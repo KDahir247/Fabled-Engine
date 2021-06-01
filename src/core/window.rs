@@ -1,7 +1,5 @@
 use super::{Command, graphic};
 use winit::event::{Event, WindowEvent, KeyboardInput};
-use wgpu::SwapChainError;
-
 
 pub struct Window;
 

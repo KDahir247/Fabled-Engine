@@ -5,6 +5,9 @@ mod model;
 mod texture;
 mod camera;
 
+pub trait Vertex{
+    fn desc<'a>() -> wgpu::VertexBufferLayout<'a>;
+}
 
 pub struct Graphic{
     window : winit::window::Window,
@@ -15,13 +18,14 @@ pub struct Graphic{
     queue : wgpu::Queue,
     swap_chain_desc : wgpu::SwapChainDescriptor,
     swap_chain : wgpu::SwapChain,
+    depth_texture : texture::Texture,
     render_pipeline : wgpu::RenderPipeline
 }
 
 
 impl Command for Graphic{
     type Output = Self;
-    type Input = winit::window::Window; //todo make a struct for setting graphic parameters
+    type Input = winit::window::Window;
 
     fn run(options : Self::Input) -> anyhow::Result<Self::Output> {
 
@@ -63,6 +67,9 @@ impl Graphic{
 
         let swap_chain = device.create_swap_chain(&surface, &swap_chain_desc);
 
+
+        let depth_texture = texture::Texture::create_depth_texture(&size, &device);
+
         let shader_module = device.create_shader_module(&wgpu::ShaderModuleDescriptor{
             label: Some("Shader Module"),
             source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!("../../shader/shader.wgsl"))), //todo make include_str target shader folder
@@ -71,7 +78,7 @@ impl Graphic{
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor{
             label: Some("Pipeline Layout"),
-            bind_group_layouts: &[],
+            bind_group_layouts: &[], //camera and Instance
             push_constant_ranges: &[]
         });
 
@@ -82,7 +89,7 @@ impl Graphic{
             vertex: wgpu::VertexState {
                 module: &shader_module,
                 entry_point: "main",
-                buffers: &[]
+                buffers: &[model::ModelVertex::desc()]
             },
             fragment: Some(wgpu::FragmentState{
                 module: &shader_module,
@@ -108,7 +115,13 @@ impl Graphic{
                 polygon_mode: wgpu::PolygonMode::Fill,
                 conservative: false
             },
-            depth_stencil: None, //todo add depth test
+            depth_stencil: Some(wgpu::DepthStencilState{
+                format: wgpu::TextureFormat::Depth32Float,
+                depth_write_enabled: true,
+                depth_compare: wgpu::CompareFunction::Less,
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default()
+            }),
             multisample: wgpu::MultisampleState{
                 count: 1,
                 mask: !0,
@@ -125,6 +138,7 @@ impl Graphic{
                 queue,
                 swap_chain_desc,
                 swap_chain,
+                depth_texture,
                 render_pipeline
             }
         )
@@ -163,7 +177,14 @@ impl Graphic{
                             }
                         }
                     ],
-                depth_stencil_attachment: None //todo add depth test
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment{
+                    view: &self.depth_texture.view,
+                    depth_ops: Some(wgpu::Operations{
+                        load: wgpu::LoadOp::Clear(1.),
+                        store: true
+                    }),
+                    stencil_ops: None
+                })
             });
 
             render_pass.set_pipeline(&self.render_pipeline);
@@ -181,10 +202,14 @@ impl Graphic{
 
     pub fn resize(&mut self, size : winit::dpi::PhysicalSize<u32>){
         if size.width != 0 && size.height != 0 {
+
             self.size = size;
             self.swap_chain_desc.width = self.size.width;
             self.swap_chain_desc.height = self.size.height;
             self.swap_chain = self.device.create_swap_chain(&self.surface, &self.swap_chain_desc);
+
+            self.depth_texture = texture::Texture::create_depth_texture(&self.size, &self.device);
+
         }
     }
 
