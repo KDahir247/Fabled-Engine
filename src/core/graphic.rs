@@ -1,9 +1,11 @@
 use super::{State,Command};
 use anyhow::Context;
+use crate::core::graphic::model::DrawModel;
 
 mod model;
 mod texture;
 mod camera;
+mod light;
 
 pub trait Vertex{
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a>;
@@ -15,7 +17,7 @@ pub trait Binding{
 
 pub struct Graphic{
     window : winit::window::Window,
-
+    obj_model : Option<model::Model>,
     size : winit::dpi::PhysicalSize<u32>,
     surface : wgpu::Surface,
     device : wgpu::Device,
@@ -141,6 +143,7 @@ impl Graphic{
         Ok(
             Self{
                 window,
+                obj_model: None,
                 size,
                 surface,
                 device,
@@ -199,6 +202,10 @@ impl Graphic{
 
             render_pass.set_pipeline(&self.render_pipeline);
 
+            if self.obj_model.is_some() {
+                render_pass.draw_model(self.obj_model.as_ref().unwrap());
+            }
+
         }
 
         self.queue.submit(std::iter::once(render_command.finish()));
@@ -228,7 +235,8 @@ impl Graphic{
 
     }
 
-    pub fn load_obj<P : AsRef<std::path::Path>>(&self, path : P){
-        model::Model::load(&self.device, &self.queue, path, &self.tex_layout);
+    pub fn load_obj<P : AsRef<std::path::Path>>(&mut self,  path : P){
+       let obj_model = model::Model::load(&self.device, &self.queue, path, &self.tex_layout).unwrap();
+        self.obj_model = Some(obj_model);
     }
 }

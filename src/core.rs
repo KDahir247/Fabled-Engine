@@ -25,11 +25,8 @@ impl State {
             .build(&event_loop)
             .unwrap();
 
-
-
         let graphic : graphic::Graphic = graphic::Graphic::run(window)
           .expect("Failed on graphic");
-
 
 
         window::Window::run((graphic, event_loop)).expect("Failed on window");

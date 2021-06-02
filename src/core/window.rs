@@ -17,7 +17,6 @@ impl Command for Window{
     }
 }
 
-
 impl Window{
 
     fn new(mut graphic: graphic::Graphic, event_loop : winit::event_loop::EventLoop<()>) {

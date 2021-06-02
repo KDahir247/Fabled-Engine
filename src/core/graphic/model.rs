@@ -2,6 +2,7 @@ use super::{Vertex, Binding, texture};
 use wgpu::{VertexBufferLayout, BindGroupLayout};
 use anyhow::Context;
 use rayon::prelude::*;
+use wgpu::util::DeviceExt;
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -83,8 +84,8 @@ struct Mesh{
     name : String,
     vertex_buffer : wgpu::Buffer,
     index_buffer : wgpu::Buffer,
-    indices : usize,
-    material_id : u32
+    indices : u32,
+    material_id : usize
 
 }
 
@@ -126,7 +127,7 @@ impl Model{
         queue : &wgpu::Queue,
         path : P,
         tex_layout : &wgpu::BindGroupLayout
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<Self> {
 
         let parent_directory = path.as_ref().parent().unwrap();
 
@@ -145,13 +146,14 @@ impl Model{
 
 
         let (obj_model, obj_material) = tobj::load_obj(path.as_ref(), &tobj::LoadOptions{
-            single_index: false,
+            single_index: true,
             triangulate: true,
-            ignore_points: false,
-            ignore_lines: false
+            ignore_points: true,
+            ignore_lines: true
         }).context("Invalid extension")?;
 
 
+        //material
         let materials :Vec<Material>  = obj_material?.par_iter().map(|mat : &tobj::Material|{
             let diffuse_path : &String = &mat.diffuse_texture;
 
@@ -165,7 +167,86 @@ impl Model{
         }).collect::<Vec<_>>();
 
 
-        Ok(())
+
+        //mesh
+        let meshes : Vec<Mesh> = obj_model.par_iter().map(|m : &tobj::Model|{
+
+           let vertices: Vec<ModelVertex> = (0..m.mesh.positions.len() /3).into_par_iter().map(|i|{
+                ModelVertex{
+                    position:
+                    [
+                        m.mesh.positions[i * 3],
+                        m.mesh.positions[i * 3 + 1],
+                        m.mesh.positions[i * 3 + 2]
+                    ],
+                    tex_coord:
+                    [
+                        m.mesh.texcoords[i * 2],
+                        m.mesh.texcoords[i * 2 + 1]
+                    ],
+                    normal:
+                    [
+                        m.mesh.normals[i * 3],
+                        m.mesh.normals[i * 3 + 1],
+                        m.mesh.normals[i * 3 + 2]
+                    ]
+                }
+            }).collect::<Vec<_>>();
+
+            let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
+                label: Some("vertex buffer"),
+                contents: &bytemuck::cast_slice(&vertices),
+                usage: wgpu::BufferUsage::VERTEX
+            });
+
+            let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
+                label: Some("index buffer"),
+                contents: &bytemuck::cast_slice(&m.mesh.indices),
+                usage: wgpu::BufferUsage::INDEX
+            });
+
+            Mesh{
+                name: m.name.clone(),
+                vertex_buffer,
+                index_buffer,
+                indices: m.mesh.indices.len() as u32,
+                material_id: m.mesh.material_id.unwrap_or(0)
+            }
+        })
+            .collect::<Vec<_>>();
+
+        Ok(
+            Model{
+                meshes,
+                materials
+            }
+        )
     }
 }
 
+pub trait DrawModel<'a, 'b>
+    where 'b : 'a
+{
+    fn draw_model(&mut self, model : &'b Model);
+    fn draw_meshes(&mut self, mesh : &'b Mesh, material : &'b Material);
+}
+
+impl<'a,'b> DrawModel<'a, 'b> for wgpu::RenderPass<'a>
+    where 'b : 'a {
+
+    fn draw_model(&mut self, model: &'b Model) {
+        for m in &model.meshes{
+            self.draw_meshes(m, &model.materials[m.material_id]);
+        }
+    }
+
+    fn draw_meshes(&mut self, mesh: &'b Mesh, material: &'b Material) {
+
+        self.set_bind_group(0,&material.bind_group, &[]);
+
+        self.set_vertex_buffer(0, mesh.vertex_buffer.slice(..));
+        self.set_index_buffer(mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
+
+        self.draw_indexed(0..mesh.indices,0, 0..1);
+    }
+}
