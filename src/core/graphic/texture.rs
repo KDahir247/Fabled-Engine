@@ -8,8 +8,19 @@ pub struct Texture{
 
 
 impl Texture{
-    
-    pub fn create_depth_texture(size : &winit::dpi::PhysicalSize<u32> ,device : &wgpu::Device) -> Self{
+
+    pub fn load<P : AsRef<std::path::Path>>(device : &wgpu::Device,
+                                            queue : &wgpu::Queue,
+                                            path : P) -> anyhow::Result<Self>{
+
+        let dyn_img = image::open(path.as_ref())?;
+
+        Self::from_image(&device, &queue,dyn_img)
+
+    }
+
+    pub fn create_depth_texture(size : &winit::dpi::PhysicalSize<u32>,
+                                device : &wgpu::Device) -> Self{
         
         let extend3d = wgpu::Extent3d{
             width: size.width,
@@ -113,7 +124,11 @@ impl Texture{
     }
 
 
-    fn create_texture(device: &wgpu::Device ,size : wgpu::Extent3d, format : wgpu::TextureFormat, usage : wgpu::TextureUsage, label : Option<&str>) -> wgpu::Texture{
+    fn create_texture(device: &wgpu::Device,
+                      size : wgpu::Extent3d,
+                      format : wgpu::TextureFormat,
+                      usage : wgpu::TextureUsage,
+                      label : Option<&str>) -> wgpu::Texture{
         device.create_texture(&wgpu::TextureDescriptor{
             label,
             size,
@@ -125,4 +140,5 @@ impl Texture{
         })
 
     }
+
 }

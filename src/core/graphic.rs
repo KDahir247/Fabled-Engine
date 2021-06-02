@@ -9,6 +9,10 @@ pub trait Vertex{
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a>;
 }
 
+pub trait Binding{
+    fn layout() -> wgpu::BindGroupLayout;
+}
+
 pub struct Graphic{
     window : winit::window::Window,
 
@@ -19,6 +23,7 @@ pub struct Graphic{
     swap_chain_desc : wgpu::SwapChainDescriptor,
     swap_chain : wgpu::SwapChain,
     depth_texture : texture::Texture,
+    tex_layout : wgpu::BindGroupLayout,
     render_pipeline : wgpu::RenderPipeline
 }
 
@@ -67,8 +72,9 @@ impl Graphic{
 
         let swap_chain = device.create_swap_chain(&surface, &swap_chain_desc);
 
-
         let depth_texture = texture::Texture::create_depth_texture(&size, &device);
+
+        let tex_layout = model::Model::create_tex_layout(&device);
 
         let shader_module = device.create_shader_module(&wgpu::ShaderModuleDescriptor{
             label: Some("Shader Module"),
@@ -78,7 +84,10 @@ impl Graphic{
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor{
             label: Some("Pipeline Layout"),
-            bind_group_layouts: &[], //camera and Instance
+            bind_group_layouts: &
+                [
+                    &tex_layout
+                ],
             push_constant_ranges: &[]
         });
 
@@ -139,6 +148,7 @@ impl Graphic{
                 swap_chain_desc,
                 swap_chain,
                 depth_texture,
+                tex_layout,
                 render_pipeline
             }
         )
@@ -216,5 +226,9 @@ impl Graphic{
     pub fn request_redraw(&self){
         self.window.request_redraw();
 
+    }
+
+    pub fn load_obj<P : AsRef<std::path::Path>>(&self, path : P){
+        model::Model::load(&self.device, &self.queue, path, &self.tex_layout);
     }
 }

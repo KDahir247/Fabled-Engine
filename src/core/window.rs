@@ -36,6 +36,7 @@ impl Window{
                             }
                             WindowEvent::DroppedFile(file_path) => { //validate file_path if the extension is obj or mtl. a obj file must be previously loaded to load a mtl file to the current obj file.
                                 //todo create graphic function to call.
+                                graphic.load_obj(file_path.as_path());
                             }
                             WindowEvent::KeyboardInput { input, .. } => {
                                 match input{
