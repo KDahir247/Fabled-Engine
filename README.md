@@ -8,7 +8,7 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 
 # current progress: 
 * rough render of obj with material on the screen.
-There is no perspective or view matrix yet.
+* The material mapping maps incorrectly to the mesh currently.
 
 ![title](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/001.png)
 </br>
