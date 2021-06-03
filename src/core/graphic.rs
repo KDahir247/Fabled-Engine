@@ -6,6 +6,7 @@ mod model;
 mod texture;
 mod camera;
 mod light;
+mod constant;
 
 pub trait Vertex{
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a>;
@@ -26,6 +27,8 @@ pub struct Graphic{
     swap_chain : wgpu::SwapChain,
     depth_texture : texture::Texture,
     tex_layout : wgpu::BindGroupLayout,
+    camera : camera::Camera,
+    uniform : camera::Uniform,
     render_pipeline : wgpu::RenderPipeline
 }
 
@@ -74,13 +77,43 @@ impl Graphic{
 
         let swap_chain = device.create_swap_chain(&surface, &swap_chain_desc);
 
+        let camera = camera::Camera{
+            eye: cgmath::Point3 {
+                x: 0.0,
+                y: 2.0,
+                z: 10.0
+            },
+            target: cgmath::Point3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0
+            },
+            up: cgmath::Vector3 {
+                x: 0.0,
+                y: 1.0,
+                z: 0.0
+            },
+            aspect: swap_chain_desc.width as f32 / swap_chain_desc.height as f32,
+            fovy: 60.0,
+            znear: 0.1,
+            zfar: 100.0
+        };
+
+        //create the uniform layout.
+        let uniform = camera::Uniform::create(&device, &camera);
+
+        //create the unifom buffer.
+
+        //create the uniform group
+
         let depth_texture = texture::Texture::create_depth_texture(&size, &device);
 
-        let tex_layout = model::Model::create_tex_layout(&device);
+        let tex_layout = model::Material::create_tex_layout(&device);
+
 
         let shader_module = device.create_shader_module(&wgpu::ShaderModuleDescriptor{
             label: Some("Shader Module"),
-            source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!("../../shader/shader.wgsl"))), //todo make include_str target shader folder
+            source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!("../../shader/shader.wgsl"))),
             flags: wgpu::ShaderFlags::all()
         });
 
@@ -88,7 +121,8 @@ impl Graphic{
             label: Some("Pipeline Layout"),
             bind_group_layouts: &
                 [
-                    &tex_layout
+                    &tex_layout,
+                    &uniform.group_layout
                 ],
             push_constant_ranges: &[]
         });
@@ -152,6 +186,8 @@ impl Graphic{
                 swap_chain,
                 depth_texture,
                 tex_layout,
+                camera,
+                uniform,
                 render_pipeline
             }
         )
@@ -203,7 +239,7 @@ impl Graphic{
             render_pass.set_pipeline(&self.render_pipeline);
 
             if self.obj_model.is_some() {
-                render_pass.draw_model(self.obj_model.as_ref().unwrap());
+                render_pass.draw_model(self.obj_model.as_ref().unwrap(), &self.uniform);
             }
 
         }
@@ -220,14 +256,22 @@ impl Graphic{
     pub fn resize(&mut self, size : winit::dpi::PhysicalSize<u32>){
         if size.width != 0 && size.height != 0 {
 
+            self.camera.resize(size.width, size.height);
+
             self.size = size;
             self.swap_chain_desc.width = self.size.width;
             self.swap_chain_desc.height = self.size.height;
             self.swap_chain = self.device.create_swap_chain(&self.surface, &self.swap_chain_desc);
 
             self.depth_texture = texture::Texture::create_depth_texture(&self.size, &self.device);
-
+            self.uniform.update_view_proj(&self.camera);
         }
+    }
+
+    pub fn update(&mut self){
+        self.uniform.update_view_proj(&self.camera);
+        self.uniform.write_buffer(&self.queue);
+        //view_proj update, write queue uniform_buffer self.uniform.layout
     }
 
     pub fn request_redraw(&self){

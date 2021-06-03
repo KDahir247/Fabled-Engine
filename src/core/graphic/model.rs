@@ -1,8 +1,9 @@
-use super::{Vertex, Binding, texture};
+use super::{Vertex, Binding, texture, camera};
 use wgpu::{VertexBufferLayout, BindGroupLayout};
 use anyhow::Context;
 use rayon::prelude::*;
 use wgpu::util::DeviceExt;
+use tobj::LoadError;
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -40,7 +41,7 @@ impl Vertex for ModelVertex{
     }
 }
 
-struct Material{
+pub struct Material{
     name : String,
     bind_group : wgpu::BindGroup,
     texture : texture::Texture
@@ -51,8 +52,6 @@ impl Material {
            name : String,
            texture : texture::Texture,
            layout : &wgpu::BindGroupLayout) -> Self{
-
-        println!("{}", name); //todo remove
 
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor{
             label: Some("Material Bind Group"),
@@ -77,26 +76,7 @@ impl Material {
         }
 
     }
-}
 
-
-struct Mesh{
-    name : String,
-    vertex_buffer : wgpu::Buffer,
-    index_buffer : wgpu::Buffer,
-    indices : u32,
-    material_id : usize
-
-}
-
-pub struct Model{
-    meshes : Vec<Mesh>,
-    materials : Vec<Material>
-}
-
-//Public
-impl Model{
-    //todo might move to materials struct
     pub fn create_tex_layout(device : &wgpu::Device) -> wgpu::BindGroupLayout{
         device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor{
             label: Some("Diffuse Group Layout"),
@@ -121,6 +101,25 @@ impl Model{
                 ]
         })
     }
+}
+
+
+struct Mesh{
+    name : String,
+    vertex_buffer : wgpu::Buffer,
+    index_buffer : wgpu::Buffer,
+    indices : u32,
+    material_id : usize
+
+}
+
+pub struct Model{
+    meshes : Vec<Mesh>,
+    materials : Vec<Material>
+}
+
+//Public
+impl Model{
 
     pub fn load<P : AsRef<std::path::Path>>( //trait wrapper to get the path::Path as ref (as_ref(&self)).
         device : &wgpu::Device,
@@ -146,16 +145,25 @@ impl Model{
 
 
         let (obj_model, obj_material) = tobj::load_obj(path.as_ref(), &tobj::LoadOptions{
-            single_index: true,
-            triangulate: true,
+            single_index:  true,
+            triangulate:   true,
             ignore_points: true,
-            ignore_lines: true
+            ignore_lines:  true
         }).context("Invalid extension")?;
 
 
+        match obj_material {
+            Ok(_) => {}
+            Err(err) => { eprintln!("error : {}", err);}
+        }
+
+
         //material
+
+
         let materials :Vec<Material>  = obj_material?.par_iter().map(|mat : &tobj::Material|{
             let diffuse_path : &String = &mat.diffuse_texture;
+
 
             let diffuse_texture = texture::Texture::load(device,queue,parent_directory.join(diffuse_path)).unwrap();
 
@@ -227,23 +235,23 @@ impl Model{
 pub trait DrawModel<'a, 'b>
     where 'b : 'a
 {
-    fn draw_model(&mut self, model : &'b Model);
-    fn draw_meshes(&mut self, mesh : &'b Mesh, material : &'b Material);
+    fn draw_model(&mut self, model : &'b Model,  uniform : &'b camera::Uniform);
+    fn draw_meshes(&mut self, mesh : &'b Mesh, material : &'b Material, uniform : &'b camera::Uniform);
 }
 
 impl<'a,'b> DrawModel<'a, 'b> for wgpu::RenderPass<'a>
     where 'b : 'a {
 
-    fn draw_model(&mut self, model: &'b Model) {
+    fn draw_model(&mut self, model: &'b Model, uniform : &'b camera::Uniform) {
         for m in &model.meshes{
-            self.draw_meshes(m, &model.materials[m.material_id]);
+            self.draw_meshes(m, &model.materials[m.material_id], uniform);
         }
     }
 
-    fn draw_meshes(&mut self, mesh: &'b Mesh, material: &'b Material) {
+    fn draw_meshes(&mut self, mesh: &'b Mesh, material: &'b Material, uniform : &'b camera::Uniform) {
 
         self.set_bind_group(0,&material.bind_group, &[]);
-
+        self.set_bind_group(1, &uniform.group, &[]);
         self.set_vertex_buffer(0, mesh.vertex_buffer.slice(..));
         self.set_index_buffer(mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
 

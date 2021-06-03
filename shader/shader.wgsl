@@ -1,4 +1,11 @@
-//Blueprint
+[[block]]
+struct Uniforms{
+    view_proj : mat4x4<f32>;
+};
+
+[[group(1), binding(0)]]
+var<uniform> uniform : Uniforms;
+
 
 struct VertexInput{
     [[location(0)]] position : vec3<f32>;
@@ -18,7 +25,7 @@ fn main(in : VertexInput) -> VertexOutput{
 
     var out : VertexOutput;
     out.tex_coord = in.tex_coord;
-    out.v_position = vec4<f32>(in.position.x, in.position.y, 0.9, 1.0);
+    out.v_position = uniform.view_proj * vec4<f32>(in.position,1.0);
     return out;
 }
 

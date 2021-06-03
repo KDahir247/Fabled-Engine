@@ -33,8 +33,7 @@ impl Window{
                             WindowEvent::CloseRequested => {
                                 *control_flow = winit::event_loop::ControlFlow::Exit;
                             }
-                            WindowEvent::DroppedFile(file_path) => { //validate file_path if the extension is obj or mtl. a obj file must be previously loaded to load a mtl file to the current obj file.
-                                //todo create graphic function to call.
+                            WindowEvent::DroppedFile(file_path) => {
                                 graphic.load_obj(file_path.as_path());
                             }
                             WindowEvent::KeyboardInput { input, .. } => {
@@ -53,6 +52,7 @@ impl Window{
                 }
 
                 Event::RedrawRequested(_) => {
+                    graphic.update();
                     match graphic.render(){
                         Ok(_) => {}
                         Err(wgpu::SwapChainError::Lost) =>{

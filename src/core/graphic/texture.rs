@@ -73,9 +73,10 @@ impl Texture{
 
     fn from_image(device : &wgpu::Device, queue : &wgpu::Queue, dyn_img : image::DynamicImage) -> anyhow::Result<Self>{
 
-        let dimensions = dyn_img.dimensions();
 
         let rgba8_img = dyn_img.to_rgba8();
+
+        let dimensions = rgba8_img.dimensions();
 
         let extend3d = wgpu::Extent3d {
             width: dimensions.0,
