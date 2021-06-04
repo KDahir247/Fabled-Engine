@@ -8,7 +8,6 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 
 # current progress: 
 * rough render of obj with material on the screen.
-* The material mapping maps incorrectly to the mesh currently.
 
-![title](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/001.png)
+![title](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/002.png)
 </br>
