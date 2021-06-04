@@ -21,7 +21,7 @@ struct VertexOutput{
 
 
 [[stage(vertex)]]
-fn main(in : VertexInput) -> VertexOutput{
+fn vs_main(in : VertexInput) -> VertexOutput{
 
     var out : VertexOutput;
     out.tex_coord = in.tex_coord;
@@ -33,7 +33,7 @@ fn main(in : VertexInput) -> VertexOutput{
 [[group(0), binding(1)]] var t_sampler : sampler;
 
 [[stage(fragment)]]
-fn main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
+fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
 
     return textureSample(t_diffuse, t_sampler, in.tex_coord);
 
