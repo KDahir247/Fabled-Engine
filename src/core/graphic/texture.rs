@@ -10,6 +10,7 @@ impl Texture {
         queue: &wgpu::Queue,
         path: P,
     ) -> anyhow::Result<Self> {
+        println!("{}", path.as_ref().display());
         let dyn_img = image::open(path.as_ref())?;
 
         Texture::from_image(device, queue, dyn_img)
@@ -72,9 +73,16 @@ impl Texture {
         queue: &wgpu::Queue,
         dyn_img: image::DynamicImage,
     ) -> anyhow::Result<Self> {
-        let rgba8_img = dyn_img.to_rgba8();
+        let reversed_rgba8_img = dyn_img.to_rgba8();
 
-        let dimensions = rgba8_img.dimensions();
+        let dimensions = reversed_rgba8_img.dimensions();
+
+        let rgba8_img = reversed_rgba8_img
+            .chunks(dimensions.0 as usize * 4)
+            .rev()
+            .flat_map(|row| row.iter())
+            .cloned()
+            .collect::<Vec<_>>();
 
         let extend3d = wgpu::Extent3d {
             width: dimensions.0,
