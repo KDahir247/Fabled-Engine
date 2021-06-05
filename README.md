@@ -8,7 +8,8 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 
 # current progress: 
 * rough render of obj with material on the screen.
-* Testing different obj with material to see if it is mapped correctly.
+* Refactor and redesign camera.
+* Creating dynamic fly like camera with zooming. 
 
 ![title](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/002.png)
 </br>
