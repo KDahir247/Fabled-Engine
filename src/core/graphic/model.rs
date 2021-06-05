@@ -184,7 +184,9 @@ impl Model {
             .map(|m: &tobj::Model| {
                 let vertices: Vec<ModelVertex> = (0..m.mesh.positions.len() / 3)
                     .into_par_iter()
-                    .map(|i| ModelVertex {
+                    .map(|i|
+                        //todo handle case where model has no normals or any other mapping.
+                        ModelVertex {
                         position: [
                             m.mesh.positions[i * 3],
                             m.mesh.positions[i * 3 + 1],

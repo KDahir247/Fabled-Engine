@@ -8,6 +8,8 @@ mod light;
 mod model;
 mod texture;
 
+const CLEAR_COLOR: f64 = 0.09;
+
 pub trait Binding {
     fn layout() -> wgpu::BindGroupLayout;
 }
@@ -79,12 +81,12 @@ impl Graphic {
         let camera = camera::Camera {
             eye: cgmath::Point3 {
                 x: 0.0,
-                y: 2.0,
-                z: 10.0,
+                y: 0.0,
+                z: 5.0,
             },
             target: cgmath::Point3 {
                 x: 0.0,
-                y: 0.0,
+                y: 2.0,
                 z: 0.0,
             },
             up: cgmath::Vector3 {
@@ -93,7 +95,7 @@ impl Graphic {
                 z: 0.0,
             },
             aspect: swap_chain_desc.width as f32 / swap_chain_desc.height as f32,
-            fovy: 45.0,
+            fovy: 60.0,
             znear: 0.1,
             zfar: 100.0,
         };
@@ -198,9 +200,9 @@ impl Graphic {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.4,
-                            g: 0.3,
-                            b: 0.2,
+                            r: CLEAR_COLOR,
+                            g: CLEAR_COLOR,
+                            b: CLEAR_COLOR,
                             a: 1.0,
                         }),
                         store: true,

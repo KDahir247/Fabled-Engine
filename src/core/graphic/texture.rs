@@ -11,6 +11,9 @@ impl Texture {
         path: P,
     ) -> anyhow::Result<Self> {
         println!("{}", path.as_ref().display());
+
+        //todo check if the texture image is valid in the mtl file. if it is not then create a fallback texture to use.
+
         let dyn_img = image::open(path.as_ref())?;
 
         Texture::from_image(device, queue, dyn_img)
