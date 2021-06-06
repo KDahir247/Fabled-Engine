@@ -11,5 +11,8 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Refactor and redesign camera.
 * Creating dynamic fly like camera with zooming. 
 
-![title](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/002.png)
-</br>
+<br/>
+Video for current progress on dynamic camera.
+<br/>
+
+[![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/003.png)](https://streamable.com/z2scyu)
