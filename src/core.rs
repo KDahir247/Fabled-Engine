@@ -60,6 +60,8 @@ impl State {
             .build(&event_loop)
             .unwrap();
 
+        window.set_cursor_visible(false);
+
         (event_loop, window)
     }
 

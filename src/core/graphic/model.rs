@@ -46,6 +46,7 @@ pub struct Material {
     name: String,
     bind_group: wgpu::BindGroup,
     texture: texture::Texture,
+    //todo create texture map which will have ambient color, diffuse color etc..
 }
 
 impl Material {
@@ -184,20 +185,32 @@ impl Model {
             .map(|m: &tobj::Model| {
                 let vertices: Vec<ModelVertex> = (0..m.mesh.positions.len() / 3)
                     .into_par_iter()
-                    .map(|i|
-                        //todo handle case where model has no normals or any other mapping.
+                    .map(|i| {
+                        let normal = if m.mesh.normals.is_empty() {
+                            [0.0, 0.0, 0.0]
+                        } else {
+                            [
+                                m.mesh.normals[i * 3],
+                                m.mesh.normals[i * 3 + 1],
+                                m.mesh.normals[i * 3 + 2],
+                            ]
+                        };
+
+                        let tex_coord = if m.mesh.texcoords.is_empty() {
+                            [0.0, 0.0]
+                        } else {
+                            [m.mesh.texcoords[i * 2], m.mesh.texcoords[i * 2 + 1]]
+                        };
+
                         ModelVertex {
-                        position: [
-                            m.mesh.positions[i * 3],
-                            m.mesh.positions[i * 3 + 1],
-                            m.mesh.positions[i * 3 + 2],
-                        ],
-                        tex_coord: [m.mesh.texcoords[i * 2], m.mesh.texcoords[i * 2 + 1]],
-                        normal: [
-                            m.mesh.normals[i * 3],
-                            m.mesh.normals[i * 3 + 1],
-                            m.mesh.normals[i * 3 + 2],
-                        ],
+                            position: [
+                                m.mesh.positions[i * 3],
+                                m.mesh.positions[i * 3 + 1],
+                                m.mesh.positions[i * 3 + 2],
+                            ],
+                            tex_coord,
+                            normal,
+                        }
                     })
                     .collect::<Vec<ModelVertex>>();
 

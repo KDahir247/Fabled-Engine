@@ -1,3 +1,5 @@
+use super::constant::INVALID_MAP_PATH;
+
 pub struct Texture {
     pub texture: wgpu::Texture,
     pub view: wgpu::TextureView,
@@ -10,11 +12,14 @@ impl Texture {
         queue: &wgpu::Queue,
         path: P,
     ) -> anyhow::Result<Self> {
-        println!("{}", path.as_ref().display());
-
-        //todo check if the texture image is valid in the mtl file. if it is not then create a fallback texture to use.
-
-        let dyn_img = image::open(path.as_ref())?;
+        let dyn_img = if path.as_ref().exists() {
+            match path.as_ref().extension() {
+                None => image::open(std::path::Path::new(INVALID_MAP_PATH))?,
+                Some(_) => image::open(path.as_ref())?, //todo check extension if it is a jpg use rgb. if it is a png use rgba
+            }
+        } else {
+            image::open(std::path::Path::new(INVALID_MAP_PATH))?
+        };
 
         Texture::from_image(device, queue, dyn_img)
     }
@@ -58,6 +63,30 @@ impl Texture {
             view: depth_view,
             sampler: depth_sampler,
         }
+    }
+
+    pub fn create_multisample_framebuffer(
+        device: &wgpu::Device,
+        size: winit::dpi::PhysicalSize<u32>,
+        sample_count: u32,
+    ) -> wgpu::TextureView {
+        let extend3d = wgpu::Extent3d {
+            width: size.width,
+            height: size.height,
+            depth_or_array_layers: 1,
+        };
+
+        let multisample_texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Multisample Texture"),
+            size: extend3d,
+            mip_level_count: 1,
+            sample_count,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
+        });
+
+        multisample_texture.create_view(&wgpu::TextureViewDescriptor::default())
     }
 
     #[allow(dead_code)] //TODO note Dead Code
@@ -126,6 +155,7 @@ impl Texture {
             mag_filter: wgpu::FilterMode::Nearest,
             min_filter: wgpu::FilterMode::Linear,
             mipmap_filter: wgpu::FilterMode::Linear,
+            anisotropy_clamp: Some(std::num::NonZeroU8::new(16).unwrap()),
             ..Default::default()
         });
 

@@ -8,8 +8,6 @@ mod light;
 mod model;
 mod texture;
 
-const CLEAR_COLOR: f64 = 0.09;
-
 pub trait Binding {
     fn layout() -> wgpu::BindGroupLayout;
 }
@@ -26,8 +24,11 @@ pub struct Graphic {
     depth_texture: texture::Texture,
     tex_layout: wgpu::BindGroupLayout,
     camera: camera::Camera,
+    projection: camera::Projection,
+    camera_controller: camera::CameraController,
     uniform: camera::Uniform,
     render_pipeline: wgpu::RenderPipeline,
+    mouse_pressed: bool,
 }
 
 //Trait
@@ -78,29 +79,26 @@ impl Graphic {
 
         let swap_chain = device.create_swap_chain(&surface, &swap_chain_desc);
 
-        let camera = camera::Camera {
-            eye: cgmath::Point3 {
-                x: 0.0,
-                y: 0.0,
-                z: 5.0,
-            },
-            target: cgmath::Point3 {
+        let camera = camera::Camera::new(
+            cgmath::Point3 {
                 x: 0.0,
                 y: 2.0,
-                z: 0.0,
+                z: 6.0,
             },
-            up: cgmath::Vector3 {
-                x: 0.0,
-                y: 1.0,
-                z: 0.0,
-            },
-            aspect: swap_chain_desc.width as f32 / swap_chain_desc.height as f32,
-            fovy: 60.0,
-            znear: 0.1,
-            zfar: 100.0,
-        };
+            cgmath::Deg(-90.),
+            cgmath::Rad(0.0),
+        );
 
-        let uniform = camera::Uniform::create(&device, &camera);
+        let projection = camera::Projection::new(
+            size.width as f32 / size.height as f32,
+            cgmath::Deg(60.0),
+            0.1,
+            100.0,
+        );
+
+        let camera_controller = camera::CameraController::new(4.0, 0.4);
+
+        let uniform = camera::Uniform::create(&device, &camera, &projection);
 
         let depth_texture = texture::Texture::create_depth_texture(&device, size);
 
@@ -175,8 +173,11 @@ impl Graphic {
             depth_texture,
             tex_layout,
             camera,
+            projection,
+            camera_controller,
             uniform,
             render_pipeline,
+            mouse_pressed: false,
         })
     }
 }
@@ -197,12 +198,12 @@ impl Graphic {
                 label: Some("Render Pass"),
                 color_attachments: &[wgpu::RenderPassColorAttachment {
                     view: &frame.view,
-                    resolve_target: None,
+                    resolve_target: None, //todo here
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: CLEAR_COLOR,
-                            g: CLEAR_COLOR,
-                            b: CLEAR_COLOR,
+                            r: constant::CLEAR_COLOR,
+                            g: constant::CLEAR_COLOR,
+                            b: constant::CLEAR_COLOR,
                             a: 1.0,
                         }),
                         store: true,
@@ -243,15 +244,45 @@ impl Graphic {
                 .device
                 .create_swap_chain(&self.surface, &self.swap_chain_desc);
 
-            self.camera.resize(size.width, size.height);
-            self.uniform.update_view_proj(&self.camera);
+            self.projection.resize(size);
+            self.uniform
+                .update_view_proj(&self.camera, &self.projection);
 
             self.depth_texture = texture::Texture::create_depth_texture(&self.device, self.size);
         }
     }
 
-    pub fn update(&mut self) {
-        self.uniform.update_view_proj(&self.camera); //used for later if the camera is dynamic
+    pub fn input(&mut self, event: winit::event::DeviceEvent) -> bool {
+        match event {
+            winit::event::DeviceEvent::Key(winit::event::KeyboardInput {
+                virtual_keycode: Some(key),
+                state,
+                ..
+            }) => {
+                self.camera_controller.process_keyboard(key, state);
+                true
+            }
+
+            winit::event::DeviceEvent::MouseMotion { delta } => {
+                if self.mouse_pressed {
+                    self.camera_controller.process_mouse(delta.0, delta.1);
+                }
+
+                true
+            }
+            winit::event::DeviceEvent::MouseWheel { .. } => true,
+            winit::event::DeviceEvent::Button { button: 1, state } => {
+                self.mouse_pressed = state == winit::event::ElementState::Pressed;
+                true
+            }
+            _ => false,
+        }
+    }
+
+    pub fn update(&mut self, dt: std::time::Duration) {
+        self.camera_controller.update_camera(&mut self.camera, dt);
+        self.uniform
+            .update_view_proj(&self.camera, &self.projection); //used for later if the camera is dynamic
         self.uniform.write_buffer(&self.queue);
     }
 

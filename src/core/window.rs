@@ -17,7 +17,13 @@ impl Command for Window {
 
 impl Window {
     fn handle(mut graphic: graphic::Graphic, event_loop: winit::event_loop::EventLoop<()>) {
+        let mut last_render_time = std::time::Instant::now();
+
         event_loop.run(move |evt, _, control_flow| match evt {
+            winit::event::Event::DeviceEvent { event, .. } => {
+                graphic.input(event);
+            }
+
             winit::event::Event::WindowEvent { event, .. } => match event {
                 winit::event::WindowEvent::Resized(size) => {
                     graphic.resize(size);
@@ -51,7 +57,10 @@ impl Window {
             },
 
             winit::event::Event::RedrawRequested(_) => {
-                graphic.update();
+                let now = std::time::Instant::now();
+                let dt = now - last_render_time;
+                last_render_time = now;
+                graphic.update(dt);
                 match graphic.render() {
                     Ok(_) => {}
                     Err(wgpu::SwapChainError::Lost) => graphic.refresh(),
