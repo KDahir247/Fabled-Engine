@@ -267,7 +267,7 @@ impl Graphic {
                     self.camera_controller.process_mouse(delta.0, delta.1);
                 }
             }
-            winit::event::DeviceEvent::MouseWheel { .. } => true,
+            winit::event::DeviceEvent::MouseWheel { .. } => {}
             winit::event::DeviceEvent::Button { button: 1, state } => {
                 self.mouse_pressed = state == winit::event::ElementState::Pressed;
             }
