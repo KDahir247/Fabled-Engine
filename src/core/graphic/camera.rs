@@ -83,28 +83,11 @@ impl CameraController {
     pub fn new(speed: f32, sensitivity: f32) -> CameraController {
         Self {
             amount_matrix: cgmath::Matrix3::from_cols(
-                cgmath::Vector3 {
-                    x: 0.0,   //Forward
-                    y: 0.0,   //Backward
-                    z: speed, //Scalar
-                },
-                cgmath::Vector3 {
-                    x: 0.0,   //Right
-                    y: 0.0,   //Left
-                    z: speed, //Scalar
-                },
-                cgmath::Vector3 {
-                    x: 0.0,   //Up
-                    y: 0.0,   //Down
-                    z: speed, //Scalar
-                },
+                cgmath::Vector3::unit_z() * speed,
+                cgmath::Vector3::unit_z() * speed,
+                cgmath::Vector3::unit_z() * speed,
             ),
-            rotation: cgmath::Vector4 {
-                x: 0.0, //Pitch
-                y: 0.0, //Yaw
-                z: 0.0, //Roll
-                w: sensitivity,
-            },
+            rotation: cgmath::Vector4::unit_w() * sensitivity,
             scroll: 0.0,
         }
     }
