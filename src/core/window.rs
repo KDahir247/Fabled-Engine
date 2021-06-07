@@ -1,28 +1,38 @@
 use super::{graphic, Command};
 use winit::event::WindowEvent;
 
-pub struct Window;
+pub struct Window {
+    focused: bool,
+}
 
 impl Command for Window {
     type Output = ();
     type Input = (graphic::Graphic, winit::event_loop::EventLoop<()>);
 
     fn run(options: Self::Input) -> anyhow::Result<Self::Output> {
+        let window = Self { focused: false };
+
         let (graphic, event_loop) = options;
 
-        Window::handle(graphic, event_loop);
+        Window::handle(window, graphic, event_loop);
 
         Ok(())
     }
 }
 
 impl Window {
-    fn handle(mut graphic: graphic::Graphic, event_loop: winit::event_loop::EventLoop<()>) {
+    fn handle(
+        mut self,
+        mut graphic: graphic::Graphic,
+        event_loop: winit::event_loop::EventLoop<()>,
+    ) {
         let mut last_render_time = std::time::Instant::now();
 
         event_loop.run(move |evt, _, control_flow| match evt {
             winit::event::Event::DeviceEvent { event, .. } => {
-                graphic.input(event);
+                if self.focused {
+                    graphic.input(event);
+                }
             }
 
             winit::event::Event::WindowEvent { event, .. } => match event {
@@ -35,7 +45,7 @@ impl Window {
                 }
 
                 winit::event::WindowEvent::DroppedFile(file_path) => {
-                    graphic.load_obj(file_path.as_path());
+                    graphic.load_obj(file_path.as_path())
                 }
 
                 winit::event::WindowEvent::KeyboardInput {
@@ -46,17 +56,12 @@ impl Window {
                             ..
                         },
                     ..
-                } => {
-                    *control_flow = winit::event_loop::ControlFlow::Exit;
-                }
+                } => *control_flow = winit::event_loop::ControlFlow::Exit,
 
                 winit::event::WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                     graphic.resize(*new_inner_size)
                 }
-                WindowEvent::Focused(focus) => {
-                    //todo add focus support to halt any event if the window is not focused and resume event loop if window is focused.
-                    //if there is no validation on window focus then event can happen such as click event outside the window.
-                }
+                WindowEvent::Focused(focus) => self.focused = focus,
                 _ => {}
             },
 

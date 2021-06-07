@@ -96,7 +96,7 @@ impl Graphic {
             100.0,
         );
 
-        let camera_controller = camera::CameraController::new(4.0, 0.4);
+        let camera_controller = camera::CameraController::new(4.0, 0.5, 15.0);
 
         let uniform = camera::Uniform::create(&device, &camera, &projection);
 
@@ -267,7 +267,9 @@ impl Graphic {
                     self.camera_controller.process_mouse(delta.0, delta.1);
                 }
             }
-            winit::event::DeviceEvent::MouseWheel { .. } => {}
+            winit::event::DeviceEvent::MouseWheel { delta } => {
+                self.camera_controller.process_scroll(delta);
+            }
             winit::event::DeviceEvent::Button { button: 1, state } => {
                 self.mouse_pressed = state == winit::event::ElementState::Pressed;
             }
@@ -276,9 +278,10 @@ impl Graphic {
     }
 
     pub fn update(&mut self, dt: std::time::Duration) {
-        self.camera_controller.update_camera(&mut self.camera, dt);
+        self.camera_controller
+            .update_camera_proj(&mut self.camera, &mut self.projection, dt);
         self.uniform
-            .update_view_proj(&self.camera, &self.projection); //used for later if the camera is dynamic
+            .update_view_proj(&self.camera, &self.projection);
         self.uniform.write_buffer(&self.queue);
     }
 

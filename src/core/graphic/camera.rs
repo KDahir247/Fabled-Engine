@@ -1,6 +1,7 @@
 use super::constant;
 use cgmath::{InnerSpace, SquareMatrix};
 use wgpu::util::DeviceExt;
+use winit::event::MouseScrollDelta;
 
 //to get up use forward.cross(right);
 pub struct Camera {
@@ -74,21 +75,22 @@ pub struct CameraController {
     amount_matrix: cgmath::Matrix3<f32>,
 
     //Pitch, Yaw, Roll, Scalar
-    rotation: cgmath::Vector4<f32>,
+    amount_rotation: cgmath::Vector4<f32>,
 
-    scroll: f32,
+    //Amount, Scalar
+    amount_scroll: cgmath::Vector2<f32>,
 }
 
 impl CameraController {
-    pub fn new(speed: f32, sensitivity: f32) -> CameraController {
+    pub fn new(speed: f32, sensitivity: f32, scroll_factor: f32) -> CameraController {
         Self {
             amount_matrix: cgmath::Matrix3::from_cols(
                 cgmath::Vector3::unit_z() * speed,
                 cgmath::Vector3::unit_z() * speed,
                 cgmath::Vector3::unit_z() * speed,
             ),
-            rotation: cgmath::Vector4::unit_w() * sensitivity,
-            scroll: 0.0,
+            amount_rotation: cgmath::Vector4::unit_w() * sensitivity,
+            amount_scroll: cgmath::Vector2::unit_y() * scroll_factor,
         }
     }
 
@@ -121,17 +123,32 @@ impl CameraController {
     }
 
     pub fn process_mouse(&mut self, mouse_dx: f64, mouse_dy: f64) {
-        self.rotation.x = -mouse_dy as f32 * self.rotation.w;
-        self.rotation.y = mouse_dx as f32 * self.rotation.w;
+        self.amount_rotation.x = -mouse_dy as f32 * self.amount_rotation.w;
+        self.amount_rotation.y = mouse_dx as f32 * self.amount_rotation.w;
     }
 
-    pub fn process_scroll(&mut self, delta: &winit::event::MouseScrollDelta) {
-        //todo change fovy
+    pub fn process_scroll(&mut self, delta: winit::event::MouseScrollDelta) {
+        match delta {
+            MouseScrollDelta::LineDelta(_, y_position) => {
+                self.amount_scroll.x = y_position * self.amount_scroll.y
+            }
+
+            MouseScrollDelta::PixelDelta(_) => {
+                eprintln!("Touch pad or other device that use PixelDelta is not supported on this application");
+                //todo
+            }
+        }
     }
 
-    pub fn update_camera(&mut self, camera: &mut Camera, dt: std::time::Duration) {
+    pub fn update_camera_proj(
+        &mut self,
+        camera: &mut Camera,
+        proj: &mut Projection,
+        dt: std::time::Duration,
+    ) {
         let dt = dt.as_secs_f32();
 
+        //Camera
         let (yaw_sin, yaw_cos) = camera.yaw.0.sin_cos();
         let pitch_sin = camera.pitch.0.sin();
 
@@ -152,16 +169,27 @@ impl CameraController {
         camera.position += camera.forward * (self.amount_matrix.x.x - self.amount_matrix.x.y) * dt;
         camera.position += camera.right * (self.amount_matrix.y.x - self.amount_matrix.y.y) * dt;
 
-        camera.yaw += cgmath::Rad(self.rotation.y) * dt;
-        camera.pitch += cgmath::Rad(self.rotation.x) * dt;
+        camera.yaw += cgmath::Rad(self.amount_rotation.y) * dt;
+        camera.pitch += cgmath::Rad(self.amount_rotation.x) * dt;
 
-        self.rotation = self.rotation.w * cgmath::Vector4::unit_w();
+        self.amount_rotation = self.amount_rotation.w * cgmath::Vector4::unit_w();
 
         if camera.pitch < -cgmath::Rad(std::f32::consts::FRAC_PI_2) {
             camera.pitch = -cgmath::Rad(std::f32::consts::FRAC_PI_2);
         } else if camera.pitch > cgmath::Rad(std::f32::consts::FRAC_PI_2) {
             camera.pitch = cgmath::Rad(std::f32::consts::FRAC_PI_2);
         }
+
+        //Projection
+        proj.fovy += -cgmath::Rad(self.amount_scroll.x) * dt;
+
+        if proj.fovy < cgmath::Rad(0.0174533) {
+            proj.fovy = cgmath::Rad(0.0174533);
+        } else if proj.fovy > cgmath::Rad(3.12414) {
+            proj.fovy = cgmath::Rad(3.12414);
+        }
+
+        self.amount_scroll.x = 0.0;
     }
 }
 
