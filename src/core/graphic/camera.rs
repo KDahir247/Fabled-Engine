@@ -1,9 +1,12 @@
 use super::constant;
-use cgmath::{Angle, InnerSpace, SquareMatrix};
+use cgmath::{InnerSpace, SquareMatrix};
 use wgpu::util::DeviceExt;
 
+//to get up use forward.cross(right);
 pub struct Camera {
     pub position: cgmath::Point3<f32>,
+    forward: cgmath::Vector3<f32>,
+    right: cgmath::Vector3<f32>,
     yaw: cgmath::Rad<f32>,
     pitch: cgmath::Rad<f32>,
 }
@@ -20,18 +23,15 @@ impl Camera {
     ) -> Camera {
         Self {
             position: position.into(),
+            forward: cgmath::Vector3::unit_z() * -1.0,
+            right: cgmath::Vector3::unit_x(),
             yaw: yaw.into(),
             pitch: pitch.into(),
         }
     }
 
     pub fn calc_matrix(&self) -> cgmath::Matrix4<f32> {
-        cgmath::Matrix4::look_to_rh(
-            self.position,
-            cgmath::Vector3::new(self.yaw.0.cos(), self.pitch.0.sin(), self.yaw.0.sin())
-                .normalize(),
-            cgmath::Vector3::unit_y(),
-        )
+        cgmath::Matrix4::look_to_rh(self.position, self.forward, cgmath::Vector3::unit_y())
     }
 }
 
@@ -68,29 +68,44 @@ impl Projection {
 }
 
 pub struct CameraController {
-    amount_left: f32,
-    amount_right: f32,
-    amount_forward: f32,
-    amount_backward: f32,
-    rotate_horizontal: f32,
-    rotate_vertical: f32,
+    //Forward,   Right,   Up
+    //Backward,  Left,    Down
+    //Scalar,    Scalar,  Scalar
+    amount_matrix: cgmath::Matrix3<f32>,
+
+    //Pitch, Yaw, Roll, Scalar
+    rotation: cgmath::Vector4<f32>,
+
     scroll: f32,
-    speed: f32,
-    sensitivity: f32,
 }
 
 impl CameraController {
     pub fn new(speed: f32, sensitivity: f32) -> CameraController {
         Self {
-            amount_left: 0.0,
-            amount_right: 0.0,
-            amount_forward: 0.0,
-            amount_backward: 0.0,
-            rotate_horizontal: 0.0,
-            rotate_vertical: 0.0,
+            amount_matrix: cgmath::Matrix3::from_cols(
+                cgmath::Vector3 {
+                    x: 0.0,   //Forward
+                    y: 0.0,   //Backward
+                    z: speed, //Scalar
+                },
+                cgmath::Vector3 {
+                    x: 0.0,   //Right
+                    y: 0.0,   //Left
+                    z: speed, //Scalar
+                },
+                cgmath::Vector3 {
+                    x: 0.0,   //Up
+                    y: 0.0,   //Down
+                    z: speed, //Scalar
+                },
+            ),
+            rotation: cgmath::Vector4 {
+                x: 0.0, //Pitch
+                y: 0.0, //Yaw
+                z: 0.0, //Roll
+                w: sensitivity,
+            },
             scroll: 0.0,
-            speed,
-            sensitivity,
         }
     }
 
@@ -98,7 +113,7 @@ impl CameraController {
         &mut self,
         key: winit::event::VirtualKeyCode,
         state: winit::event::ElementState,
-    ) -> bool {
+    ) {
         let amount = if state == winit::event::ElementState::Pressed {
             1.0
         } else {
@@ -107,28 +122,24 @@ impl CameraController {
 
         match key {
             winit::event::VirtualKeyCode::W | winit::event::VirtualKeyCode::Up => {
-                self.amount_forward = amount;
-                true
+                self.amount_matrix.x.x = amount * self.amount_matrix.y.z;
             }
             winit::event::VirtualKeyCode::S | winit::event::VirtualKeyCode::Down => {
-                self.amount_backward = amount;
-                true
+                self.amount_matrix.x.y = amount * self.amount_matrix.y.z;
             }
             winit::event::VirtualKeyCode::D | winit::event::VirtualKeyCode::Right => {
-                self.amount_right = amount;
-                true
+                self.amount_matrix.y.x = amount * self.amount_matrix.y.z;
             }
             winit::event::VirtualKeyCode::A | winit::event::VirtualKeyCode::Left => {
-                self.amount_left = amount;
-                true
+                self.amount_matrix.y.y = amount * self.amount_matrix.y.z;
             }
-            _ => false,
+            _ => {}
         }
     }
 
     pub fn process_mouse(&mut self, mouse_dx: f64, mouse_dy: f64) {
-        self.rotate_horizontal = mouse_dx as f32;
-        self.rotate_vertical = -mouse_dy as f32;
+        self.rotation.x = -mouse_dy as f32 * self.rotation.w;
+        self.rotation.y = mouse_dx as f32 * self.rotation.w;
     }
 
     pub fn process_scroll(&mut self, delta: &winit::event::MouseScrollDelta) {
@@ -139,21 +150,29 @@ impl CameraController {
         let dt = dt.as_secs_f32();
 
         let (yaw_sin, yaw_cos) = camera.yaw.0.sin_cos();
-        let pitch_sin = camera.pitch.sin();
+        let pitch_sin = camera.pitch.0.sin();
 
-        let forward: cgmath::Vector3<f32> =
-            cgmath::Vector3::new(yaw_cos, pitch_sin, yaw_sin).normalize();
+        camera.forward = cgmath::Vector3 {
+            x: yaw_cos,
+            y: pitch_sin,
+            z: yaw_sin,
+        }
+        .normalize();
 
-        let right: cgmath::Vector3<f32> = cgmath::Vector3::new(-yaw_sin, 0.0, yaw_cos).normalize();
+        camera.right = cgmath::Vector3 {
+            x: -yaw_sin,
+            y: 0.0,
+            z: yaw_cos,
+        }
+        .normalize();
 
-        camera.position += forward * (self.amount_forward - self.amount_backward) * self.speed * dt;
-        camera.position += right * (self.amount_right - self.amount_left) * self.speed * dt;
+        camera.position += camera.forward * (self.amount_matrix.x.x - self.amount_matrix.x.y) * dt;
+        camera.position += camera.right * (self.amount_matrix.y.x - self.amount_matrix.y.y) * dt;
 
-        camera.yaw += cgmath::Rad(self.rotate_horizontal) * self.sensitivity * dt;
-        camera.pitch += cgmath::Rad(self.rotate_vertical) * self.sensitivity * dt;
+        camera.yaw += cgmath::Rad(self.rotation.y) * dt;
+        camera.pitch += cgmath::Rad(self.rotation.x) * dt;
 
-        self.rotate_horizontal = 0.0;
-        self.rotate_vertical = 0.0;
+        self.rotation = self.rotation.w * cgmath::Vector4::unit_w();
 
         if camera.pitch < -cgmath::Rad(std::f32::consts::FRAC_PI_2) {
             camera.pitch = -cgmath::Rad(std::f32::consts::FRAC_PI_2);

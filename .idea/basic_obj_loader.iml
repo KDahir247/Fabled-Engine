@@ -35,7 +35,11 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/wgpu-core-30f7fdb970dd7aa8/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-9220a517d4519f1e/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winit-ecd1c3222452151e/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
+      <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

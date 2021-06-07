@@ -1,0 +1,3 @@
+Features
+*** Pass Ambient Color, Diffuse Color, Specular Color, Shininess, Dissolve(alpha channel), Optical_density????
+*** Create Mipmap System for the graphic

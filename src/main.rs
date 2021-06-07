@@ -2,4 +2,6 @@
 
 mod core;
 
-fn main() { core::State::run(); }
+fn main() {
+    core::State::run();
+}

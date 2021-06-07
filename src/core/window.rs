@@ -1,4 +1,5 @@
 use super::{graphic, Command};
+use winit::event::WindowEvent;
 
 pub struct Window;
 
@@ -52,7 +53,10 @@ impl Window {
                 winit::event::WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                     graphic.resize(*new_inner_size)
                 }
-
+                WindowEvent::Focused(focus) => {
+                    //todo add focus support to halt any event if the window is not focused and resume event loop if window is focused.
+                    //if there is no validation on window focus then event can happen such as click event outside the window.
+                }
                 _ => {}
             },
 
@@ -76,7 +80,6 @@ impl Window {
             winit::event::Event::RedrawEventsCleared => {
                 graphic.request_redraw();
             }
-
             _ => {}
         })
     }

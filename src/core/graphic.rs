@@ -252,7 +252,7 @@ impl Graphic {
         }
     }
 
-    pub fn input(&mut self, event: winit::event::DeviceEvent) -> bool {
+    pub fn input(&mut self, event: winit::event::DeviceEvent) {
         match event {
             winit::event::DeviceEvent::Key(winit::event::KeyboardInput {
                 virtual_keycode: Some(key),
@@ -260,22 +260,18 @@ impl Graphic {
                 ..
             }) => {
                 self.camera_controller.process_keyboard(key, state);
-                true
             }
 
             winit::event::DeviceEvent::MouseMotion { delta } => {
                 if self.mouse_pressed {
                     self.camera_controller.process_mouse(delta.0, delta.1);
                 }
-
-                true
             }
             winit::event::DeviceEvent::MouseWheel { .. } => true,
             winit::event::DeviceEvent::Button { button: 1, state } => {
                 self.mouse_pressed = state == winit::event::ElementState::Pressed;
-                true
             }
-            _ => false,
+            _ => {}
         }
     }
 
