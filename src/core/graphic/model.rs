@@ -11,9 +11,9 @@ pub trait Vertex {
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct ModelVertex {
-    pub position: [f32; 3],
-    pub tex_coord: [f32; 2],
-    pub normal: [f32; 3],
+    pub position: glam::Vec3,
+    pub tex_coord: glam::Vec2,
+    pub normal: glam::Vec3,
 }
 
 impl Vertex for ModelVertex {
@@ -44,9 +44,12 @@ impl Vertex for ModelVertex {
 
 pub struct Material {
     name: String,
-    bind_group: wgpu::BindGroup,
-    texture: texture::Texture,
-    //todo create texture map which will have ambient color, diffuse color etc..
+    bind_group: wgpu::BindGroup, //there will be multiple mapping (diffuse, normal, etc...)
+    texture: texture::Texture,   //there will be multiple mapping (diffuse, normal, etc...)
+                                 //add vec3 for diffuse and ambient color,
+                                 //add f32 for shininess
+
+                                 //todo create texture map which will have ambient color, diffuse color etc..
 }
 
 impl Material {
@@ -203,13 +206,13 @@ impl Model {
                         };
 
                         ModelVertex {
-                            position: [
+                            position: glam::const_vec3!([
                                 m.mesh.positions[i * 3],
                                 m.mesh.positions[i * 3 + 1],
-                                m.mesh.positions[i * 3 + 2],
-                            ],
-                            tex_coord,
-                            normal,
+                                m.mesh.positions[i * 3 + 2]
+                            ]),
+                            tex_coord: glam::const_vec2!(tex_coord),
+                            normal: glam::const_vec3!(normal),
                         }
                     })
                     .collect::<Vec<ModelVertex>>();

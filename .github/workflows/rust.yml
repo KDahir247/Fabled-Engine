@@ -1,4 +1,4 @@
-name: Rust
+name: wgpu_obj_loader
 
 on:
   push:

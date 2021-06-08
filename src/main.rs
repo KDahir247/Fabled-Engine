@@ -1,5 +1,3 @@
-#![feature(backtrace)]
-
 mod core;
 
 fn main() {

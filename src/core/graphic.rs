@@ -89,7 +89,7 @@ impl Graphic {
 
         let camera_controller = camera::CameraController::new(4.0, 0.5, 15.0);
 
-        let uniform = camera::Uniform::create(&device, &camera, &projection);
+        let camera_uniform = camera::Uniform::create(&device, &camera, &projection);
 
         let depth_texture = texture::Texture::create_depth_texture(&device, size);
 
@@ -105,7 +105,7 @@ impl Graphic {
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Pipeline Layout"),
-            bind_group_layouts: &[&tex_layout, &uniform.group_layout],
+            bind_group_layouts: &[&tex_layout, &camera_uniform.group_layout],
             push_constant_ranges: &[],
         });
 
@@ -166,7 +166,7 @@ impl Graphic {
             camera,
             projection,
             camera_controller,
-            uniform,
+            uniform: camera_uniform,
             render_pipeline,
             mouse_pressed: false,
         })
