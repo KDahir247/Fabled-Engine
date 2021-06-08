@@ -23,4 +23,4 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 Video for current progress on dynamic camera.
 <br/>
 
-[![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/003.png)](https://streamable.com/z2scyu)
+[![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/004.png)](https://streamable.com/8d398a)
