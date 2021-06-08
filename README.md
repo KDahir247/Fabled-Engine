@@ -24,3 +24,5 @@ Video for improvement on dynamic camera.
 <br/>
 
 [![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/004.png)](https://streamable.com/8d398a)
+<br/>
+model is made by tyurru02. Attribution is stated in the example folder.
