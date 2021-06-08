@@ -20,7 +20,7 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Creating dynamic fly like camera with zooming. 
 
 <br/>
-Video for current progress on dynamic camera.
+Video for improvement on dynamic camera.
 <br/>
 
 [![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/004.png)](https://streamable.com/8d398a)
