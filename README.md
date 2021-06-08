@@ -4,7 +4,15 @@ Project with wgpu using rust. Where you can drop a obj file to the window for it
 </br>
 </br>
 Any issues, enchancement, features, or bugs report are always welcome in Issues.
-
+<br/>
+<br/>
+## Camera Movement
+* Forward : Up or W
+* Backward : Down or S
+* Left : Left or A
+* Right : Right or D
+* Up : Q
+* Down : E
 
 # current progress: 
 * rough render of obj with material on the screen.
