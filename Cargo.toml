@@ -4,12 +4,9 @@ version = "0.1.0"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-
 [dependencies]
 image = "*"
 winit = "*"
-cgmath = "*"
 env_logger = "*"
 log = "*"
 wgpu = "0.8"
@@ -18,3 +15,4 @@ bytemuck = {version = "*", features = ["derive"]}
 tobj = "*"
 anyhow = "*"
 rayon = "1.4"
+glam = {version = "*", features = ["bytemuck"]}

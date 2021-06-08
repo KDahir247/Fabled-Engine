@@ -80,21 +80,12 @@ impl Graphic {
         let swap_chain = device.create_swap_chain(&surface, &swap_chain_desc);
 
         let camera = camera::Camera::new(
-            cgmath::Point3 {
-                x: 0.0,
-                y: 2.0,
-                z: 6.0,
-            },
-            cgmath::Deg(-90.),
-            cgmath::Rad(0.0),
+            glam::Vec3::new(0.0, 2.0, 6.0),
+            glam::Vec3::new(0.0, -90.0, 0.0),
         );
 
-        let projection = camera::Projection::new(
-            size.width as f32 / size.height as f32,
-            cgmath::Deg(60.0),
-            0.1,
-            100.0,
-        );
+        let projection =
+            camera::Projection::new(size.width as f32 / size.height as f32, 60.0, 0.1, 100.0);
 
         let camera_controller = camera::CameraController::new(4.0, 0.5, 15.0);
 

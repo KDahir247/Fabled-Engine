@@ -1,66 +1,70 @@
 use super::constant;
-use cgmath::{InnerSpace, SquareMatrix};
 use wgpu::util::DeviceExt;
 use winit::event::MouseScrollDelta;
 
 //to get up use forward.cross(right);
 pub struct Camera {
-    pub position: cgmath::Point3<f32>,
-    forward: cgmath::Vector3<f32>,
-    right: cgmath::Vector3<f32>,
-    yaw: cgmath::Rad<f32>,
-    pitch: cgmath::Rad<f32>,
+    forward: glam::Vec3,
+    right: glam::Vec3,
+
+    //X, Y, Z
+    pub position: glam::Vec3,
+    //Pitch, Yaw, Roll
+    rotation: glam::Vec3,
+    //X, Y, Z
+    scale: glam::Vec3,
 }
 
 impl Camera {
-    pub fn new<
-        V: Into<cgmath::Point3<f32>>,
-        Y: Into<cgmath::Rad<f32>>,
-        P: Into<cgmath::Rad<f32>>,
-    >(
-        position: V,
-        yaw: Y,
-        pitch: P,
-    ) -> Camera {
+    pub fn new<V: Into<glam::Vec3>, PYR: Into<glam::Vec3>>(position: V, rotation: PYR) -> Camera {
         Self {
+            forward: glam::Vec3::Z * -1.0,
+            right: glam::Vec3::X,
             position: position.into(),
-            forward: cgmath::Vector3::unit_z() * -1.0,
-            right: cgmath::Vector3::unit_x(),
-            yaw: yaw.into(),
-            pitch: pitch.into(),
+            rotation: rotation.into() * (std::f32::consts::PI / 180.0_f32),
+            scale: glam::Vec3::ONE,
         }
     }
 
-    pub fn calc_matrix(&self) -> cgmath::Matrix4<f32> {
-        cgmath::Matrix4::look_to_rh(self.position, self.forward, cgmath::Vector3::unit_y())
+    pub fn calc_matrix(&self) -> glam::Mat4 {
+        let f = self.forward.normalize();
+        let s = f.cross(glam::Vec3::Y).normalize();
+        let u = s.cross(f);
+
+        glam::mat4(
+            glam::vec4(s.x, u.x, -f.x, 0.0),
+            glam::vec4(s.y, u.y, -f.y, 0.0),
+            glam::vec4(s.z, u.z, -f.z, 0.0),
+            glam::vec4(
+                -self.position.dot(s),
+                -self.position.dot(u),
+                self.position.dot(f),
+                1.0,
+            ),
+        )
     }
 }
 
 pub struct Projection {
     aspect: f32,
-    fovy: cgmath::Rad<f32>,
+    fovy: f32,
     znear: f32,
     zfar: f32,
 }
 
 impl Projection {
-    pub fn new<F: Into<cgmath::Rad<f32>>>(
-        aspect: f32,
-        fovy: F,
-        znear: f32,
-        zfar: f32,
-    ) -> Projection {
+    pub fn new(aspect: f32, fovy: f32, znear: f32, zfar: f32) -> Projection {
         Self {
             aspect,
-            fovy: fovy.into(),
+            fovy: fovy.to_radians(),
             znear,
             zfar,
         }
     }
 
-    pub fn calc_matrix(&self) -> cgmath::Matrix4<f32> {
+    pub fn calc_matrix(&self) -> glam::Mat4 {
         constant::OPENGL_TO_WGPU_MATRIX
-            * cgmath::perspective(self.fovy, self.aspect, self.znear, self.zfar)
+            * glam::Mat4::perspective_rh_gl(self.fovy, self.aspect, self.znear, self.zfar)
     }
 
     pub fn resize(&mut self, size: winit::dpi::PhysicalSize<u32>) {
@@ -72,25 +76,25 @@ pub struct CameraController {
     //Forward,   Right,   Up
     //Backward,  Left,    Down
     //Scalar,    Scalar,  Scalar
-    amount_matrix: cgmath::Matrix3<f32>,
+    amount_matrix: glam::Mat3,
 
     //Pitch, Yaw, Roll, Scalar
-    amount_rotation: cgmath::Vector4<f32>,
+    amount_rotation: glam::Vec4,
 
     //Amount, Scalar
-    amount_scroll: cgmath::Vector2<f32>,
+    amount_scroll: glam::Vec2,
 }
 
 impl CameraController {
     pub fn new(speed: f32, sensitivity: f32, scroll_factor: f32) -> CameraController {
         Self {
-            amount_matrix: cgmath::Matrix3::from_cols(
-                cgmath::Vector3::unit_z() * speed,
-                cgmath::Vector3::unit_z() * speed,
-                cgmath::Vector3::unit_z() * speed,
+            amount_matrix: glam::Mat3::from_cols(
+                glam::Vec3::Z * speed,
+                glam::Vec3::Z * speed,
+                glam::Vec3::Z * speed,
             ),
-            amount_rotation: cgmath::Vector4::unit_w() * sensitivity,
-            amount_scroll: cgmath::Vector2::unit_y() * scroll_factor,
+            amount_rotation: glam::Vec4::W * sensitivity,
+            amount_scroll: glam::Vec2::Y * scroll_factor,
         }
     }
 
@@ -107,16 +111,22 @@ impl CameraController {
 
         match key {
             winit::event::VirtualKeyCode::W | winit::event::VirtualKeyCode::Up => {
-                self.amount_matrix.x.x = amount * self.amount_matrix.y.z;
+                self.amount_matrix.x_axis.x = amount * self.amount_matrix.x_axis.z;
             }
             winit::event::VirtualKeyCode::S | winit::event::VirtualKeyCode::Down => {
-                self.amount_matrix.x.y = amount * self.amount_matrix.y.z;
+                self.amount_matrix.x_axis.y = amount * self.amount_matrix.x_axis.z;
             }
             winit::event::VirtualKeyCode::D | winit::event::VirtualKeyCode::Right => {
-                self.amount_matrix.y.x = amount * self.amount_matrix.y.z;
+                self.amount_matrix.y_axis.x = amount * self.amount_matrix.y_axis.z;
             }
             winit::event::VirtualKeyCode::A | winit::event::VirtualKeyCode::Left => {
-                self.amount_matrix.y.y = amount * self.amount_matrix.y.z;
+                self.amount_matrix.y_axis.y = amount * self.amount_matrix.y_axis.z;
+            }
+            winit::event::VirtualKeyCode::Q => {
+                self.amount_matrix.z_axis.x = amount * self.amount_matrix.z_axis.z;
+            }
+            winit::event::VirtualKeyCode::E => {
+                self.amount_matrix.z_axis.y = amount * self.amount_matrix.z_axis.z;
             }
             _ => {}
         }
@@ -149,44 +159,39 @@ impl CameraController {
         let dt = dt.as_secs_f32();
 
         //Camera
-        let (yaw_sin, yaw_cos) = camera.yaw.0.sin_cos();
-        let pitch_sin = camera.pitch.0.sin();
+        let (yaw_sin, yaw_cos) = camera.rotation.y.sin_cos();
+        let pitch_sin = camera.rotation.x.sin();
 
-        camera.forward = cgmath::Vector3 {
-            x: yaw_cos,
-            y: pitch_sin,
-            z: yaw_sin,
-        }
-        .normalize();
+        camera.forward = glam::Vec3::new(yaw_cos, pitch_sin, yaw_sin).normalize();
 
-        camera.right = cgmath::Vector3 {
-            x: -yaw_sin,
-            y: 0.0,
-            z: yaw_cos,
-        }
-        .normalize();
+        camera.right = glam::Vec3::new(-yaw_sin, 0.0, yaw_cos).normalize();
 
-        camera.position += camera.forward * (self.amount_matrix.x.x - self.amount_matrix.x.y) * dt;
-        camera.position += camera.right * (self.amount_matrix.y.x - self.amount_matrix.y.y) * dt;
+        camera.position +=
+            camera.forward * (self.amount_matrix.x_axis.x - self.amount_matrix.x_axis.y) * dt;
 
-        camera.yaw += cgmath::Rad(self.amount_rotation.y) * dt;
-        camera.pitch += cgmath::Rad(self.amount_rotation.x) * dt;
+        camera.position +=
+            camera.right * (self.amount_matrix.y_axis.x - self.amount_matrix.y_axis.y) * dt;
 
-        self.amount_rotation = self.amount_rotation.w * cgmath::Vector4::unit_w();
+        camera.position.y += (self.amount_matrix.z_axis.x - self.amount_matrix.z_axis.y) * dt;
 
-        if camera.pitch < -cgmath::Rad(std::f32::consts::FRAC_PI_2) {
-            camera.pitch = -cgmath::Rad(std::f32::consts::FRAC_PI_2);
-        } else if camera.pitch > cgmath::Rad(std::f32::consts::FRAC_PI_2) {
-            camera.pitch = cgmath::Rad(std::f32::consts::FRAC_PI_2);
+        camera.rotation.x += self.amount_rotation.x * dt;
+        camera.rotation.y += self.amount_rotation.y * dt;
+
+        self.amount_rotation = self.amount_rotation.w * glam::Vec4::W;
+
+        if camera.rotation.x < -std::f32::consts::FRAC_2_PI {
+            camera.rotation.x = -std::f32::consts::FRAC_2_PI;
+        } else if camera.rotation.x > std::f32::consts::FRAC_2_PI {
+            camera.rotation.x = std::f32::consts::FRAC_2_PI;
         }
 
         //Projection
-        proj.fovy += -cgmath::Rad(self.amount_scroll.x) * dt;
+        proj.fovy += -self.amount_scroll.x * dt;
 
-        if proj.fovy < cgmath::Rad(0.0174533) {
-            proj.fovy = cgmath::Rad(0.0174533);
-        } else if proj.fovy > cgmath::Rad(3.12414) {
-            proj.fovy = cgmath::Rad(3.12414);
+        if proj.fovy < 1.0_f32.to_radians() {
+            proj.fovy = 1.0_f32.to_radians();
+        } else if proj.fovy > 179.0_f32.to_radians() {
+            proj.fovy = 179.0_f32.to_radians();
         }
 
         self.amount_scroll.x = 0.0;
@@ -196,21 +201,22 @@ impl CameraController {
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 struct UniformLayout {
-    view_position: [f32; 4],
-    view_proj: [[f32; 4]; 4],
+    view_position: glam::Vec4,
+    view_proj: glam::Mat4,
 }
 
 impl UniformLayout {
     fn new() -> Self {
         Self {
-            view_position: [0.0f32; 4],
-            view_proj: cgmath::Matrix4::identity().into(),
+            view_position: glam::Vec4::ZERO,
+            view_proj: glam::Mat4::IDENTITY,
         }
     }
 
     fn update_view_proj(&mut self, camera: &Camera, proj: &Projection) {
-        self.view_position = camera.position.to_homogeneous().into();
-        self.view_proj = (proj.calc_matrix() * camera.calc_matrix()).into();
+        self.view_position =
+            glam::Vec4::new(camera.position.x, camera.position.y, camera.position.z, 1.0);
+        self.view_proj = proj.calc_matrix() * camera.calc_matrix();
     }
 }
 

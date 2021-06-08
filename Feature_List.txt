@@ -1,3 +1,14 @@
 Features
 *** Pass Ambient Color, Diffuse Color, Specular Color, Shininess, Dissolve(alpha channel), Optical_density????
 *** Create Mipmap System for the graphic
+
+
+Negative Y is up
+Positive Y is down
+
+Negative Z is Backward
+Positive Z is Forward
+
+
+Negative X is Left
+Positive X is Right
