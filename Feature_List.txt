@@ -12,3 +12,10 @@ Positive Z is Forward
 
 Negative X is Left
 Positive X is Right
+
+
+
+todo Create a Directional Light Color
+Ambient Color,
+Diffuse Color,
+Specular Color,

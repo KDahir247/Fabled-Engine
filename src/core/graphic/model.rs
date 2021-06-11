@@ -1,4 +1,4 @@
-use super::{camera, texture};
+use super::{camera, light, texture};
 
 use anyhow::Context;
 use rayon::prelude::*;
@@ -10,13 +10,13 @@ pub trait Vertex {
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct ModelVertex {
+pub struct VertexRaw {
     pub position: glam::Vec3,
     pub tex_coord: glam::Vec2,
     pub normal: glam::Vec3,
 }
 
-impl Vertex for ModelVertex {
+impl Vertex for VertexRaw {
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<Self>() as wgpu::BufferAddress,
@@ -43,50 +43,69 @@ impl Vertex for ModelVertex {
 }
 
 pub struct Material {
-    name: String,
-    bind_group: wgpu::BindGroup, //there will be multiple mapping (diffuse, normal, etc...)
-    texture: texture::Texture,   //there will be multiple mapping (diffuse, normal, etc...)
-                                 //add vec3 for diffuse and ambient color,
-                                 //add f32 for shininess
-
-                                 //todo create texture map which will have ambient color, diffuse color etc..
+    mat_name: String,
+    mat_color: ColorRaw,
+    pub mat_group: wgpu::BindGroup,
+    mat_mapping: Mapping, //todo doesn't support other mapping type such as normal map, specular map. Just diffuse map
 }
 
 impl Material {
-    fn new(
+    pub fn new(
         device: &wgpu::Device,
-        name: String,
-        texture: texture::Texture,
+        material_name: String,
+        material_color: ColorRaw,
+        material_mapping: Mapping,
         layout: &wgpu::BindGroupLayout,
     ) -> Self {
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let color_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Material Color Buffer"),
+            contents: &bytemuck::cast_slice(&[material_color]),
+            usage: wgpu::BufferUsage::UNIFORM,
+        });
+
+        let mat_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Material Bind Group"),
             layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&texture.view),
+                    resource: color_buffer.as_entire_binding(),
                 },
                 wgpu::BindGroupEntry {
                     binding: 1,
-                    resource: wgpu::BindingResource::Sampler(&texture.sampler),
+                    resource: wgpu::BindingResource::TextureView(&material_mapping.texture.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::Sampler(&material_mapping.texture.sampler),
                 },
             ],
         });
 
         Self {
-            name,
-            bind_group,
-            texture,
+            mat_name: material_name,
+            mat_color: material_color,
+            mat_group,
+            mat_mapping: material_mapping,
         }
     }
 
-    pub fn create_tex_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
+    pub fn create_material_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
         device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("Diffuse Group Layout"),
+            label: Some("Material Uniform Layout"),
             entries: &[
                 wgpu::BindGroupLayoutEntry {
                     binding: 0,
+                    visibility: wgpu::ShaderStage::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: true },
@@ -96,7 +115,7 @@ impl Material {
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: 2,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: true,
@@ -107,6 +126,41 @@ impl Material {
             ],
         })
     }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct ColorRaw {
+    //RGB
+    pub ambient_color: glam::Vec4,
+    pub diffuse_color: glam::Vec4,
+    pub specular_color: glam::Vec4,
+    //Shininess, Dissolve.
+    pub factor: glam::Vec3,
+    _padding: u32,
+}
+
+impl ColorRaw {
+    pub fn new(
+        ambient_color: glam::Vec4,
+        diffuse_color: glam::Vec4,
+        specular_color: glam::Vec4,
+        shininess: f32,
+        dissolve: f32,
+        optical_density: f32,
+    ) -> Self {
+        Self {
+            ambient_color,
+            diffuse_color,
+            specular_color,
+            factor: glam::const_vec3!([shininess, dissolve, optical_density]),
+            _padding: 0,
+        }
+    }
+}
+
+pub struct Mapping {
+    pub texture: texture::Texture, //there will be multiple mapping (diffuse, normal, etc...)
 }
 
 pub struct Mesh {
@@ -128,7 +182,7 @@ impl Model {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         path: P,
-        tex_layout: &wgpu::BindGroupLayout,
+        material_layout: &wgpu::BindGroupLayout,
     ) -> anyhow::Result<Self> {
         let parent_directory = path.as_ref().parent().unwrap();
 
@@ -178,7 +232,27 @@ impl Model {
                     texture::Texture::load(device, queue, parent_directory.join(diffuse_path))
                         .unwrap();
 
-                Material::new(device, mat.to_owned().name, diffuse_texture, tex_layout)
+                //
+                let diffuse_map = Mapping {
+                    texture: diffuse_texture,
+                };
+
+                let material_color = ColorRaw::new(
+                    glam::Vec3::from(mat.ambient).extend(0.5),
+                    glam::Vec3::from(mat.diffuse).extend(0.9),
+                    glam::Vec3::from(mat.specular).extend(0.8),
+                    mat.shininess,
+                    mat.dissolve,
+                    mat.optical_density,
+                );
+
+                Material::new(
+                    device,
+                    mat.to_owned().name,
+                    material_color,
+                    diffuse_map,
+                    material_layout,
+                )
             })
             .collect::<Vec<Material>>();
 
@@ -186,7 +260,7 @@ impl Model {
         let meshes: Vec<Mesh> = obj_model
             .par_iter()
             .map(|m: &tobj::Model| {
-                let vertices: Vec<ModelVertex> = (0..m.mesh.positions.len() / 3)
+                let vertices: Vec<VertexRaw> = (0..m.mesh.positions.len() / 3)
                     .into_par_iter()
                     .map(|i| {
                         let normal = if m.mesh.normals.is_empty() {
@@ -205,7 +279,7 @@ impl Model {
                             [m.mesh.texcoords[i * 2], m.mesh.texcoords[i * 2 + 1]]
                         };
 
-                        ModelVertex {
+                        VertexRaw {
                             position: glam::const_vec3!([
                                 m.mesh.positions[i * 3],
                                 m.mesh.positions[i * 3 + 1],
@@ -215,7 +289,7 @@ impl Model {
                             normal: glam::const_vec3!(normal),
                         }
                     })
-                    .collect::<Vec<ModelVertex>>();
+                    .collect::<Vec<VertexRaw>>();
 
                 let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                     label: Some("vertex buffer"),
@@ -247,17 +321,33 @@ pub trait DrawModel<'a, 'b>
 where
     'b: 'a,
 {
-    fn draw_model(&mut self, model: &'b Model, uniform: &'b camera::Uniform);
-    fn draw_meshes(&mut self, mesh: &'b Mesh, material: &'b Material, uniform: &'b camera::Uniform);
+    fn draw_model(
+        &mut self,
+        model: &'b Model,
+        uniform: &'b camera::Uniform,
+        light: &'b light::Uniform,
+    );
+    fn draw_meshes(
+        &mut self,
+        mesh: &'b Mesh,
+        material: &'b Material,
+        uniform: &'b camera::Uniform,
+        light: &'b light::Uniform,
+    );
 }
 
 impl<'a, 'b> DrawModel<'a, 'b> for wgpu::RenderPass<'a>
 where
     'b: 'a,
 {
-    fn draw_model(&mut self, model: &'b Model, uniform: &'b camera::Uniform) {
+    fn draw_model(
+        &mut self,
+        model: &'b Model,
+        uniform: &'b camera::Uniform,
+        light: &'b light::Uniform,
+    ) {
         for m in &model.meshes {
-            self.draw_meshes(m, &model.materials[m.material_id], uniform);
+            self.draw_meshes(m, &model.materials[m.material_id], uniform, light);
         }
     }
 
@@ -266,9 +356,11 @@ where
         mesh: &'b Mesh,
         material: &'b Material,
         uniform: &'b camera::Uniform,
+        light: &'b light::Uniform,
     ) {
-        self.set_bind_group(0, &material.bind_group, &[]);
+        self.set_bind_group(0, &material.mat_group, &[]);
         self.set_bind_group(1, &uniform.group, &[]);
+        self.set_bind_group(2, &light.group, &[]);
         self.set_vertex_buffer(0, mesh.vertex_buffer.slice(..));
         self.set_index_buffer(mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
 

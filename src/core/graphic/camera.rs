@@ -200,12 +200,12 @@ impl CameraController {
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-struct UniformLayout {
+struct CameraRaw {
     view_position: glam::Vec4,
     view_proj: glam::Mat4,
 }
 
-impl UniformLayout {
+impl CameraRaw {
     fn new() -> Self {
         Self {
             view_position: glam::Vec4::ZERO,
@@ -224,19 +224,19 @@ pub struct Uniform {
     pub buffer: wgpu::Buffer,
     pub group: wgpu::BindGroup,
     pub group_layout: wgpu::BindGroupLayout,
-    layout: UniformLayout, // internal camera matrix container
+    layout: CameraRaw, // internal camera matrix container
 }
 
 impl Uniform {
     pub fn create(device: &wgpu::Device, camera: &Camera, projection: &Projection) -> Self {
-        let mut uniform_layout = UniformLayout::new();
+        let mut uniform_layout = CameraRaw::new();
         uniform_layout.update_view_proj(camera, projection);
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("Uniform Layout"),
+            label: Some("Camera Uniform Layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: 0,
-                visibility: wgpu::ShaderStage::VERTEX,
+                visibility: wgpu::ShaderStage::VERTEX | wgpu::ShaderStage::FRAGMENT,
                 ty: wgpu::BindingType::Buffer {
                     ty: wgpu::BufferBindingType::Uniform,
                     has_dynamic_offset: false,
@@ -247,13 +247,13 @@ impl Uniform {
         });
 
         let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Uniform Buffer"),
+            label: Some("Camera Uniform Buffer"),
             contents: &bytemuck::cast_slice(&[uniform_layout]),
             usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
         });
 
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("Uniform Group"),
+            label: Some("Camera Uniform Group"),
             layout: &bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
                 binding: 0,
