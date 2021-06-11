@@ -15,10 +15,7 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Down : E
 
 # current progress: 
-* rough render of obj with material on the screen.
-* Refactor and redesign camera.
-* Creating dynamic fly like camera with zooming. 
-
+* Lighting and building on the material system.
 <br/>
 Video for improvement on dynamic camera.
 <br/>
