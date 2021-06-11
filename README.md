@@ -15,11 +15,13 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Down : E
 
 # current progress: 
-* Lighting and building on the material system.
+* Lighting is on experimental phase and will improve a-lot.
+* Only one light source is currently supported Directional Light. 
+* Only one Lighting is currently supported
 <br/>
 Video for improvement on dynamic camera.
 <br/>
 
-[![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/004.png)](https://streamable.com/8d398a)
+[![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/005.png)](https://streamable.com/nfvq75)
 <br/>
-model is made by tyurru02. Attribution is stated in the example folder.
+model is made by theStoff. Attribution is stated in the example folder.
