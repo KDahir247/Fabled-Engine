@@ -12,6 +12,8 @@ impl Graphic {
 
 impl Graphic {
     fn start(world: &shipyard::World) -> anyhow::Result<()> {
+        superluminal_perf::begin_event("Create_Entity");
+
         let (mut entities, setup) =
             world.borrow::<(shipyard::EntitiesViewMut, shipyard::UniqueView<Setup>)>()?;
 
@@ -30,6 +32,8 @@ impl Graphic {
         let (uniform_storage) = world.borrow::<shipyard::ViewMut<LightUniform>>()?;
 
         entities.add_entity(uniform_storage, lighting_uniform);
+
+        superluminal_perf::end_event();
 
         Ok(())
     }

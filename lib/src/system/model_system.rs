@@ -2,6 +2,7 @@ use crate::component::prelude::*;
 use crate::util::texture::*;
 use rayon::prelude::*;
 
+use anyhow::Error;
 use shipyard::{IntoFastIter, IntoIter, IntoWithId};
 use wgpu::util::DeviceExt;
 
@@ -140,8 +141,9 @@ pub fn load_model_system(
                 .map(|mat : &tobj::Material|{
                     let diffuse_path : &String = &mat.diffuse_texture;
 
-                    let diffuse_texture = load(&setup.device, &setup.queue, parent_directory.join(diffuse_path))
-                        .unwrap();
+                    let diffuse_texture = load(&setup.device, &setup.queue, parent_directory.join(diffuse_path)).unwrap();
+
+
 
                     let diffuse_map = Mapping{ texture: diffuse_texture };
 

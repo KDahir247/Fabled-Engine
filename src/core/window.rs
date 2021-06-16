@@ -7,7 +7,7 @@ pub struct Window {
 
 impl Window {
     pub fn run(options: (shipyard::World, winit::event_loop::EventLoop<()>)) -> anyhow::Result<()> {
-        let window = Self { focused: true };
+        let window = Self { focused: false };
 
         let (world, event_loop) = options;
 

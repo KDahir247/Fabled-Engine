@@ -3,6 +3,8 @@ use lib::component::prelude::*;
 
 // This is where all the static storage is created.
 pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
+    superluminal_perf::begin_event("Application_SetUp");
+
     let window = world.borrow::<shipyard::UniqueView<Window>>().unwrap();
 
     let size = window.raw.inner_size();
@@ -49,6 +51,8 @@ pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
     };
 
     let swap_chain = device.create_swap_chain(&surface, &swap_chain_desc);
+
+    superluminal_perf::end_event();
 
     setup_depth_texture(world, &device, size)?;
     setup_world_camera(world, &device, size)?;
@@ -121,19 +125,25 @@ fn setup_depth_texture(
     device: &wgpu::Device,
     size: winit::dpi::PhysicalSize<u32>,
 ) -> anyhow::Result<()> {
+    superluminal_perf::begin_event("Create_Depth_Texture");
+
     let depth_texture = lib::util::texture::create_depth_texture(device, size);
     world.add_unique(depth_texture)?;
 
+    superluminal_perf::end_event();
     Ok(())
 }
 
 fn setup_input_system(world: &shipyard::World) -> anyhow::Result<()> {
+    superluminal_perf::begin_event("Create_Input_System");
     world.add_unique(lib::component::input_component::Input::default())?;
-
+    superluminal_perf::end_event();
     Ok(())
 }
 
 fn setup_world_builder(world: &shipyard::World) -> anyhow::Result<()> {
+    superluminal_perf::begin_event("Create_ECS_System");
+
     shipyard::Workload::builder("render_update_system")
         .with_system(&lib::system::time_system::calculate_delta_time_system)
         .with_try_system(&lib::system::render_system::begin_render_pass_system)
@@ -148,6 +158,8 @@ fn setup_world_builder(world: &shipyard::World) -> anyhow::Result<()> {
         .with_system(&lib::system::model_system::create_pipeline_system)
         .with_try_system(&lib::system::model_system::load_model_system)
         .add_to_world(world)?;
+
+    superluminal_perf::end_event();
 
     //shipyard::Workload::builder("render_input_system").with_system();
 

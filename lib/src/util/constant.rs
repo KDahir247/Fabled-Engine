@@ -9,4 +9,8 @@ pub const OPENGL_TO_WGPU_MATRIX: glam::Mat4 = glam::const_mat4!(
 
 pub const CLEAR_COLOR: f64 = 0.09;
 
-pub const INVALID_MAP_PATH: &str = "resource/map/Default_Map.png";
+pub fn INVALID_MAP_PATH() -> String {
+    let mut cargo_directory = env!("CARGO_MANIFEST_DIR").to_string();
+    cargo_directory.push_str("/resource/map/Default_Map.png");
+    cargo_directory
+}

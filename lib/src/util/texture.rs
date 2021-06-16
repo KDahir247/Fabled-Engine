@@ -8,11 +8,11 @@ pub fn load<P: AsRef<std::path::Path>>(
 ) -> anyhow::Result<Texture> {
     let dyn_img = if path.as_ref().exists() {
         match path.as_ref().extension() {
-            None => image::open(std::path::Path::new(constant::INVALID_MAP_PATH))?,
+            None => image::open(std::path::Path::new(constant::INVALID_MAP_PATH().as_str()))?,
             Some(_) => image::open(path.as_ref())?, //todo check extension if it is a jpg use rgb. if it is a png use rgba
         }
     } else {
-        image::open(std::path::Path::new(constant::INVALID_MAP_PATH))?
+        image::open(std::path::Path::new(constant::INVALID_MAP_PATH().as_str()))?
     };
 
     from_image(device, queue, dyn_img)
