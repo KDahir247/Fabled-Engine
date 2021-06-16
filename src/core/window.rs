@@ -29,33 +29,39 @@ impl Window {
                 if self.focused {
                     match event {
                         DeviceEvent::MouseMotion { delta } => {
-                            world.run_with_data(
-                                lib::system::input_system::register_mouse_motion_system,
-                                input_component::MousePosition { delta },
-                            );
+                            world
+                                .run_with_data(
+                                    lib::system::input_system::register_mouse_motion_system,
+                                    input_component::MousePosition { delta },
+                                )
+                                .unwrap();
                         }
                         DeviceEvent::MouseWheel { delta } => {
-                            world.run_with_data(
-                                lib::system::input_system::register_scroll_input_system,
-                                input_component::ScrollState {
-                                    scroll_delta: delta,
-                                },
-                            );
+                            world
+                                .run_with_data(
+                                    lib::system::input_system::register_scroll_input_system,
+                                    input_component::ScrollState {
+                                        scroll_delta: delta,
+                                    },
+                                )
+                                .unwrap();
                         }
                         DeviceEvent::Button { button, state } => {
-                            world.run_with_data(
-                                lib::system::input_system::register_mouse_input_system,
-                                input_component::MouseClick {
-                                    button: if button == 1 {
-                                        winit::event::MouseButton::Left
-                                    } else if button == 3 {
-                                        winit::event::MouseButton::Right
-                                    } else {
-                                        winit::event::MouseButton::Other(0)
+                            world
+                                .run_with_data(
+                                    lib::system::input_system::register_mouse_input_system,
+                                    input_component::MouseClick {
+                                        button: if button == 1 {
+                                            winit::event::MouseButton::Left
+                                        } else if button == 3 {
+                                            winit::event::MouseButton::Right
+                                        } else {
+                                            winit::event::MouseButton::Other(0)
+                                        },
+                                        state,
                                     },
-                                    state,
-                                },
-                            );
+                                )
+                                .unwrap();
                         }
                         DeviceEvent::Key(winit::event::KeyboardInput {
                             virtual_keycode: Some(keycode),
@@ -63,10 +69,12 @@ impl Window {
                             ..
                         }) => {
                             //key goes here
-                            world.run_with_data(
-                                lib::system::input_system::register_key_input_system,
-                                input_component::KeyState { keycode, state },
-                            );
+                            world
+                                .run_with_data(
+                                    lib::system::input_system::register_key_input_system,
+                                    input_component::KeyState { keycode, state },
+                                )
+                                .unwrap();
                         }
                         _ => {}
                     }

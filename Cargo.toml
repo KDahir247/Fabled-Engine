@@ -13,9 +13,9 @@ opt-level = 3
 name = "lib"
 path = "lib/src/lib.rs"
 
-[dependencies.superluminal-perf]
-version = "*"
-optional = true
+#[dependencies.superluminal-perf]
+#version = "*"
+#optional = true
 
 [dependencies.env_logger]
 version = "*"
@@ -26,7 +26,7 @@ version = "*"
 optional = true
 
 [features]
-profiler = ["superluminal-perf"]
+#profiler = ["superluminal-perf"]
 logger = ["log" ,"env_logger"]
 
 [dependencies]
@@ -40,4 +40,5 @@ anyhow = "*"
 rayon = "1.4"
 glam = {version = "*", features = ["bytemuck"]}
 shipyard = {version = "*", features = ["default", "thread_local"]}
+superluminal-perf = "*"
 naga = {version = "0.4.2", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga

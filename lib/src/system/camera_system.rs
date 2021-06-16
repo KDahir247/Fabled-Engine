@@ -28,9 +28,3 @@ pub fn camera_update_system(
         )
     });
 }
-
-pub fn process_keyboard_system() {}
-
-pub fn process_mouse_system() {}
-
-pub fn process_scroll_system() {}
