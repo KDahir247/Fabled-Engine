@@ -1,29 +1,34 @@
-mod graphic;
-mod window;
+use lib::component::prelude::*;
 
-pub trait Command {
-    type Output;
-    type Input;
-    fn run(options: Self::Input) -> anyhow::Result<Self::Output>;
-}
+mod graphic;
+mod setup;
+mod window;
 
 pub struct State;
 
-//Public
 impl State {
     pub fn run() {
         let (event_loop, window) = State::create_window();
 
-        let graphic: graphic::Graphic = graphic::Graphic::run(window).expect("Failed on graphic");
+        let world = shipyard::World::new();
 
-        window::Window::run((graphic, event_loop)).expect("Failed on window")
+        world.add_unique(Window { raw: window }).unwrap();
+        world
+            .add_unique(DeltaTime {
+                last_render_time: std::time::Instant::now(),
+                delta: Default::default(),
+            })
+            .unwrap();
+
+        graphic::Graphic::run(&world).expect("Failed on graphic");
+
+        window::Window::run((world, event_loop)).expect("Failed on window")
     }
 }
 
-//Private
 impl State {
     fn create_window() -> (winit::event_loop::EventLoop<()>, winit::window::Window) {
-        let event_loop = winit::event_loop::EventLoop::new();
+        let event_loop = winit::event_loop::EventLoop::with_user_event();
 
         let window = winit::window::WindowBuilder::new()
             .with_inner_size(winit::dpi::Size::Physical(winit::dpi::PhysicalSize {
@@ -32,6 +37,7 @@ impl State {
             }))
             .with_title("BasicObjLoader")
             .with_decorations(true)
+            //.with_fullscreen(Some(winit::window::Fullscreen::Borderless(None)))
             .build(&event_loop)
             .unwrap();
 

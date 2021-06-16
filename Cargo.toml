@@ -4,11 +4,34 @@ version = "0.1.0"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.release]
+lto = true
+debug = true
+opt-level = 3
+
+[lib]
+name = "lib"
+path = "lib/src/lib.rs"
+
+[dependencies.superluminal-perf]
+version = "*"
+optional = true
+
+[dependencies.env_logger]
+version = "*"
+optional = true
+
+[dependencies.log]
+version = "*"
+optional = true
+
+[features]
+profiler = ["superluminal-perf"]
+logger = ["log" ,"env_logger"]
+
 [dependencies]
 image = "*"
 winit = "*"
-env_logger = "*"
-log = "*"
 wgpu = "0.8"
 futures = "*"
 bytemuck = {version = "*", features = ["derive"]}
@@ -16,3 +39,5 @@ tobj = "*"
 anyhow = "*"
 rayon = "1.4"
 glam = {version = "*", features = ["bytemuck"]}
+shipyard = {version = "*", features = ["default", "thread_local"]}
+naga = {version = "0.4.2", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga

@@ -14,8 +14,11 @@ Negative X is Left
 Positive X is Right
 
 
+//todo Clean Solution
+//todo Destroy buffer when done.
 
-todo Create a Directional Light Color
-Ambient Color,
-Diffuse Color,
-Specular Color,
+//todo the model should have a render_pipeline since we want to support future shader customization for the model.
+
+//todo only one single exclusive access or multiple shared access
+//todo  for_each
+//todo Prefer moving the loop inside run and move borrow's call outside the loop

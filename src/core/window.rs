@@ -1,91 +1,129 @@
-use super::{graphic, Command};
-use winit::event::WindowEvent;
+use lib::component::prelude::*;
+use winit::event::{DeviceEvent, WindowEvent};
 
 pub struct Window {
     focused: bool,
 }
 
-impl Command for Window {
-    type Output = ();
-    type Input = (graphic::Graphic, winit::event_loop::EventLoop<()>);
+impl Window {
+    pub fn run(options: (shipyard::World, winit::event_loop::EventLoop<()>)) -> anyhow::Result<()> {
+        let window = Self { focused: true };
 
-    fn run(options: Self::Input) -> anyhow::Result<Self::Output> {
-        let window = Self { focused: false };
+        let (world, event_loop) = options;
 
-        let (graphic, event_loop) = options;
+        shipyard::Workload::builder("window_redraw_system")
+            .with_system(&lib::system::window_system::window_redraw_system)
+            .add_to_world(&world)
+            .unwrap();
 
-        Window::handle(window, graphic, event_loop);
+        Window::handle(window, world, event_loop);
 
         Ok(())
     }
 }
 
 impl Window {
-    fn handle(
-        mut self,
-        mut graphic: graphic::Graphic,
-        event_loop: winit::event_loop::EventLoop<()>,
-    ) {
-        let mut last_render_time = std::time::Instant::now();
-
+    fn handle(mut self, mut world: shipyard::World, event_loop: winit::event_loop::EventLoop<()>) {
         event_loop.run(move |evt, _, control_flow| match evt {
             winit::event::Event::DeviceEvent { event, .. } => {
                 if self.focused {
-                    graphic.input(event);
+                    match event {
+                        DeviceEvent::MouseMotion { delta } => {
+                            world.run_with_data(
+                                lib::system::input_system::register_mouse_motion_system,
+                                input_component::MousePosition { delta },
+                            );
+                        }
+                        DeviceEvent::MouseWheel { delta } => {
+                            world.run_with_data(
+                                lib::system::input_system::register_scroll_input_system,
+                                input_component::ScrollState {
+                                    scroll_delta: delta,
+                                },
+                            );
+                        }
+                        DeviceEvent::Button { button, state } => {
+                            world.run_with_data(
+                                lib::system::input_system::register_mouse_input_system,
+                                input_component::MouseClick {
+                                    button: if button == 1 {
+                                        winit::event::MouseButton::Left
+                                    } else if button == 3 {
+                                        winit::event::MouseButton::Right
+                                    } else {
+                                        winit::event::MouseButton::Other(0)
+                                    },
+                                    state,
+                                },
+                            );
+                        }
+                        DeviceEvent::Key(winit::event::KeyboardInput {
+                            virtual_keycode: Some(keycode),
+                            state,
+                            ..
+                        }) => {
+                            //key goes here
+                            world.run_with_data(
+                                lib::system::input_system::register_key_input_system,
+                                input_component::KeyState { keycode, state },
+                            );
+                        }
+                        _ => {}
+                    }
                 }
             }
 
-            winit::event::Event::WindowEvent { event, .. } => match event {
-                winit::event::WindowEvent::Resized(size) => {
-                    graphic.resize(size);
-                }
+            winit::event::Event::WindowEvent { event, .. } => {
+                match event {
+                    winit::event::WindowEvent::Resized(_) => {
+                        world.run_workload("render_resize_system").unwrap();
+                    }
 
-                winit::event::WindowEvent::CloseRequested => {
-                    *control_flow = winit::event_loop::ControlFlow::Exit;
-                }
-
-                winit::event::WindowEvent::DroppedFile(file_path) => {
-                    graphic.load_obj(file_path.as_path())
-                }
-
-                winit::event::WindowEvent::KeyboardInput {
-                    input:
-                        winit::event::KeyboardInput {
-                            virtual_keycode: Some(winit::event::VirtualKeyCode::Escape),
-                            state: winit::event::ElementState::Pressed,
-                            ..
-                        },
-                    ..
-                } => *control_flow = winit::event_loop::ControlFlow::Exit,
-
-                winit::event::WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                    graphic.resize(*new_inner_size)
-                }
-                WindowEvent::Focused(focus) => self.focused = focus,
-                _ => {}
-            },
-
-            winit::event::Event::RedrawRequested(_) => {
-                let now = std::time::Instant::now();
-                let dt = now - last_render_time;
-                last_render_time = now;
-                graphic.update(dt);
-                match graphic.render() {
-                    Ok(_) => {}
-                    Err(wgpu::SwapChainError::Lost) => graphic.refresh(),
-                    Err(wgpu::SwapChainError::OutOfMemory) => {
+                    winit::event::WindowEvent::KeyboardInput {
+                        input:
+                            winit::event::KeyboardInput {
+                                virtual_keycode: Some(winit::event::VirtualKeyCode::Escape),
+                                state: winit::event::ElementState::Pressed,
+                                ..
+                            },
+                        ..
+                    }
+                    | winit::event::WindowEvent::CloseRequested => {
                         *control_flow = winit::event_loop::ControlFlow::Exit;
                     }
-                    Err(err) => {
-                        eprintln!("SwapChainError : {:?}", err);
+
+                    winit::event::WindowEvent::DroppedFile(file_path) => {
+                        //todo add an entity to the world that will have the file_path and the string to represent the path to the shader.
+                        let model_id = world.add_entity((ModelData {
+                            path: file_path,
+                            shader_path: "../../shader/shader.wgsl".to_string(),
+                        },));
+
+                        world.run_workload("load_model_system").unwrap();
+
+                        let mut model_storage =
+                            world.borrow::<shipyard::ViewMut<ModelData>>().unwrap();
+
+                        model_storage.delete(model_id);
                     }
+
+                    winit::event::WindowEvent::ScaleFactorChanged { .. } => {
+                        world.run_workload("render_resize_system").unwrap();
+                    }
+                    WindowEvent::Focused(focus) => self.focused = focus,
+
+                    _ => {}
                 }
+            }
+
+            winit::event::Event::RedrawRequested(_) => {
+                world.run_workload("render_update_system").unwrap();
             }
 
             winit::event::Event::RedrawEventsCleared => {
-                graphic.request_redraw();
+                world.run_workload("window_redraw_system").unwrap();
             }
             _ => {}
-        })
+        });
     }
 }
