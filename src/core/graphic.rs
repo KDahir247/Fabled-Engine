@@ -14,8 +14,8 @@ impl Graphic {
     fn start(world: &shipyard::World) -> anyhow::Result<()> {
         superluminal_perf::begin_event("Create_Entity");
 
-        let (mut entities, setup) =
-            world.borrow::<(shipyard::EntitiesViewMut, shipyard::UniqueView<Setup>)>()?;
+        let (mut entities, render) =
+            world.borrow::<(shipyard::EntitiesViewMut, shipyard::UniqueView<RenderData>)>()?;
 
         let lighting = DirectionalLightRaw {
             direction: glam::vec3(0.5, 0.0, 0.0),
@@ -24,12 +24,13 @@ impl Graphic {
                 ambient_color: glam::vec4(1.0, 1.0, 1.0, 0.4),
                 diffuse_color: glam::vec4(1.0, 0.0, 0.0, 1.0),
                 specular_color: glam::vec4(1.0, 0.0, 0.0, 1.0),
+                emissive_color: Default::default(),
             },
         };
 
-        let lighting_uniform = LightUniform::create(&setup.device, lighting);
+        let lighting_uniform = LightUniform::create(&render.core.device, lighting);
 
-        let (uniform_storage) = world.borrow::<shipyard::ViewMut<LightUniform>>()?;
+        let uniform_storage = world.borrow::<shipyard::ViewMut<LightUniform>>()?;
 
         entities.add_entity(uniform_storage, lighting_uniform);
 

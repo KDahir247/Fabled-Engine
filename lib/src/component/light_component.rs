@@ -6,14 +6,15 @@ pub struct LightColorRaw {
     pub ambient_color: glam::Vec4,
     pub diffuse_color: glam::Vec4,
     pub specular_color: glam::Vec4,
+    pub emissive_color: glam::Vec4,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct DirectionalLightRaw {
-    pub direction: glam::Vec3,
-    pub __padding__: u32,
-    pub color: LightColorRaw,
+    pub direction: glam::Vec3, // 12 bytes
+    pub __padding__: u32,      // 4 bytes
+    pub color: LightColorRaw,  // 64 bytes
 }
 
 pub struct LightUniform {
@@ -25,6 +26,8 @@ pub struct LightUniform {
 
 impl LightUniform {
     pub fn create(device: &wgpu::Device, lighting: DirectionalLightRaw) -> Self {
+        println!("{}", lighting.direction);
+
         let bind_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("Lighting Uniform Layout"),
             entries: &[wgpu::BindGroupLayoutEntry {

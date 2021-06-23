@@ -18,7 +18,7 @@ pub struct ScrollState {
 
 #[derive(Default)]
 pub struct Input {
+    pub mouse_state: Option<MouseClick>,
     pub scroll_delta: Option<ScrollState>,
     pub key_state: Option<KeyState>,
-    pub mouse_state: Option<MouseClick>,
 }

@@ -16,9 +16,12 @@ impl State {
 
         world.add_unique(Window { raw: window }).unwrap();
         world
-            .add_unique(DeltaTime {
-                last_render_time: std::time::Instant::now(),
-                delta: Default::default(),
+            .add_unique(Time {
+                application: lib::component::time_component::Application {
+                    time: std::time::Instant::now(),
+                },
+                last_frame: 0.0,
+                delta: 0.0,
             })
             .unwrap();
 

@@ -7,7 +7,7 @@ use shipyard::{IntoFastIter, IntoIter, IntoWithId};
 use wgpu::util::DeviceExt;
 
 pub fn create_pipeline_system(
-    setup: shipyard::UniqueView<Setup>,
+    render: shipyard::UniqueView<RenderData>,
     camera: shipyard::UniqueView<Camera>,
     entities: shipyard::EntitiesViewMut,
     model_data: shipyard::ViewMut<ModelData>,
@@ -15,7 +15,7 @@ pub fn create_pipeline_system(
     mut pipeline: shipyard::ViewMut<ModelRenderDetail>,
 ) {
     model_data.iter().with_id().for_each(|(entity_id, _)| {
-        let material = Material::material_layout(&setup.device);
+        let material = Material::material_layout(&render.core.device);
 
         let mut bind_group_layout: Vec<&wgpu::BindGroupLayout> =
             vec![&material, &camera.uniform.group_layout];
@@ -26,19 +26,22 @@ pub fn create_pipeline_system(
 
         let render_pipeline = {
             //Shader Module
-            let shader_module = setup
-                .device
-                .create_shader_module(&wgpu::ShaderModuleDescriptor {
-                    label: Some("Core Shader Module"),
-                    source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!(
-                        "../../../shader/shader.wgsl"
-                    ))),
-                    flags: wgpu::ShaderFlags::all(),
-                });
+            let shader_module =
+                render
+                    .core
+                    .device
+                    .create_shader_module(&wgpu::ShaderModuleDescriptor {
+                        label: Some("Core Shader Module"),
+                        source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!(
+                            "../../../shader/shader.wgsl"
+                        ))),
+                        flags: wgpu::ShaderFlags::all(),
+                    });
 
             //Pipeline Layout
             let pipeline_layout =
-                setup
+                render
+                    .core
                     .device
                     .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                         label: Some("Render Layout"),
@@ -46,7 +49,8 @@ pub fn create_pipeline_system(
                         push_constant_ranges: &[],
                     });
 
-            setup
+            render
+                .core
                 .device
                 .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                     label: Some("Render Pipeline"),
@@ -60,7 +64,7 @@ pub fn create_pipeline_system(
                         module: &shader_module,
                         entry_point: "fs_main",
                         targets: &[wgpu::ColorTargetState {
-                            format: setup.swap_chain_desc.format,
+                            format: render.info.swap_chain_desc.format,
                             blend: Some(wgpu::BlendState {
                                 color: wgpu::BlendComponent::REPLACE,
                                 alpha: wgpu::BlendComponent::REPLACE,
@@ -105,13 +109,13 @@ pub fn create_pipeline_system(
 }
 
 pub fn load_model_system(
-    setup: shipyard::UniqueView<Setup>,
+    render: shipyard::UniqueView<RenderData>,
     model_data: shipyard::ViewMut<ModelData>,
     mut model_render_detail: shipyard::ViewMut<ModelRenderDetail>,
 ) -> anyhow::Result<()> {
     (&model_data, &mut model_render_detail)
         .fast_iter()
-        .for_each(|(model, render)| {
+        .for_each(|(model, render_detail)| {
             let parent_directory: &std::path::Path = model.path.parent().unwrap();
 
             let file_ext = model.path.extension().unwrap().to_str().unwrap();
@@ -141,7 +145,8 @@ pub fn load_model_system(
                 .map(|mat : &tobj::Material|{
                     let diffuse_path : &String = &mat.diffuse_texture;
 
-                    let diffuse_texture = load(&setup.device, &setup.queue, parent_directory.join(diffuse_path)).unwrap();
+                    //todo once loaded we dont need to store it????????????
+                    let diffuse_texture = load(&render.core.device, &render.pass.queue, parent_directory.join(diffuse_path)).unwrap();
 
 
 
@@ -155,7 +160,7 @@ pub fn load_model_system(
                         ___padding___: 0
                     };
 
-                    Material::new(&setup.device, mat.to_owned().name, material_color, diffuse_map, &render.material_layout)
+                    Material::new(&render.core.device, mat.to_owned().name, material_color, diffuse_map, &render_detail.material_layout)
 
                 }).collect::<Vec<Material>>();
 
@@ -197,13 +202,13 @@ pub fn load_model_system(
                         }).collect::<Vec<VertexRaw>>();
 
 
-                    let vertex_buffer = setup.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
+                    let vertex_buffer = render.core.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
                         label: Some("Vertex Buffer"),
                         contents: bytemuck::cast_slice(&vertices),
                         usage: wgpu::BufferUsage::VERTEX
                     });
 
-                    let index_buffer = setup.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
+                    let index_buffer = render.core.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
                         label: Some("Index Buffer"),
                         contents: bytemuck::cast_slice(&m.mesh.indices),
                         usage: wgpu::BufferUsage::INDEX
@@ -218,7 +223,7 @@ pub fn load_model_system(
                     }
                 }).collect::<Vec<Mesh>>();
 
-            render.model = Some(Model{ meshes, materials });
+            render_detail.model = Some(Model{ meshes, materials });
         });
 
     Ok(())

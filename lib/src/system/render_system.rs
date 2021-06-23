@@ -5,20 +5,22 @@ use crate::util::{camera, constant, texture};
 use shipyard::*;
 
 pub fn begin_render_pass_system(
-    setup: shipyard::UniqueView<render_component::Setup>,
+    render: shipyard::UniqueView<render_component::RenderData>,
     camera: shipyard::UniqueView<camera_component::Camera>,
     lighting: shipyard::View<light_component::LightUniform>,
     depth_texture: shipyard::UniqueView<render_component::Texture>,
     render_pipeline: shipyard::View<model_component::ModelRenderDetail>,
 ) -> anyhow::Result<()> {
     //begin render here.
-    let frame = setup.swap_chain.get_current_frame()?.output;
+    let frame = render.pass.swap_chain.get_current_frame()?.output;
 
-    let mut render_command = setup
-        .device
-        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Render Command"),
-        });
+    let mut render_command =
+        render
+            .core
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Render Command"),
+            });
 
     {
         let mut render_pass = render_command.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -73,40 +75,38 @@ pub fn begin_render_pass_system(
         });
     }
 
-    setup.queue.submit(std::iter::once(render_command.finish()));
+    render
+        .pass
+        .queue
+        .submit(std::iter::once(render_command.finish()));
 
     Ok(())
 }
 
 pub fn render_resize_system(
     window: shipyard::UniqueView<window_component::Window>,
-    mut setup: shipyard::UniqueViewMut<render_component::Setup>,
+    mut render: shipyard::UniqueViewMut<render_component::RenderData>,
     mut camera: shipyard::UniqueViewMut<camera_component::Camera>,
     mut depth_texture: shipyard::UniqueViewMut<render_component::Texture>,
 ) {
     let size = window.raw.inner_size();
 
     if size.width != 0 && size.height != 0 {
-        setup.size = size;
-        setup.swap_chain_desc.width = size.width;
-        setup.swap_chain_desc.height = size.height;
+        render.info.swap_chain_desc.width = size.width;
+        render.info.swap_chain_desc.height = size.height;
 
-        setup.swap_chain = setup
+        render.pass.swap_chain = render
+            .core
             .device
-            .create_swap_chain(&setup.surface, &setup.swap_chain_desc);
+            .create_swap_chain(&render.setup.surface, &render.info.swap_chain_desc);
 
-        camera.projection.aspect = setup.size.width as f32 / setup.size.height as f32;
+        camera.projection.aspect = size.width as f32 / size.height as f32;
 
-        camera.uniform.raw.view_position = glam::vec3(
-            camera.orientation.position.x,
-            camera.orientation.position.y,
-            camera.orientation.position.z,
-        )
-        .extend(1.0);
+        camera.uniform.raw.view_position = camera.orientation.transformation_matrix.w_axis;
 
         camera.uniform.raw.view_proj = camera::calc_proj_matrix(&camera.projection)
             * camera::calc_camera_matrix(&camera.orientation);
 
-        *depth_texture = texture::create_depth_texture(&setup.device, setup.size);
+        *depth_texture = texture::create_depth_texture(&render.core.device, size);
     }
 }

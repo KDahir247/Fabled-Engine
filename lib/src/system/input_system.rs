@@ -85,9 +85,9 @@ pub fn register_mouse_motion_system(
 
         if condition {
             (&mut camera_controller).fast_iter().for_each(|controller| {
-                controller.amount_rotation.x =
+                controller.amount_rotation.x -=
                     -mouse_delta.delta.1 as f32 * controller.amount_rotation.w;
-                controller.amount_rotation.y =
+                controller.amount_rotation.y -=
                     mouse_delta.delta.0 as f32 * controller.amount_rotation.w;
             });
         }

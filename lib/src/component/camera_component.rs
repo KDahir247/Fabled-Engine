@@ -1,5 +1,6 @@
 //The method are only used to construct the component.
 use crate::util::camera::{calc_camera_matrix, calc_proj_matrix};
+use glam::Vec4Swizzles;
 use wgpu::util::DeviceExt;
 
 pub struct Camera {
@@ -10,21 +11,14 @@ pub struct Camera {
 
 //to get up use forward.cross(right);
 pub struct CameraOrientation {
-    pub forward: glam::Vec3,
-    pub right: glam::Vec3,
-
-    //X, Y, Z
-    pub position: glam::Vec3,
-    //Pitch, Yaw, Roll
-    pub rotation: glam::Vec3,
-    //X, Y, Z
-    #[allow(dead_code)]
-    pub scale: glam::Vec3,
+    pub transformation_matrix: glam::Mat4,
+    pub forward: glam::Vec4,
+    pub right: glam::Vec4,
 }
 
 pub struct Projection {
-    pub aspect: f32,
     pub fovy: f32,
+    pub aspect: f32,
     pub znear: f32,
     pub zfar: f32,
 }
@@ -50,10 +44,10 @@ pub struct CameraRaw {
 }
 
 pub struct CameraUniform {
+    pub raw: CameraRaw, // internal camera matrix container
     pub buffer: wgpu::Buffer,
     pub group: wgpu::BindGroup,
     pub group_layout: wgpu::BindGroupLayout,
-    pub raw: CameraRaw, // internal camera matrix container
 }
 
 impl CameraUniform {
@@ -67,12 +61,7 @@ impl CameraUniform {
             view_proj: glam::Mat4::IDENTITY,
         };
 
-        uniform_layout.view_position = glam::vec3(
-            orientation.position.x,
-            orientation.position.y,
-            orientation.position.z,
-        )
-        .extend(1.0);
+        uniform_layout.view_position = orientation.transformation_matrix.w_axis.xyz().extend(1.0);
         uniform_layout.view_proj = calc_proj_matrix(projection) * calc_camera_matrix(orientation);
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {

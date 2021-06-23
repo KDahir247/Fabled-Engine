@@ -50,7 +50,6 @@ pub fn create_depth_texture(device: &wgpu::Device, size: winit::dpi::PhysicalSiz
     });
 
     Texture {
-        texture: depth_texture,
         view: depth_view,
         sampler: depth_sampler,
     }
@@ -127,7 +126,6 @@ fn from_image(
     });
 
     Ok(Texture {
-        texture: diffuse_texture,
         view: diffuse_view,
         sampler: diffuse_sampler,
     })

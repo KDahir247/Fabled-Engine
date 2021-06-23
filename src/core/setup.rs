@@ -59,14 +59,11 @@ pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
     setup_input_system(world)?;
     setup_world_builder(world)?;
 
-    world.add_unique(Setup {
-        size,
-        surface,
-        adapter,
-        device,
-        queue,
-        swap_chain_desc,
-        swap_chain,
+    world.add_unique(RenderData {
+        core: Core { device },
+        pass: Pass { swap_chain, queue },
+        info: Info { swap_chain_desc },
+        setup: Setup { surface, adapter },
     })?;
 
     Ok(())
@@ -78,11 +75,18 @@ fn setup_world_camera(
     size: winit::dpi::PhysicalSize<u32>,
 ) -> anyhow::Result<()> {
     let orientation = CameraOrientation {
-        forward: glam::Vec3::Z * -1.0,
-        right: glam::Vec3::X,
-        position: glam::Vec3::new(9.0, 2.0, 6.),
-        rotation: glam::Vec3::new(0.0, -90.0, 0.0),
-        scale: glam::Vec3::ONE,
+        transformation_matrix: glam::Mat4::from_scale_rotation_translation(
+            glam::Vec3::ONE,
+            glam::Quat::from_euler(
+                glam::EulerRot::XYZ,
+                0f32.to_radians(),
+                -90.0f32.to_radians(),
+                0.0f32.to_radians(),
+            ),
+            glam::vec3(11.0, 2.0, 6.0),
+        ),
+        forward: glam::Vec4::Z * -1.0,
+        right: glam::Vec4::X,
     };
 
     let projection = Projection {
@@ -107,12 +111,12 @@ fn setup_world_camera(
 
     let camera_controller = CameraController {
         amount_matrix: glam::Mat3::from_cols(
-            glam::Vec3::Z * 3.0,
-            glam::Vec3::Z * 3.0,
-            glam::Vec3::Z * 3.0,
+            glam::Vec3::Z * 40.0,
+            glam::Vec3::Z * 40.0,
+            glam::Vec3::Z * 40.0,
         ),
-        amount_rotation: glam::Vec4::W * 0.5,
-        amount_scroll: glam::Vec2::Y * 10.0,
+        amount_rotation: glam::Vec4::W / 40.0,
+        amount_scroll: glam::Vec2::Y * 30.0,
     };
 
     entities.add_entity(camera_controller_storage, camera_controller);
@@ -144,8 +148,11 @@ fn setup_input_system(world: &shipyard::World) -> anyhow::Result<()> {
 fn setup_world_builder(world: &shipyard::World) -> anyhow::Result<()> {
     superluminal_perf::begin_event("Create_ECS_System");
 
-    shipyard::Workload::builder("render_update_system")
+    shipyard::Workload::builder("update_delta_time_system")
         .with_system(&lib::system::time_system::calculate_delta_time_system)
+        .add_to_world(world)?;
+
+    shipyard::Workload::builder("render_update_system")
         .with_try_system(&lib::system::render_system::begin_render_pass_system)
         .with_system(&lib::system::camera_system::camera_update_system)
         .add_to_world(world)?;

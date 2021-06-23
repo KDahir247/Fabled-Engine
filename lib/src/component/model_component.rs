@@ -2,10 +2,10 @@ use crate::component::render_component::Texture;
 use wgpu::util::DeviceExt;
 
 pub struct Material {
-    pub mat_name: String,
-    pub mat_color: ColorRaw,
-    pub mat_mapping: Mapping,
-    pub mat_group: wgpu::BindGroup,
+    pub mat_name: String,           //24 bytes
+    pub mat_color: ColorRaw,        //64 bytes
+    pub mat_mapping: Mapping,       //40 bytes
+    pub mat_group: wgpu::BindGroup, //16 bytes
 }
 
 impl Material {
@@ -156,7 +156,7 @@ pub struct ModelData {
 }
 
 pub struct ModelRenderDetail {
+    pub model: Option<Model>,
     pub pipeline: wgpu::RenderPipeline,
     pub material_layout: wgpu::BindGroupLayout,
-    pub model: Option<Model>,
 }

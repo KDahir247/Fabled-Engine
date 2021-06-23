@@ -1,2 +1,2 @@
 #[rustfmt::skip]
-use super::{shader::*, constant::*, texture::*, camera::*};
+use super::{shader::*, constant::*, texture::*, camera::*, math::*};
