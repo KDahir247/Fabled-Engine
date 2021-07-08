@@ -15,6 +15,7 @@ impl State {
         let world = shipyard::World::new();
 
         world.add_unique(Window { raw: window }).unwrap();
+
         world
             .add_unique(Time {
                 application: lib::component::time_component::Application {
@@ -46,7 +47,6 @@ impl State {
             }))
             .with_title("BasicObjLoader")
             .with_decorations(true)
-            //.with_fullscreen(Some(winit::window::Fullscreen::Borderless(None)))
             .build(&event_loop)
             .unwrap();
 

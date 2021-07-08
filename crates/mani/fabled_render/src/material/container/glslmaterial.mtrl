@@ -1,0 +1,50 @@
+(
+    material_name: "Material",
+    shader: "Material",
+    attributes: (
+        (
+            type_name: "Scalar",
+            types: [],
+        ),
+        (
+            type_name: "Vector",
+            types: [
+                (
+                    value_name: "gl_GlobalInvocationID",
+                    value_type: Vector(size:Tri,kind:Uint,width:4),
+                    value_group: None,
+                    value_binding: None,
+                    value: Vec3UInt((0,0,0)),
+                ),
+            ],
+        ),
+        (
+            type_name: "Matrix",
+            types: [],
+        ),
+        (
+            type_name: "Pointer",
+            types: [],
+        ),
+        (
+            type_name: "ValuePointer",
+            types: [],
+        ),
+        (
+            type_name: "Array",
+            types: [],
+        ),
+        (
+            type_name: "Struct",
+            types: [],
+        ),
+        (
+            type_name: "Image",
+            types: [],
+        ),
+        (
+            type_name: "Sampler",
+            types: [],
+        ),
+    ),
+)

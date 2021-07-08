@@ -1,0 +1,17 @@
+[package]
+name = "fabled_render"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bytemuck = {version = "1.7.0", features = ["derive"]}
+glam = {version = "*", features = ["bytemuck"]}
+wgpu = {version = "0.9.0", features = ["trace", "replay"]}
+naga = {version = "0.5.0", features = ["wgsl-in", "wgsl-out", "glsl-in", "glsl-out", "spv-out", "spv-in", "serialize", "deserialize"]}
+anyhow = {version = "*"}
+ansi_term = {version = "0.12.1"}
+ron = "0.6.0"
+serde = "*"
+rayon = "*"

@@ -1,7 +1,5 @@
 use anyhow::Context;
 use lib::component::prelude::*;
-
-// This is where all the static storage is created.
 pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
     superluminal_perf::begin_event("Application_SetUp");
 
@@ -9,7 +7,7 @@ pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
 
     let size = window.raw.inner_size();
 
-    let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
+    let instance = wgpu::Instance::new(wgpu::BackendBit::VULKAN);
 
     let surface = unsafe { instance.create_surface(&window.raw) };
 
@@ -21,14 +19,17 @@ pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
         .await
         .context("Failed to create graphic adapter")?;
 
+    let trace_path = std::path::Path::new("D:\\Study\\Fabled Engine\\references\\file.txt");
+
     let (device, queue) = adapter
         .request_device(
             &wgpu::DeviceDescriptor {
                 label: Some("Request Device"),
-                features: wgpu::Features::NON_FILL_POLYGON_MODE,
+                features: wgpu::Features::NON_FILL_POLYGON_MODE
+                    | wgpu::Features::TEXTURE_COMPRESSION_BC,
                 limits: wgpu::Limits::default(),
             },
-            None,
+            Some(trace_path),
         )
         .await?;
 
@@ -115,7 +116,7 @@ fn setup_world_camera(
             glam::Vec3::Z * 40.0,
             glam::Vec3::Z * 40.0,
         ),
-        amount_rotation: glam::Vec4::W / 40.0,
+        amount_rotation: glam::Vec4::W / 30.0,
         amount_scroll: glam::Vec2::Y * 30.0,
     };
 
@@ -162,13 +163,15 @@ fn setup_world_builder(world: &shipyard::World) -> anyhow::Result<()> {
         .add_to_world(world)?;
 
     shipyard::Workload::builder("load_model_system")
-        .with_system(&lib::system::model_system::create_pipeline_system)
+        .with_system(&lib::system::model_system::create_model_pipeline_system)
         .with_try_system(&lib::system::model_system::load_model_system)
         .add_to_world(world)?;
 
-    superluminal_perf::end_event();
+    shipyard::Workload::builder("load_skybox_system")
+        .with_system(&lib::system::skybox_system::create_skybox_pipeline_system)
+        .add_to_world(world)?;
 
-    //shipyard::Workload::builder("render_input_system").with_system();
+    superluminal_perf::end_event();
 
     Ok(())
 }

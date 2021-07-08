@@ -28,6 +28,14 @@ impl Window {
             world.run_workload("update_delta_time_system").unwrap();
 
             match evt {
+                winit::event::Event::NewEvents(winit::event::StartCause::Init) => {
+                    let entity_id = world.add_entity((SkyboxData,));
+
+                    world.run_workload("load_skybox_system").unwrap();
+
+                    world.delete_component::<(SkyboxData,)>(entity_id);
+                }
+
                 winit::event::Event::DeviceEvent { event, .. } => {
                     if self.focused {
                         match event {
@@ -49,6 +57,7 @@ impl Window {
                                     )
                                     .unwrap();
                             }
+
                             DeviceEvent::Button { button, state } => {
                                 world
                                     .run_with_data(
@@ -71,7 +80,6 @@ impl Window {
                                 state,
                                 ..
                             }) => {
-                                //key goes here
                                 world
                                     .run_with_data(
                                         lib::system::input_system::register_key_input_system,
@@ -107,15 +115,12 @@ impl Window {
                             //todo add an entity to the world that will have the file_path and the string to represent the path to the shader.
                             let model_id = world.add_entity((ModelData {
                                 path: file_path,
-                                shader_path: "../../shader/shader.wgsl".to_string(),
+                                shader_path: "../../shader/lit.wgsl".to_string(),
                             },));
 
                             world.run_workload("load_model_system").unwrap();
 
-                            let mut model_storage =
-                                world.borrow::<shipyard::ViewMut<ModelData>>().unwrap();
-
-                            model_storage.delete(model_id);
+                            world.delete_component::<(ModelData,)>(model_id);
                         }
 
                         winit::event::WindowEvent::ScaleFactorChanged { .. } => {
@@ -134,6 +139,7 @@ impl Window {
                 winit::event::Event::RedrawEventsCleared => {
                     world.run_workload("window_redraw_system").unwrap();
                 }
+
                 _ => {}
             }
         });

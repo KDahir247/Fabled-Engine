@@ -68,45 +68,66 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/wgpu-core-63f2e34aa19b1a20/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-2840e4612978ef83/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winit-d9b755f025d89e0d/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/anyhow-93352e1f6dc274d3/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/bitflags-40280b3ed7a2f4d1/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/indexmap-bbb9498d12d36247/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/libc-738913853a551b80/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/libc-b4716a83eb3ade8d/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/log-31bac88202ced75d/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/num-traits-c05ebb0374b03131/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/proc-macro2-d97faacf008b61bc/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/spirv_cross-47363cc96035c9e9/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/syn-1695f9989cbbe201/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/syn-b771c5838120d0d0/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/wgpu-core-63f2e34aa19b1a20/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/winapi-0ec82577c203309b/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/winapi-2840e4612978ef83/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/winit-d9b755f025d89e0d/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/superluminal-perf-sys-ddfe30b1ba46677c/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/log-31bac88202ced75d/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/crc32fast-fb928f202d075374/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/crossbeam-epoch-04f341681bb29493/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/crossbeam-utils-523cc982a0924334/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/memoffset-50ad735605faa348/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/miniz_oxide-dc2a49cd9d85a5fc/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/num-integer-b68f086dcf6a926f/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/num-iter-ed42d9427403f7b3/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/num-rational-d44279f7bdebdd14/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/num-traits-6cc50bee4be2a517/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/rayon-core-29fc6870cbca00b6/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/rayon-de72647708727825/out" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/target/debug/build/ahash-0a4ba23e9897b7a0/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/anyhow-93352e1f6dc274d3/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/libc-738913853a551b80/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/num-traits-c05ebb0374b03131/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/syn-1695f9989cbbe201/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-b27c641680712e59/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/ryu-2628fab852519433/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/serde-e2ffe3d50414c503/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/serde_derive-ddcd9deaa1391868/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/serde_json-cf6e4a7db17cbd66/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_gltf/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_logger/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_math/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_obj/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_reflection/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_render/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_wgpu/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/ahash-0a4ba23e9897b7a0/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/anyhow-93352e1f6dc274d3/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/bitflags-40280b3ed7a2f4d1/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/crc32fast-fb928f202d075374/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/crossbeam-epoch-04f341681bb29493/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/crossbeam-utils-523cc982a0924334/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/indexmap-bbb9498d12d36247/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/libc-738913853a551b80/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/libc-b4716a83eb3ade8d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/log-31bac88202ced75d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/memoffset-50ad735605faa348/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/miniz_oxide-dc2a49cd9d85a5fc/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/num-integer-b68f086dcf6a926f/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/num-iter-ed42d9427403f7b3/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/num-rational-d44279f7bdebdd14/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/num-traits-6cc50bee4be2a517/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/num-traits-c05ebb0374b03131/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/proc-macro2-d97faacf008b61bc/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/rayon-core-29fc6870cbca00b6/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/rayon-de72647708727825/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/spirv_cross-47363cc96035c9e9/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/syn-1695f9989cbbe201/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/syn-b771c5838120d0d0/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/wgpu-core-63f2e34aa19b1a20/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/winapi-0ec82577c203309b/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/winapi-2840e4612978ef83/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/lib/target/debug/build/winit-d9b755f025d89e0d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/sol/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/drm-fourcc-43cd4d574dbe62cb/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/serde-f6327b77eb351dc3/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/shaderc-sys-9abc3d748c81b811/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/wgpu-core-f0a1802493d10190/out" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />
-      <excludeFolder url="file://$MODULE_DIR$/lib/target" />
+      <excludeFolder url="file://$MODULE_DIR$/crates/mani/target" />
+      <excludeFolder url="file://$MODULE_DIR$/crates/mani/fabled_gltf/target" />
+      <excludeFolder url="file://$MODULE_DIR$/crates/mani/fabled_math/target" />
+      <excludeFolder url="file://$MODULE_DIR$/crates/mani/fabled_obj/target" />
+      <excludeFolder url="file://$MODULE_DIR$/crates/mani/lib/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,0 +1,31 @@
+[
+Init(
+    desc: (
+        label: Some("request_device"),
+        features: (
+            bits: 273602773007,
+        ),
+        limits: (
+            max_texture_dimension_1d: 16384,
+            max_texture_dimension_2d: 16384,
+            max_texture_dimension_3d: 8192,
+            max_texture_array_layers: 8192,
+            max_bind_groups: 8,
+            max_dynamic_uniform_buffers_per_pipeline_layout: 8,
+            max_dynamic_storage_buffers_per_pipeline_layout: 8,
+            max_sampled_textures_per_shader_stage: 4294967295,
+            max_samplers_per_shader_stage: 4294967295,
+            max_storage_buffers_per_shader_stage: 4294967295,
+            max_storage_textures_per_shader_stage: 4294967295,
+            max_uniform_buffers_per_shader_stage: 4294967295,
+            max_uniform_buffer_binding_size: 4294967295,
+            max_storage_buffer_binding_size: 4294967295,
+            max_vertex_buffers: 32,
+            max_vertex_attributes: 64,
+            max_vertex_buffer_array_stride: 16383,
+            max_push_constant_size: 128,
+        ),
+    ),
+    backend: Vulkan,
+),
+]
