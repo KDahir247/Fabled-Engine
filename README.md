@@ -1,8 +1,10 @@
 # Fabled Engine
+# Current solution will might break, since KTX 2.0 and Dds texture support is Experimental 
+# Also Texture Compression Method which is quite voliate due to quick testing 
 Self Study on developing a game engine. Learning as I go.
-</br> Not done the core parts of the rendering.
-</br>
-</br>
+<br/> Not done the core parts of the rendering.
+<br/>
+<br/>
 Any issues, enchancement, features, or bugs report are always welcome in Issues.
 <br/>
 <br/>
@@ -15,9 +17,22 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Down : E
 
 # current progress: 
-* overhaul on solution organization.
-* working on the render module located in crate/mani in the render branch.
+* Experimenting with KTX 2.0 and Dds as option for texture file.
+* Experimenting support for different texture compression method 
+# KTX 2.0
 
-[![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/005.png)](https://streamable.com/nfvq75)
 <br/>
+BC3 Compression
+<br/>
+
+![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/BC3.png)
+<br/>
+
+RGBAUNORMSRGB
+<br/>
+
+![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/RGBAUNORMSRGB.png)
+
+<br/>
+
 model is made by theStoff. Attribution is stated in the example folder.
