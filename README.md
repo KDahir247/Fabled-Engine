@@ -17,7 +17,7 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Down : E
 
 # current progress: 
-* Experimenting with KTX 2.0 and Dds as option for texture file, since these are the fastest texture file to load to the gpu.
+* Experimenting with KTX 2.0 and Dds as option for texture file, since these are the fastest texture file format to load to the gpu.
 * Experimenting support for different texture compression method 
 # KTX 2.0
 
