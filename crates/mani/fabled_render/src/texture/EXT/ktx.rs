@@ -105,7 +105,7 @@ impl KtxTextureLoader {
             if ktx2.needs_transcoding() {
                 println!("This KTX2 needs transcoding");
                 ktx2.transcode_basis(
-                    ktx::TranscodeFormat::Bc3Rgba,
+                    ktx::TranscodeFormat::Rgba32,
                     KtxTranscodeFlag::HIGHEST_QUALITY.into(),
                 )
                 .expect("transcoding to work");

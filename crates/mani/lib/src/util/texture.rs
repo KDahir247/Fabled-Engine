@@ -114,7 +114,7 @@ fn from_image(
     })
     .unwrap();
 
-    extend_test.physical_size(wgpu::TextureFormat::Bc3RgbaUnormSrgb);
+    extend_test.physical_size(wgpu::TextureFormat::Rgba8UnormSrgb);
 
     let target = ktx
         .data()
@@ -133,7 +133,7 @@ fn from_image(
     let diffuse_texture = create_texture(
         device,
         extend_test,
-        wgpu::TextureFormat::Bc3RgbaUnormSrgb,
+        wgpu::TextureFormat::Rgba8UnormSrgb,
         wgpu::TextureUsage::COPY_DST | wgpu::TextureUsage::SAMPLED,
         Some("Diffuse Texture"),
         1,
