@@ -1,5 +1,5 @@
 # Fabled Engine
-Project with wgpu using rust. Where you can drop a obj file to the window for it to be render to the window (including material).
+Self Study on developing a game engine. Learning as I go.
 </br> Not done the core parts of the rendering.
 </br>
 </br>
@@ -15,12 +15,8 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Down : E
 
 # current progress: 
-* Lighting is on experimental phase and will improve a-lot.
-* Only one light source is currently supported Directional Light. 
-* Only one Lighting is currently supported
-<br/>
-Video for improvement on dynamic camera.
-<br/>
+* overhaul on solution organization.
+* working on the render module located in crate/mani in the render branch.
 
 [![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/005.png)](https://streamable.com/nfvq75)
 <br/>
