@@ -4,6 +4,8 @@ pub mod model;
 pub mod shader;
 pub mod texture;
 
+pub use texture::*;
+
 pub fn init_shader_test_env() {
     std::env::set_var("WGSL_FILE", shader::common::PARSE_TEST_WGSL_SHADER);
     std::env::set_var("SPV_FILE", shader::common::PARSE_TEST_SPV_SHADER);

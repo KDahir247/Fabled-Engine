@@ -45,7 +45,7 @@ impl State {
                 width: 800,
                 height: 600,
             }))
-            .with_title("BasicObjLoader")
+            .with_title("Fabled Engine")
             .with_decorations(true)
             .build(&event_loop)
             .unwrap();

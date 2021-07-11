@@ -1,10 +1,13 @@
-use crate::texture::texture_sampler::TextureSampler;
+use crate::texture::container::Extent3d;
+use crate::texture::*;
 
-#[repr(align(128))]
+#[derive(Debug)]
 pub struct Texture {
     pub data: Vec<u8>,
-    pub size: wgpu::Extent3d,
-    pub format: wgpu::TextureFormat,
-    pub sampler: TextureSampler,
-    pub dimensions: wgpu::TextureViewDimension,
+    pub size: Extent3d,
+    pub format: i32,
+    pub usage: i32,
+    pub sample_count: i32,
+    pub mip_level: i32,
+    pub dimensions: TextureViewDimension,
 }

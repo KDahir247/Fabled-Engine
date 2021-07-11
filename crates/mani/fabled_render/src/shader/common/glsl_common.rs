@@ -1,4 +1,5 @@
 //Directory of required glsl shader for the game engine.
+//todo may use glob to get all the files that match a pattern.
 
 //  Test Shader
 pub const PARSE_TEST_VERTEX_SHADER: &str = ".\\src\\shader\\shader\\glsl\\test\\parse_test.vert";

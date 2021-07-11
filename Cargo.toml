@@ -8,6 +8,8 @@ edition = "2018"
 lto = true
 debug = true
 opt-level = 3
+codegen-units = 3
+panic = "abort"
 
 [lib]
 name = "lib"
@@ -55,3 +57,5 @@ serde = {version = "*", features = ["derive"], optional = true}
 [dependencies.gltf]
 version = "0.16"
 features = ["KHR_materials_unlit", "KHR_materials_pbrSpecularGlossiness", "extras", "names", "utils", "import"]
+
+

@@ -120,6 +120,8 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/serde-f6327b77eb351dc3/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/shaderc-sys-9abc3d748c81b811/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/wgpu-core-f0a1802493d10190/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-643c8ef044882b7d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/libktx-rs-sys-2ba8a4847a7723fb/out" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />

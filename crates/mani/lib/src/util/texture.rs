@@ -1,21 +1,43 @@
 use super::constant;
 use crate::component::render_component::Texture;
+use fabled_render::texture::conversion::codecs::dds::*;
+use image::GenericImageView;
+use std::convert::TryFrom;
 
+//todo clean solution.
 pub fn load<P: AsRef<std::path::Path>>(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
     path: P,
 ) -> anyhow::Result<Texture> {
-    let dyn_img = if path.as_ref().exists() {
-        match path.as_ref().extension() {
-            None => image::open(std::path::Path::new(constant::invalid_map_path().as_str()))?,
-            Some(_) => image::open(path.as_ref())?, //todo check extension if it is a jpg use rgb. if it is a png use rgba
-        }
-    } else {
-        image::open(std::path::Path::new(constant::invalid_map_path().as_str()))?
-    };
+    //-------------------------For Png and JPEG Support-------------------------
+    //-------------------------Works-------------------------
 
-    from_image(device, queue, dyn_img)
+    /*let dyn_img = if path.as_ref().exists() {
+            match path.as_ref().extension() {
+                None => image::open(std::path::Path::new(constant::invalid_map_path().as_str()))?,
+                Some(_) => image::open(path.as_ref())?, //todo check extension if it is a jpg use rgb. if it is a png use rgba
+            }
+        } else {
+            image::open(std::path::Path::new(constant::invalid_map_path().as_str()))?
+        };
+
+    //-------------------------For DDS Support-------------------------
+    //-------------------------Works-------------------------
+
+    */
+    /*let path_to = path.as_ref();
+    let dds = DdsTextureLoader::default();
+    let dyn_img = dds.load(path_to).unwrap();*/
+
+    //-------------------------For KTX2 Support-------------------------
+
+    from_image(
+        device,
+        queue,
+        image::DynamicImage::new_rgb8(100, 100),
+        path.as_ref().to_str().unwrap().to_string(),
+    )
 }
 
 pub fn create_depth_texture(device: &wgpu::Device, size: winit::dpi::PhysicalSize<u32>) -> Texture {
@@ -64,20 +86,39 @@ pub fn from_bytes(
 ) -> anyhow::Result<Texture> {
     let dyn_img = image::load_from_memory(img_buffer)?;
 
-    from_image(device, queue, dyn_img)
+    from_image(device, queue, dyn_img, "".to_string())
 }
 
 fn from_image(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
     dyn_img: image::DynamicImage,
+    _test: String,
 ) -> anyhow::Result<Texture> {
-    let reversed_rgba8_img = dyn_img.to_rgba8();
+    let rgba8_img = dyn_img.flipv().to_rgba8();
 
-    let dimensions = reversed_rgba8_img.dimensions();
+    let dimensions = rgba8_img.dimensions();
+    let ktx =
+        fabled_render::KtxTextureLoader::from_stream(std::fs::File::open(_test.as_str()).unwrap());
 
-    let rgba8_img = reversed_rgba8_img
-        .chunks(dimensions.0 as usize * 4)
+    let mut extend_test = wgpu::Extent3d::default();
+    let mut mip_level = 0;
+    ktx.iterate_levels(|mip, face, width, height, depth, pix| {
+        extend_test.width = width as u32;
+        extend_test.height = height as u32;
+        extend_test.depth_or_array_layers = depth as u32;
+        if mip_level <= mip {
+            mip_level = mip;
+        }
+        Ok(())
+    })
+    .unwrap();
+
+    extend_test.physical_size(wgpu::TextureFormat::Bc3RgbaUnormSrgb);
+
+    let target = ktx
+        .data()
+        .chunks(extend_test.width as usize * 4)
         .rev()
         .flat_map(|row| row.iter())
         .cloned()
@@ -87,13 +128,12 @@ fn from_image(
         width: dimensions.0,
         height: dimensions.1,
         depth_or_array_layers: 1,
-    }
-    .physical_size(wgpu::TextureFormat::Rgba8UnormSrgb);
+    };
 
     let diffuse_texture = create_texture(
         device,
-        extend3d,
-        wgpu::TextureFormat::Rgba8UnormSrgb,
+        extend_test,
+        wgpu::TextureFormat::Bc3RgbaUnormSrgb,
         wgpu::TextureUsage::COPY_DST | wgpu::TextureUsage::SAMPLED,
         Some("Diffuse Texture"),
         1,
@@ -105,13 +145,13 @@ fn from_image(
             mip_level: 0,
             origin: wgpu::Origin3d::ZERO,
         },
-        &rgba8_img,
+        &target,
         wgpu::ImageDataLayout {
             offset: 0,
-            bytes_per_row: Some(core::num::NonZeroU32::new(4 * dimensions.0).unwrap()),
-            rows_per_image: Some(core::num::NonZeroU32::new(dimensions.1).unwrap()),
+            bytes_per_row: Some(core::num::NonZeroU32::new(ktx.row_pitch(0) as u32).unwrap()),
+            rows_per_image: Some(core::num::NonZeroU32::new(extend_test.height).unwrap()),
         },
-        extend3d,
+        extend_test,
     );
 
     let diffuse_view = diffuse_texture.create_view(&wgpu::TextureViewDescriptor::default());

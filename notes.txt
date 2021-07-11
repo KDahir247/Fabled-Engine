@@ -19,11 +19,12 @@ Positive X is Right
 
 //todo the model should have a render_pipeline since we want to support future shader customization for the model.
 
-//todo only one single exclusive access or multiple shared access
+//todo work on the texture next.
 
 //todo Prefer moving the loop inside run and move borrow's call outside the loop
 //todo Division is an expensive operation use reciprocal
-
+//todo for passes should i store the required data in a pass file and decode it when doing the render passes?
+//todo when releasing use cargo run --release -- -C opt-level=3 -C target-cpu=skylark -C target-feature=+sse3,+avx
 
 first scale then rotate then translate.
 
@@ -36,3 +37,11 @@ transfromation matrix formula
 
 cargo miri test
 cargo miri run
+
+Reference game engine
+
+Defold, Amethyst, Bevy, Cocos2d, Coffee, Cryengine, Godot, Macroquad, Monogame, Panda3d, R3D, Stride
+
+
+Look at cocos2d-x-4 CCTextureUtils.h and CCTextureUtils.cpp for texture conversion.
+
