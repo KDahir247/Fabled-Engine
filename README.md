@@ -4,7 +4,8 @@ Self Study on developing a game engine. Learning as I go.
 </br>
 Creating core render crate. Currently the engine uses my old implementation which i need to clean and improve alot. 
 </br>
-Rendering Changes will be pushed to render branch till it is verified that the whole render crate works with the core engine and is integrated with the core engine.
+
+## Rendering Changes will be pushed to render branch till it is verified that the whole render crate works with the core engine and is integrated with the core engine.
 </br>
 Any issues, enchancement, features, or bugs report are always welcome in Issues.
 <br/>
