@@ -19,6 +19,12 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 # current progress: 
 * Experimenting with KTX 2.0 and Dds as option for texture file, since these are the fastest texture file format to load to the gpu.
 * Experimenting support for different texture compression method 
+# Grid System (Early Experimental)
+<br/>
+
+![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)
+<br/>
+
 # KTX 2.0
 
 <br/>
@@ -35,4 +41,4 @@ RGBAUNORMSRGB
 
 <br/>
 
-model is made by theStoff. Attribution is stated in the example folder.
+model is made by theStoff, Wesai, and xahun. Attribution is stated in the example folder.
