@@ -1,10 +1,9 @@
 #[repr(C)]
 #[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Vertex {
-    //todo convert to primitives
-    pub position: glam::Vec3,
-    pub tex_coord: glam::Vec2,
-    pub normal: glam::Vec3,
-    pub tangent: glam::Vec4,
-    pub bi_tangent: glam::Vec4,
+    pub position: [f32; 3],
+    pub tex_coord: [f32; 2],
+    pub normal: [f32; 3],
+    pub tangent: [f32; 4],
+    pub bi_tangent: [f32; 4],
 }

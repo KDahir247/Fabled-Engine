@@ -14,10 +14,11 @@ libktx-rs = {version = "0.2.4", features = ["default"]}
 #ddsfile = {version = "*"}
 
 # Core
-serde = "*"
-anyhow = {version = "*"}
+serde = "1.0.126"
+anyhow = {version = "1.0.42"}
 bytemuck = {version = "1.7.0", features = ["derive"]}
 bitflags = "1.2.1"
+glob = "0.3.0"
 
 # Shader
 naga = {version = "0.5.0", features = ["wgsl-in", "wgsl-out", "glsl-in", "glsl-out", "spv-out", "spv-in", "serialize", "deserialize"]}
@@ -26,11 +27,6 @@ ron = "0.6.0"
 
 # Miscellaneous
 ansi_term = {version = "0.12.1"}
-
-
-# Remove
-glam = {version = "*", features = ["bytemuck"]} #todo remove
-
 
 
 [features]

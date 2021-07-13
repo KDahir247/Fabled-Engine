@@ -1,5 +1,6 @@
+pub use codecs::*;
 use common::*;
-pub use conversion::*;
+pub use container::*;
 pub use core::*;
 pub use texture_data::*;
 pub use texture_sampler::*;
@@ -11,9 +12,9 @@ mod synthesizer;
 
 //Clean up
 pub mod EXT;
+pub mod codecs;
 mod common;
 mod container;
-pub mod conversion;
 mod texture_aspect;
 mod texture_data;
 mod texture_dimension;

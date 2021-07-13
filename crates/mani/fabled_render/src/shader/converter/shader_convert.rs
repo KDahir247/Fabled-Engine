@@ -39,12 +39,15 @@ pub fn convert_shader(
             match version {
                 Version::Desktop(desk_prep) => {
                     assert!(
-                        desk_prep <= *naga::back::glsl::SUPPORTED_CORE_VERSIONS.last().unwrap() //todo better error
+                        desk_prep <= *naga::back::glsl::SUPPORTED_CORE_VERSIONS.last().unwrap(),
+                        "Desktop preprocessor version is not supported. Supported versions are : [330, 400, 410, 420, 430, 440, 450]"
                     );
                 }
                 Version::Embedded(embed_prep) => {
-                    assert!(embed_prep <= *naga::back::glsl::SUPPORTED_ES_VERSIONS.last().unwrap());
-                    //todo better error
+                    assert!(
+                        embed_prep <= *naga::back::glsl::SUPPORTED_ES_VERSIONS.last().unwrap(),
+                        "Embedded preprocessor version is not supported. Supported versions are : [300, 310, 320]"
+                    );
                 }
             };
 

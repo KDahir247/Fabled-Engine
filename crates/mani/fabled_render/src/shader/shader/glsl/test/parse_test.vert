@@ -20,7 +20,11 @@ layout(set = 2, binding = 1) uniform Sprite_size {
     vec2 size;
 };
 
+
 void main() {
+
+    float c = float(2 > 10);
+
     v_Uv = Vertex_Uv;
     vec3 position = Vertex_Position * vec3(size, 1.0);
     gl_Position = ViewProj * Model * vec4(position, 1.0);

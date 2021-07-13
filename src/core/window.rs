@@ -31,7 +31,7 @@ impl Window {
                 winit::event::Event::NewEvents(winit::event::StartCause::Init) => {
                     let entity_id = world.add_entity((SkyboxData,));
 
-                    world.run_workload("load_skybox_system").unwrap();
+                    world.run_workload("load_grid_system").unwrap();
 
                     world.delete_component::<(SkyboxData,)>(entity_id);
                 }

@@ -261,7 +261,6 @@ pub fn load_model_system(
                         vertex.tangent = reject(n,t.truncate()).normalize().extend(w);
                     }
 
-
                     let vertex_buffer = render.core.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
                         label: Some("Vertex Buffer"),
                         contents: bytemuck::cast_slice(&vertices),

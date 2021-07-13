@@ -44,10 +44,18 @@ pub fn begin_render_pass_system(
                 view: &depth_texture.view,
                 depth_ops: Some(wgpu::Operations {
                     load: wgpu::LoadOp::Clear(1.0),
-                    store: false,
+                    store: true,
                 }),
                 stencil_ops: None,
             }),
+        });
+
+        skybox_render.fast_iter().for_each(|render| {
+            render_pass.set_pipeline(&render.pipeline);
+
+            render_pass.set_bind_group(0, &camera.uniform.group, &[]);
+
+            render_pass.draw(0..6, 0..1);
         });
 
         model_render.fast_iter().for_each(|render| {
@@ -73,12 +81,6 @@ pub fn begin_render_pass_system(
                     render_pass.draw_indexed(0..m.indices, 0, 0..1);
                 }
             }
-        });
-
-        skybox_render.fast_iter().for_each(|render| {
-            render_pass.set_pipeline(&render.pipeline);
-            render_pass.set_bind_group(0, &camera.uniform.group, &[]);
-            //render_pass.draw(0..36, 0..1);
         });
     }
 

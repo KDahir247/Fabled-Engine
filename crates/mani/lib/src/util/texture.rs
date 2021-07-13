@@ -1,8 +1,8 @@
 use super::constant;
 use crate::component::render_component::Texture;
-use fabled_render::texture::conversion::codecs::dds::*;
+use fabled_render::texture::codecs::*;
+use fabled_render::texture::EXT::*;
 use image::GenericImageView;
-use std::convert::TryFrom;
 
 //todo clean solution.
 pub fn load<P: AsRef<std::path::Path>>(
@@ -26,20 +26,13 @@ pub fn load<P: AsRef<std::path::Path>>(
     //-------------------------Works-------------------------
 
     */
-    /*let path_to = path.as_ref();
-    let dds = DdsTextureLoader::default();
-    let dyn_img = dds.load(path_to).unwrap();*/
 
     //-------------------------For KTX2 Support-------------------------
 
-    from_image(
-        device,
-        queue,
-        image::DynamicImage::new_rgb8(100, 100),
-        path.as_ref().to_str().unwrap().to_string(),
-    )
+    from_image(device, queue, path.as_ref().to_str().unwrap().to_string())
 }
 
+//todo don't get the size from winit::dpi::PhysicalSize, but an Texture struct.
 pub fn create_depth_texture(device: &wgpu::Device, size: winit::dpi::PhysicalSize<u32>) -> Texture {
     let extend3d = wgpu::Extent3d {
         width: size.width,
@@ -63,7 +56,7 @@ pub fn create_depth_texture(device: &wgpu::Device, size: winit::dpi::PhysicalSiz
         address_mode_u: wgpu::AddressMode::ClampToEdge,
         address_mode_v: wgpu::AddressMode::ClampToEdge,
         address_mode_w: wgpu::AddressMode::ClampToEdge,
-        mag_filter: wgpu::FilterMode::Nearest,
+        mag_filter: wgpu::FilterMode::Linear,
         min_filter: wgpu::FilterMode::Linear,
         mipmap_filter: wgpu::FilterMode::Linear,
         lod_min_clamp: -100.0,
@@ -78,57 +71,44 @@ pub fn create_depth_texture(device: &wgpu::Device, size: winit::dpi::PhysicalSiz
     }
 }
 
-#[allow(dead_code)] //TODO note Dead Code
-pub fn from_bytes(
-    device: &wgpu::Device,
-    queue: &wgpu::Queue,
-    img_buffer: &[u8],
-) -> anyhow::Result<Texture> {
-    let dyn_img = image::load_from_memory(img_buffer)?;
-
-    from_image(device, queue, dyn_img, "".to_string())
-}
-
 fn from_image(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
-    dyn_img: image::DynamicImage,
     _test: String,
 ) -> anyhow::Result<Texture> {
-    let rgba8_img = dyn_img.flipv().to_rgba8();
+    // todo Maybe make a abstract library is Sol that will read the extension of the file and will use the proper decode
+    //  if it fails to read then it will place a png purple image to signify that the texture has not been loaded and failed to load.
+    //todo arguments seem kind of big
 
-    let dimensions = rgba8_img.dimensions();
-    let ktx =
-        fabled_render::KtxTextureLoader::from_stream(std::fs::File::open(_test.as_str()).unwrap());
+    /* let dds = DdsTextureLoader::default();
+    let dyn_img = dds
+        .load(
+            _test,
+            &fabled_render::TextureDescriptor {
+                flip_axis: Default::default(),
+                dimensions: Default::default(),
+                format: 18,
+                usage: 6,
+            },
+        )
+        .unwrap();*/
 
-    let mut extend_test = wgpu::Extent3d::default();
-    let mut mip_level = 0;
-    ktx.iterate_levels(|mip, face, width, height, depth, pix| {
-        extend_test.width = width as u32;
-        extend_test.height = height as u32;
-        extend_test.depth_or_array_layers = depth as u32;
-        if mip_level <= mip {
-            mip_level = mip;
-        }
-        Ok(())
-    })
-    .unwrap();
+    let ktx = KtxTextureLoader::from_stream(
+        std::fs::File::open(_test.as_str()).unwrap(),
+        &KTXDescriptor {
+            flip_axis: Some(fabled_render::FlipAxis::FlipY),
+            transcode_flag: KtxTranscodeFlag::HIGHEST_QUALITY,
+            transcode_format: KtxTranscodeFormat::RGBA32,
+        },
+    );
+
+    let extend_test = wgpu::Extent3d {
+        width: ktx.size.width,
+        height: ktx.size.height,
+        depth_or_array_layers: ktx.size.depth_or_array_layers,
+    };
 
     extend_test.physical_size(wgpu::TextureFormat::Rgba8UnormSrgb);
-
-    let target = ktx
-        .data()
-        .chunks(extend_test.width as usize * 4)
-        .rev()
-        .flat_map(|row| row.iter())
-        .cloned()
-        .collect::<Vec<_>>();
-
-    let extend3d = wgpu::Extent3d {
-        width: dimensions.0,
-        height: dimensions.1,
-        depth_or_array_layers: 1,
-    };
 
     let diffuse_texture = create_texture(
         device,
@@ -145,11 +125,11 @@ fn from_image(
             mip_level: 0,
             origin: wgpu::Origin3d::ZERO,
         },
-        &target,
+        &ktx.data,
         wgpu::ImageDataLayout {
             offset: 0,
-            bytes_per_row: Some(core::num::NonZeroU32::new(ktx.row_pitch(0) as u32).unwrap()),
-            rows_per_image: Some(core::num::NonZeroU32::new(extend_test.height).unwrap()),
+            bytes_per_row: Some(core::num::NonZeroU32::new(ktx.rows_per_image).unwrap()),
+            rows_per_image: Some(core::num::NonZeroU32::new(ktx.size.height).unwrap()),
         },
         extend_test,
     );

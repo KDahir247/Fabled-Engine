@@ -6,7 +6,7 @@ struct Uniforms{
     view : mat4x4<f32>;
     proj : mat4x4<f32>;
     inv_proj : mat4x4<f32>;
-
+    inv_view : mat4x4<f32>;
 };
 
 [[group(1), binding(0)]]

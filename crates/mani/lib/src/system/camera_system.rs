@@ -22,7 +22,9 @@ pub fn camera_update_system(
         camera.uniform.raw.proj = camera::calc_proj_matrix(&camera.projection);
         camera.uniform.raw.view = camera::calc_camera_matrix(&camera.orientation);
         camera.uniform.raw.inv_proj = camera.uniform.raw.proj.inverse();
+        camera.uniform.raw.inv_view = camera.uniform.raw.view.inverse();
 
+        let a = ((1 > 0) as i32) as f32;
         setup.pass.queue.write_buffer(
             &camera.uniform.buffer,
             0,

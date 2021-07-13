@@ -1,6 +1,13 @@
+//todo maybe convert to a bitflag to allow multiple flipping.
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum FlipAxis {
     FlipX = 0,
     FlipY = 1,
-    FipZ = 2,
+    FlipZ = 2,
+}
+
+impl Default for FlipAxis {
+    fn default() -> Self {
+        FlipAxis::FlipY
+    }
 }

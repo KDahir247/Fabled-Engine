@@ -167,8 +167,8 @@ fn setup_world_builder(world: &shipyard::World) -> anyhow::Result<()> {
         .with_try_system(&lib::system::model_system::load_model_system)
         .add_to_world(world)?;
 
-    shipyard::Workload::builder("load_skybox_system")
-        .with_system(&lib::system::skybox_system::create_skybox_pipeline_system)
+    shipyard::Workload::builder("load_grid_system")
+        .with_system(&lib::system::grid_system::create_grid_pipeline_system)
         .add_to_world(world)?;
 
     superluminal_perf::end_event();

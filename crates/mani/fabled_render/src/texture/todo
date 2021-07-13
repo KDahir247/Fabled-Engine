@@ -27,3 +27,5 @@
 // Texture flag such as NoMipMap, ForceMipMap??
 // Add Texture Atlas??
 
+// Sol will have an abstracted texture loader that will load the texture depending on the extension file.
+// This will mean all the function from the codecs loader must return the same return types.

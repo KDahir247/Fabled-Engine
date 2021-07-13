@@ -43,6 +43,7 @@ pub struct CameraRaw {
     pub view: glam::Mat4,
     pub proj: glam::Mat4,
     pub inv_proj: glam::Mat4,
+    pub inv_view: glam::Mat4,
 }
 
 pub struct CameraUniform {
@@ -63,6 +64,7 @@ impl CameraUniform {
             view: Default::default(),
             proj: Default::default(),
             inv_proj: Default::default(),
+            inv_view: Default::default(),
         };
 
         uniform_layout.view_position = orientation.transformation_matrix.w_axis.xyz().extend(1.0);

@@ -24,7 +24,7 @@ pub enum SpvOptions {
     Default,
     Custom {
         maj_min: (u8, u8),
-        //capabilities: Option<naga::FastHashSet<naga::back::spv::Capability>>, todo add capabilities feature.
+        //capabilities: Option<naga::FastHashSet<naga::back::spv::Capability>>,
     },
 }
 
@@ -92,7 +92,7 @@ mod converter_test {
             println!("GLSL Desktop INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Glsl Core conversion failed and return another data type other than glsl\n{:?}",
+                "Glsl Core decode failed and return another data type other than glsl\n{:?}",
                 glsl_desktop_representation
             );
         }
@@ -109,7 +109,7 @@ mod converter_test {
             println!("GLSL Embedded INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Glsl ES conversion failed and return another data type other than glsl\n{:?}",
+                "Glsl ES decode failed and return another data type other than glsl\n{:?}",
                 glsl_core_representation
             );
         }
@@ -126,7 +126,7 @@ mod converter_test {
             println!("SPV INTERPRETATION\n {:?}", v);
         } else {
             panic!(
-                "SPV conversion failed and return another data type other than spv\n{:?}",
+                "SPV decode failed and return another data type other than spv\n{:?}",
                 spv_representation
             )
         }
@@ -152,7 +152,7 @@ mod converter_test {
             println!("GLSL Desktop INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Glsl Core conversion failed and return another data type other than glsl\n{:?}",
+                "Glsl Core decode failed and return another data type other than glsl\n{:?}",
                 glsl_desktop_representation
             );
         }
@@ -169,7 +169,7 @@ mod converter_test {
             println!("GLSL Embedded INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Glsl ES conversion failed and return another data type other than glsl\n{:?}",
+                "Glsl ES decode failed and return another data type other than glsl\n{:?}",
                 glsl_embedded_representation
             );
         }
@@ -183,7 +183,7 @@ mod converter_test {
             println!("WEB_GPU INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Wgsl conversion failed and return another data type other than wgsl\n{:?}",
+                "Wgsl decode failed and return another data type other than wgsl\n{:?}",
                 wgsl_representation
             )
         }
@@ -212,7 +212,7 @@ mod converter_test {
             println!("WEB_GPU VERTEX INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Wgsl conversion failed and return another data type other than wgsl\n{:?}",
+                "Wgsl decode failed and return another data type other than wgsl\n{:?}",
                 wgsl_vertex_representation
             )
         }
@@ -221,7 +221,7 @@ mod converter_test {
             println!("WEB_GPU FRAGMENT INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Wgsl conversion failed and return another data type other than wgsl\n{:?}",
+                "Wgsl decode failed and return another data type other than wgsl\n{:?}",
                 wgsl_fragment_representation
             )
         }
@@ -230,7 +230,7 @@ mod converter_test {
             println!("WEB_GPU COMPUTE INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Wgsl conversion failed and return another data type other than wgsl\n{:?}",
+                "Wgsl decode failed and return another data type other than wgsl\n{:?}",
                 wgsl_compute_representation
             )
         }
@@ -263,7 +263,7 @@ mod converter_test {
             println!("SPV VERTEX INTERPRETATION\n {:?}", v);
         } else {
             panic!(
-                "SPV conversion failed and return another data type other than spv\n{:?}",
+                "SPV decode failed and return another data type other than spv\n{:?}",
                 spirv_vertex_representation
             )
         }
@@ -272,7 +272,7 @@ mod converter_test {
             println!("SPV FRAGMENT INTERPRETATION\n {:?}", v);
         } else {
             panic!(
-                "SPV conversion failed and return another data type other than spv\n{:?}",
+                "SPV decode failed and return another data type other than spv\n{:?}",
                 spirv_fragment_representation
             )
         }
@@ -281,7 +281,7 @@ mod converter_test {
             println!("SPV COMPUTE INTERPRETATION\n {:?}", v);
         } else {
             panic!(
-                "SPV conversion failed and return another data type other than spv\n{:?}",
+                "SPV decode failed and return another data type other than spv\n{:?}",
                 spirv_compute_representation
             )
         }

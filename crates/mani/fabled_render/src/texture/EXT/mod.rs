@@ -1,17 +1,26 @@
 pub mod ktx;
+use crate::FlipAxis;
 use bitflags::*;
 pub use ktx::*;
+
+#[repr(C, align(16))]
+#[derive(Copy, Clone, Debug)]
+pub struct KTXDescriptor {
+    pub flip_axis: Option<FlipAxis>,
+    pub transcode_flag: KtxTranscodeFlag,
+    pub transcode_format: KtxTranscodeFormat,
+}
 
 bitflags! {
 pub struct KtxTranscodeFlag : u32 {
         /// Makes the width and height to the next Pow 2
         /// Required to satisfy some API specialization (WebGL 1.0, PVRTC format)
-        const DECODE_TO_NEXT_POW2 = 0b10;
+        const PVRTC_DECODE_TO_NEXT_POW2 = 2;
         /// Disregards if the width and height is uniform to the pow 2
         /// Aim for whatever yield the best quality
-        const HIGHEST_QUALITY = 0b100000;
+        const HIGHEST_QUALITY = 4;
         /// Convert the Alpha data from the alpha channel to Opaque format
-        const ALPHA_DATA_TO_OPAQUE_FORMAT = 0b100;
+        const ALPHA_DATA_TO_OPAQUE_FORMAT = 32;
 }
     }
 
@@ -21,6 +30,8 @@ impl From<KtxTranscodeFlag> for libktx_rs::TranscodeFlags {
     }
 }
 
+#[derive(Copy, Debug, Clone)]
+#[repr(u32)]
 pub enum KtxTranscodeFormat {
     /// ETC1-2
     ETC1RGB = 0,
@@ -78,7 +89,7 @@ pub enum KtxTranscodeFormat {
 #[cfg(test)]
 mod ktx_test {
 
-    use crate::{KtxTextureLoader, KtxTranscodeFlag, KtxTranscodeFormat};
+    use crate::{KTXDescriptor, KtxTextureLoader, KtxTranscodeFlag, KtxTranscodeFormat};
 
     #[test]
     fn data_alignment() {
@@ -89,6 +100,9 @@ mod ktx_test {
         assert_eq!(transcode_format & (transcode_format - 1), 0);
 
         let ktx_loader = std::mem::size_of::<KtxTextureLoader>();
-        println!("{}", ktx_loader);
+        assert_eq!(ktx_loader & (ktx_loader - 1), 0);
+
+        let ktx_desc = std::mem::size_of::<KTXDescriptor>();
+        assert_eq!(ktx_desc & (ktx_desc - 1), 0);
     }
 }

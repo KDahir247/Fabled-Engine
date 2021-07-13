@@ -10,8 +10,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd tex\\ktx\\cave.ktx2
-map_d tex\\ktx\\cave.ktx2
+map_Kd tex\\dds\\cave.dds
+map_d tex\\dds\\cave.dds
 
 newmtl mat_fire
 Ns 179.999996
@@ -22,8 +22,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd tex\\ktx\\fire.ktx2
-map_d tex\\ktx\\fire.ktx2
+map_Kd tex\\dds\\fire.dds
+map_d tex\\dds\\fire.dds
 
 newmtl mat_misc
 Ns 179.999996
@@ -34,8 +34,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd tex\\ktx\\misc.ktx2
-map_d tex\\ktx\\misc.ktx2
+map_Kd tex\\dds\\misc.dds
+map_d tex\\dds\\misc.dds
 
 newmtl mat_zelda
 Ns 179.999996
@@ -46,8 +46,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd tex\\ktx\\zelda.ktx2
-map_d tex\\ktx\\zelda.ktx2
+map_Kd tex\\dds\\zelda.dds
+map_d tex\\dds\\zelda.dds
 
 newmtl mat_zeldaEyes
 Ns 179.999996
@@ -58,8 +58,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd tex\\ktx\\eye.ktx2
-map_d tex\\ktx\\eye.ktx2
+map_Kd tex\\dds\\eye.dds
+map_d tex\\dds\\eye.dds
 
 newmtl mat_zeldaHair
 Ns 179.999996
@@ -70,5 +70,5 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd tex\\ktx\\hair.ktx2
-map_d tex\\ktx\\hair.ktx2
+map_Kd tex\\dds\\hair.dds
+map_d tex\\dds\\hair.dds

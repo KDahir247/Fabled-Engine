@@ -62,7 +62,6 @@ impl ShaderParser {
     pub fn encode<P: AsRef<std::path::Path>>(shader_data: String, target: P) -> anyhow::Result<()> {
         let file = std::fs::File::create(target).expect("Unable to create ron_material file");
         let mut buffer_writer = std::io::BufWriter::new(file);
-        //todo make a const string to
         let mut auto_gen = AUTO_GEN_MESSAGE.to_string();
         auto_gen.push_str(shader_data.as_str());
         buffer_writer
