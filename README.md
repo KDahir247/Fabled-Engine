@@ -23,6 +23,6 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * overhaul on solution organization.
 * working on the render module located in crate/mani in the render branch.
 
-[![Watch the video](https://github.com/KDahir247/wgpu-obj-loader/blob/main/res/005.png)](https://streamable.com/nfvq75)
+[![Watch the video](![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)](https://streamable.com/35lwsl)
 <br/>
 model is made by theStoff. Attribution is stated in the example folder.
