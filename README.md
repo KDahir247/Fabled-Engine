@@ -25,4 +25,4 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 
 [![Watch the video](![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)](https://streamable.com/35lwsl)
 <br/>
-model is made by theStoff. Attribution is stated in the example folder.
+model is made by Wesai. Attribution is stated in the example folder.
