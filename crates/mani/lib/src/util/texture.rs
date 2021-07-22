@@ -43,7 +43,7 @@ pub fn create_depth_texture(device: &wgpu::Device, size: winit::dpi::PhysicalSiz
     let depth_texture = create_texture(
         device,
         extend3d,
-        wgpu::TextureFormat::Depth32Float,
+        wgpu::TextureFormat::Depth24PlusStencil8,
         wgpu::TextureUsage::RENDER_ATTACHMENT | wgpu::TextureUsage::SAMPLED,
         Some("Depth Texture"),
         1,
@@ -53,15 +53,16 @@ pub fn create_depth_texture(device: &wgpu::Device, size: winit::dpi::PhysicalSiz
 
     let depth_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
         label: None,
-        address_mode_u: wgpu::AddressMode::ClampToEdge,
-        address_mode_v: wgpu::AddressMode::ClampToEdge,
-        address_mode_w: wgpu::AddressMode::ClampToEdge,
+        address_mode_u: wgpu::AddressMode::ClampToBorder,
+        address_mode_v: wgpu::AddressMode::ClampToBorder,
+        address_mode_w: wgpu::AddressMode::ClampToBorder,
         mag_filter: wgpu::FilterMode::Linear,
         min_filter: wgpu::FilterMode::Linear,
         mipmap_filter: wgpu::FilterMode::Linear,
         lod_min_clamp: -100.0,
         lod_max_clamp: 100.0,
         compare: Some(wgpu::CompareFunction::LessEqual),
+        border_color: Some(wgpu::SamplerBorderColor::OpaqueBlack),
         ..Default::default()
     });
 

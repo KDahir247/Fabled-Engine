@@ -1,5 +1,5 @@
 use crate::component::{
-    camera_component, light_component, model_component, render_component, skybox_component,
+    camera_component, grid_component, light_component, model_component, render_component,
     window_component,
 };
 use crate::util::{camera, constant, texture};
@@ -12,7 +12,7 @@ pub fn begin_render_pass_system(
     lighting: shipyard::View<light_component::LightUniform>,
     depth_texture: shipyard::UniqueView<render_component::Texture>,
     model_render: shipyard::View<model_component::ModelRenderDetail>,
-    skybox_render: shipyard::View<skybox_component::SkyBoxRenderDetail>,
+    skybox_render: shipyard::View<grid_component::GridRenderDetail>,
 ) -> anyhow::Result<()> {
     let frame = setup.pass.swap_chain.get_current_frame()?.output;
 
@@ -46,9 +46,41 @@ pub fn begin_render_pass_system(
                     load: wgpu::LoadOp::Clear(1.0),
                     store: true,
                 }),
-                stencil_ops: None,
+                stencil_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Load,
+                    store: false,
+                }),
             }),
         });
+
+        //depth shader and pipeline Only happens Once.
+        //pseudo code.
+        /*
+        We want a texture to be the size of the window and pass it to the depth shader.
+        The depth shader will just have a vertex shader. and convert the point from world space to
+        screen space by multiplying the MVP matrix. in my case VP matrix since there no translation, scale or rotation occurring yet.
+        */
+
+        /*
+        //todo Note That we can't use wgsl since there is no barrier for the compute shader. we will fallback to glsl till wgsl get support?
+        create the workgroup:
+        workGroupX = (ScreenSize.x + (ScreenSize.X % 16)) / 16;
+        workGroupY = (ScreenSize.y + (ScreenSize.Y % 16)) / 16;
+        create the number of tiles = workGroupX * workGroupY
+
+        create a buffer one for lightBuffer another for visibleLightIndicesBuffer.
+        bind the buffer as a storage buffer for the LightBuffer to the size of the total allow allocated light number * size of Light struct, not data.
+        The data store contents will be modified repeatedly and used many times.
+
+        bind the buffer as a storage buffer for the visibleLightIndicesBuffer to the size of struct (one variable of type i32 for index) * total allow allocated light number.
+        The data store contents will be modified once and used many times.
+
+
+        We are going to get all the light from the storage buffer by iterating the total allow allocated light number
+        and allow read and write and set their position, color, and radius.
+
+        then we unbind all the light shader storage
+        */
 
         skybox_render.fast_iter().for_each(|render| {
             render_pass.set_pipeline(&render.pipeline);

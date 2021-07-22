@@ -42,8 +42,8 @@ impl State {
 
         let window = winit::window::WindowBuilder::new()
             .with_inner_size(winit::dpi::Size::Physical(winit::dpi::PhysicalSize {
-                width: 800,
-                height: 600,
+                width: 1920,
+                height: 1080,
             }))
             .with_title("Fabled Engine")
             .with_decorations(true)

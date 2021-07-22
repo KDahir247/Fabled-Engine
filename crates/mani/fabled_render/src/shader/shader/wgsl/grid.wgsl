@@ -54,63 +54,73 @@ fn vs_main([[builtin(vertex_index)]] vertex_index: u32) -> VertexOutput{
 }
 
 
-struct FragmentOutput{
-     [[builtin(frag_depth)]] depth: f32;
-     //[[builtin(front_facing)]] y: bool;
-     [[location(0)]] color: vec4<f32>;
-};
 
 //---------------------------- Fragment Shader ----------------------------
+
+
+struct FragmentOutput{
+     [[builtin(frag_depth)]] depth: f32;
+     [[location(0)]] color: vec4<f32>;
+
+     //[[builtin(front_facing)]] y: bool;
+};
+
+
+let grid_intensity : f32  = 0.05;
+let grid_alpha : f32 = 0.5;
 
 fn checkerboard(R : vec2<f32>, scale : f32) -> f32{
     return (floor(R.x / scale) + floor(R.y / scale)) % 2.0;
 }
 
 
+//Give depth to the grid system, but cause z fighting with model that are located at the same x, z plane as the grid.
 fn computeDepth(pos : vec3<f32>) -> f32{
-    let clip_space_pos = uniform.inv_proj * uniform.inv_view * vec4<f32>(pos.xyz, 1.0);
+    let clip_space_pos = uniform.proj * uniform.view * vec4<f32>(pos.xyz, 1.0);
 
     let clip_space_depth = clip_space_pos.z / clip_space_pos.w;
 
-    //todo don't hard code far is specified in setup.rs
-    let far : f32 = 100.0;
-    let near : f32 = 0.1;
+    return clip_space_depth;
 
-    let depth = (((far-near) * clip_space_depth) + near + far) / 2.0;
-
-    return depth;
 }
 
+fn computeLinearDepth(pos : vec3<f32>) -> f32{
+    // //todo don't hard code. Far and near is specified in setup.rs
+    let near = 0.1;
+    let far = 100.0;
+
+    let clip_space_pos = uniform.proj * uniform.view * vec4<f32>(pos.xyz, 1.0);
+    let clip_space_depth = (clip_space_pos.z / clip_space_pos.w) * 2.0 - 1.0;
+    let linear_depth = (2.0 * near * far) / (far + near - clip_space_depth * (far - near));
+    return linear_depth / far;
+}
 
 [[stage(fragment)]]
 fn fs_main( in : VertexOutput) -> FragmentOutput{
 
     let t : f32 = -in.near_point.y / (in.far_point.y - in.near_point.y);
-    let r : vec3<f32> = in.near_point + t * (in.far_point);
-    let c = checkerboard(r.xz, 1.0) * 0.3 +
+    let r : vec3<f32> = in.near_point + t * (in.far_point - in.near_point);
+    let c = checkerboard(r.xz, 1.0) * 0.4 +
             checkerboard(r.xz, 10.0) * 0.2 +
             checkerboard(r.xz, 100.0) * 0.1 +
             0.1;
 
-    //c = c * float(t > 0);
+
+    let linear_depth = computeLinearDepth(r);
+    let fading_factor = max(0.0, (0.5 - linear_depth));
 
     var out : FragmentOutput;
-    out.depth = 1.0; //todo fix computeDepth(r);
-    out.color = vec4<f32>(vec3<f32>(c/2.0 + 0.3), 1.0) * 0.3;
+    out.depth =  1.0; //depth calculation computeDepth(r)
+    let checker_color : vec3<f32> = vec3<f32>((c/4.0 + 0.3) + (c/2.0 + 0.3)) * grid_intensity;
+    out.color = vec4<f32>(checker_color, 1.0 ) * grid_alpha;
 
-    if (r.x  > -0.05 && r.x < 0.05){
-        out.color.x = 0.5;
-    }
+    out.color.x = select(1.0 * grid_alpha, out.color.x, length(r.x) < 0.05);
+    out.color.z = select(1.0 * grid_alpha, out.color.z, length(r.z) < 0.05);
 
-    if(r.z  > -0.05 && r.z < 0.05){
-        out.color.z = 0.5;
-    }
+    out.color = out.color * select(0.0, 1.0, t < 0.0);
 
+    out.color.a =  out.color.a * fading_factor;
 
-    //todo temporary solution
-    if (t < 0.0){
-        discard;
-    }
 
     return out;
 }

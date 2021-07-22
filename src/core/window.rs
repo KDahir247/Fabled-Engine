@@ -29,11 +29,11 @@ impl Window {
 
             match evt {
                 winit::event::Event::NewEvents(winit::event::StartCause::Init) => {
-                    let entity_id = world.add_entity((SkyboxData,));
+                    let entity_id = world.add_entity((GridData,));
 
                     world.run_workload("load_grid_system").unwrap();
 
-                    world.delete_component::<(SkyboxData,)>(entity_id);
+                    world.delete_component::<(GridData,)>(entity_id);
                 }
 
                 winit::event::Event::DeviceEvent { event, .. } => {
@@ -115,7 +115,7 @@ impl Window {
                             //todo add an entity to the world that will have the file_path and the string to represent the path to the shader.
                             let model_id = world.add_entity((ModelData {
                                 path: file_path,
-                                shader_path: "../../shader/lit.wgsl".to_string(),
+                                shader_path: "../../shader/standard.wgsl".to_string(),
                             },));
 
                             world.run_workload("load_model_system").unwrap();

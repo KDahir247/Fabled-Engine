@@ -16,3 +16,4 @@ bytemuck = {version = "*", features = ["derive"]}
 tobj = "*"
 rayon = "*"
 ddsfile = "*"
+fabled_render = {path = "./../fabled_render", version = "*"}

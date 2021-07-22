@@ -1,7 +1,11 @@
 pub mod ktx;
+
 use crate::FlipAxis;
 use bitflags::*;
 pub use ktx::*;
+//todo add a util file under EXT that will convert height map to normal map.
+// and convert height map to horizon map.
+// Generating horizon cube
 
 #[repr(C, align(16))]
 #[derive(Copy, Clone, Debug)]
@@ -99,8 +103,9 @@ mod ktx_test {
         let transcode_format = std::mem::size_of::<KtxTranscodeFormat>();
         assert_eq!(transcode_format & (transcode_format - 1), 0);
 
-        let ktx_loader = std::mem::size_of::<KtxTextureLoader>();
-        assert_eq!(ktx_loader & (ktx_loader - 1), 0);
+        //KTX Loader is 0 bytes and bits.
+        /* let ktx_loader = std::mem::size_of::<KtxTextureLoader>();
+        assert_eq!(ktx_loader & (ktx_loader - 1), 0);*/
 
         let ktx_desc = std::mem::size_of::<KTXDescriptor>();
         assert_eq!(ktx_desc & (ktx_desc - 1), 0);

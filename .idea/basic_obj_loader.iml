@@ -125,6 +125,9 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/anyhow-6832903f27b7dffa/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_collada/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_fbx/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/libc-b4716a83eb3ade8d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/syn-ae1affadbdedba7a/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-4eb2c95b91e1c0c9/out" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />

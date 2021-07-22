@@ -18,7 +18,7 @@ impl Graphic {
             world.borrow::<(shipyard::EntitiesViewMut, shipyard::UniqueView<RenderData>)>()?;
 
         let lighting = LightRaw {
-            position: glam::vec3(0.5, 0.2, 0.0),
+            position: glam::vec3(0.1, 0.3, 0.1),
             __padding__: 0,
             color: LightColorRaw {
                 ambient_color: glam::vec4(1.0, 1.0, 1.0, 1.0),

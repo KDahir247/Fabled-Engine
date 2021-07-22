@@ -30,39 +30,36 @@ mod data_alignment_test {
     #[test]
     fn data_alignment() {
         let border_color = std::mem::size_of::<BorderColor>();
-        println!("Border Color takes up {:?} bytes", border_color);
+        assert_eq!(border_color & (border_color - 1), 0);
 
         let extent3d = std::mem::size_of::<Extent3d>();
-        println!("Extent3d takes up {:?} bytes", extent3d);
+        assert_eq!(extent3d & (extent3d - 1), 0);
 
         let texture_data = std::mem::size_of::<Texture>();
-        println!("Texture data takes up {:?} bytes", texture_data);
+        assert_eq!(texture_data & (texture_data - 1), 0);
 
         let texture_dimension = std::mem::size_of::<TextureViewDimension>();
-        println!(
-            "Texture view dimension takes up {:?} bytes",
-            texture_dimension
-        );
+        assert_eq!(texture_dimension & (texture_dimension - 1), 0);
 
         let sampler = std::mem::size_of::<TextureSampler>();
-        println!("Sampler takes up {:?} bytes", sampler);
+        assert_eq!(sampler & (sampler - 1), 0);
 
         let color_space = std::mem::size_of::<ColorSpace>();
-        println!("Color space takes up {:?} bytes", color_space);
+        assert_eq!(color_space & (color_space - 1), 0);
 
         let flip_axis = std::mem::size_of::<flip_axis::FlipAxis>();
-        println!("Flip axis takes up {:?}, bytes", flip_axis);
+        assert_eq!(flip_axis & (flip_axis - 1), 0);
 
         let texture_access = std::mem::size_of::<texture_access::StorageTextureAccess>();
-        println!("Texture access takes up {:?} bytes", texture_access);
+        assert_eq!(texture_access & (texture_access - 1), 0);
 
         let texture_aspect = std::mem::size_of::<texture_aspect::TextureAspect>();
-        println!("Texture aspect takes up {:?} bytes", texture_aspect);
+        assert_eq!(texture_aspect & (texture_aspect - 1), 0);
 
         let sample_type = std::mem::size_of::<texture_sample_type::TextureSampleType>();
-        println!("Texture sample type takes up {:?} bytes", sample_type);
+        assert_eq!(sample_type & (sample_type - 1), 0);
 
         let texture_dimension = std::mem::size_of::<texture_dimension::TextureDimension>();
-        println!("Texture dimension takes up {:?} bytes", texture_dimension);
+        assert_eq!(texture_dimension & (texture_dimension - 1), 0);
     }
 }

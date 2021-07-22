@@ -3,45 +3,52 @@ use lib::component::prelude::*;
 pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
     superluminal_perf::begin_event("Application_SetUp");
 
+    let back_end = wgpu::BackendBit::PRIMARY;
+
     let window = world.borrow::<shipyard::UniqueView<Window>>().unwrap();
 
     let size = window.raw.inner_size();
 
-    let instance = wgpu::Instance::new(wgpu::BackendBit::VULKAN);
+    let instance = wgpu::Instance::new(back_end);
+
+    let trace_path = {
+        let path = std::path::Path::new("wgpu-trace");
+        let _ = std::fs::create_dir(path);
+        Some(path)
+    };
 
     let surface = unsafe { instance.create_surface(&window.raw) };
 
     let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::HighPerformance,
-            compatible_surface: Some(&surface),
-        })
-        .await
-        .context("Failed to create graphic adapter")?;
-
-    let trace_path = std::path::Path::new("D:\\Study\\Fabled Engine\\references\\file.txt");
+        .enumerate_adapters(back_end)
+        .max_by(|current, future| current.features().cmp(&future.features()))
+        .context("Failed to get an adapter from backend bit")?;
 
     let (device, queue) = adapter
         .request_device(
             &wgpu::DeviceDescriptor {
                 label: Some("Request Device"),
-                features: wgpu::Features::NON_FILL_POLYGON_MODE
-                    | wgpu::Features::TEXTURE_COMPRESSION_BC,
-                limits: wgpu::Limits::default(),
+                features: adapter.features(),
+                limits: adapter.limits(),
             },
-            Some(trace_path),
+            trace_path,
         )
         .await?;
 
     println!(
         "Starting Application\nDetail : {:?}",
         format!(
-            "CPU = {:?}, GPU-TYPE = {:?}, BACKEND = {:?},",
+            "CPU = {:?}, GPU-TYPE = {:?}, BACKEND = {:?}",
             adapter.get_info().name,
             adapter.get_info().device_type,
-            adapter.get_info().backend
+            adapter.get_info().backend,
         )
     );
+
+    let work_groupX = (size.width as f32 + (size.width as f32 % 16.0)) / 16.0;
+    let work_groupY = (size.height as f32 + (size.height as f32 % 16.0)) / 16.0;
+
+    println!("{} {}", work_groupX, work_groupY);
 
     let swap_chain_desc = wgpu::SwapChainDescriptor {
         usage: wgpu::TextureUsage::RENDER_ATTACHMENT,

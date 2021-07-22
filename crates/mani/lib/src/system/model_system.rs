@@ -34,7 +34,7 @@ pub fn create_model_pipeline_system(
                     .create_shader_module(&wgpu::ShaderModuleDescriptor {
                         label: Some("Core Shader Module"),
                         source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!(
-                            "../../../fabled_render/src/shader/shader/wgsl/lit.wgsl"
+                            "../../../fabled_render/src/shader/shader/wgsl/standard.wgsl"
                         ))),
                         flags: wgpu::ShaderFlags::all(),
                     });
@@ -83,7 +83,7 @@ pub fn create_model_pipeline_system(
                         conservative: false,
                     },
                     depth_stencil: Some(wgpu::DepthStencilState {
-                        format: wgpu::TextureFormat::Depth32Float,
+                        format: wgpu::TextureFormat::Depth24PlusStencil8,
                         depth_write_enabled: true,
                         depth_compare: wgpu::CompareFunction::LessEqual,
                         stencil: wgpu::StencilState::default(),
@@ -206,6 +206,7 @@ pub fn load_model_system(
                             }
                         }).collect::<Vec<VertexRaw>>();
 
+                    //todo re-look at
                     for c in m.mesh.indices.chunks(3){
                         //calculate tangent and bi-tangent
                         let i0 = vertices[c[0] as usize];
@@ -233,6 +234,7 @@ pub fn load_model_system(
                         let r = 1.0f32 / (x1 * y2 - x2 * y1 );
                         let t = (e1 * y2 - e2 * y1) * r;
                         let b = (e2 * x1 - e1 * x2) * r;
+
 
                         vertices[c[0] as usize].tangent = t.extend(0.0);
                         vertices[c[1] as usize].tangent = t.extend(0.0);

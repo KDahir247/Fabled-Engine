@@ -1,5 +1,6 @@
 #[rustfmt::skip]
 pub mod camera_component;
+pub mod grid_component;
 pub mod input_component;
 pub mod light_component;
 pub mod math_component;

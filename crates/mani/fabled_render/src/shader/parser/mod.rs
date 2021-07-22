@@ -28,10 +28,10 @@ mod shader_test {
         init_shader_test_env();
 
         let wgsl_parser = ShaderParser::parse(std::env::var("WGSL_FILE").unwrap()).unwrap();
-        assert_eq!(wgsl_parser.module.functions.len(), 0);
-        assert_eq!(wgsl_parser.module.global_variables.len(), 2);
-        assert_eq!(wgsl_parser.module.types.len(), 7);
-        assert_eq!(wgsl_parser.module.constants.len(), 7);
+        assert_eq!(wgsl_parser.module.functions.len(), 4);
+        assert_eq!(wgsl_parser.module.global_variables.len(), 1);
+        assert_eq!(wgsl_parser.module.types.len(), 10);
+        assert_eq!(wgsl_parser.module.constants.len(), 22);
         assert_eq!(wgsl_parser.module.entry_points.len(), 2);
     }
 

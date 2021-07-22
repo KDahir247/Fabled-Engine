@@ -18,10 +18,10 @@ layout(set = 1, binding = 2) uniform sampler ColorMaterial_texture_sampler;
 
 void main() {
     vec4 color = Color;
-# ifdef COLORMATERIAL_TEXTURE
+    # ifdef COLORMATERIAL_TEXTURE
     color *= texture(
-        sampler2D(ColorMaterial_texture, ColorMaterial_texture_sampler),
-        v_Uv);
-# endif
+    sampler2D(ColorMaterial_texture, ColorMaterial_texture_sampler),
+    v_Uv);
+    # endif
     o_Target = color;
 }
