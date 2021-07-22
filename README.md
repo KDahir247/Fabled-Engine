@@ -19,6 +19,8 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 # current progress: 
 * Experimenting with KTX 2.0 and Dds as option for texture file, since these are the fastest texture file format to load to the gpu.
 * Experimenting support for different texture compression method 
+* Cleaning whole render pipeline and passes to be more modular.
+* Seperating responsibility for low level in crate/mani and high level in crate/sol. Create a building block structure that allow access to low and high level.
 # Grid System (Early Experimental)
 <br/>
 
