@@ -1,11 +1,8 @@
 use crate::{Extent3d, FlipAxis, Texture, TextureDescriptor};
 use image::GenericImageView;
 
-//todo. maybe add a progress supported.
 #[derive(Default, Clone)]
-pub struct PngTextureLoader {
-    //Maybe will store the texture and the new texture
-}
+pub struct PngTextureLoader;
 
 // Png File Format
 // The default value is: R8G8B8A8

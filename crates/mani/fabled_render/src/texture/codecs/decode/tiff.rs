@@ -1,23 +1,18 @@
 use crate::{Extent3d, FlipAxis, Texture, TextureDescriptor};
 use image::GenericImageView;
 
-//todo. maybe add a progress support.
 #[derive(Default, Clone)]
-pub struct TiffTextureLoader {
-    //Maybe will store the texture and the new texture.
-}
+pub struct TiffTextureLoader;
 
 // Tiff File Format
-// todo write a generic information of this codec loader
+// The default value is:
+//todo add description.
 impl TiffTextureLoader {
-    //todo add arguments such as flipping the image, the type of image, dimensions of image.
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
         path: P,
         texture_descriptor: &TextureDescriptor,
     ) -> anyhow::Result<Texture> {
-        //
-
         let file = std::fs::File::open(path.as_ref())?;
 
         let tiff_decoder = image::codecs::tiff::TiffDecoder::new(file)?;

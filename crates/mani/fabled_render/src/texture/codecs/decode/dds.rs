@@ -1,11 +1,8 @@
 use crate::{Extent3d, FlipAxis, Texture, TextureDescriptor};
 use image::GenericImageView;
 
-//todo. maybe add a progress support.
 #[derive(Default, Clone)]
-pub struct DdsTextureLoader {
-    //Maybe will store the saved texture and the new texture
-}
+pub struct DdsTextureLoader;
 
 // DDS File Format
 // The default value is: R8G8B8.
@@ -13,7 +10,6 @@ pub struct DdsTextureLoader {
 // If mipmap is "Yes", the sizes of saved images must be equal to the power of two (128, 256, 512, 1024 etc.).
 impl DdsTextureLoader {
     //Decoder
-    //todo add arguments such as flipping the image, the type of image, dimensions of image,
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
         path: P,

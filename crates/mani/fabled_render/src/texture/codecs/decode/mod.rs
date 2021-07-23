@@ -2,11 +2,13 @@ use crate::texture::texture_dimension::TextureDimension;
 use crate::FlipAxis;
 
 pub mod dds;
+pub mod hdr;
 pub mod jpg;
 pub mod png;
 pub mod tiff;
 
 pub use dds::*;
+pub use hdr::*;
 pub use jpg::*;
 pub use png::*;
 pub use tiff::*;

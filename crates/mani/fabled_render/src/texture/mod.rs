@@ -14,6 +14,7 @@ mod synthesizer;
 pub mod EXT;
 pub mod codecs;
 mod common;
+mod compression;
 mod container;
 mod texture_aspect;
 mod texture_data;

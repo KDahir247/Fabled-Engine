@@ -12,6 +12,19 @@ Positive Z is Forward
 Negative X is Left
 Positive X is Right
 
+//List of encoding and compression codecs
+/*
+    look at smush for reference.
+
+    bincode,
+    brotli,
+    bs58,
+    flate2,
+    xz2,
+    lz4,
+    zstd
+*/
+
 // Forward Rendering refer to a rendering technique that traditional has only two passes.
 // 1) Opaque Pass
 // 2) Transparent Pass

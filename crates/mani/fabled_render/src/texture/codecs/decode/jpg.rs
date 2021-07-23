@@ -1,18 +1,14 @@
 use crate::{Extent3d, FlipAxis, Texture, TextureDescriptor};
 use image::GenericImageView;
 
-//todo. maybe add a progress support.
 #[derive(Default, Clone)]
-pub struct JpgTextureLoader {
-    //Maybe will store the saved texture and the new texture.
-}
+pub struct JpgTextureLoader;
 
 // Jpg File Format
 // The default value is:
 //todo add description.
 impl JpgTextureLoader {
     //Decoder
-    //todo add arguments such as flipping the image, the type of image, dimensions of image.
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
         path: P,

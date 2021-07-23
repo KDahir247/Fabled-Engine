@@ -170,7 +170,7 @@ impl KtxTextureLoader {
 
         if let Some(target) = ktx_descriptor.flip_axis {
             match target {
-                FlipAxis::FlipX => unimplemented!(),
+                FlipAxis::FlipX => { /*Unimplemented*/ }
                 FlipAxis::FlipY => {
                     result = stream_tex
                         .data()
@@ -180,7 +180,7 @@ impl KtxTextureLoader {
                         .cloned()
                         .collect::<Vec<_>>();
                 }
-                FlipAxis::FlipZ => unimplemented!(),
+                FlipAxis::FlipZ => { /*Unimplemented*/ }
             }
         }
         result

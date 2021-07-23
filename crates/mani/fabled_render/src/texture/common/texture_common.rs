@@ -21,3 +21,8 @@ pub const PNG_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fab
 pub const TIFF_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\jpgyellow.jpg";
 
 // Core Tiff Texture
+
+// Test HDR Texture
+pub const HDR_TEST_TEXTURE: &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\WoodenDoor.hdr";
+
+// Core HDR Texture
