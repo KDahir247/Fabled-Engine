@@ -17,7 +17,6 @@ impl HdrTextureLoader {
         let hdr_decoder = image::codecs::hdr::HdrDecoder::new(buf_reader)?;
 
         let meta_data = hdr_decoder.metadata();
-
         let rgb_data = hdr_decoder.read_image_hdr()?;
 
         //RGBA32Float
@@ -41,11 +40,9 @@ impl HdrTextureLoader {
                 height: meta_data.height,
                 depth_or_array_layers: 1,
             },
-            format: texture_descriptor.format,
-            usage: texture_descriptor.usage,
             sample_count: 1,
             mip_level: 0,
-            dimensions: texture_descriptor.dimensions,
+            channel_count: 4, //Rgba16
             rows_per_image: meta_data.width * 16,
         };
 
@@ -88,9 +85,6 @@ mod hdr_loader_codecs {
                 HDR_TEST_TEXTURE,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
-                    dimensions: Default::default(),
-                    format: 18,
-                    usage: 6,
                 },
             )
             .unwrap();

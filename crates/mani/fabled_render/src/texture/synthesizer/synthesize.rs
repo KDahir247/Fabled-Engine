@@ -1,11 +1,11 @@
-use texture_synthesis::*;
+/*use texture_synthesis::*;
 
 #[cfg(test)]
 mod test {
 
     #[test]
     pub fn test() {
-        /* let session = texture_synthesis::Session::builder()
+        let session = texture_synthesis::Session::builder()
             .nearest_neighbors(40)
             .seed(30)
             .add_example(&"./src/texture/texture/test/albedo/source.jpg")
@@ -20,6 +20,7 @@ mod test {
 
         generated_img
             .save("./src/texture/texture/test/albedo/source_result.ktx")
-            .expect("Failed to save generated");*/
+            .expect("Failed to save generated");
     }
 }
+*/

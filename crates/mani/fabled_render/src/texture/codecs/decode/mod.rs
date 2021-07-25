@@ -1,4 +1,3 @@
-use crate::texture::texture_dimension::TextureDimension;
 use crate::FlipAxis;
 
 pub mod dds;
@@ -16,11 +15,6 @@ pub use tiff::*;
 #[derive(Clone, Debug)]
 pub struct TextureDescriptor {
     pub flip_axis: FlipAxis,
-    pub dimensions: TextureDimension,
-    pub format: u32,
-    pub usage: u32,
-    //No sure about mip_level since i haven't played around with it
-    //same goes with sample count
 }
 
 impl Default for TextureDescriptor {
@@ -28,9 +22,6 @@ impl Default for TextureDescriptor {
     fn default() -> Self {
         Self {
             flip_axis: Default::default(),
-            dimensions: Default::default(),
-            format: 18,
-            usage: 6,
         }
     }
 }

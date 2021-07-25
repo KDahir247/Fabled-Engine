@@ -131,3 +131,69 @@ impl MaterialParser {
         }
     }
 }
+
+// ------------- Test --------------
+
+#[cfg(test)]
+mod material_test {
+
+    use crate::init_shader_test_env;
+    use crate::shader::parser::*;
+
+    #[test]
+    fn display_material() {
+        init_shader_test_env();
+
+        let wgsl_path = std::env::var("WGSL_FILE").unwrap();
+        let wgsl_path = std::path::Path::new(wgsl_path.as_str());
+
+        let mut material_wgsl_parser = MaterialParser::new("Wgsl Material");
+        let wgsl_tree = material_wgsl_parser
+            .create_material_hierarchy(wgsl_path)
+            .unwrap();
+
+        println!("WGSL TREE:\n{}\n\n", wgsl_tree);
+
+        let spv_path = std::env::var("SPV_FILE").unwrap();
+        let spv_path = std::path::Path::new(spv_path.as_str());
+
+        let mut material_spv_parser = MaterialParser::new("SPV Material");
+
+        let spv_tree = material_spv_parser
+            .create_material_hierarchy(spv_path)
+            .unwrap();
+        println!("SPV TREE:\n{}\n\n", spv_tree);
+
+        let vertex_path = std::env::var("VERT_FILE").unwrap();
+        let vertex_path = std::path::Path::new(vertex_path.as_str());
+
+        let mut material_vert_parser = MaterialParser::new("GLSL Vertex Material");
+        let vertex_tree = material_vert_parser
+            .create_material_hierarchy(vertex_path)
+            .unwrap();
+
+        println!("GLSL VERTEX TREE:\n{}\n\n", vertex_tree);
+
+        let frag_path = std::env::var("FRAG_FILE").unwrap();
+        let frag_path = std::path::Path::new(frag_path.as_str());
+
+        let mut material_frag_parser = MaterialParser::new("GLSL Fragment Material");
+
+        let fragment_tree = material_frag_parser
+            .create_material_hierarchy(frag_path)
+            .unwrap();
+
+        println!("GLSL FRAGMENT TREE:\n{}\n\n", fragment_tree);
+
+        let compute_path = std::env::var("COMP_FILE").unwrap();
+        let compute_path = std::path::Path::new(compute_path.as_str());
+
+        let mut material_comp_parser = MaterialParser::new("GLSL Compute Material");
+
+        let compute_tree = material_comp_parser
+            .create_material_hierarchy(compute_path)
+            .unwrap();
+
+        println!("GLSL COMPUTE TREE:\n{}\n\n", compute_tree);
+    }
+}

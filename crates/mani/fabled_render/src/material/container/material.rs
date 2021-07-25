@@ -1,7 +1,7 @@
 pub struct Material {}
 
 //testing struct
-pub struct Prototype_Material {
+pub struct PrototypeMaterial {
     ambient_color: [f32; 4],
     emissive_color: [f32; 4],
     diffuse_color: [f32; 4],

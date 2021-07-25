@@ -8,7 +8,7 @@ pub const DDS_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fab
 // Core DDS Texture
 
 // Test Jpg Texture
-pub const JPG_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\jpgyellow.jpg";
+pub const JPG_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\test.jpg";
 
 // Core Jpg Texture
 
@@ -23,6 +23,6 @@ pub const TIFF_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fa
 // Core Tiff Texture
 
 // Test HDR Texture
-pub const HDR_TEST_TEXTURE: &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\WoodenDoor.hdr";
+pub const HDR_TEST_TEXTURE: &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\old_hall_4k.hdr";
 
 // Core HDR Texture

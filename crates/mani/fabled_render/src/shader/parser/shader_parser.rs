@@ -85,3 +85,115 @@ impl ShaderParser {
         Ok(data)
     }
 }
+
+// -------------- Test ---------------
+
+#[cfg(test)]
+mod shader_test {
+    use crate::init_shader_test_env;
+    use crate::shader::parser::*;
+
+    #[test]
+    fn wgsl_parse() {
+        init_shader_test_env();
+
+        let wgsl_parser = ShaderParser::parse(std::env::var("WGSL_FILE").unwrap()).unwrap();
+        assert_eq!(wgsl_parser.module.functions.len(), 4);
+        assert_eq!(wgsl_parser.module.global_variables.len(), 1);
+        assert_eq!(wgsl_parser.module.types.len(), 10);
+        assert_eq!(wgsl_parser.module.constants.len(), 22);
+        assert_eq!(wgsl_parser.module.entry_points.len(), 2);
+    }
+
+    #[test]
+    fn spv_parse() {
+        init_shader_test_env();
+
+        let spv_parser = ShaderParser::parse(std::env::var("SPV_FILE").unwrap()).unwrap();
+        assert_eq!(spv_parser.module.functions.len(), 2);
+        assert_eq!(spv_parser.module.global_variables.len(), 7);
+        assert_eq!(spv_parser.module.types.len(), 57);
+        assert_eq!(spv_parser.module.constants.len(), 39);
+        assert_eq!(spv_parser.module.entry_points.len(), 1);
+    }
+
+    #[test]
+    fn glsl_parse() {
+        init_shader_test_env();
+
+        let vert_parser = ShaderParser::parse(std::env::var("VERT_FILE").unwrap()).unwrap();
+
+        assert_eq!(vert_parser.module.functions.len(), 1);
+        assert_eq!(vert_parser.module.global_variables.len(), 8);
+        assert_eq!(vert_parser.module.types.len(), 8);
+        assert_eq!(vert_parser.module.constants.len(), 12);
+        assert_eq!(vert_parser.module.entry_points.len(), 1);
+
+        let frag_parser = ShaderParser::parse(std::env::var("FRAG_FILE").unwrap()).unwrap();
+
+        assert_eq!(frag_parser.module.functions.len(), 1);
+        assert_eq!(frag_parser.module.global_variables.len(), 3);
+        assert_eq!(frag_parser.module.types.len(), 4);
+        assert_eq!(frag_parser.module.constants.len(), 4);
+        assert_eq!(frag_parser.module.entry_points.len(), 1);
+
+        let comp_parser = ShaderParser::parse(std::env::var("COMP_FILE").unwrap()).unwrap();
+
+        assert_eq!(comp_parser.module.functions.len(), 2);
+        assert_eq!(comp_parser.module.global_variables.len(), 2);
+        assert_eq!(comp_parser.module.types.len(), 4);
+        assert_eq!(comp_parser.module.constants.len(), 11);
+        assert_eq!(comp_parser.module.entry_points.len(), 1);
+    }
+
+    use crate::shader::converter::*;
+
+    #[test]
+    fn encode() {
+        init_shader_test_env();
+
+        let target = std::path::Path::new(".\\src\\shader\\shader\\glsl\\test\\encode_test.glsl");
+
+        let wgsl_parser = ShaderParser::parse(std::env::var("WGSL_FILE").unwrap()).unwrap();
+
+        let conversion_res = convert_shader(
+            ShaderConvertOption::Glsl {
+                version: Version::Desktop(420),
+            },
+            &wgsl_parser.module,
+        )
+        .unwrap();
+
+        if let ShaderConvertResult::Glsl(data) = conversion_res {
+            match ShaderParser::encode(data, target) {
+                Ok(_) => {}
+                Err(err) => panic!("shader encode failed : error {}", err),
+            }
+        }
+    }
+
+    #[test]
+    fn decode() {
+        init_shader_test_env();
+
+        let target = std::path::Path::new(".\\src\\shader\\shader\\glsl\\test\\encode_test.glsl");
+
+        //we want something to read from
+        encode();
+
+        let decode_shader = ShaderParser::decode(target);
+
+        if let Ok(data) = decode_shader {
+            println!("{}", data);
+        } else {
+            panic!("Failed to decode shader: file {}", target.display())
+        }
+
+        if target.exists() {
+            match std::fs::remove_file(target) {
+                Ok(_) => {}
+                Err(err) => panic!("Failed to remove file {}", err),
+            }
+        }
+    }
+}

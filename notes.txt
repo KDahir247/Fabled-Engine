@@ -12,6 +12,18 @@ Positive Z is Forward
 Negative X is Left
 Positive X is Right
 
+//List of compression types
+/*
+    PVRTC,
+    ETC,
+    ASTC,
+    BC,
+    PVRTCII,
+    EAC,
+    BASISU ETC,
+    BASISU UASTC
+*/
+
 //List of encoding and compression codecs
 /*
     look at smush for reference.

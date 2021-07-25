@@ -33,11 +33,9 @@ impl JpgTextureLoader {
                 height: dyn_img.height(),
                 depth_or_array_layers: 1,
             },
-            format: texture_descriptor.format,
-            usage: texture_descriptor.usage,
             sample_count: 1,
             mip_level: 0,
-            dimensions: texture_descriptor.dimensions,
+            channel_count: dyn_img.color().channel_count(),
             rows_per_image: dyn_img.width() * 4,
         };
 
@@ -58,13 +56,11 @@ mod jpg_loader_codecs {
                 JPG_TEST_TEXTURE,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
-                    dimensions: Default::default(),
-                    format: 18,
-                    usage: 6,
                 },
             )
             .unwrap();
 
+        println!("{:?}", jpgyellow.data);
         assert!(!jpgyellow.data.is_empty());
     }
 }

@@ -58,4 +58,3 @@ serde = {version = "*", features = ["derive"], optional = true}
 version = "0.16"
 features = ["KHR_materials_unlit", "KHR_materials_pbrSpecularGlossiness", "extras", "names", "utils", "import"]
 
-

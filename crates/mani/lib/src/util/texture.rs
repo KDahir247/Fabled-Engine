@@ -1,7 +1,7 @@
 use super::constant;
 use crate::component::render_component::Texture;
 use fabled_render::texture::codecs::*;
-use fabled_render::texture::EXT::*;
+use fabled_render::texture::ext::*;
 use image::GenericImageView;
 
 //todo clean solution.
