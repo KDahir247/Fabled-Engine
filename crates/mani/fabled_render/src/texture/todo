@@ -1,14 +1,14 @@
-//todo Maybe add compression features.
+// Maybe add compression features.
 
-//todo figure out the file layout for texture.
-//todo maybe add a file for file extension for image support file.
-//todo support dxt compression (DXT1, DXT2, DXT5) maybe add support for other compression like BC1, BC2, BC3, BC5, BC7, ATC, FXT1, PVRTC2, EAC_R, EAC_RG
-//todo support image post processing such
-//todo maybe add texture synthesiser.
-//todo add snapshot that save the current texture metadata such as pixel data (color), since i'm not abstracting.
-//todo generate mipmap with override support?
-//todo anti aliasing?
-//todo allow texture conversion.
+// figure out the file layout for texture.
+// maybe add a file for file extension for image support file.
+// support dxt compression (DXT1, DXT2, DXT5) maybe add support for other compression like BC1, BC2, BC3, BC5, BC7, ATC, FXT1, PVRTC2, EAC_R, EAC_RG
+// support image post processing such
+// maybe add texture synthesiser.
+// add snapshot that save the current texture metadata such as pixel data (color), since i'm not abstracting.
+// generate mipmap with override support?
+// anti aliasing?
+// allow texture conversion.
 // Everything is exposed to the developer but the only abstraction will be the snapshot so the developer can fall back to
 // Texture when the modified the current texture. There will also be a "trailing" feature which will have the basically an undo and redo system.
 // does stencil texture go in texture module ????

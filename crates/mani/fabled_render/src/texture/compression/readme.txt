@@ -1,1 +1,0 @@
-This folder will have all the basis-universal Supercompressed GPU Texture Codec calls

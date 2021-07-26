@@ -1,26 +1,22 @@
-/*use texture_synthesis::*;
+use fabled_core::thread_op::ThreadOperation;
 
-#[cfg(test)]
-mod test {
+#[repr(align(256))]
+pub struct SessionBuilder<'a> {
+    session_builder: texture_synthesis::SessionBuilder<'a>,
+}
 
-    #[test]
-    pub fn test() {
-        let session = texture_synthesis::Session::builder()
-            .nearest_neighbors(40)
-            .seed(30)
-            .add_example(&"./src/texture/texture/test/albedo/source.jpg")
-            .output_size(texture_synthesis::Dims {
-                width: 700,
-                height: 884,
-            })
-            .build()
-            .unwrap();
+impl<'a> SessionBuilder<'a> {
+    pub fn create_builder(thread_op: ThreadOperation) -> SessionBuilder<'a> {
+        let num_thread = thread_op.into();
 
-        let generated_img = session.run(None);
+        Self {
+            session_builder: texture_synthesis::Session::builder().max_thread_count(num_thread),
+        }
+    }
 
-        generated_img
-            .save("./src/texture/texture/test/albedo/source_result.ktx")
-            .expect("Failed to save generated");
+    //all the rest take a mutable self and return it.
+
+    pub fn build(self) -> texture_synthesis::Session {
+        self.session_builder.build().unwrap()
     }
 }
-*/

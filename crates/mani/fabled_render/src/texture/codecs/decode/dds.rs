@@ -1,4 +1,4 @@
-use crate::{Extent3d, FlipAxis, Texture, TextureDescriptor};
+use crate::{ColorType, Extent3d, FlipAxis, Texture, TextureDescriptor};
 use image::GenericImageView;
 
 #[derive(Default, Clone)]
@@ -21,7 +21,6 @@ impl DdsTextureLoader {
 
         let dds_decoder = image::codecs::dds::DdsDecoder::new(file)?;
 
-        //todo make flip an arg
         let dyn_img = image::DynamicImage::from_decoder(dds_decoder)?.flipv();
 
         match texture_descriptor.flip_axis {
@@ -39,7 +38,7 @@ impl DdsTextureLoader {
             },
             sample_count: 1,
             mip_level: 0,
-            channel_count: dyn_img.color().channel_count(),
+            color_type: dyn_img.color().into(),
             rows_per_image: dyn_img.width() * 4,
         };
         Ok(dds_texture)

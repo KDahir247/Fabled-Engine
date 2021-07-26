@@ -55,22 +55,22 @@ Positive X is Right
 // if the diffuse color for the material will be multiplied by the texture sample rgb value
 // eg. if the texture r = 0.345 and the material diffuse r = 0.0 then the output will be 0.0;
 
-//todo Rendering
-// todo re-read 154 to 159 to understand and implement ScissorRect for lighting and decide which folder the method should be in.
-// todo re-read 160 to 162 to  understand and implement Depth Bounds for lighting and decide which folder the method should be in.
-// todo re-read 162 to 169 to understand and implement Oblique Depth Bounds for lighting and decide which folder the method should be in.
+// Rendering
+// re-read 154 to 159 to understand and implement ScissorRect for lighting and decide which folder the method should be in.
+// re-read 160 to 162 to  understand and implement Depth Bounds for lighting and decide which folder the method should be in.
+// re-read 162 to 169 to understand and implement Oblique Depth Bounds for lighting and decide which folder the method should be in.
 
-//todo Clean Solution
-//todo Destroy buffer when done.
+// Clean Solution
+// Destroy buffer when done.
 
-//todo the model should have a render_pipeline since we want to support future shader customization for the model.
+// the model should have a render_pipeline since we want to support future shader customization for the model.
 
-//todo work on the texture next.
+// work on the texture next.
 
-//todo Prefer moving the loop inside run and move borrow's call outside the loop
-//todo Division is an expensive operation use reciprocal
-//todo for passes should i store the required data in a pass file and decode it when doing the render passes?
-//todo when releasing use cargo run --release -- -C opt-level=3 -C target-cpu=skylark -C target-feature=+sse3,+avx
+// Prefer moving the loop inside run and move borrow's call outside the loop
+// Division is an expensive operation use reciprocal
+// for passes should i store the required data in a pass file and decode it when doing the render passes?
+// when releasing use cargo run --release -- -C opt-level=3 -C target-cpu=skylark -C target-feature=+sse3,+avx
 
 first scale then rotate then translate.
 

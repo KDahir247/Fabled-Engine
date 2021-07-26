@@ -1,21 +1,16 @@
 use crate::texture::ColorSpace;
 
 pub mod compress;
+pub mod transcode;
+
 pub use compress::*;
+pub use transcode::*;
 
-#[allow(dead_code)]
-#[derive(Copy, Clone, Debug, PartialEq)]
-#[repr(C)]
-pub enum ThreadOperation {
-    /// Single threaded execution that runs a operation in the current thread.
-    Single,
-    /// Multiple threaded execution that runs multiple operations depending
-    /// on the number of CPUs available on the current system.
-    Automatic,
-
-    /// Multiple threaded or single threaded execution that run a operation in the
-    /// current thread if it is single else it will use the user defined number of threads to use.
-    Custom { thread_amount: u32 },
+#[derive(Debug)]
+#[repr(C, align(64))]
+pub enum TranscodeSource {
+    BasisTexture { basis: BasisTexture },
+    BasisPath { path: String },
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -106,8 +101,9 @@ pub struct BasisTexture {
 mod data_alignment_test {
     use crate::texture::compression::{
         BasisCompressionFormat, BasisTexture, CompressionDescriptor, CompressionQuality,
-        MipmapDescriptor, RDODescriptor, ThreadOperation, UserData,
+        MipmapDescriptor, RDODescriptor, UserData,
     };
+    use crate::TranscodeSource;
 
     #[test]
     fn data_alignment() {
@@ -133,10 +129,10 @@ mod data_alignment_test {
         let compression_desc = std::mem::size_of::<CompressionDescriptor>();
         assert_eq!(compression_desc & (compression_desc - 1), 0);
 
-        let thread_operation = std::mem::size_of::<ThreadOperation>();
-        assert_eq!(thread_operation & (thread_operation - 1), 0);
-
         let basis_texture = std::mem::size_of::<BasisTexture>();
         assert_eq!(basis_texture & (basis_texture - 1), 0);
+
+        let transcode_source = std::mem::size_of::<TranscodeSource>();
+        println!("{}", transcode_source);
     }
 }

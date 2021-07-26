@@ -1,11 +1,9 @@
-use crate::{Extent3d, FlipAxis, Texture, TextureDescriptor};
+use crate::{ColorType, Extent3d, FlipAxis, Texture, TextureDescriptor};
 
 #[derive(Default, Clone)]
 pub struct HdrTextureLoader;
 
 // HDR File Format
-// The default value is: RGBE
-//todo add description.
 impl HdrTextureLoader {
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
@@ -42,7 +40,7 @@ impl HdrTextureLoader {
             },
             sample_count: 1,
             mip_level: 0,
-            channel_count: 4, //Rgba16
+            color_type: ColorType::Rgba16,
             rows_per_image: meta_data.width * 16,
         };
 

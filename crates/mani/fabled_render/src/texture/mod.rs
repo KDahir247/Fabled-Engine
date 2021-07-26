@@ -1,6 +1,7 @@
 pub use core::*;
 
 pub use codecs::*;
+pub use color_processing::*;
 pub use common::*;
 pub use compression::*;
 pub use container::texture_data::*;
@@ -14,7 +15,9 @@ mod synthesizer;
 
 //Clean up
 pub mod codecs;
+pub mod color_processing;
 pub mod common;
 pub mod compression;
 mod container;
 pub mod ext;
+mod image_processing;

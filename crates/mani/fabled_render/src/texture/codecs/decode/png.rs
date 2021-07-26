@@ -1,4 +1,4 @@
-use crate::{Extent3d, FlipAxis, Texture, TextureDescriptor};
+use crate::{ColorType, Extent3d, FlipAxis, Texture, TextureDescriptor};
 use image::GenericImageView;
 
 #[derive(Default, Clone)]
@@ -7,7 +7,6 @@ pub struct PngTextureLoader;
 // Png File Format
 // The default value is: R8G8B8A8
 // Yes generating Mip Map level
-// todo write the general information of this codec loader
 impl PngTextureLoader {
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
@@ -37,7 +36,7 @@ impl PngTextureLoader {
             },
             sample_count: 1,
             mip_level: 0,
-            channel_count: 4,
+            color_type: dyn_img.color().into(),
             rows_per_image: dyn_img.width() * 4,
         };
 

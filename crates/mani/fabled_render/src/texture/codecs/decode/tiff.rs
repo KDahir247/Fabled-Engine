@@ -1,4 +1,4 @@
-use crate::{Extent3d, FlipAxis, Texture, TextureDescriptor};
+use crate::{ColorType, Extent3d, FlipAxis, Texture, TextureDescriptor};
 use image::GenericImageView;
 
 #[derive(Default, Clone)]
@@ -6,7 +6,6 @@ pub struct TiffTextureLoader;
 
 // Tiff File Format
 // The default value is:
-//todo add description.
 impl TiffTextureLoader {
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
@@ -34,7 +33,7 @@ impl TiffTextureLoader {
             },
             sample_count: 1,
             mip_level: 0,
-            channel_count: dyn_img.color().channel_count(),
+            color_type: dyn_img.color().into(),
             rows_per_image: dyn_img.width() * 4,
         };
 

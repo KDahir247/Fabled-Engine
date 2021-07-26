@@ -1,6 +1,6 @@
 use crate::convert::TryFrom;
 use crate::texture::container::{Extent3d, FlipAxis};
-use crate::{KTXDescriptor, Texture};
+use crate::{ColorType, KTXDescriptor, Texture};
 use libktx_rs as ktx;
 
 #[derive(Default)]
@@ -36,12 +36,20 @@ impl KtxTextureLoader {
             })
             .expect("Retrieving KTX1 texture information");
 
+        let color_type = match texture.element_size() {
+            1 => ColorType::L8,
+            2 => ColorType::La8,
+            3 => ColorType::Rgb8,
+            4 => ColorType::Rgba8,
+            _ => panic!("Texture has more then 4 channel and is not supported"),
+        };
+
         Texture {
             data: texture.data().to_vec(),
             size: dimensions,
             sample_count: 1,
             mip_level: _mip_level as u32,
-            channel_count: 4, //todo not sure what color type and the channel count.
+            color_type,
             rows_per_image: texture.row_pitch(0) as u32,
         }
     }
@@ -71,12 +79,20 @@ impl KtxTextureLoader {
             })
             .expect("Retrieving KTX2 texture information");
 
+        let color_type = match texture.element_size() {
+            1 => ColorType::L8,
+            2 => ColorType::La8,
+            3 => ColorType::Rgb8,
+            4 => ColorType::Rgba8,
+            _ => panic!("Texture has more then 4 channel and is not supported"),
+        };
+
         Texture {
             data: texture.data().to_vec(),
             size: dimensions,
             sample_count: 1,
             mip_level: mip_level as u32,
-            channel_count: 4, //todo not sure what color type and the channel count.
+            color_type,
             rows_per_image: texture.row_pitch(0) as u32,
         }
     }
@@ -139,12 +155,27 @@ impl KtxTextureLoader {
         let manipulated_buf =
             KtxTextureLoader::ktx_reorientation(ktx_descriptor, &stream_tex, &dimensions);
 
+        let color_type = match stream_tex.element_size() {
+            1 => ColorType::L8,
+            2 => ColorType::La8,
+            3 => ColorType::Rgb8,
+            4 => ColorType::Rgba8,
+            _ => panic!("Texture has more then 4 channel and is not supported"),
+        };
+
+        println!(
+            "{:?} {:?} {:?}",
+            stream_tex.row_pitch(0),
+            stream_tex.data_size(),
+            stream_tex.get_image_size(0).unwrap(),
+        );
+
         Texture {
             data: manipulated_buf,
             size: dimensions,
             sample_count: 1,
             mip_level,
-            channel_count: 4, //todo not sure what color type and the channel count.
+            color_type,
             rows_per_image: stream_tex.row_pitch(0) as u32,
         }
     }

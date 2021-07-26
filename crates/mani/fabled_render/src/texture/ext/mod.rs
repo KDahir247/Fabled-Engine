@@ -3,10 +3,6 @@ pub mod ktx;
 use crate::FlipAxis;
 use bitflags::*;
 pub use ktx::*;
-//todo add a util file under ext that will convert height map to normal map.
-// and convert height map to horizon map.
-// Generating horizon cube
-
 #[repr(C, align(16))]
 #[derive(Copy, Clone, Debug)]
 pub struct KTXDescriptor {

@@ -1,4 +1,3 @@
-//todo maybe convert to a bitflag to allow multiple flipping.
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum FlipAxis {
     FlipX = 0,

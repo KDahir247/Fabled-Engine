@@ -8,7 +8,7 @@ pub const DDS_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fab
 // Core DDS Texture
 
 // Test Jpg Texture
-pub const JPG_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\test.jpg";
+pub const JPG_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\jpgyellow.jpg";
 
 // Core Jpg Texture
 
@@ -18,7 +18,7 @@ pub const PNG_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fab
 // Core Png Texture
 
 // Test Tiff Texture
-pub const TIFF_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\jpgyellow.jpg";
+pub const TIFF_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\tiffyellow.tiff";
 
 // Core Tiff Texture
 
