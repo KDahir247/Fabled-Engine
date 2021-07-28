@@ -48,7 +48,7 @@ mod tiff_loader_codecs {
     #[test]
     fn load_tiff() {
         let tiff_loader = TiffTextureLoader::default();
-        let pngyellow = tiff_loader
+        let tiffyellow = tiff_loader
             .load(
                 TIFF_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -56,6 +56,6 @@ mod tiff_loader_codecs {
                 },
             )
             .unwrap();
-        assert!(!pngyellow.data.is_empty());
+        assert!(!tiffyellow.data.is_empty());
     }
 }

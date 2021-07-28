@@ -1,6 +1,7 @@
 pub use border_color::*;
 pub use color_space::*;
 pub use color_type::*;
+pub use extent2d::*;
 pub use extent3d::*;
 pub use flip_axis::*;
 pub use texture_access::*;
@@ -14,6 +15,7 @@ pub use texture_view_dimension::*;
 pub mod border_color;
 pub mod color_space;
 pub mod color_type;
+pub mod extent2d;
 pub mod extent3d;
 pub mod flip_axis;
 pub mod texture_access;
@@ -27,8 +29,9 @@ pub mod texture_view_dimension;
 #[cfg(test)]
 pub mod data_alignment_test {
     use crate::{
-        BorderColor, ColorSpace, ColorType, Extent3d, FlipAxis, StorageTextureAccess, Texture,
-        TextureAspect, TextureDimension, TextureSampleType, TextureSampler, TextureViewDimension,
+        BorderColor, ColorSpace, ColorType, Extent2d, Extent3d, FlipAxis, StorageTextureAccess,
+        Texture, TextureAspect, TextureDimension, TextureSampleType, TextureSampler,
+        TextureViewDimension,
     };
 
     #[test]
@@ -41,6 +44,9 @@ pub mod data_alignment_test {
 
         let extent3d = std::mem::size_of::<Extent3d>();
         assert_eq!(extent3d & (extent3d - 1), 0);
+
+        let extend2d = std::mem::size_of::<Extent2d>();
+        assert_eq!(extend2d & (extend2d - 1), 0);
 
         let flip_axis = std::mem::size_of::<FlipAxis>();
         assert_eq!(flip_axis & (flip_axis - 1), 0);

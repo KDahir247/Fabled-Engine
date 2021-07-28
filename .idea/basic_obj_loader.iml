@@ -130,6 +130,12 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-4eb2c95b91e1c0c9/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/basis-universal-sys-1f6fc1853b0debb4/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/getrandom-ed4756e838f37867/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/matrixmultiply-7dc1592b208e26fd/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/num-bigint-8ba1d146958a3601/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/num-integer-04034e43393be0ea/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/num-iter-9e06625c86d3d3a9/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/num-rational-9d4036252a2bc7e1/out" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />
