@@ -45,11 +45,6 @@ pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
         )
     );
 
-    let work_groupX = (size.width as f32 + (size.width as f32 % 16.0)) / 16.0;
-    let work_groupY = (size.height as f32 + (size.height as f32 % 16.0)) / 16.0;
-
-    println!("{} {}", work_groupX, work_groupY);
-
     let swap_chain_desc = wgpu::SwapChainDescriptor {
         usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
         format: adapter.get_swap_chain_preferred_format(&surface).unwrap(),

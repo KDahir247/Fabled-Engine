@@ -155,7 +155,7 @@ impl ShaderReflection {
 
 #[cfg(test)]
 mod reflection_test {
-    use crate::init_shader_test_env;
+    use crate::shader::init_shader_test_env;
     use crate::shader::parser::*;
     use crate::shader::reflection::*;
     use naga::{Constant, Function, GlobalVariable, Type};

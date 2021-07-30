@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub struct Light {
     //Position Direction is relative to World Space.
     //if W = 1 then Spotlight and Point Light, else Directional light = 0

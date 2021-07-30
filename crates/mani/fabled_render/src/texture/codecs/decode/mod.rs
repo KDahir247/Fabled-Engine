@@ -1,11 +1,10 @@
-use crate::FlipAxis;
+mod dds;
+mod hdr;
+mod jpg;
+mod png;
+mod tiff;
 
-pub mod dds;
-pub mod hdr;
-pub mod jpg;
-pub mod png;
-pub mod tiff;
-
+use crate::texture::container::FlipAxis;
 pub use dds::*;
 pub use hdr::*;
 pub use jpg::*;
@@ -27,9 +26,8 @@ impl Default for TextureDescriptor {
 }
 
 #[cfg(test)]
-pub mod codecs_test {
-    use crate::TextureDescriptor;
-
+mod codecs_test {
+    use crate::texture::codecs::TextureDescriptor;
     #[test]
     fn data_alignment() {
         let tex_desc = std::mem::size_of::<TextureDescriptor>();

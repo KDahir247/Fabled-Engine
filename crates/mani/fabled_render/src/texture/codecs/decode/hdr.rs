@@ -1,9 +1,8 @@
-use crate::{ColorType, Extent3d, FlipAxis, Texture, TextureDescriptor};
-
+use crate::texture::codecs::TextureDescriptor;
+use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
 #[derive(Default, Clone)]
 pub struct HdrTextureLoader;
 
-// HDR File Format
 impl HdrTextureLoader {
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
@@ -17,18 +16,13 @@ impl HdrTextureLoader {
         let meta_data = hdr_decoder.metadata();
         let rgb_data = hdr_decoder.read_image_hdr()?;
 
-        //RGBA32Float
-        //RGBA (32 bit == 4 bytes)
-        //4 channel (RGBA)
         let mut hdr_data = Vec::with_capacity(rgb_data.len() * 16);
         for rgb in rgb_data {
             hdr_data.extend_from_slice(&rgb.0[0].to_ne_bytes());
             hdr_data.extend_from_slice(&rgb.0[1].to_ne_bytes());
             hdr_data.extend_from_slice(&rgb.0[2].to_ne_bytes());
 
-            //Alpha or exposure.
             hdr_data.extend_from_slice(&1.0f32.to_ne_bytes());
-            //maybe store the exposure in the alpha channel.
         }
 
         let mut hdr_texture = Texture {
@@ -72,8 +66,8 @@ impl HdrTextureLoader {
 
 #[cfg(test)]
 mod hdr_loader_codecs {
+    use crate::texture::codecs::{HdrTextureLoader, TextureDescriptor};
     use crate::texture::common::HDR_TEST_TEXTURE;
-    use crate::{HdrTextureLoader, TextureDescriptor};
 
     #[test]
     fn load_hdr() {

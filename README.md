@@ -1,11 +1,11 @@
 # Fabled Engine
-# Current solution will might break, since KTX 2.0 and Dds texture support is Experimental 
-# Also Texture Compression Method which is quite voliate due to quick testing 
+# Current solution will might break, since KTX 2.0 and Dds texture support is Experimental
+# Also Texture Compression Method which is quite volatile due to quick testing
 Self Study on developing a game engine. Learning as I go.
 <br/> Not done the core parts of the rendering.
 <br/>
 <br/>
-Any issues, enchancement, features, or bugs report are always welcome in Issues.
+Any issues, enhancement, features, or bugs report are always welcome in Issues.
 <br/>
 <br/>
 ## Camera Movement
@@ -16,9 +16,9 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Up : Q
 * Down : E
 
-# current progress: 
+# current progress:
 * Experimenting with KTX 2.0 and Dds as option for texture file, since these are the fastest texture file format to load to the gpu.
-* Experimenting support for different texture compression method 
+* Experimenting support for different texture compression method
 # Grid System (Early Experimental)
 <br/>
 

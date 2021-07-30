@@ -1,20 +1,16 @@
-use crate::{ColorType, Extent3d, FlipAxis, Texture, TextureDescriptor};
+use crate::texture::codecs::TextureDescriptor;
+use crate::texture::container::{Extent3d, FlipAxis, Texture};
 use image::GenericImageView;
 
 #[derive(Default, Clone)]
 pub struct PngTextureLoader;
 
-// Png File Format
-// The default value is: R8G8B8A8
-// Yes generating Mip Map level
 impl PngTextureLoader {
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
         path: P,
         texture_descriptor: &TextureDescriptor,
     ) -> anyhow::Result<Texture> {
-        //grayscale luminance (with or without transparency) or RGB24 (R8G8B8) or RGBA32 (R8G8B8A8)
-
         let file = std::fs::File::open(path.as_ref())?;
 
         let png_decoder = image::codecs::png::PngDecoder::new(file)?;
@@ -47,13 +43,13 @@ impl PngTextureLoader {
 #[cfg(test)]
 mod png_loader_codecs {
 
-    use crate::codecs::*;
+    use crate::texture::codecs::{PngTextureLoader, TextureDescriptor};
     use crate::texture::common::*;
 
     #[test]
     fn load_png() {
         let png_loader = PngTextureLoader::default();
-        let pngyellow = png_loader
+        let png_yellow = png_loader
             .load(
                 PNG_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -61,6 +57,6 @@ mod png_loader_codecs {
                 },
             )
             .unwrap();
-        assert!(!pngyellow.data.is_empty());
+        assert!(!png_yellow.data.is_empty());
     }
 }

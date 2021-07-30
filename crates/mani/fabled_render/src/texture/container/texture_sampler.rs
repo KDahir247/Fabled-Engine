@@ -1,7 +1,7 @@
 use crate::texture::container::BorderColor;
 
 //Filter and Sampler
-#[repr(C, align(32))]
+#[repr(align(32))]
 pub struct TextureSampler {
     pub u_edge: u8,
     pub v_edge: u8,

@@ -1,6 +1,7 @@
-use crate::convert::TryFrom;
-use crate::texture::container::{Extent3d, FlipAxis};
-use crate::{ColorType, KTXDescriptor, Texture};
+use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
+use crate::texture::ext::KTXDescriptor;
+
+use crate::texture::_core::convert::TryFrom;
 use libktx_rs as ktx;
 
 #[derive(Default)]
@@ -97,30 +98,16 @@ impl KtxTextureLoader {
         }
     }
 
-    pub fn from_stream(file: std::fs::File, ktx_descriptor: &KTXDescriptor) -> Texture {
+    pub fn from_stream(
+        file: std::fs::File,
+        ktx_descriptor: &KTXDescriptor,
+    ) -> anyhow::Result<Texture> {
         let stream = ktx::RustKtxStream::new(Box::new(file)).expect("The RustKtxStream");
         let source = ktx::sources::StreamSource::new(
             std::sync::Arc::new(std::sync::Mutex::new(stream)),
             ktx::TextureCreateFlags::LOAD_IMAGE_DATA,
         );
         let mut stream_tex = ktx::Texture::new(source).expect("the loaded KTX");
-
-        assert!(
-            stream_tex.element_size() > 0,
-            "The element byte size is zero"
-        );
-        assert!(
-            stream_tex.row_pitch(0) > 0,
-            "The mip level at 0 (core-image) dimensions can't be zero"
-        );
-        assert!(
-            stream_tex.data_size() > 0,
-            "There are no bytes in the KTX file. File is probably corrupted or contains no content"
-        );
-        assert!(
-            stream_tex.ktx1().is_some() || stream_tex.ktx2().is_some(),
-            "File read from the KTX_TEXTURE_LOADER is not KTX1 or KTX2"
-        );
 
         let format = ktx::TranscodeFormat::try_from(ktx_descriptor.transcode_format as u32)
             .unwrap_or(ktx::TranscodeFormat::Rgba32);
@@ -163,21 +150,14 @@ impl KtxTextureLoader {
             _ => panic!("Texture has more then 4 channel and is not supported"),
         };
 
-        println!(
-            "{:?} {:?} {:?}",
-            stream_tex.row_pitch(0),
-            stream_tex.data_size(),
-            stream_tex.get_image_size(0).unwrap(),
-        );
-
-        Texture {
+        Ok(Texture {
             data: manipulated_buf,
             size: dimensions,
             sample_count: 1,
             mip_level,
             color_type,
             rows_per_image: stream_tex.row_pitch(0) as u32,
-        }
+        })
     }
 
     fn ktx_reorientation(
@@ -209,8 +189,11 @@ impl KtxTextureLoader {
 #[cfg(test)]
 mod ktx_mod_test {
 
-    use crate::ext::*;
     use crate::texture::common::*;
+    use crate::texture::ext::{
+        KTXDescriptor, KtxTextureLoader, KtxTranscodeFlag, KtxTranscodeFormat,
+    };
+
     #[test]
     fn basic_ktx1_test() {
         let ktx1_texture = KtxTextureLoader::default_ktx1();
@@ -257,7 +240,8 @@ mod ktx_mod_test {
                 transcode_flag: KtxTranscodeFlag::HIGHEST_QUALITY,
                 transcode_format: KtxTranscodeFormat::RGBA32,
             },
-        );
+        )
+        .unwrap();
 
         let mut container = 0;
         assert_eq!(ktx_stream_texture.size.width, 1024);

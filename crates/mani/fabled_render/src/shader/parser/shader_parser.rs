@@ -1,7 +1,9 @@
 use crate::shader::validation_rule::ValidationLayer;
 use anyhow::Context;
 use std::io::{Read, Write};
-pub const AUTO_GEN_MESSAGE : &str = "//This is auto generated code. Do not modify code! Modification can break interpreted solution.\n//Modify shader code if you know what you're doing.\n\n";
+
+#[allow(dead_code)]
+const AUTO_GEN_MESSAGE : &str = "//This is auto generated code. Do not modify code! Modification can break interpreted solution.\n//Modify shader code if you know what you're doing.\n\n";
 
 #[repr(align(128))]
 pub struct ShaderParser {
@@ -90,7 +92,6 @@ impl ShaderParser {
 
 #[cfg(test)]
 mod shader_test {
-    use crate::init_shader_test_env;
     use crate::shader::parser::*;
 
     #[test]
@@ -147,6 +148,7 @@ mod shader_test {
     }
 
     use crate::shader::converter::*;
+    use crate::shader::init_shader_test_env;
 
     #[test]
     fn encode() {

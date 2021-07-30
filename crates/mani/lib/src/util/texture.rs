@@ -1,8 +1,7 @@
-use super::constant;
 use crate::component::render_component::Texture;
-use fabled_render::texture::codecs::*;
-use fabled_render::texture::ext::*;
-use image::GenericImageView;
+use fabled_render::texture::{
+    KTXDescriptor, KtxTextureLoader, KtxTranscodeFlag, KtxTranscodeFormat,
+};
 
 //todo clean solution.
 pub fn load<P: AsRef<std::path::Path>>(
@@ -97,11 +96,12 @@ fn from_image(
     let ktx = KtxTextureLoader::from_stream(
         std::fs::File::open(_test.as_str()).unwrap(),
         &KTXDescriptor {
-            flip_axis: Some(fabled_render::FlipAxis::FlipY),
+            flip_axis: Some(fabled_render::texture::FlipAxis::FlipY),
             transcode_flag: KtxTranscodeFlag::HIGHEST_QUALITY,
             transcode_format: KtxTranscodeFormat::RGBA32,
         },
-    );
+    )
+    .unwrap();
 
     let extend_test = wgpu::Extent3d {
         width: ktx.size.width,

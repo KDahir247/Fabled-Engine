@@ -78,7 +78,7 @@ pub fn update_camera_orientation(
     let wy = desired_rotation.w * desired_rotation.y;
     let wz = desired_rotation.w * desired_rotation.z;
 
-    //todo relook at this the yaw move the camera up and down
+    //todo re-look at this the yaw move the camera up and down
     let rotation = glam::mat3(
         glam::vec3(
             1.0f32 - 2.0f32 * y2 - 2.0f32 * z2,

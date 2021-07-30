@@ -1,12 +1,11 @@
-use crate::{ColorType, Extent3d, FlipAxis, Texture, TextureDescriptor};
+use crate::texture::codecs::TextureDescriptor;
+use crate::texture::container::{Extent3d, FlipAxis, Texture};
 use image::GenericImageView;
 
 #[derive(Default, Clone)]
 pub struct JpgTextureLoader;
 
-// Jpg File Format
 impl JpgTextureLoader {
-    //Decoder
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
         path: P,
@@ -44,12 +43,13 @@ impl JpgTextureLoader {
 #[cfg(test)]
 mod jpg_loader_codecs {
 
-    use crate::codecs::*;
+    use crate::texture::codecs::{JpgTextureLoader, TextureDescriptor};
     use crate::texture::common::*;
+
     #[test]
     fn load_jpg() {
         let jpg_loader = JpgTextureLoader::default();
-        let jpgyellow = jpg_loader
+        let jpg_yellow = jpg_loader
             .load(
                 JPG_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -58,12 +58,6 @@ mod jpg_loader_codecs {
             )
             .unwrap();
 
-        assert!(!jpgyellow.data.is_empty());
-
-        let img =
-            image::RgbImage::from_raw(jpgyellow.size.width, jpgyellow.size.height, jpgyellow.data)
-                .unwrap();
-
-        img.save_with_format("D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\test2.jpg", image::ImageFormat::Jpeg).unwrap();
+        assert!(!jpg_yellow.data.is_empty());
     }
 }

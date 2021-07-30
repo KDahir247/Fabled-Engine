@@ -1,6 +1,7 @@
 pub struct Material {}
 
 //testing struct
+#[allow(dead_code)]
 pub struct PrototypeMaterial {
     ambient_color: [f32; 4],
     emissive_color: [f32; 4],

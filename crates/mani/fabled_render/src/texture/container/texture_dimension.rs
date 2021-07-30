@@ -1,5 +1,4 @@
 #[derive(Debug, Clone, Copy)]
-#[repr(C)]
 pub enum TextureDimension {
     D1,
     D2,

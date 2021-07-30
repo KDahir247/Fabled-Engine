@@ -1,4 +1,5 @@
-use crate::shader::validation_rule::*;
+use super::validation_rule::*;
+
 use anyhow::Context;
 use naga::valid::ValidationFlags;
 use std::error::Error;
@@ -11,7 +12,6 @@ impl ValidationLayer for naga::Module {
                 #[cfg(target_os = "windows")]
                 if let Err(err_code) = ansi_term::enable_ansi_support() {
                     println!("Error has occurred when enabling ansi supported on windows\nWindows error code: {}", err_code);
-                    //how to handle 
                 }
 
                 eprintln!(

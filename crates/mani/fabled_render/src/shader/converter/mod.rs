@@ -20,6 +20,7 @@ impl From<Version> for naga::back::glsl::Version {
 
 #[derive(Debug)]
 #[repr(align(4))]
+#[allow(dead_code)]
 pub enum SpvOptions {
     Default,
     Custom {
@@ -28,7 +29,14 @@ pub enum SpvOptions {
     },
 }
 
+impl Default for SpvOptions {
+    fn default() -> Self {
+        SpvOptions::Default
+    }
+}
+
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum ShaderConvertOption {
     Wgsl,
     Spv { option: SpvOptions },
@@ -36,6 +44,7 @@ pub enum ShaderConvertOption {
 }
 
 #[derive(Debug, PartialEq)]
+#[allow(dead_code)]
 pub enum ShaderConvertResult {
     Wgsl(String),
     Spv(Vec<u8>),

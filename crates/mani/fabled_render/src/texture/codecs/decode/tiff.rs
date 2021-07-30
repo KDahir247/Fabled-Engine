@@ -1,11 +1,10 @@
-use crate::{ColorType, Extent3d, FlipAxis, Texture, TextureDescriptor};
+use crate::texture::codecs::TextureDescriptor;
+use crate::texture::container::{Extent3d, FlipAxis, Texture};
 use image::GenericImageView;
 
 #[derive(Default, Clone)]
 pub struct TiffTextureLoader;
 
-// Tiff File Format
-// The default value is:
 impl TiffTextureLoader {
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
@@ -43,12 +42,13 @@ impl TiffTextureLoader {
 
 #[cfg(test)]
 mod tiff_loader_codecs {
-    use crate::codecs::*;
+    use crate::texture::codecs::{TextureDescriptor, TiffTextureLoader};
     use crate::texture::common::*;
+
     #[test]
     fn load_tiff() {
         let tiff_loader = TiffTextureLoader::default();
-        let tiffyellow = tiff_loader
+        let tiff_yellow = tiff_loader
             .load(
                 TIFF_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -56,6 +56,6 @@ mod tiff_loader_codecs {
                 },
             )
             .unwrap();
-        assert!(!tiffyellow.data.is_empty());
+        assert!(!tiff_yellow.data.is_empty());
     }
 }

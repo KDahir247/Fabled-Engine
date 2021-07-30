@@ -1,3 +1,16 @@
+    let work_group_x = (size.width as f32 + (size.width as f32 % 16.0)) / 16.0;
+    let work_group_y = (size.height as f32 + (size.height as f32 % 16.0)) / 16.0;
+
+    println!("{} {}", work_group_x, work_group_y);
+
+Shader module notes
+// Feature lists for shader:
+// Maybe add a shader query system where you can pass a generic and it will return all the data for that generic from the shader.
+// Maybe add a shader cache for the shader module??, but definitely add a common with will hold all the directory path to the common shader for the game engine.
+// Maybe add benching for the shader scripts.
+// Look into rspirv crate
+
+
 Features
 *** Pass Ambient Color, Diffuse Color, Specular Color, Shininess, Dissolve(alpha channel), Optical_density????
 *** Create Mipmap System for the graphic

@@ -1,5 +1,5 @@
-use crate::texture::image_processing::{ColorTarget, FilterType};
-use crate::{ColorType, Extent2d, Extent3d, Texture};
+use crate::texture::container::{ColorTarget, ColorType, Extent2d, Extent3d, Texture};
+use crate::texture::image_processing::FilterType;
 use image::GenericImageView;
 
 #[repr(align(64))]
@@ -11,7 +11,7 @@ impl ImageProcessing {
     pub fn new<T: 'static>(
         texture: Texture,
         color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
-    ) -> ImageProcessing
+    ) -> anyhow::Result<ImageProcessing>
     where
         T: image::Pixel<Subpixel = u8>,
     {
@@ -36,7 +36,7 @@ impl ImageProcessing {
 
         let dyn_texture: image::DynamicImage = texture_target.into();
 
-        Self { dyn_texture }
+        Ok(Self { dyn_texture })
     }
 
     pub fn blur(mut self, sigma: f32) -> Self {
@@ -44,7 +44,7 @@ impl ImageProcessing {
         self
     }
 
-    pub fn unsharpen(mut self, sigma: f32, threshold: i32) -> Self {
+    pub fn unsharpened(mut self, sigma: f32, threshold: i32) -> Self {
         self.dyn_texture = self.dyn_texture.unsharpen(sigma, threshold);
         self
     }
@@ -119,41 +119,23 @@ impl ImageProcessing {
         self
     }
 
-    pub fn replace<T: 'static>(
-        mut self,
-        top_tex: Texture,
-        coord: Extent2d,
-        color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
-    ) -> Self
-    where
-        T: image::Pixel<Subpixel = u8>,
-    {
-        let img_buff =
-            image::ImageBuffer::from_raw(top_tex.size.width, top_tex.size.height, top_tex.data)
-                .unwrap();
-
-        let top_img: image::DynamicImage = color_target_predicate(img_buff).into();
-
-        image::imageops::replace(&mut self.dyn_texture, &top_img, coord.width, coord.height);
+    pub fn replace(mut self, top_tex: &ImageProcessing, coord: Extent2d) -> Self {
+        image::imageops::replace(
+            &mut self.dyn_texture,
+            &top_tex.dyn_texture,
+            coord.width,
+            coord.height,
+        );
         self
     }
 
-    pub fn overlay<T: 'static>(
-        mut self,
-        top_tex: Texture,
-        coord: Extent2d,
-        color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
-    ) -> Self
-    where
-        T: image::Pixel<Subpixel = u8>,
-    {
-        let img_buff =
-            image::ImageBuffer::from_raw(top_tex.size.width, top_tex.size.height, top_tex.data)
-                .unwrap();
-
-        let top_img: image::DynamicImage = color_target_predicate(img_buff).into();
-
-        image::imageops::overlay(&mut self.dyn_texture, &top_img, coord.width, coord.height);
+    pub fn overlay(mut self, top_tex: &ImageProcessing, coord: Extent2d) -> Self {
+        image::imageops::overlay(
+            &mut self.dyn_texture,
+            &top_tex.dyn_texture,
+            coord.width,
+            coord.height,
+        );
 
         self
     }
@@ -178,26 +160,16 @@ impl ImageProcessing {
 
 #[cfg(test)]
 mod image_processing_test {
-    use crate::texture::image_processing::{ColorTarget, FilterType, ImageProcessing};
-    use crate::{
-        Extent2d, PngTextureLoader, Texture, TextureDescriptor, PNG_TEST_TEXTURE,
-        PNG_TEST_TEXTURE1, PNG_TEST_TEXTUREBLUR, PNG_TEST_TEXTURECROP, PNG_TEST_TEXTUREFLIPH,
-        PNG_TEST_TEXTUREFLIPV, PNG_TEST_TEXTUREOPACITY, PNG_TEST_TEXTUREOVERLAY,
-        PNG_TEST_TEXTUREREPLACE, PNG_TEST_TEXTURERESIZE, PNG_TEST_TEXTUREROT180,
-        PNG_TEST_TEXTUREROT270, PNG_TEST_TEXTUREROT90, PNG_TEST_TEXTUREUNSHARPEN,
-    };
+    use crate::texture::codecs::*;
+    use crate::texture::common::*;
+    use crate::texture::container::{ColorTarget, Extent2d, Texture};
+    use crate::texture::image_processing::{FilterType, ImageProcessing};
 
     #[test]
     fn creation_test() {
-        use crate::{
-            DdsTextureLoader, JpgTextureLoader, PngTextureLoader, TextureDescriptor,
-            TiffTextureLoader, DDS_TEST_TEXTURE, JPG_TEST_TEXTURE, PNG_TEST_TEXTURE,
-            TIFF_TEST_TEXTURE,
-        };
-
         // Png
         let png_loader = PngTextureLoader::default();
-        let pngyellow = png_loader
+        let png_yellow = png_loader
             .load(
                 PNG_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -208,10 +180,12 @@ mod image_processing_test {
 
         println!(
             "before Png : {:?}, {:?}",
-            pngyellow.size, pngyellow.color_type
+            png_yellow.size, png_yellow.color_type
         );
 
-        let png_texture = ImageProcessing::new(pngyellow, ColorTarget::ImageRgba8).build();
+        let png_texture = ImageProcessing::new(png_yellow, ColorTarget::ImageRgba8)
+            .unwrap()
+            .build();
 
         println!(
             "after Png: {:?}, {:?}",
@@ -234,7 +208,9 @@ mod image_processing_test {
             dds_yellow.size, dds_yellow.color_type
         );
 
-        let dds_texture = ImageProcessing::new(dds_yellow, ColorTarget::ImageRgb8).build();
+        let dds_texture = ImageProcessing::new(dds_yellow, ColorTarget::ImageRgb8)
+            .unwrap()
+            .build();
 
         println!(
             "after DDS: {:?}, {:?}",
@@ -245,7 +221,7 @@ mod image_processing_test {
 
         // JPEG
         let jpg_loader = JpgTextureLoader::default();
-        let jpgyellow = jpg_loader
+        let jpg_yellow = jpg_loader
             .load(
                 JPG_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -256,18 +232,21 @@ mod image_processing_test {
 
         println!(
             "before Jpeg: {:?}, {:?}",
-            jpgyellow.size, jpgyellow.color_type
+            jpg_yellow.size, jpg_yellow.color_type
         );
 
-        let jpg_texture = ImageProcessing::new(jpgyellow, ColorTarget::ImageRgb8).build();
+        let jpg_texture = ImageProcessing::new(jpg_yellow, ColorTarget::ImageRgb8)
+            .unwrap()
+            .build();
 
         println!(
             "after Jpeg: {:?}, {:?}",
             jpg_texture.size, jpg_texture.color_type
         );
 
+        // TIFF
         let tiff_loader = TiffTextureLoader::default();
-        let tiffyellow = tiff_loader
+        let tiff_yellow = tiff_loader
             .load(
                 TIFF_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -278,10 +257,12 @@ mod image_processing_test {
 
         println!(
             "before Tiff: {:?}, {:?}",
-            tiffyellow.size, tiffyellow.color_type
+            tiff_yellow.size, tiff_yellow.color_type
         );
 
-        let tiff_texture = ImageProcessing::new(tiffyellow, ColorTarget::ImageRgba8).build();
+        let tiff_texture = ImageProcessing::new(tiff_yellow, ColorTarget::ImageRgba8)
+            .unwrap()
+            .build();
 
         println!(
             "after Tiff: {:?}, {:?}",
@@ -292,7 +273,7 @@ mod image_processing_test {
     fn init_test() -> ImageProcessing {
         // Png
         let png_loader = PngTextureLoader::default();
-        let pngyellow = png_loader
+        let png_yellow = png_loader
             .load(
                 PNG_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -301,7 +282,7 @@ mod image_processing_test {
             )
             .unwrap();
 
-        ImageProcessing::new(pngyellow, ColorTarget::ImageRgba8)
+        ImageProcessing::new(png_yellow, ColorTarget::ImageRgba8).unwrap()
     }
 
     fn write_back(path: &str, texture: Texture) {
@@ -321,16 +302,16 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.blur(10.0).build();
 
-        write_back(PNG_TEST_TEXTUREBLUR, result);
+        write_back(PNG_TEST_TEXTURE_BLUR, result);
         //Draw the result to a file
     }
 
     #[test]
-    fn unsharpen_test() {
+    fn unsharpened_test() {
         let img_proc = init_test();
-        let result = img_proc.unsharpen(20.0, 15).build();
+        let result = img_proc.unsharpened(20.0, 15).build();
 
-        write_back(PNG_TEST_TEXTUREUNSHARPEN, result);
+        write_back(PNG_TEST_TEXTURE_UNSHARPENED, result);
     }
 
     #[test]
@@ -338,7 +319,7 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.rotate90().build();
 
-        write_back(PNG_TEST_TEXTUREROT90, result);
+        write_back(PNG_TEST_TEXTURE_ROT_90, result);
     }
 
     #[test]
@@ -346,7 +327,7 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.rotate180().build();
 
-        write_back(PNG_TEST_TEXTUREROT180, result);
+        write_back(PNG_TEST_TEXTURE_ROT_180, result);
     }
 
     #[test]
@@ -354,7 +335,7 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.rotate270().build();
 
-        write_back(PNG_TEST_TEXTUREROT270, result);
+        write_back(PNG_TEST_TEXTURE_ROT_270, result);
     }
 
     #[test]
@@ -362,7 +343,7 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.flip_horizontal().build();
 
-        write_back(PNG_TEST_TEXTUREFLIPH, result);
+        write_back(PNG_TEST_TEXTURE_FLIP_H, result);
     }
 
     #[test]
@@ -370,7 +351,7 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.flip_vertical().build();
 
-        write_back(PNG_TEST_TEXTUREFLIPV, result);
+        write_back(PNG_TEST_TEXTURE_FLIP_V, result);
     }
 
     #[test]
@@ -386,7 +367,7 @@ mod image_processing_test {
             )
             .build();
 
-        write_back(PNG_TEST_TEXTURERESIZE, result);
+        write_back(PNG_TEST_TEXTURE_RESIZE, result);
     }
 
     #[test]
@@ -394,7 +375,7 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.opacity(128).build();
 
-        write_back(PNG_TEST_TEXTUREOPACITY, result);
+        write_back(PNG_TEST_TEXTURE_OPACITY, result);
     }
 
     #[test]
@@ -413,7 +394,7 @@ mod image_processing_test {
             )
             .build();
 
-        write_back(PNG_TEST_TEXTURECROP, result);
+        write_back(PNG_TEST_TEXTURE_CROP, result);
     }
 
     #[test]
@@ -423,18 +404,19 @@ mod image_processing_test {
             .load(PNG_TEST_TEXTURE1, &TextureDescriptor::default())
             .unwrap();
 
+        let result1 = ImageProcessing::new(second_img, ColorTarget::ImageRgba8).unwrap();
+
         let result = img_proc
             .replace(
-                second_img,
+                &result1,
                 Extent2d {
                     width: 350,
                     height: 350,
                 },
-                ColorTarget::ImageRgba8,
             )
             .build();
 
-        write_back(PNG_TEST_TEXTUREREPLACE, result);
+        write_back(PNG_TEST_TEXTURE_REPLACE, result);
     }
 
     #[test]
@@ -444,17 +426,18 @@ mod image_processing_test {
             .load(PNG_TEST_TEXTURE1, &TextureDescriptor::default())
             .unwrap();
 
+        let result1 = ImageProcessing::new(second_img, ColorTarget::ImageRgba8).unwrap();
+
         let result = img_proc
             .overlay(
-                second_img,
+                &result1,
                 Extent2d {
                     width: 100,
                     height: 100,
                 },
-                ColorTarget::ImageRgba8,
             )
             .build();
 
-        write_back(PNG_TEST_TEXTUREOVERLAY, result);
+        write_back(PNG_TEST_TEXTURE_OVERLAY, result);
     }
 }

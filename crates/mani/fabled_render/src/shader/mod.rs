@@ -1,14 +1,18 @@
-// Feature lists for shader:
-// Maybe add a shader query system where you can pass a generic and it will return all the data for that generic from the shader.
-// Maybe add a shader cache for the shader module??, but definitely add a common with will hold all the directory path to the common shader for the game engine.
-// Maybe add benching for the shader scripts.
-// Look into rspirv crate
-
-pub mod common;
-pub mod converter;
-pub mod parser;
-pub mod reflection;
-pub mod shader_validator;
+mod common;
+mod converter;
+mod parser;
+mod reflection;
+mod shader_validator;
 mod validation_rule;
 
+use crate::shader;
 pub use validation_rule::*;
+
+pub fn init_shader_test_env() {
+    std::env::set_var("WGSL_FILE", shader::common::PARSE_TEST_WGSL_SHADER);
+    std::env::set_var("SPV_FILE", shader::common::PARSE_TEST_SPV_SHADER);
+
+    std::env::set_var("VERT_FILE", shader::common::PARSE_TEST_VERTEX_SHADER);
+    std::env::set_var("FRAG_FILE", shader::common::PARSE_TEST_FRAGMENT_SHADER);
+    std::env::set_var("COMP_FILE", shader::common::PARSE_TEST_COMPUTE_SHADER);
+}

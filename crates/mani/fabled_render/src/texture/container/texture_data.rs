@@ -1,5 +1,4 @@
-use crate::texture::container::Extent3d;
-use crate::texture::*;
+use crate::texture::container::{ColorType, Extent3d};
 
 #[derive(Debug)]
 #[repr(align(64))]

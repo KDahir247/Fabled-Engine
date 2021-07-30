@@ -137,7 +137,7 @@ impl MaterialParser {
 #[cfg(test)]
 mod material_test {
 
-    use crate::init_shader_test_env;
+    use crate::shader::init_shader_test_env;
     use crate::shader::parser::*;
 
     #[test]

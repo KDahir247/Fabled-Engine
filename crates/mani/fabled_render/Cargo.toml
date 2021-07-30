@@ -8,9 +8,9 @@ edition = "2018"
 [dependencies]
 
 # Texture
-texture-synthesis = { version = "0.8.1"}
+#texture-synthesis = { version = "0.8.1"}
 image = { version = "0.23.12", features = ["default", "hdr", "jpeg_rayon", "dds"]}
-imageproc = {version = "0.22.0", features = ["default"] }
+#imageproc = {version = "0.22.0", features = ["default"] } # future use
 libktx-rs = {version = "0.2.4", features = ["default"]}
 basis-universal = "0.1.1"
 basis-universal-sys = "0.1.1"

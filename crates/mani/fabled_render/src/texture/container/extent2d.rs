@@ -1,6 +1,5 @@
-use crate::Extent3d;
+use crate::texture::container::Extent3d;
 
-#[repr(C)]
 #[derive(Default, Debug, Copy, Clone, PartialEq)]
 pub struct Extent2d {
     pub width: u32,
@@ -16,5 +15,3 @@ impl From<Extent2d> for Extent3d {
         }
     }
 }
-
-

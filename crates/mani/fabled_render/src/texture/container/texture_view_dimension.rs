@@ -1,4 +1,3 @@
-#[repr(C)]
 #[derive(Debug)]
 pub enum TextureViewDimension {
     D1,

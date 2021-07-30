@@ -12,27 +12,23 @@ pub use texture_sample_type::*;
 pub use texture_sampler::*;
 pub use texture_view_dimension::*;
 
-pub mod border_color;
-pub mod color_space;
-pub mod color_type;
-pub mod extent2d;
-pub mod extent3d;
-pub mod flip_axis;
-pub mod texture_access;
-pub mod texture_aspect;
-pub mod texture_data;
-pub mod texture_dimension;
-pub mod texture_sample_type;
-pub mod texture_sampler;
-pub mod texture_view_dimension;
+mod border_color;
+mod color_space;
+mod color_type;
+mod extent2d;
+mod extent3d;
+mod flip_axis;
+mod texture_access;
+mod texture_aspect;
+mod texture_data;
+mod texture_dimension;
+mod texture_sample_type;
+mod texture_sampler;
+mod texture_view_dimension;
 
 #[cfg(test)]
 pub mod data_alignment_test {
-    use crate::{
-        BorderColor, ColorSpace, ColorType, Extent2d, Extent3d, FlipAxis, StorageTextureAccess,
-        Texture, TextureAspect, TextureDimension, TextureSampleType, TextureSampler,
-        TextureViewDimension,
-    };
+    use crate::texture::container::*;
 
     #[test]
     fn data_alignment() {
@@ -74,5 +70,8 @@ pub mod data_alignment_test {
 
         let color_type = std::mem::size_of::<ColorType>();
         assert_eq!(color_type & (color_type - 1), 0);
+
+        let color_target = std::mem::size_of::<ColorTarget>();
+        assert_eq!(color_target & (color_target - 1), 0);
     }
 }

@@ -1,14 +1,15 @@
 use fabled_core::concurrent::container::thread_op::ThreadOperation;
 
 use crate::texture::compression::{BasisTexture, CompressionDescriptor, CompressionQuality};
-use crate::{ColorType, Texture};
+use crate::texture::container::{ColorType, Texture};
+
 use basis_universal::{Compressor, CompressorParams};
 
 pub fn super_compress(
     texture: &Texture,
     compression_desc: &CompressionDescriptor,
     thread_op: ThreadOperation,
-) -> BasisTexture {
+) -> anyhow::Result<BasisTexture> {
     let channel_count = match texture.color_type {
         ColorType::L8 | ColorType::L16 => 1,
         ColorType::La8 | ColorType::La16 => 2,
@@ -31,7 +32,7 @@ pub fn super_compress(
             compression_params.set_etc1s_quality_level(basis_universal::ETC1S_QUALITY_MAX);
             compression_params.set_uastc_quality_level(basis_universal::UASTC_QUALITY_MAX);
         }
-        _ => {} //Default compression quality for ETC1S and UASTC4x4 is set on creation
+        _ => {} //Default compression quality for ETC1S and U_ASTC4x4 is set on creation
     }
 
     compression_params.set_color_space(compression_desc.color_space.into());
@@ -70,28 +71,26 @@ pub fn super_compress(
     let basis_file = compressor.basis_file();
     let basis_size = compressor.basis_file_size();
 
-    BasisTexture {
+    Ok(BasisTexture {
         data: basis_file.to_vec(),
         file_size: basis_size,
-    }
+    })
 }
 
 //KTX file is not supported.
 //TODO ffi causes heap corruption. Source : CompressorParams dropping and Compressor.Init. Description: exit code: 0xc0000374, STATUS_HEAP_CORRUPTION
 #[cfg(test)]
 mod basis_compression_test {
-    use crate::texture::compression::{
-        BasisCompressionFormat, CompressionDescriptor, CompressionQuality,
-    };
-    use crate::{
-        super_compress, ColorSpace, JpgTextureLoader, TextureDescriptor, JPG_TEST_TEXTURE,
-    };
+    use crate::texture::codecs::{JpgTextureLoader, TextureDescriptor};
+    use crate::texture::common::JPG_TEST_TEXTURE;
+    use crate::texture::compression::*;
+    use crate::texture::container::ColorSpace;
     use fabled_core::concurrent::thread_op::ThreadOperation;
 
     #[test]
     fn compression_test() {
         let jpg_loader = JpgTextureLoader::default();
-        let jpgyellow = jpg_loader
+        let jpg_yellow = jpg_loader
             .load(
                 JPG_TEST_TEXTURE,
                 &TextureDescriptor {
@@ -101,7 +100,7 @@ mod basis_compression_test {
             .unwrap();
 
         let basis_texture = super_compress(
-            &jpgyellow,
+            &jpg_yellow,
             &CompressionDescriptor {
                 compression_format: BasisCompressionFormat::UASTC4x4,
                 compression_quality: CompressionQuality::Default,
@@ -110,8 +109,9 @@ mod basis_compression_test {
                 rdo_desc: None,
             },
             ThreadOperation::Automatic,
-        );
+        )
+        .unwrap();
 
-        std::fs::write("D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\basisyellow.basis", basis_texture.data).unwrap();
+        std::fs::write("D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\basis_yellow.basis", basis_texture.data).unwrap();
     }
 }

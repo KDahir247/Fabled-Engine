@@ -1,3 +1,3 @@
-pub mod decode;
+mod decode;
 
 pub use decode::*;

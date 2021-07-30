@@ -81,8 +81,8 @@ pub fn convert_shader(
 
 #[cfg(test)]
 mod converter_test {
-    use crate::init_shader_test_env;
     use crate::shader::converter::*;
+    use crate::shader::init_shader_test_env;
     use crate::shader::parser::*;
 
     //unwrapping None fails the test since it throws an panic.
@@ -247,21 +247,21 @@ mod converter_test {
             )
         }
 
-        let spirv_vertex_representation = convert_shader(
+        let spir_v_vertex_representation = convert_shader(
             ShaderConvertOption::Spv {
                 option: SpvOptions::Default,
             },
             &glsl_vert_parse.module,
         )
         .unwrap();
-        let spirv_fragment_representation = convert_shader(
+        let spir_v_fragment_representation = convert_shader(
             ShaderConvertOption::Spv {
                 option: SpvOptions::Default,
             },
             &glsl_frag_parse.module,
         )
         .unwrap();
-        let spirv_compute_representation = convert_shader(
+        let spir_v_compute_representation = convert_shader(
             ShaderConvertOption::Spv {
                 option: SpvOptions::Default,
             },
@@ -271,30 +271,30 @@ mod converter_test {
 
         //SPIR-V
 
-        if let ShaderConvertResult::Spv(v) = spirv_vertex_representation {
+        if let ShaderConvertResult::Spv(v) = spir_v_vertex_representation {
             println!("SPV VERTEX INTERPRETATION\n {:?}", v);
         } else {
             panic!(
                 "SPV decode failed and return another data type other than spv\n{:?}",
-                spirv_vertex_representation
+                spir_v_vertex_representation
             )
         }
 
-        if let ShaderConvertResult::Spv(v) = spirv_fragment_representation {
+        if let ShaderConvertResult::Spv(v) = spir_v_fragment_representation {
             println!("SPV FRAGMENT INTERPRETATION\n {:?}", v);
         } else {
             panic!(
                 "SPV decode failed and return another data type other than spv\n{:?}",
-                spirv_fragment_representation
+                spir_v_fragment_representation
             )
         }
 
-        if let ShaderConvertResult::Spv(v) = spirv_compute_representation {
+        if let ShaderConvertResult::Spv(v) = spir_v_compute_representation {
             println!("SPV COMPUTE INTERPRETATION\n {:?}", v);
         } else {
             panic!(
                 "SPV decode failed and return another data type other than spv\n{:?}",
-                spirv_compute_representation
+                spir_v_compute_representation
             )
         }
     }

@@ -1,10 +1,6 @@
-use gltf::image::{Format, Source};
-
-use rayon::iter::{ParallelBridge, ParallelIterator};
-
-pub struct GltfLoader {
+/*pub struct GltfLoader {
     width: u32,
-}
+}*/
 
 pub fn run() {
     /*let target = std::path::Path::new("example/anime/scene.gltf");
