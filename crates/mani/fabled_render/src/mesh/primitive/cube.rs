@@ -51,69 +51,48 @@ impl Cube {
         let cube_data = &CUBE_DATA;
 
         let mut container = Vec::with_capacity(24);
+        let mut temp_storage = [Vertex::default(); 4];
+        for chuck in 0..6 {
+            let normal = cube_data.normal[chuck];
+            let tangent = cube_data.tangent[chuck];
+            let bi_tangent = cube_data.bi_tangent[chuck];
 
-        for index in 0..6 {
-            let normal = cube_data.normal[index];
-            let tangent = cube_data.tangent[index];
-            let bi_tangent = cube_data.bi_tangent[index];
+            let corners = [
+                (normal - bi_tangent - tangent) * size,
+                (normal - bi_tangent + tangent) * size,
+                (normal + bi_tangent + tangent) * size,
+                (normal + bi_tangent - tangent) * size,
+            ];
 
-            let corner_0 = (normal - bi_tangent - tangent) * size;
-            let corner_1 = (normal - bi_tangent + tangent) * size;
-            let corner_2 = (normal + bi_tangent + tangent) * size;
-            let corner_3 = (normal + bi_tangent - tangent) * size;
-
-            let indices = [
-                index * 3,
-                index * 3 + 1,
-                index * 3 + 2,
-                index * 3 + 2,
-                index * 3 + 3,
-                index * 3,
+            let indices = vec![
+                chuck * 3,
+                chuck * 3 + 1,
+                chuck * 3 + 2,
+                chuck * 3 + 2,
+                chuck * 3 + 3,
+                chuck * 3,
             ];
 
             let normal_result = normal.to_array();
             let tangent_result = tangent.extend(1.0).to_array();
             let bi_tangent_result = bi_tangent.extend(1.0).to_array();
 
-            let tex_coord_0 = [(corner_0.x + 1.) * 0.5, (corner_0.y + 1.) * 0.5];
-            let tex_coord_1 = [(corner_1.x + 1.) * 0.5, (corner_1.y + 1.) * 0.5];
-            let tex_coord_2 = [(corner_2.x + 1.) * 0.5, (corner_2.y + 1.) * 0.5];
-            let tex_coord_3 = [(corner_3.x + 1.) * 0.5, (corner_3.y + 1.) * 0.5];
+            for (index, corner) in corners.iter().enumerate() {
+                let tex_coord = [corner.x.signum(), corner.y.signum()];
 
-            //0,1,2,2,3,0
+                temp_storage[index] = Vertex {
+                    position: corner.to_array(),
+                    tex_coord,
+                    normal: normal_result,
+                    tangent: tangent_result,
+                    bi_tangent: bi_tangent_result,
+                }
+            }
+
             container.push(Mesh {
-                vertices: vec![
-                    Vertex {
-                        position: corner_0.to_array(),
-                        tex_coord: tex_coord_0,
-                        normal: normal_result,
-                        tangent: tangent_result,
-                        bi_tangent: bi_tangent_result,
-                    },
-                    Vertex {
-                        position: corner_1.to_array(),
-                        tex_coord: tex_coord_1,
-                        normal: normal_result,
-                        tangent: tangent_result,
-                        bi_tangent: bi_tangent_result,
-                    },
-                    Vertex {
-                        position: corner_2.to_array(),
-                        tex_coord: tex_coord_2,
-                        normal: normal_result,
-                        tangent: tangent_result,
-                        bi_tangent: bi_tangent_result,
-                    },
-                    Vertex {
-                        position: corner_3.to_array(),
-                        tex_coord: tex_coord_3,
-                        normal: normal_result,
-                        tangent: tangent_result,
-                        bi_tangent: bi_tangent_result,
-                    },
-                ],
+                vertices: temp_storage.to_vec(),
                 material_id: 0,
-                indices: indices.to_vec(),
+                indices,
             });
         }
 
@@ -130,6 +109,6 @@ mod test {
 
     #[test]
     fn test() {
-        Cube::new(0.3);
+        Cube::new(0.7);
     }
 }
