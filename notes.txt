@@ -98,9 +98,7 @@ cargo miri test
 cargo miri run
 
 Reference game engine
-
 Defold, Amethyst, Bevy, Cocos2d, Coffee, Cryengine, Godot, Macroquad, Monogame, Panda3d, R3D, Stride
 
 
-Look at cocos2d-x-4 CCTextureUtils.h and CCTextureUtils.cpp for texture conversion.
 

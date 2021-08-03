@@ -1,0 +1,198 @@
+pub fn transpose_4x4_array<T: Copy>(
+    input: &[T; 16],
+    output: &mut [T; 16],
+    width: usize,
+    height: usize,
+) {
+    //Note this is a internal implementation and should not be considered to be public.
+    for y in 0..height {
+        for x in 0..width {
+            let input_index = y + x * width;
+            let output_index = x + y * height;
+
+            *output.get_mut(output_index).expect("") = *input.get(input_index).expect("");
+        }
+    }
+}
+
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Vertex {
+    pub position: [f32; 3],   //x, y, z
+    pub tex_coord: [f32; 2],  //u, v
+    pub normal: [f32; 3],     //x, y, z
+    pub tangent: [f32; 4],    //x, y, z, w
+    pub bi_tangent: [f32; 4], //x, y, z, w
+}
+
+impl Default for Vertex {
+    fn default() -> Self {
+        Self {
+            position: [0.0; 3],
+            tex_coord: [0.0; 2],
+            normal: [0.0; 3],
+            tangent: [0.0; 4],
+            bi_tangent: [0.0; 4],
+        }
+    }
+}
+
+
+#[allow(dead_code)]
+const CUBE_FACE_COUNT: usize = 6;
+
+//Maybe reverse this
+#[allow(dead_code)]
+//EXTRA COORD W IS FOR PADDING might make it 24
+const FACE_NORMALS: [f32; 18] = [
+    0.0, 0.0, 1.0, // Front
+    0.0, 0.0, -1.0, // Back
+    1.0, 0.0, 0.0, // Right
+    -1.0, 0.0, 0.0, // Left
+    0.0, 1.0, 0.0, // Up
+    0.0, -1.0, 0.0, // Down
+];
+
+//Maybe reverse this
+#[allow(dead_code)]
+const FACE_TANGENTS: [f32; 24] = [
+    -1.0, 0.0, 0.0, 1.0, // Front
+    -1.0, 0.0, 0.0, 1.0, // Back
+    0.0, 0.0, -1.0, 1.0, // Right
+    0.0, 0.0, 1.0, 1.0, // Left
+    -1.0, 0.0, 0.0, 1.0, // Up
+    -1.0, 0.0, 0.0, 1.0, // Down
+];
+
+//Maybe reverse this
+#[allow(dead_code)]
+const FACE_BI_TANGENTS: [f32; 24] = [
+    0.0, -1.0, 0.0, 1.0, // Front
+    0.0, 1.0, 0.0, 1.0, // Back
+    0.0, 1.0, 0.0, 1.0, // Right
+    0.0, 1.0, 0.0, 1.0, // Left
+    0.0, 0.0, 1.0, 1.0, // Up
+    0.0, 0.0, -1.0, 1.0, // Down
+];
+
+#[allow(dead_code)]
+const TEXTURE_COORDINATES: [f32; 8] = [
+    1.0, 0.0, // Bottom Right
+    1.0, 1.0, // Top Right
+    0.0, 1.0, //
+    0.0, 0.0,
+];
+
+pub struct Cube {
+    //todo maybe make a a structure of array
+//face_vertices: [Vertex; CUBE_FACE_COUNT as usize], //maybe remove
+}
+
+impl Default for Cube {
+    fn default() -> Self {
+        Self{}
+    }
+}
+
+impl Cube {
+    pub fn new(size: f32) {
+            let mut normal_faces = &FACE_NORMALS[0..18];
+        let mut tangent_faces = &FACE_TANGENTS[0..24];
+        let mut bi_tangent_faces = &FACE_BI_TANGENTS[0..24];
+
+        let mut container = Vec::with_capacity(6);
+
+        while normal_faces.len() >= 6 {
+            let normal = [normal_faces[0], normal_faces[1], normal_faces[2]];
+
+            let bi_tangent = [
+                bi_tangent_faces[0],
+                bi_tangent_faces[1],
+                bi_tangent_faces[2],
+                bi_tangent_faces[3],
+            ];
+
+            let tangent = [
+                tangent_faces[0],
+                tangent_faces[1],
+                tangent_faces[2],
+                tangent_faces[3],
+            ];
+
+            let corner_01 = normal[0] - bi_tangent[0] - tangent[0];
+            let corner_02 = normal[0] - bi_tangent[0] + tangent[0];
+            let corner_03 = normal[0] + bi_tangent[0] + tangent[0];
+            let corner_04 = normal[0] + bi_tangent[0] - tangent[0];
+
+            let corner_11 = normal[1] - bi_tangent[1] - tangent[1];
+            let corner_12 = normal[1] - bi_tangent[1] + tangent[1];
+            let corner_13 = normal[1] + bi_tangent[1] + tangent[1];
+            let corner_14 = normal[1] + bi_tangent[1] - tangent[1];
+
+            let corner_21 = normal[2] - bi_tangent[2] - tangent[2];
+            let corner_22 = normal[2] - bi_tangent[2] + tangent[2];
+            let corner_23 = normal[2] + bi_tangent[2] + tangent[2];
+            let corner_24 = normal[2] + bi_tangent[2] - tangent[2];
+
+            //One bundle for a face and the inverse of the the face.
+            let corners_container = [
+                corner_01, //1
+                corner_11, //1
+                corner_21, //1
+                //
+                corner_02, //2
+                corner_12, //2
+                corner_22, //2
+                //
+                corner_03, //3
+                corner_13, //3
+                corner_23, //3
+                //
+                corner_04, //4
+                corner_14, //4
+                corner_24, //4
+                //
+                corner_01 * -1.0, //5
+                corner_11 * -1.0, //5
+                corner_21 * -1.0, //5
+                //
+                corner_02 * -1.0, //6
+                corner_12 * -1.0, //6
+                corner_22 * -1.0, //6
+                //
+                corner_03 * -1.0, //7
+                corner_13 * -1.0, //7
+                corner_23 * -1.0, //7
+                //
+                corner_04 * -1.0, //8
+                corner_14 * -1.0, //8
+                corner_24 * -1.0, //8
+            ];
+
+            for face_index in 0..8 {
+                let x = face_index * 3;
+                let y = face_index * 3 + 1;
+                let z = face_index * 3 + 2;
+
+                let v_position_x = corners_container[x] * size;
+                let v_position_y = corners_container[y] * size;
+                let v_position_z = corners_container[z] * size;
+
+                container.push(Vertex {
+                    position: [v_position_x, v_position_y, v_position_z],
+                    tex_coord: [(v_position_x + 1.) * 0.5, (v_position_y + 1.) * 0.5],
+                    normal,
+                    tangent,
+                    bi_tangent,
+                });
+            }
+
+            normal_faces = &normal_faces[6..];
+            tangent_faces = &tangent_faces[8..];
+            bi_tangent_faces = &bi_tangent_faces[8..];
+        }
+
+
+    }
+}

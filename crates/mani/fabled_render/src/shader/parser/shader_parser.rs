@@ -7,6 +7,7 @@ const AUTO_GEN_MESSAGE : &str = "//This is auto generated code. Do not modify co
 
 #[repr(align(128))]
 pub struct ShaderParser {
+    //todo maybe remove struct and just return naga::module
     pub module: naga::Module,
 }
 

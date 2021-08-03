@@ -12,7 +12,7 @@ codegen-units = 3
 panic = "abort"
 
 [lib]
-name = "lib"
+name = "core"
 path = "crates/mani/lib/src/lib.rs"
 
 [workspace]

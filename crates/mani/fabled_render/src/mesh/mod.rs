@@ -1,6 +1,7 @@
-pub use mesh_data::*;
-pub use vertex::*;
+pub use container::*;
+pub use primitive::*;
 
-mod mesh_data;
-pub mod model;
-mod vertex;
+mod container;
+mod indices;
+mod primitive;
+mod util;
