@@ -8,7 +8,7 @@ pub struct CubeData {
     pub bi_tangent: [glam::Vec3A; 6],
 }
 
-const CUBE_DATA: CubeData = CubeData {
+const CUBE_FACE_DATA: CubeData = CubeData {
     normal: [
         glam::const_vec3a!([0.0, 0.0, 1.0]),  // Front
         glam::const_vec3a!([0.0, 0.0, -1.0]), // Back
@@ -48,14 +48,14 @@ impl Default for Cube {
 
 impl Cube {
     pub fn new(size: f32) -> Cube {
-        let cube_data = &CUBE_DATA;
+        let cube_data = &CUBE_FACE_DATA;
 
         let mut container = Vec::with_capacity(24);
-        let mut temp_storage = [Vertex::default(); 4];
-        for chuck in 0..6 {
-            let normal = cube_data.normal[chuck];
-            let tangent = cube_data.tangent[chuck];
-            let bi_tangent = cube_data.bi_tangent[chuck];
+        let mut temp_vert_storage = [Vertex::default(); 4];
+        for chunk in 0..6 {
+            let normal = cube_data.normal[chunk];
+            let tangent = cube_data.tangent[chunk];
+            let bi_tangent = cube_data.bi_tangent[chunk];
 
             let corners = [
                 (normal - bi_tangent - tangent) * size,
@@ -65,12 +65,12 @@ impl Cube {
             ];
 
             let indices = vec![
-                chuck * 3,
-                chuck * 3 + 1,
-                chuck * 3 + 2,
-                chuck * 3 + 2,
-                chuck * 3 + 3,
-                chuck * 3,
+                chunk * 3,
+                chunk * 3 + 1,
+                chunk * 3 + 2,
+                chunk * 3 + 2,
+                chunk * 3 + 3,
+                chunk * 3,
             ];
 
             let normal_result = normal.to_array();
@@ -80,7 +80,7 @@ impl Cube {
             for (index, corner) in corners.iter().enumerate() {
                 let tex_coord = [corner.x.signum(), corner.y.signum()];
 
-                temp_storage[index] = Vertex {
+                temp_vert_storage[index] = Vertex {
                     position: corner.to_array(),
                     tex_coord,
                     normal: normal_result,
@@ -90,7 +90,7 @@ impl Cube {
             }
 
             container.push(Mesh {
-                vertices: temp_storage.to_vec(),
+                vertices: temp_vert_storage.to_vec(),
                 material_id: 0,
                 indices,
             });

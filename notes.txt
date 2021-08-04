@@ -97,8 +97,6 @@ transfromation matrix formula
 cargo miri test
 cargo miri run
 
-Reference game engine
-Defold, Amethyst, Bevy, Cocos2d, Coffee, Cryengine, Godot, Macroquad, Monogame, Panda3d, R3D, Stride
 
 
 
