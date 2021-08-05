@@ -35,6 +35,7 @@ const CUBE_FACE_DATA: CubeData = CubeData {
     ],
 };
 
+#[derive(Debug)]
 pub struct Cube {
     #[allow(dead_code)]
     model: Model,
@@ -48,14 +49,14 @@ impl Default for Cube {
 
 impl Cube {
     pub fn new(size: f32) -> Cube {
-        let cube_data = &CUBE_FACE_DATA;
+        const CUBE_DATA: &CubeData = &CUBE_FACE_DATA;
 
         let mut container = Vec::with_capacity(24);
         let mut temp_vert_storage = [Vertex::default(); 4];
         for chunk in 0..6 {
-            let normal = cube_data.normal[chunk];
-            let tangent = cube_data.tangent[chunk];
-            let bi_tangent = cube_data.bi_tangent[chunk];
+            let normal = CUBE_DATA.normal[chunk];
+            let tangent = CUBE_DATA.tangent[chunk];
+            let bi_tangent = CUBE_DATA.bi_tangent[chunk];
 
             let corners = [
                 (normal - bi_tangent - tangent) * size,
@@ -78,7 +79,7 @@ impl Cube {
             let bi_tangent_result = bi_tangent.extend(1.0).to_array();
 
             for (index, corner) in corners.iter().enumerate() {
-                let tex_coord = [corner.x.signum(), corner.y.signum()];
+                let tex_coord = [corner.x.signum() * 0.5 + 0.5, corner.y.signum() * 0.5 + 0.5];
 
                 temp_vert_storage[index] = Vertex {
                     position: corner.to_array(),
@@ -96,7 +97,7 @@ impl Cube {
             });
         }
 
-        println!("{:?}", container);
+        //println!("{:?}", container);
         Cube {
             model: Model { meshes: container },
         }

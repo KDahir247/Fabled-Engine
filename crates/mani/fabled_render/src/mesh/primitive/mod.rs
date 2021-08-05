@@ -10,4 +10,5 @@ mod teapot;
 mod torus;
 mod uvsphere;
 
+pub use cone::*;
 pub use cube::*;

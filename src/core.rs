@@ -1,5 +1,4 @@
 use lib::component::prelude::*;
-
 mod graphic;
 mod setup;
 mod window;
