@@ -6,7 +6,6 @@ mod icosphere;
 mod plane;
 mod quad;
 mod sphere;
-mod teapot;
 mod torus;
 mod uvsphere;
 

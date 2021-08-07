@@ -145,7 +145,6 @@ pub fn load_model_system(
                 .map(|mat : &tobj::Material|{
                     let diffuse_path : &String = &mat.diffuse_texture;
 
-                    println!("{}", &mat.normal_texture);
                     //todo once loaded we dont need to store it????????????
                     let diffuse_texture = load(&render.core.device, &render.pass.queue, parent_directory.join(diffuse_path)).unwrap();
 
@@ -168,7 +167,7 @@ pub fn load_model_system(
                 .map(|m : &tobj::Model|{
 
                     let mut vertices: Vec<VertexRaw> = (0..m.mesh.positions.len() / 3)
-                        .into_par_iter()
+                        .into_iter()
                         .map(|i|{
 
                             let vertex : [f32 ; 3] =
@@ -197,6 +196,9 @@ pub fn load_model_system(
                                 ]
                             };
 
+                            //todo remove
+                            //println!("{} texture coord {:?}",i, tex_coord);
+                            //println!("{} vertex {:?}",i, &vertex);
                             VertexRaw{
                                 position: glam::const_vec3!(vertex),
                                 tex_coord: glam::const_vec2!(tex_coord),
@@ -262,6 +264,9 @@ pub fn load_model_system(
 
                         vertex.tangent = reject(n,t.truncate()).normalize().extend(w);
                     }
+
+                    //todo remove
+                    //println!("indices {:?}", &m.mesh.indices);
 
                     let vertex_buffer = render.core.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
                         label: Some("Vertex Buffer"),

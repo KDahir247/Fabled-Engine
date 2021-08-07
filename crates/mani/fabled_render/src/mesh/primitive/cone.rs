@@ -1,8 +1,8 @@
-use crate::mesh::Model;
-
 #[allow(dead_code)]
 const PI_DIV_180: f32 = 0.017_453_292; //excessive precision truncation. (0.01745329251994329576923690768489)]
-
+                                       //blender has an normal offset of 0.0596445 of z
+                                       //normal offset of 0.0644555 of x
+                                       //normal offset of -0.0017136 of y
 #[derive(Debug)]
 pub struct Cone {
     //model: Model,
@@ -21,6 +21,8 @@ impl Cone {
         height: f32,
         apex_position: [f32; 3],
     ) -> Cone {
+        let mut vertex_buffer = Vec::new();
+
         //We can't technically have a cone with less than three tessellation slice for the base. right?
         tessellation_slice = tessellation_slice.max(3);
 
@@ -39,23 +41,39 @@ impl Cone {
         let slope_sin = radius / slant_height; //cone_angle.sin();
         let slope_cos = height / slant_height; //cone_angle.cos();
 
-        //Center vertex
-        println!("{}", center);
-        //normal is pointing downwards.
-        for i in 0..tessellation_slice {
-            let (rad_sin, rad_cos) = (angle_inc * i as f32).sin_cos();
-
-            let tex_coord = glam::vec2(i as f32 / tessellation, 1. - (i as f32 / tessellation));
+        //Calculate the Cone
+        let intro_vertex = center + (basis) * radius;
+        vertex_buffer.push(intro_vertex);
+        // Cone vertex
+        for cone_index in 1..tessellation_slice {
+            let (rad_sin, rad_cos) = (angle_inc * cone_index as f32).sin_cos();
             let vertex = center + (basis * rad_cos + forward_dir * rad_sin) * radius;
+
             let normal = glam::vec3a(slope_cos * rad_cos, slope_sin, slope_cos * rad_sin);
 
-            println!("vertex {}", vertex);
-            println!("normal {}", normal);
-            println!("tex_coord {} \n", tex_coord);
+            vertex_buffer.push(apex_position);
+            vertex_buffer.push(vertex);
+            vertex_buffer.push(vertex);
         }
-        // Apex vertex
-        println!("{}", apex_position);
-        //for the last element we know that will be the apex  of the cone so we can multiple by height.
+
+        vertex_buffer.push(apex_position);
+        vertex_buffer.push(vertex_buffer[0]);
+
+        //
+
+        for base_index in 0..tessellation_slice {
+            let (rad_sin, rad_cos) = (angle_inc * base_index as f32).sin_cos();
+            let vertex = center + (basis * rad_cos + forward_dir * rad_sin) * radius;
+
+            // calculate the normal
+            // calculate the tangent
+            // calculate the bi-normal
+
+            vertex_buffer.push(vertex);
+        }
+
+        println!("{:?}", vertex_buffer);
+
         Cone {}
     }
 }
@@ -66,6 +84,6 @@ mod test {
 
     #[test]
     fn test() {
-        let x = Cone::new(1.0, 33, 2., [0.0, 2.0, 0.0]);
+        let x = Cone::new(1.0, 6, 2., [0.0, 1.0, 0.0]);
     }
 }

@@ -118,7 +118,6 @@ fn fs_main( in : VertexOutput) -> FragmentOutput{
     out.color.z = select(1.0 * grid_alpha, out.color.z, length(r.z) < 0.05);
 
     out.color = out.color * select(0.0, 1.0, t < 0.0);
-
     out.color.a =  out.color.a * fading_factor;
 
 
