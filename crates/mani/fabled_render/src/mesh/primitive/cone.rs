@@ -10,30 +10,6 @@ struct ConeData {
     pub uv: [glam::Vec2; 2],
 }
 
-#[allow(dead_code)]
-const CONE_DATA: ConeData = ConeData {
-    position: [
-        glam::const_vec3a!([0.0, 1.0, 0.0]), // Apex position
-        glam::const_vec3a!([0.0, 0.0, 0.0]), // Base-Center position
-    ],
-    normal: [
-        glam::const_vec3a!([0.0, 1.0, 0.0]),  // Apex normal
-        glam::const_vec3a!([0.0, -1.0, 0.0]), // Base-Center normal
-    ],
-    tangent: [
-        glam::const_vec4!([-1.0, 0.0, 0.0, 1.0]), // Apex tangent
-        glam::const_vec4!([-1.0, 0.0, 0.0, 1.0]), // Base-Center tangent
-    ],
-    bi_tangent: [
-        glam::const_vec4!([0.0, 0.0, 1.0, 1.0]),  // Apex bi tangent
-        glam::const_vec4!([0.0, 0.0, -1.0, 1.0]), // Base-Center bi tangent
-    ],
-    uv: [
-        glam::const_vec2!([0.0, 1.0]),  // Apex uv
-        glam::const_vec2!([0.0, -1.0]), // Base-Center uv
-    ],
-};
-
 #[derive(Debug)]
 pub struct Cone {
     model: Model,
