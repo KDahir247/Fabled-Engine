@@ -1,3 +1,3 @@
-pub enum Indices{
-    U16()
+pub enum Indices {
+    U16(),
 }

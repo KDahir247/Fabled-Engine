@@ -1,7 +1,7 @@
 # Blender v2.93.0 OBJ File: ''
 # www.blender.org
 mtllib untitled.mtl
-o Cone_Cone.001
+o Cone
 v 0.000000 -1.000000 -1.000000
 v 0.866025 -1.000000 -0.500000
 v 0.866025 -1.000000 0.500000

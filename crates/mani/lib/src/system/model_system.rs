@@ -196,9 +196,6 @@ pub fn load_model_system(
                                 ]
                             };
 
-                            //todo remove
-                            //println!("{} texture coord {:?}",i, tex_coord);
-                            //println!("{} vertex {:?}",i, &vertex);
                             VertexRaw{
                                 position: glam::const_vec3!(vertex),
                                 tex_coord: glam::const_vec2!(tex_coord),
@@ -264,9 +261,6 @@ pub fn load_model_system(
 
                         vertex.tangent = reject(n,t.truncate()).normalize().extend(w);
                     }
-
-                    //todo remove
-                    //println!("indices {:?}", &m.mesh.indices);
 
                     let vertex_buffer = render.core.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
                         label: Some("Vertex Buffer"),

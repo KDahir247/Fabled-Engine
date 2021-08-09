@@ -1,8 +1,8 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
-#[repr(C)]
+#[repr(C, align(16))]
 #[derive(Debug)]
-pub struct CubeData {
+struct CubeData {
     pub normal: [glam::Vec3A; 6],
     pub tangent: [glam::Vec3A; 6],
     pub bi_tangent: [glam::Vec3A; 6],
@@ -97,7 +97,6 @@ impl Cube {
             });
         }
 
-        //println!("{:?}", container);
         Cube {
             model: Model { meshes: container },
         }
