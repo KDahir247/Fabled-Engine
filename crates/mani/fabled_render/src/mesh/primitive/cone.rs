@@ -1,8 +1,5 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
-#[allow(dead_code)]
-const PI_DIV_180: f32 = 0.017_453_292;
-
 #[repr(C, align(16))]
 #[derive(Debug)]
 struct ConeData {
@@ -61,19 +58,14 @@ impl Cone {
         //We can't technically have a cone with less than three tessellation slice for the base. right?
         tessellation_slice = tessellation_slice.max(3);
 
-        let tessellation: f32 = tessellation_slice as f32;
-        let apex_position = glam::Vec3A::from_slice(&apex_position);
+        let apex_position = glam::const_vec3a!(apex_position);
 
-        let base_to_apex_dir = (apex_position - glam::Vec3A::ZERO).normalize(); // hard coded. Vec3A::Zero should be base position.
-        let forward_dir = glam::Vec3A::X.cross(base_to_apex_dir).normalize();
+        //let base_to_apex_dir = apex_position.normalize(); // hard coded. Vec3A::Zero should be base position. (apex_position - glam::Vec3A::ZERO) //center instead of zero.
+        let forward_dir = glam::Vec3A::X.cross(apex_position.normalize());
+        let center = apex_position + (-apex_position.normalize() * height);
 
-        let center = apex_position + (-base_to_apex_dir * height);
-
-        let angle_inc = 360.0 / tessellation * PI_DIV_180;
-        let slant_height = (radius * radius + height * height).sqrt();
-
-        let slope_sin = radius / slant_height;
-        let slope_cos = height / slant_height;
+        // 360.0 / tessellation * PI_DIV_180(0.017_453_292) == 2.0 * PI /tessellation
+        let angle_inc = 2.0 * std::f32::consts::PI / tessellation_slice as f32;
 
         // Apex Vertex
         vertex_buffer.push(Vertex {
@@ -95,21 +87,18 @@ impl Cone {
 
         // Cone vertex
         for side in 0..=tessellation_slice {
-            let side = side as f32;
-            let (rad_sin, rad_cos) = (angle_inc * side).sin_cos();
+            let (rad_sin, rad_cos) = (angle_inc * side as f32).sin_cos();
 
             let vertex = center + (glam::Vec3A::X * rad_cos + forward_dir * rad_sin) * radius;
-
-            let normal =
-                glam::vec3a(slope_cos * rad_cos, slope_sin, slope_cos * rad_sin).normalize();
+            let slant_height = glam::Vec3A::Y - vertex;
 
             let tangent = vertex.normalize().cross(glam::Vec3A::Y);
-
+            let normal = slant_height.cross(tangent).normalize();
             let bi_tangent = normal.cross(tangent);
 
             vertex_buffer.push(Vertex {
                 position: vertex.to_array(),
-                tex_coord: [side / tessellation, 0.0],
+                tex_coord: [side as f32 / tessellation_slice as f32, 0.0],
                 normal: normal.to_array(),
                 tangent: tangent.extend(1.0).to_array(),
                 bi_tangent: bi_tangent.extend(1.0).to_array(),
@@ -117,20 +106,14 @@ impl Cone {
         }
 
         //indices
-        const TOP: usize = 0;
-        const BOTTOM: usize = 1;
-
         for point in 2..tessellation_slice + 2 {
-            let left = point + 1;
-            let right = point;
+            indices.push(0); // top
+            indices.push(point + 1); // left
+            indices.push(point); // right
 
-            indices.push(TOP);
-            indices.push(left);
-            indices.push(right);
-
-            indices.push(BOTTOM);
-            indices.push(right);
-            indices.push(left);
+            indices.push(1); // bottom
+            indices.push(point); // right
+            indices.push(point + 1); // left
         }
 
         let mesh = Mesh {
