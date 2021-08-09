@@ -90,10 +90,11 @@ impl Cone {
             let (rad_sin, rad_cos) = (angle_inc * side as f32).sin_cos();
 
             let vertex = center + (glam::Vec3A::X * rad_cos + forward_dir * rad_sin) * radius;
-            let slant_height = glam::Vec3A::Y - vertex;
+            //slant_height = slant_height_vector.length();
+            let slant_height_vector = glam::Vec3A::Y - vertex;
 
             let tangent = vertex.normalize().cross(glam::Vec3A::Y);
-            let normal = slant_height.cross(tangent).normalize();
+            let normal = slant_height_vector.cross(tangent).normalize();
             let bi_tangent = normal.cross(tangent);
 
             vertex_buffer.push(Vertex {
