@@ -96,7 +96,7 @@ fn setup_world_camera(
         aspect: size.width as f32 / size.height as f32,
         fovy: 60.0_f32.to_radians(),
         znear: 0.1,
-        zfar: 100.0,
+        zfar: 10000.0, //change back to 100
     };
 
     let camera_uniform: CameraUniform = CameraUniform::create(device, &orientation, &projection);

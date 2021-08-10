@@ -22,7 +22,7 @@ pub fn calc_camera_matrix(camera: &camera_component::CameraOrientation) -> glam:
 
 pub fn calc_proj_matrix(projection: &camera_component::Projection) -> glam::Mat4 {
     constant::OPENGL_TO_WGPU_MATRIX
-        * glam::Mat4::perspective_rh_gl(
+        * glam::Mat4::perspective_rh(
             projection.fovy,
             projection.aspect,
             projection.znear,
