@@ -1,15 +1,22 @@
 use crate::mesh::primitive::capsule::CapsuleUvProfile::Aspect;
-use crate::mesh::util::{clamp_ss, min_ss};
-use crate::mesh::Model;
+use crate::mesh::util::min_ss;
+use crate::mesh::{Mesh, Model, Vertex};
 
+#[derive(Debug, Copy, Clone)]
 pub enum CapsuleUvProfile {
-    Aspect,
-    Uniform,
-    Fixed,
+    Aspect = 0,
+    Uniform = 1,
+    Fixed = 2,
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct Capsule {
-    model: Model,
+    pub radius: f32,
+    pub rings: u32,
+    pub depth: f32,
+    pub latitude: usize,
+    pub longitude: usize,
+    pub v_profile: CapsuleUvProfile,
 }
 
 impl Default for Capsule {
@@ -19,38 +26,62 @@ impl Default for Capsule {
 }
 
 impl Capsule {
-    //radius (top?, bottom?, vertical?, horizontal? or both), length, center, rotation, axis, depth
     pub fn new(
         radius: f32,
-        rings: usize,
+        rings: u32,
         depth: f32,
         latitude: usize,
         longitude: usize,
         profile: CapsuleUvProfile,
     ) -> Capsule {
+        Capsule {
+            radius,
+            rings,
+            depth,
+            latitude,
+            longitude,
+            v_profile: profile,
+        }
+    }
+}
+
+impl From<Capsule> for Model {
+    fn from(capsule: Capsule) -> Self {
         /*
-          code adapted from https://behreajj.medium.com/making-a-capsule-mesh-via-script-in-five-3d-environments-c2214abf02db
+          code adapted with modifications from https://behreajj.medium.com/making-a-capsule-mesh-via-script-in-five-3d-environments-c2214abf02db
           provided by bevy. Thank you Bevy Community! \(ᵔᵕᵔ)/
         */
 
+        let Capsule {
+            radius,
+            rings,
+            depth,
+            latitude,
+            longitude,
+            v_profile,
+        } = capsule;
+
+        let rings = rings as usize;
+
         let calc_middle = min_ss(rings as f32, 1.0);
         let half_lats = latitude >> 1; //equal to latitude / 2;
-        let half_latsn1 = half_lats - 1;
-        let half_latsn2 = half_latsn1 - 1;
-        let ringsp1 = rings + 1;
-        let longsp1 = longitude + 1;
+        let half_lats_sub_1 = half_lats - 1;
+        let half_lats_sub_2 = half_lats_sub_1 - 1;
+        let rings_add_1 = rings + 1;
+        let longs_add_1 = longitude + 1;
         let half_depth = depth * 0.5;
         let summit = half_depth + radius;
 
         //Vertex index offsets;
-        let vert_offset_north_hemi = longitude;
-        let vert_offset_north_equator = vert_offset_north_hemi + longsp1 * half_latsn1;
-        let vertex_offset_cylinder = vert_offset_north_equator + longsp1;
-        let vertex_offset_south_equator = vertex_offset_cylinder + longsp1 * rings;
+        let vert_offset_north_hemisphere = longitude;
+        let vert_offset_north_equator =
+            vert_offset_north_hemisphere + longs_add_1 * half_lats_sub_1;
+        let vertex_offset_cylinder = vert_offset_north_equator + longs_add_1;
+        let vertex_offset_south_equator = vertex_offset_cylinder + longs_add_1 * rings; //if ring is zero then vertex_offset_cylinder + 0;
 
-        let vert_offset_south_hemi = vertex_offset_south_equator + longsp1;
-        let vert_offset_south_polar = vert_offset_south_hemi + longsp1 * half_latsn2;
-        let vert_offset_south_cap = vert_offset_south_polar + longsp1;
+        let vert_offset_south_hemisphere = vertex_offset_south_equator + longs_add_1;
+        let vert_offset_south_polar = vert_offset_south_hemisphere + longs_add_1 * half_lats_sub_2;
+        let vert_offset_south_cap = vert_offset_south_polar + longs_add_1;
 
         //Initialize arrays.
         let vert_len = vert_offset_south_cap + longitude;
@@ -59,29 +90,31 @@ impl Capsule {
         let mut vts: Vec<glam::Vec2> = vec![glam::Vec2::ZERO; vert_len];
         let mut vns: Vec<glam::Vec3A> = vec![glam::Vec3A::ZERO; vert_len];
 
-        let to_tex_horizontal = 1.0 / longitude as f32;
+        let inv_long = 1.0 / longitude as f32; //to_tex_horizontal
         let inv_lats = 1.0 / latitude as f32;
 
-        let to_theta = 2.0 * std::f32::consts::PI * to_tex_horizontal;
+        let to_theta = 2.0 * std::f32::consts::PI * inv_long;
         let to_phi = std::f32::consts::PI * inv_lats;
         let to_tex_vertical = inv_lats * 2.0;
 
-        let vt_aspect_ratio = match profile {
-            Aspect => radius / (depth + radius + radius),
-            CapsuleUvProfile::Uniform => half_lats as f32 / (ringsp1 + latitude) as f32,
-            CapsuleUvProfile::Fixed => 0.33333334, //f32 representation of 1.0 / 3.0
-        };
+        let aspect_ratio_target = [
+            radius / (depth + radius + radius), //CapsuleUvProfile::Aspect
+            half_lats as f32 / (rings_add_1 + latitude) as f32, //CapsuleUvProfile::Uniform
+            0.333_333_34, //CapsuleUvProfile::Fixed f32 representation of 1.0 / 3.0
+        ];
+
+        let vt_aspect_ratio = aspect_ratio_target[v_profile as usize];
 
         let vt_aspect_north = 1.0 - vt_aspect_ratio;
         let vt_aspect_south = vt_aspect_ratio;
 
         let mut theta_cartesian: Vec<glam::Vec2> = vec![glam::Vec2::ZERO; longitude];
         let mut rho_theta_cartesian: Vec<glam::Vec2> = vec![glam::Vec2::ZERO; longitude];
-        let mut s_texture_cache: Vec<f32> = vec![0.0; longsp1];
+        let mut s_texture_cache: Vec<f32> = vec![0.0; longs_add_1];
 
         for j in 0..longitude {
             let jf = j as f32;
-            let s_texture_polar = 1.0 - ((jf + 0.5) * to_tex_horizontal);
+            let s_texture_polar = 1.0 - ((jf + 0.5) * inv_long);
             let theta = jf * to_theta;
 
             let (sin_theta, cos_theta) = theta.sin_cos();
@@ -96,38 +129,37 @@ impl Capsule {
 
             // South.
             let idx = vert_offset_south_cap + j;
-            vs[idx] = glam::Vec3A::new(0.0, -summit, 0.0);
+            vs[idx] = -vs[j]; // equivalent to glam::Vec3A::new(0.0, -summit, 0.0);
             vts[idx] = glam::Vec2::new(s_texture_polar, 0.0);
             vns[idx] = -glam::Vec3A::Y;
         }
 
         // Equatorial vertices.
-        //println!("{} {}", (0..longsp1).len(), s_texture_cache.len());
-
-        for j in 0..longsp1 {
-            let s_texture = 1.0 - j as f32 * to_tex_horizontal;
-            s_texture_cache[j] = s_texture;
-
+        for (j, cache) in s_texture_cache.iter_mut().enumerate() {
+            let s_texture = 1.0 - j as f32 * inv_long;
+            *cache = s_texture;
             // Wrap to first element upon reaching last.
+
             let j_mod = j % longitude;
+
             let tc = theta_cartesian[j_mod];
             let rtc = rho_theta_cartesian[j_mod];
 
             // North equator.
-            let idxn = vert_offset_north_equator + j;
-            vs[idxn] = glam::Vec3A::new(rtc.x, half_depth, -rtc.y);
-            vts[idxn] = glam::Vec2::new(s_texture, vt_aspect_north);
-            vns[idxn] = glam::Vec3A::new(tc.x, 0.0, -tc.y);
+            let index_n = vert_offset_north_equator + j;
+            vs[index_n] = glam::Vec3A::new(rtc.x, half_depth, -rtc.y);
+            vts[index_n] = glam::Vec2::new(s_texture, vt_aspect_north);
+            vns[index_n] = glam::Vec3A::new(tc.x, 0.0, -tc.y);
 
             // South equator.
-            let idxs = vertex_offset_south_equator + j;
-            vs[idxs] = glam::Vec3A::new(rtc.x, -half_depth, -rtc.y);
-            vts[idxs] = glam::Vec2::new(s_texture, vt_aspect_ratio);
-            vns[idxs] = glam::Vec3A::new(tc.x, 0.0, -tc.y);
+            let index_s = vertex_offset_south_equator + j;
+            vs[index_s] = glam::Vec3A::new(rtc.x, -half_depth, -rtc.y);
+            vts[index_s] = glam::Vec2::new(s_texture, vt_aspect_south);
+            vns[index_s] = vns[index_n];
         }
 
         // Hemisphere vertices.
-        for i in 0..half_latsn1 {
+        for i in 0..half_lats_sub_1 {
             let ip1f = i as f32 + 1.0;
             let phi = ip1f * to_phi;
 
@@ -149,40 +181,40 @@ impl Capsule {
 
             // For texture coordinates.
             let t_tex_fac = ip1f * to_tex_vertical;
-            let cmpl_tex_fac = 1.0 - t_tex_fac;
-            let t_tex_north = cmpl_tex_fac + vt_aspect_north * t_tex_fac;
-            let t_tex_south = cmpl_tex_fac * vt_aspect_south;
+            let cmp_l_tex_fac = 1.0 - t_tex_fac;
+            let t_tex_north = cmp_l_tex_fac + vt_aspect_north * t_tex_fac;
+            let t_tex_south = cmp_l_tex_fac * vt_aspect_south;
 
-            let i_lonsp1 = i * longsp1;
-            let vert_curr_lat_north = vert_offset_north_hemi + i_lonsp1;
-            let vert_curr_lat_south = vert_offset_south_hemi + i_lonsp1;
+            let i_lon_add_1 = i * longs_add_1;
+            let vert_curr_lat_north = vert_offset_north_hemisphere + i_lon_add_1;
+            let vert_curr_lat_south = vert_offset_south_hemisphere + i_lon_add_1;
 
-            for j in 0..longsp1 {
+            for (j, &cache) in s_texture_cache.iter().enumerate() {
                 let j_mod = j % longitude;
 
-                let s_texture = s_texture_cache[j];
+                let s_texture = cache;
                 let tc = theta_cartesian[j_mod];
 
                 // North hemisphere.
-                let idxn = vert_curr_lat_north + j;
-                vs[idxn] = glam::Vec3A::new(
+                let index_n = vert_curr_lat_north + j;
+                vs[index_n] = glam::Vec3A::new(
                     rho_cos_phi_north * tc.x,
                     z_offset_north,
                     -rho_cos_phi_north * tc.y,
                 );
-                vts[idxn] = glam::Vec2::new(s_texture, t_tex_north);
-                vns[idxn] =
+                vts[index_n] = glam::Vec2::new(s_texture, t_tex_north);
+                vns[index_n] =
                     glam::Vec3A::new(cos_phi_north * tc.x, -sin_phi_north, -cos_phi_north * tc.y);
 
                 // South Hemisphere
-                let idxs = vert_curr_lat_south + j;
-                vs[idxs] = glam::Vec3A::new(
+                let index_s = vert_curr_lat_south + j;
+                vs[index_s] = glam::Vec3A::new(
                     rho_cos_phi_south * tc.x,
                     z_offset_south,
                     -rho_cos_phi_south * tc.y,
                 );
-                vts[idxs] = glam::Vec2::new(s_texture, t_tex_south);
-                vns[idxs] =
+                vts[index_s] = glam::Vec2::new(s_texture, t_tex_south);
+                vns[index_s] =
                     glam::Vec3A::new(cos_phi_south * tc.x, -sin_phi_south, -cos_phi_south * tc.y);
             }
         }
@@ -190,20 +222,22 @@ impl Capsule {
         // Cylinder vertices. (only if rings > 0).
         // Exclude both origin and destination edges
         // (North and South equators) from the interpolation.
-        let to_fac = 1.0 / ringsp1 as f32;
+        let to_fac = 1.0 / rings_add_1 as f32;
         let mut idx_cyl_lat = vertex_offset_cylinder;
 
-        for h in 1..(ringsp1 * calc_middle as usize) {
+        for h in 1..(rings_add_1 * calc_middle as usize) {
             let fac = h as f32 * to_fac;
-            let cmpl_fac = 1.0 - fac;
-            let t_texture = cmpl_fac * vt_aspect_north + fac * vt_aspect_south;
+            let cmp_l_fac = 1.0 - fac;
+            let t_texture = cmp_l_fac * vt_aspect_north + fac * vt_aspect_south;
             let z = half_depth - depth * fac;
 
-            for j in 0..longsp1 {
+            for (j, &cache) in s_texture_cache.iter().enumerate() {
                 let j_mod = j % longitude;
+
+                let s_texture = cache;
+
                 let tc = theta_cartesian[j_mod];
                 let rtc = rho_theta_cartesian[j_mod];
-                let s_texture = s_texture_cache[j];
 
                 vs[idx_cyl_lat] = glam::Vec3A::new(rtc.x, z, -rtc.y);
                 vts[idx_cyl_lat] = glam::Vec2::new(s_texture, t_texture);
@@ -217,16 +251,16 @@ impl Capsule {
 
         // Stride is 3 for polar triangles;
         // stride is 6 for two triangles forming a quad.
-        let lons3 = longitude * 3;
-        let lons6 = lons3 * 2;
-        let hemi_lons = half_latsn1 * lons6;
+        let lon_mul_3 = longitude * 3;
+        let lon_mul_6 = lon_mul_3 << 1; // equivalent to (lon_mul_3 * 2);
+        let hemisphere_lon = half_lats_sub_1 * lon_mul_6;
 
-        let tri_offset_north_hemi = lons3;
-        let tri_offset_cylinder = tri_offset_north_hemi + hemi_lons;
-        let tri_offset_south_hemi = tri_offset_cylinder + ringsp1 * lons6;
-        let tri_offset_south_cap = tri_offset_south_hemi + hemi_lons;
+        let tri_offset_north_hemisphere = lon_mul_3;
+        let tri_offset_cylinder = tri_offset_north_hemisphere + hemisphere_lon;
+        let tri_offset_south_hemisphere = tri_offset_cylinder + rings_add_1 * lon_mul_6;
+        let tri_offset_south_cap = tri_offset_south_hemisphere + hemisphere_lon;
 
-        let fs_len = tri_offset_south_cap + lons3;
+        let fs_len = tri_offset_south_cap + lon_mul_3;
         let mut tris: Vec<usize> = vec![0; fs_len];
 
         // Polar caps.
@@ -237,8 +271,8 @@ impl Capsule {
         while i < longitude {
             // North.
             tris[k] = i;
-            tris[k + 1] = vert_offset_north_hemi + i;
-            tris[k + 2] = vert_offset_north_hemi + i + 1;
+            tris[k + 1] = vert_offset_north_hemisphere + i;
+            tris[k + 2] = vert_offset_north_hemisphere + i + 1;
 
             // South.
             tris[m] = vert_offset_south_cap + i;
@@ -253,17 +287,17 @@ impl Capsule {
         // Hemispheres.
 
         let mut i = 0;
-        let mut k = tri_offset_north_hemi;
-        let mut m = tri_offset_south_hemi;
+        let mut k = tri_offset_north_hemisphere;
+        let mut m = tri_offset_south_hemisphere;
 
-        while i < half_latsn1 {
-            let i_lonsp1 = i * longsp1;
+        while i < half_lats_sub_1 {
+            let i_lon_add_1 = i * longs_add_1;
 
-            let vert_curr_lat_north = vert_offset_north_hemi + i_lonsp1;
-            let vert_next_lat_north = vert_curr_lat_north + longsp1;
+            let vert_curr_lat_north = vert_offset_north_hemisphere + i_lon_add_1;
+            let vert_next_lat_north = vert_curr_lat_north + longs_add_1;
 
-            let vert_curr_lat_south = vert_offset_south_hemi + i_lonsp1;
-            let vert_next_lat_south = vert_curr_lat_south + longsp1;
+            let vert_curr_lat_south = vertex_offset_south_equator + i_lon_add_1;
+            let vert_next_lat_south = vert_curr_lat_south + longs_add_1;
             let mut j = 0;
             while j < longitude {
                 // North.
@@ -306,9 +340,9 @@ impl Capsule {
         let mut i = 0;
         let mut k = tri_offset_cylinder;
 
-        while i < ringsp1 {
-            let vert_curr_lat = vert_offset_north_equator + i * longsp1;
-            let vert_next_lat = vert_curr_lat + longsp1;
+        while i < rings_add_1 {
+            let vert_curr_lat = vert_offset_north_equator + i * longs_add_1;
+            let vert_next_lat = vert_curr_lat + longs_add_1;
 
             let mut j = 0;
             while j < longitude {
@@ -332,32 +366,39 @@ impl Capsule {
             i += 1;
         }
 
-        //texture coords is vts
-        //normals is vns
-        //vertices is vs
+        let mut vertices: Vec<Vertex> = vec![Vertex::default(); vert_len];
 
-        println!("{:#?}", vs);
-
-        Self {
-            model: Model { meshes: vec![] },
+        for i in 0..vert_len {
+            vertices[i] = Vertex {
+                position: vs[i].to_array(),
+                tex_coord: vts[i].to_array(),
+                normal: vns[i].to_array(),
+                tangent: [0.0; 4],    //todo not done
+                bi_tangent: [0.0; 4], //todo not done
+            };
         }
+
+        let mesh = Mesh {
+            vertices,
+            material_id: 0,
+            indices: tris,
+        };
+
+        Model { meshes: vec![mesh] }
     }
 }
-
-/*for a in 0..0{
-    println!("{}",a);
-}*/
-
-/*for a in 1..0 {
-println!("{}", a);
-}*/
 
 #[cfg(test)]
 mod test {
     use crate::mesh::primitive::capsule::Capsule;
+    use crate::mesh::Model;
 
     #[test]
     fn test() {
         let capsule = Capsule::default();
+        let capsule_model: Model = capsule.into();
+        for mesh in capsule_model.meshes {
+            println!("{:?}", mesh.vertices);
+        }
     }
 }

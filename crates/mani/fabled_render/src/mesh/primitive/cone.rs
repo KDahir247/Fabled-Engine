@@ -1,18 +1,11 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
-#[repr(C, align(16))]
-#[derive(Debug)]
-struct ConeData {
-    pub position: [glam::Vec3A; 2],
-    pub normal: [glam::Vec3A; 2],
-    pub tangent: [glam::Vec4; 2],
-    pub bi_tangent: [glam::Vec4; 2],
-    pub uv: [glam::Vec2; 2],
-}
-
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Cone {
-    model: Model,
+    pub radius: f32,
+    pub tessellation_slice: usize,
+    pub height: f32,
+    pub apex_position: [f32; 3],
 }
 
 impl Default for Cone {
@@ -28,11 +21,28 @@ impl Cone {
         height: f32,
         apex_position: [f32; 3],
     ) -> Cone {
-        let mut indices = Vec::with_capacity(tessellation_slice * 6);
-        let mut vertex_buffer: Vec<Vertex> = Vec::with_capacity(tessellation_slice + 2);
-
         //We can't technically have a cone with less than three tessellation slice for the base. right?
         tessellation_slice = tessellation_slice.max(3);
+        Self {
+            radius,
+            tessellation_slice,
+            height,
+            apex_position,
+        }
+    }
+}
+
+impl From<Cone> for Model {
+    fn from(cone: Cone) -> Self {
+        let Cone {
+            radius,
+            tessellation_slice,
+            height,
+            apex_position,
+        } = cone;
+
+        let mut indices = Vec::with_capacity(tessellation_slice * 6);
+        let mut vertex_buffer: Vec<Vertex> = Vec::with_capacity(tessellation_slice + 2);
 
         let apex_position = glam::const_vec3a!(apex_position);
 
@@ -99,18 +109,21 @@ impl Cone {
             indices,
         };
 
-        Cone {
-            model: Model { meshes: vec![mesh] },
-        }
+        Model { meshes: vec![mesh] }
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::mesh::primitive::cone::Cone;
+    use crate::mesh::Model;
 
     #[test]
     fn test() {
-        Cone::new(5.0, 12, 2., [0.0, 1.0, 0.0]);
+        let a = Cone::new(5.0, 12, 2., [0.0, 1.0, 0.0]);
+        let data: Model = a.into();
+        for mesh in data.meshes {
+            println!("{:?}", mesh.vertices);
+        }
     }
 }

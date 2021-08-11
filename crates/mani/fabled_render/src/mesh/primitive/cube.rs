@@ -35,20 +35,25 @@ const CUBE_FACE_DATA: CubeData = CubeData {
     ],
 };
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Cube {
-    #[allow(dead_code)]
-    model: Model,
+    pub size: f32,
 }
 
 impl Default for Cube {
     fn default() -> Self {
-        Self::new(0.5)
+        Self::new(1.0)
     }
 }
 
 impl Cube {
     pub fn new(size: f32) -> Cube {
+        Self { size }
+    }
+}
+
+impl From<Cube> for Model {
+    fn from(cube: Cube) -> Self {
         const CUBE_DATA: &CubeData = &CUBE_FACE_DATA;
 
         let mut container = Vec::with_capacity(24);
@@ -59,10 +64,10 @@ impl Cube {
             let bi_tangent = CUBE_DATA.bi_tangent[chunk];
 
             let corners = [
-                (normal - bi_tangent - tangent) * size,
-                (normal - bi_tangent + tangent) * size,
-                (normal + bi_tangent + tangent) * size,
-                (normal + bi_tangent - tangent) * size,
+                (normal - bi_tangent - tangent) * cube.size,
+                (normal - bi_tangent + tangent) * cube.size,
+                (normal + bi_tangent + tangent) * cube.size,
+                (normal + bi_tangent - tangent) * cube.size,
             ];
 
             let indices = vec![
@@ -97,18 +102,21 @@ impl Cube {
             });
         }
 
-        Cube {
-            model: Model { meshes: container },
-        }
+        Model { meshes: container }
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::mesh::primitive::cube::Cube;
+    use crate::mesh::Model;
 
     #[test]
     fn test() {
-        Cube::new(0.7);
+        let cube = Cube::new(0.7);
+        let cube_model: Model = cube.into();
+        for mesh in cube_model.meshes {
+            println!("{:?}", mesh.vertices);
+        }
     }
 }
