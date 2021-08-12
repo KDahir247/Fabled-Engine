@@ -2,6 +2,8 @@ use crate::mesh::primitive::capsule::CapsuleUvProfile::Aspect;
 use crate::mesh::util::min_ss;
 use crate::mesh::{Mesh, Model, Vertex};
 
+//Cause KIPageFault, MMACESSFault
+
 #[derive(Debug, Copy, Clone)]
 pub enum CapsuleUvProfile {
     Aspect = 0,
@@ -108,6 +110,7 @@ impl From<Capsule> for Model {
         let vt_aspect_north = 1.0 - vt_aspect_ratio;
         let vt_aspect_south = vt_aspect_ratio;
 
+        //test out vec
         let mut theta_cartesian: Vec<glam::Vec2> = vec![glam::Vec2::ZERO; longitude];
         let mut rho_theta_cartesian: Vec<glam::Vec2> = vec![glam::Vec2::ZERO; longitude];
         let mut s_texture_cache: Vec<f32> = vec![0.0; longs_add_1];
