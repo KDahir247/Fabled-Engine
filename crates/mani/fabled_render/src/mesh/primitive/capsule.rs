@@ -2,7 +2,7 @@ use crate::mesh::primitive::capsule::CapsuleUvProfile::Aspect;
 use crate::mesh::util::min_ss;
 use crate::mesh::{Mesh, Model, Vertex};
 
-//Cause KIPageFault, MMACESSFault
+//Cause KIPageFault, MMACESSFault (Cache thrashing) from over sizing vec if the end user increases latitude, longitude, and rings. Find a solution to this problem.
 
 #[derive(Debug, Copy, Clone)]
 pub enum CapsuleUvProfile {
@@ -12,30 +12,45 @@ pub enum CapsuleUvProfile {
 }
 
 #[derive(Debug, Copy, Clone)]
+#[repr(align(16))]
 pub struct Capsule {
     pub radius: f32,
-    pub rings: u32,
+    pub rings: u8,
     pub depth: f32,
-    pub latitude: usize,
-    pub longitude: usize,
+    pub latitude: u8,
+    pub longitude: u8,
     pub v_profile: CapsuleUvProfile,
 }
 
 impl Default for Capsule {
     fn default() -> Self {
-        Self::new(0.5, 5, 1., 16, 32, Aspect)
+        Self::new(0.5, 1, 1., 8, 16, Aspect)
     }
 }
 
 impl Capsule {
     pub fn new(
         radius: f32,
-        rings: u32,
+        mut rings: u8,
         depth: f32,
-        latitude: usize,
-        longitude: usize,
+        mut latitude: u8,
+        mut longitude: u8,
         profile: CapsuleUvProfile,
     ) -> Capsule {
+        /*
+            Sanity check for the size of latitude, longitude, and ring to prevent
+            Latitude from reaching beyond 90, longitude from reaching above 180,
+            and ring from reaching beyond 5.
+
+           Prevent increasing latitude and longitude intentional or unintentional
+           to the point where it cause  s extreme repeating KiPageFault and MmAccessFault resulting in
+           cache thrashing or memory can't be allocated error.
+        */
+
+        latitude = min_ss(latitude as f32, 90.0) as u8;
+        longitude = min_ss(longitude as f32, 180.0) as u8;
+        rings = min_ss(rings as f32, 5.) as u8;
+
         Capsule {
             radius,
             rings,
@@ -64,6 +79,8 @@ impl From<Capsule> for Model {
         } = capsule;
 
         let rings = rings as usize;
+        let longitude = longitude as usize;
+        let latitude = latitude as usize;
 
         let calc_middle = min_ss(rings as f32, 1.0);
         let half_lats = latitude >> 1; //equal to latitude / 2;
@@ -400,8 +417,8 @@ mod test {
     fn test() {
         let capsule = Capsule::default();
         let capsule_model: Model = capsule.into();
-        for mesh in capsule_model.meshes {
-            println!("{:?}", mesh.vertices);
-        }
+        /*for mesh in capsule_model.meshes {
+            println!("{:?}", mesh.indices);
+        }*/
     }
 }

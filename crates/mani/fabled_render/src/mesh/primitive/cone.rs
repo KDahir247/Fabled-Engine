@@ -79,7 +79,10 @@ impl From<Cone> for Model {
             //slant_height = slant_height_vector.length();
             let slant_height_vector = glam::Vec3A::Y - vertex;
 
-            let tangent = vertex.normalize().cross(glam::Vec3A::Y);
+            let vertex_direction = vertex.normalize();
+
+            let tangent = glam::Vec3A::new(-vertex_direction.z, 0.0, vertex_direction.x);
+
             let normal = slant_height_vector.cross(tangent).normalize();
             let bi_tangent = normal.cross(tangent);
 
