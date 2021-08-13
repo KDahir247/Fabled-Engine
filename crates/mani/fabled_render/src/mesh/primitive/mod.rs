@@ -13,11 +13,12 @@ pub use capsule::*;
 pub use cone::*;
 pub use cube::*;
 pub use plane::*;
+pub use quad::*;
 
 #[cfg(test)]
 mod struct_test {
     use crate::mesh::primitive::plane::Plane;
-    use crate::mesh::{Capsule, Cone, Cube};
+    use crate::mesh::{Capsule, Cone, Cube, Quad};
 
     #[test]
     fn data_size_test() {
@@ -51,5 +52,13 @@ mod struct_test {
         let plane_alignment = std::mem::align_of::<Plane>();
         assert_eq!(plane_alignment & (plane_alignment - 1), 0);
         println!("plane is aligned to {} bytes", plane_alignment);
+
+        //-------------------- Quad ------------------------------
+
+        let quad_size = std::mem::size_of::<Quad>();
+        assert_eq!(quad_size & (quad_size - 1), 0);
+        let quad_alignment = std::mem::align_of::<Quad>();
+        assert_eq!(quad_alignment & (quad_alignment - 1), 0);
+        println!("Quad is aligned to {} bytes", quad_alignment);
     }
 }

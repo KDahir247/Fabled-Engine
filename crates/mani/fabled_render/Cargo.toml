@@ -19,7 +19,7 @@ basis-universal-sys = "0.1.1"
 # Core
 serde = "1.0.126"
 anyhow = {version = "1.0.42"}
-bytemuck = {version = "1.7.0", features = ["derive", "extern_crate_alloc"]}
+bytemuck = {version = "1.7.0", features = ["derive"]}
 bitflags = "1.2.1"
 glob = "0.3.0"
 fabled_core = {path = "../fabled_core", version = "*"}

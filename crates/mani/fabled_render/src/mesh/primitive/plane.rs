@@ -1,20 +1,11 @@
 use crate::mesh::util::min_ss;
 use crate::mesh::{Mesh, Model, Vertex};
 
-const TANGENT: [f32; 4] = [-1.0, 0.0, 0.0, 1.0];
-
 // The normal vector of the front face plane
 const NORMAL_FRONT: [f32; 3] = [0.0, 1.0, 0.0];
+const TANGENT: [f32; 4] = [-1.0, 0.0, 0.0, 1.0];
 const BI_TANGENT: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
 
-/*
-    Planning phase.
-   Assumptions for the 3D Plane model.
-   1) the Orientation is Horizontal, since we want it flat on the grid plane,
-   2) the Pivot point is on the center of the plane.
-   3) the normal vector is always the front plane and not the back plane even if double sided.
-   4) the maximum number of tessellation is 10x10.
-*/
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PlaneInstruction {
     SingleSided = 0,
@@ -30,8 +21,8 @@ impl Default for PlaneInstruction {
 #[derive(Debug, Copy, Clone, PartialEq)]
 #[repr(align(16))]
 pub struct Plane {
-    pub width: f32,  // todo these are size so it can the data normalized.
-    pub height: f32, // todo these are size so it can the data normalized.
+    pub width: f32,
+    pub height: f32,
     pub tessellation_width: u8,
     pub tessellation_height: u8,
     pub plane_instruction: PlaneInstruction,
@@ -92,7 +83,8 @@ impl From<Plane> for Model {
         // remap plane_instruction to SingleSided = 1, DoubleSided = 2,
         let double_sided_remap = plane_instruction as u8 + 1;
         let num_triangles =
-            (tessellation_width * tessellation_height * 6 * double_sided_remap) as usize;
+            (tessellation_width * (tessellation_height << 1) * 3 * double_sided_remap) as usize;
+
         let num_vertices = (w_line * h_line) as usize;
 
         let mut vertices: Vec<Vertex> = Vec::with_capacity(num_vertices);
@@ -169,7 +161,7 @@ mod test {
 
     #[test]
     fn test() {
-        let plane = Plane::new(1.0, 1.0, 5, 5, PlaneInstruction::SingleSided);
+        let plane = Plane::new(1.0, 1.0, 1, 1, PlaneInstruction::SingleSided);
         let plane_model: Model = plane.into();
         for vertices in &plane_model.meshes[0].vertices {
             println!("{:?}", vertices.position);

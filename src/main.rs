@@ -6,10 +6,10 @@ fn main() {
 
     superluminal_perf::begin_event("Creating Primitive");
 
-    let capsule = fabled_render::mesh::Plane::default();
-    let capsule_model: fabled_render::mesh::Model = capsule.into();
+    let quad = fabled_render::mesh::Quad::new(1000., 1000.);
+    let quad_model: fabled_render::mesh::Model = quad.into();
 
-    println!("{:?}", capsule_model.meshes[0].material_id);
+    println!("{:?}", quad_model.meshes[0].material_id);
 
     superluminal_perf::end_event();
     /* test::run();

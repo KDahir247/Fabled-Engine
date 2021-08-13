@@ -2,8 +2,6 @@ use crate::mesh::primitive::capsule::CapsuleUvProfile::Aspect;
 use crate::mesh::util::min_ss;
 use crate::mesh::{Mesh, Model, Vertex};
 
-//Cause KIPageFault, MMACESSFault (Cache thrashing) from over sizing vec if the end user increases latitude, longitude, and rings. Find a solution to this problem.
-
 #[derive(Debug, Copy, Clone)]
 pub enum CapsuleUvProfile {
     Aspect = 0,
