@@ -57,7 +57,8 @@ impl From<Cube> for Model {
         const CUBE_DATA: &CubeData = &CUBE_FACE_DATA;
 
         let mut container = Vec::with_capacity(24);
-        let mut temp_vert_storage = [Vertex::default(); 4];
+        let mut face_vert_storage = [Vertex::default(); 4];
+
         for chunk in 0..6 {
             let normal = CUBE_DATA.normal[chunk];
             let tangent = CUBE_DATA.tangent[chunk];
@@ -83,20 +84,52 @@ impl From<Cube> for Model {
             let tangent_result = tangent.extend(1.0).to_array();
             let bi_tangent_result = bi_tangent.extend(1.0).to_array();
 
-            for (index, corner) in corners.iter().enumerate() {
-                let tex_coord = [corner.x.signum() * 0.5 + 0.5, corner.y.signum() * 0.5 + 0.5];
+            for face in corners.chunks_exact(4) {
+                let vert_1 = face[0];
+                let vert_2 = face[1];
+                let vert_3 = face[2];
+                let vert_4 = face[3];
 
-                temp_vert_storage[index] = Vertex {
-                    position: corner.to_array(),
-                    tex_coord,
+                let tex_coord_1 = [vert_1.signum().x * 0.5 + 0.5, vert_1.signum().y * 0.5 + 0.5];
+                let tex_coord_2 = [vert_2.signum().x * 0.5 + 0.5, vert_2.signum().y * 0.5 + 0.5];
+                let tex_coord_3 = [vert_3.signum().x * 0.5 + 0.5, vert_3.signum().y * 0.5 + 0.5];
+                let tex_coord_4 = [vert_4.signum().x * 0.5 + 0.5, vert_4.signum().y * 0.5 + 0.5];
+
+                face_vert_storage[0] = Vertex {
+                    position: vert_1.to_array(),
+                    tex_coord: tex_coord_1,
                     normal: normal_result,
                     tangent: tangent_result,
                     bi_tangent: bi_tangent_result,
-                }
+                };
+
+                face_vert_storage[1] = Vertex {
+                    position: vert_2.to_array(),
+                    tex_coord: tex_coord_2,
+                    normal: normal_result,
+                    tangent: tangent_result,
+                    bi_tangent: bi_tangent_result,
+                };
+
+                face_vert_storage[2] = Vertex {
+                    position: vert_3.to_array(),
+                    tex_coord: tex_coord_3,
+                    normal: normal_result,
+                    tangent: tangent_result,
+                    bi_tangent: bi_tangent_result,
+                };
+
+                face_vert_storage[3] = Vertex {
+                    position: vert_4.to_array(),
+                    tex_coord: tex_coord_4,
+                    normal: normal_result,
+                    tangent: tangent_result,
+                    bi_tangent: bi_tangent_result,
+                };
             }
 
             container.push(Mesh {
-                vertices: temp_vert_storage.to_vec(),
+                vertices: face_vert_storage.to_vec(),
                 material_id: 0,
                 indices,
             });
