@@ -50,7 +50,6 @@ impl From<Cone> for Model {
         let forward_dir = glam::Vec3A::X.cross(apex_position.normalize());
         let center = apex_position + (-apex_position.normalize() * height);
 
-        // 360.0 / tessellation * PI_DIV_180(0.017_453_292) == 2.0 * PI /tessellation
         let angle_inc = 2.0 * std::f32::consts::PI / tessellation_slice as f32;
 
         // Apex Vertex
@@ -76,13 +75,13 @@ impl From<Cone> for Model {
             let (rad_sin, rad_cos) = (angle_inc * side as f32).sin_cos();
 
             let vertex = center + (glam::Vec3A::X * rad_cos + forward_dir * rad_sin) * radius;
+
             //slant_height = slant_height_vector.length();
             let slant_height_vector = glam::Vec3A::Y - vertex;
 
             let vertex_direction = vertex.normalize();
 
             let tangent = glam::Vec3A::new(-vertex_direction.z, 0.0, vertex_direction.x);
-
             let normal = slant_height_vector.cross(tangent).normalize();
             let bi_tangent = normal.cross(tangent);
 

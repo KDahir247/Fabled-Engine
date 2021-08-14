@@ -1,263 +1,264 @@
 # --------------- Cube Dissassembly -------------------
 //    let plane = fabled_render::mesh::Plane::default();
-00007FF6FE0612A9  movss        xmm0, dword ptr [__real@41200000 (00007FF6FE07C510h)]
-00007FF6FE0612B1  minss        xmm0, xmm0
-00007FF6FE0612B5  xorps        xmm1, xmm1
-00007FF6FE0612B8  maxss        xmm1, xmm0
-00007FF6FE0612BC  movss        xmm0, dword ptr [__real@437f0000 (00007FF6FE07C514h)]
-00007FF6FE0612C4  minss        xmm0, xmm1
-00007FF6FE0612C8  cvttss2si    esi, xmm0
+00007FF736AD1359  movss        xmm0, dword ptr [__real@41200000 (00007FF736AEC520h)]
+00007FF736AD1361  minss        xmm0, xmm0
+00007FF736AD1365  xorps        xmm1, xmm1
+00007FF736AD1368  maxss        xmm1, xmm0
+00007FF736AD136C  movss        xmm0, dword ptr [__real@437f0000 (00007FF736AEC524h)]
+00007FF736AD1374  minss        xmm0, xmm1
+00007FF736AD1378  cvttss2si    esi, xmm0
 
 //    let plane_model: fabled_render::mesh::Model = plane.into();
-00007FF6FE0612CC  lea          r14d, [rsi+1h]
-00007FF6FE0612D0  mov          eax, esi
-00007FF6FE0612D2  mul          sil
-00007FF6FE0612D5  mov          ebp, eax
-00007FF6FE0612D7  mov          eax, r14d
-00007FF6FE0612DA  mul          r14b
-00007FF6FE0612DD  movzx        edi, al
-00007FF6FE0612E0  test         dil, dil
-00007FF6FE0612E3  je           static void Fabled_Engine::main+11Ah (00007FF6FE06132Ah)
-00007FF6FE0612E5  mov          rbx, rdi
-00007FF6FE0612E8  shl          rbx, 6h
-00007FF6FE0612EC  mov          rcx, qword ptr [00007FF6FE0831C8h]
-00007FF6FE0612F3  test         rcx, rcx
-00007FF6FE0612F6  jne          static void Fabled_Engine::main+FCh (00007FF6FE06130Ch)
-00007FF6FE0612F8  call         GetProcessHeap (00007FF6FE07916Ch)
-00007FF6FE0612FD  test         rax, rax
-00007FF6FE061300  je           static void Fabled_Engine::main+10Bh (00007FF6FE06131Bh)
-00007FF6FE061302  mov          rcx, rax
-00007FF6FE061305  mov          qword ptr [00007FF6FE0831C8h], rax
-00007FF6FE06130C  xor          edx, edx
-00007FF6FE06130E  mov          r8, rbx
-00007FF6FE061311  call         HeapAlloc (00007FF6FE079172h)
-00007FF6FE061316  test         rax, rax
-00007FF6FE061319  jne          static void Fabled_Engine::main+11Fh (00007FF6FE06132Fh)
-00007FF6FE06131B  mov          edx, 10h
-00007FF6FE061320  mov          rcx, rbx
-00007FF6FE061323  call         static void alloc::alloc::handle_alloc_error (00007FF6FE07A380h)
-00007FF6FE061328  ud2
-00007FF6FE06132A  mov          eax, 10h
-00007FF6FE06132F  movzx        ecx, bpl
-00007FF6FE061333  add          ecx, ecx
-00007FF6FE061335  lea          ecx, [rcx+rcx*2]
-00007FF6FE061338  movzx        ebx, cl
-00007FF6FE06133B  mov          qword ptr [rsp+48h], rax
-00007FF6FE061340  mov          qword ptr [rsp+50h], rdi
-00007FF6FE061345  mov          qword ptr [rsp+58h], 0h
-00007FF6FE06134E  test         cl, cl
-00007FF6FE061350  je           static void Fabled_Engine::main+18Bh (00007FF6FE06139Bh)
-00007FF6FE061352  lea          rbp, [rbx*8]
-00007FF6FE06135A  mov          rcx, qword ptr [00007FF6FE0831C8h]
-00007FF6FE061361  test         rcx, rcx
-00007FF6FE061364  jne          static void Fabled_Engine::main+16Ah (00007FF6FE06137Ah)
-00007FF6FE061366  call         GetProcessHeap (00007FF6FE07916Ch)
-00007FF6FE06136B  test         rax, rax
-00007FF6FE06136E  je           static void Fabled_Engine::main+17Ch (00007FF6FE06138Ch)
-00007FF6FE061370  mov          rcx, rax
-00007FF6FE061373  mov          qword ptr [00007FF6FE0831C8h], rax
-00007FF6FE06137A  xor          edx, edx
-00007FF6FE06137C  mov          r8, rbp
-00007FF6FE06137F  call         HeapAlloc (00007FF6FE079172h)
-00007FF6FE061384  mov          r15, rax
-00007FF6FE061387  test         rax, rax
-00007FF6FE06138A  jne          static void Fabled_Engine::main+191h (00007FF6FE0613A1h)
-00007FF6FE06138C  mov          edx, 8h
-00007FF6FE061391  mov          rcx, rbp
-00007FF6FE061394  call         static void alloc::alloc::handle_alloc_error (00007FF6FE07A380h)
-00007FF6FE061399  ud2
-00007FF6FE06139B  mov          r15d, 8h
-00007FF6FE0613A1  mov          qword ptr [rsp+28h], r15
-00007FF6FE0613A6  mov          qword ptr [rsp+30h], rbx
-00007FF6FE0613AB  mov          qword ptr [rsp+38h], 0h
-00007FF6FE0613B4  test         r14b, r14b
-00007FF6FE0613B7  je           static void Fabled_Engine::main+2E3h (00007FF6FE0614F3h)
-00007FF6FE0613BD  movzx        eax, sil
-00007FF6FE0613C1  xorps        xmm0, xmm0
-00007FF6FE0613C4  cvtsi2ss     xmm0, eax
-00007FF6FE0613C8  movss        xmm9, dword ptr [__real@3f800000 (00007FF6FE07C518h)]
-00007FF6FE0613D1  movaps       xmm13, xmm9
-00007FF6FE0613D5  divss        xmm13, xmm0
-00007FF6FE0613DA  xorps        xmm0, xmm0
-00007FF6FE0613DD  xor          edx, edx
-00007FF6FE0613DF  movss        xmm10, dword ptr [__real@bf000000 (00007FF6FE07C51Ch)]
-00007FF6FE0613E8  lea          r13, [rsp+48h]
-00007FF6FE0613ED  mov          ebp, dword ptr [00007FF6FE07DA48h]
-00007FF6FE0613F3  mov          rdi, qword ptr [00007FF6FE07DA40h]
-00007FF6FE0613FA  movaps       xmm11, xmmword ptr [00007FF6FE07DA50h]
-00007FF6FE061402  movaps       xmm12, xmmword ptr [00007FF6FE07DA60h]
-00007FF6FE06140A  xor          r12d, r12d
-00007FF6FE06140D  jmp          static void Fabled_Engine::main+216h (00007FF6FE061426h)
-00007FF6FE06140F  nop
-00007FF6FE061410  addss        xmm0, xmm9
-00007FF6FE061415  lea          eax, [r12+1h]
-00007FF6FE06141A  cmp          r12b, sil
-00007FF6FE06141D  mov          r12d, eax
-00007FF6FE061420  je           static void Fabled_Engine::main+2DAh (00007FF6FE0614EAh)
-00007FF6FE061426  movaps       xmm15, xmm13
-00007FF6FE06142A  mulss        xmm15, xmm0
-00007FF6FE06142F  movaps       xmm14, xmm15
-00007FF6FE061433  addss        xmm14, xmm10
-00007FF6FE061438  mov          bl, FFh
-00007FF6FE06143A  xorps        xmm6, xmm6
-00007FF6FE06143D  jmp          static void Fabled_Engine::main+28Bh (00007FF6FE06149Bh)
-00007FF6FE06143F  nop
-00007FF6FE061440  mov          rcx, rdx
-00007FF6FE061443  mov          rdx, qword ptr [rsp+48h]
-00007FF6FE061448  shl          rcx, 6h
-00007FF6FE06144C  movss        dword ptr [rdx+rcx*1], xmm8
-00007FF6FE061452  mov          dword ptr [rdx+rcx*1+4h], 0h
-00007FF6FE06145A  movss        dword ptr [rdx+rcx*1+8h], xmm14
-00007FF6FE061461  movss        dword ptr [rdx+rcx*1+Ch], xmm7
-00007FF6FE061467  movss        dword ptr [rdx+rcx*1+10h], xmm15
-00007FF6FE06146E  mov          dword ptr [rdx+rcx*1+1Ch], ebp
-00007FF6FE061472  mov          qword ptr [rdx+rcx*1+14h], rdi
-00007FF6FE061477  movaps       xmmword ptr [rdx+rcx*1+20h], xmm11
-00007FF6FE06147D  movaps       xmmword ptr [rdx+rcx*1+30h], xmm12
-00007FF6FE061483  mov          rdx, rax
-00007FF6FE061486  add          rdx, 1h
-00007FF6FE06148A  mov          qword ptr [rsp+58h], rdx
-00007FF6FE06148F  add          bl, 1h
-00007FF6FE061492  cmp          sil, bl
-00007FF6FE061495  je           static void Fabled_Engine::main+200h (00007FF6FE061410h)
-00007FF6FE06149B  movaps       xmm7, xmm13
-00007FF6FE06149F  mulss        xmm7, xmm6
-00007FF6FE0614A3  addss        xmm6, xmm9
-00007FF6FE0614A8  movaps       xmm8, xmm7
-00007FF6FE0614AC  addss        xmm8, xmm10
-00007FF6FE0614B1  mov          rax, qword ptr [rsp+58h]
-00007FF6FE0614B6  cmp          rdx, qword ptr [rsp+50h]
-00007FF6FE0614BB  jne          static void Fabled_Engine::main+230h (00007FF6FE061440h)
-00007FF6FE0614BD  mov          rcx, rax
-00007FF6FE0614C0  cmp          rdx, rax
-00007FF6FE0614C3  jne          static void Fabled_Engine::main+233h (00007FF6FE061443h)
-00007FF6FE0614C9  mov          rcx, r13
-00007FF6FE0614CC  movss        dword ptr [rsp+60h], xmm0
-00007FF6FE0614D2  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<fabled_render::mesh::container::vertex::Vertex,alloc::alloc::Global> (00007FF6FE07ACA0h)
-00007FF6FE0614D7  movss        xmm0, dword ptr [rsp+60h]
-00007FF6FE0614DD  mov          rax, qword ptr [rsp+58h]
-00007FF6FE0614E2  mov          rcx, rax
-00007FF6FE0614E5  jmp          static void Fabled_Engine::main+233h (00007FF6FE061443h)
-00007FF6FE0614EA  test         sil, sil
-00007FF6FE0614ED  je           static void Fabled_Engine::main+48Dh (00007FF6FE06169Dh)
-00007FF6FE0614F3  movzx        eax, sil
-00007FF6FE0614F7  mov          qword ptr [rsp+98h], rax
-00007FF6FE0614FF  xor          ebx, ebx
-00007FF6FE061501  xor          edx, edx
-00007FF6FE061503  xor          eax, eax
-00007FF6FE061505  jmp          static void Fabled_Engine::main+311h (00007FF6FE061521h)
-00007FF6FE061507  nop          word ptr [rax+rax*1], ax
-00007FF6FE061510  add          bl, r14b
-00007FF6FE061513  mov          rax, qword ptr [rsp+60h]
-00007FF6FE061518  cmp          al, sil
-00007FF6FE06151B  je           static void Fabled_Engine::main+48Dh (00007FF6FE06169Dh)
-00007FF6FE061521  add          al, 1h
-00007FF6FE061523  mov          qword ptr [rsp+60h], rax
-00007FF6FE061528  test         sil, sil
-00007FF6FE06152B  je           static void Fabled_Engine::main+300h (00007FF6FE061510h)
-00007FF6FE06152D  mov          rbp, qword ptr [rsp+98h]
-00007FF6FE061535  mov          r13d, ebx
-00007FF6FE061538  jmp          static void Fabled_Engine::main+347h (00007FF6FE061557h)
-00007FF6FE06153A  nop          word ptr [rax+rax*1], ax
-00007FF6FE061540  mov          qword ptr [r15+rdx*8], r12
-00007FF6FE061544  add          rdx, 1h
-00007FF6FE061548  mov          qword ptr [rsp+38h], rdx
-00007FF6FE06154D  add          r13b, 1h
-00007FF6FE061551  add          rbp, FFFFFFFFFFFFFFFFh
-00007FF6FE061555  je           static void Fabled_Engine::main+300h (00007FF6FE061510h)
-00007FF6FE061557  cmp          rdx, qword ptr [rsp+30h]
-00007FF6FE06155C  je           static void Fabled_Engine::main+41Ah (00007FF6FE06162Ah)
-00007FF6FE061562  lea          edi, [r14+r13*1]
-00007FF6FE061566  movzx        r12d, r13b
-00007FF6FE06156A  mov          qword ptr [r15+rdx*8], r12
-00007FF6FE06156E  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE061573  add          rdx, 1h
-00007FF6FE061577  mov          qword ptr [rsp+38h], rdx
-00007FF6FE06157C  cmp          rdx, qword ptr [rsp+30h]
-00007FF6FE061581  je           static void Fabled_Engine::main+433h (00007FF6FE061643h)
-00007FF6FE061587  movzx        edi, dil
-00007FF6FE06158B  mov          rax, qword ptr [rsp+28h]
-00007FF6FE061590  mov          qword ptr [rax+rdx*8], rdi
-00007FF6FE061594  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE061599  add          rdx, 1h
-00007FF6FE06159D  mov          qword ptr [rsp+38h], rdx
-00007FF6FE0615A2  add          r12, 1h
-00007FF6FE0615A6  cmp          rdx, qword ptr [rsp+30h]
-00007FF6FE0615AB  je           static void Fabled_Engine::main+447h (00007FF6FE061657h)
-00007FF6FE0615B1  mov          qword ptr [rax+rdx*8], r12
-00007FF6FE0615B5  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE0615BA  add          rdx, 1h
-00007FF6FE0615BE  mov          qword ptr [rsp+38h], rdx
-00007FF6FE0615C3  cmp          rdx, qword ptr [rsp+30h]
-00007FF6FE0615C8  je           static void Fabled_Engine::main+460h (00007FF6FE061670h)
-00007FF6FE0615CE  mov          qword ptr [rax+rdx*8], rdi
-00007FF6FE0615D2  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE0615D7  add          rdx, 1h
-00007FF6FE0615DB  mov          qword ptr [rsp+38h], rdx
-00007FF6FE0615E0  add          rdi, 1h
-00007FF6FE0615E4  cmp          rdx, qword ptr [rsp+30h]
-00007FF6FE0615E9  je           static void Fabled_Engine::main+479h (00007FF6FE061689h)
-00007FF6FE0615EF  mov          r15, qword ptr [rsp+28h]
-00007FF6FE0615F4  mov          qword ptr [r15+rdx*8], rdi
-00007FF6FE0615F8  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE0615FD  add          rdx, 1h
-00007FF6FE061601  mov          qword ptr [rsp+38h], rdx
-00007FF6FE061606  cmp          rdx, qword ptr [rsp+30h]
-00007FF6FE06160B  jne          static void Fabled_Engine::main+330h (00007FF6FE061540h)
-00007FF6FE061611  lea          rcx, [rsp+28h]
-00007FF6FE061616  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF6FE07AD60h)
-00007FF6FE06161B  mov          r15, qword ptr [rsp+28h]
-00007FF6FE061620  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE061625  jmp          static void Fabled_Engine::main+330h (00007FF6FE061540h)
-00007FF6FE06162A  lea          rcx, [rsp+28h]
-00007FF6FE06162F  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF6FE07AD60h)
-00007FF6FE061634  mov          r15, qword ptr [rsp+28h]
-00007FF6FE061639  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE06163E  jmp          static void Fabled_Engine::main+352h (00007FF6FE061562h)
-00007FF6FE061643  lea          rcx, [rsp+28h]
-00007FF6FE061648  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF6FE07AD60h)
-00007FF6FE06164D  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE061652  jmp          static void Fabled_Engine::main+377h (00007FF6FE061587h)
-00007FF6FE061657  lea          rcx, [rsp+28h]
-00007FF6FE06165C  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF6FE07AD60h)
-00007FF6FE061661  mov          rax, qword ptr [rsp+28h]
-00007FF6FE061666  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE06166B  jmp          static void Fabled_Engine::main+3A1h (00007FF6FE0615B1h)
-00007FF6FE061670  lea          rcx, [rsp+28h]
-00007FF6FE061675  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF6FE07AD60h)
-00007FF6FE06167A  mov          rax, qword ptr [rsp+28h]
-00007FF6FE06167F  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE061684  jmp          static void Fabled_Engine::main+3BEh (00007FF6FE0615CEh)
-00007FF6FE061689  lea          rcx, [rsp+28h]
-00007FF6FE06168E  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF6FE07AD60h)
-00007FF6FE061693  mov          rdx, qword ptr [rsp+38h]
-00007FF6FE061698  jmp          static void Fabled_Engine::main+3DFh (00007FF6FE0615EFh)
-00007FF6FE06169D  mov          rax, qword ptr [rsp+38h]
-00007FF6FE0616A2  mov          qword ptr [rsp+7Ch], rax
-00007FF6FE0616A7  movups       xmm0, xmmword ptr [rsp+28h]
-00007FF6FE0616AC  movups       xmmword ptr [rsp+6Ch], xmm0
-00007FF6FE0616B1  mov          rcx, qword ptr [00007FF6FE0831C8h]
-00007FF6FE0616B8  test         rcx, rcx
-00007FF6FE0616BB  jne          static void Fabled_Engine::main+4C5h (00007FF6FE0616D5h)
-00007FF6FE0616BD  call         GetProcessHeap (00007FF6FE07916Ch)
-00007FF6FE0616C2  test         rax, rax
-00007FF6FE0616C5  je           static void Fabled_Engine::main+7B3h (00007FF6FE0619C3h)
-00007FF6FE0616CB  mov          rcx, rax
-00007FF6FE0616CE  mov          qword ptr [00007FF6FE0831C8h], rax
-00007FF6FE0616D5  mov          r8d, 40h
-00007FF6FE0616DB  xor          edx, edx
-00007FF6FE0616DD  call         HeapAlloc (00007FF6FE079172h)
-00007FF6FE0616E2  test         rax, rax
-00007FF6FE0616E5  je           static void Fabled_Engine::main+7B3h (00007FF6FE0619C3h)
-00007FF6FE0616EB  mov          rsi, rax
-00007FF6FE0616EE  mov          rax, qword ptr [rsp+58h]
-00007FF6FE0616F3  mov          qword ptr [rsi+10h], rax
-00007FF6FE0616F7  movups       xmm0, xmmword ptr [rsp+48h]
-00007FF6FE0616FC  movups       xmmword ptr [rsi], xmm0
-00007FF6FE0616FF  movups       xmm0, xmmword ptr [rsp+68h]
-00007FF6FE061704  movups       xmm1, xmmword ptr [rsp+74h]
-00007FF6FE061709  movups       xmmword ptr [rsi+1Ch], xmm0
-00007FF6FE06170D  movups       xmmword ptr [rsi+28h], xmm1
-00007FF6FE061711  mov          rax, rsi
-00007FF6FE061714  add          rax, 18h
-00007FF6FE061718  mov          dword ptr [rsi+18h], 0h
+00007FF736AD137C  lea          r14d, [rsi+1h]
+00007FF736AD1380  mov          eax, esi
+00007FF736AD1382  mul          sil
+00007FF736AD1385  mov          ebp, eax
+00007FF736AD1387  mov          eax, r14d
+00007FF736AD138A  mul          r14b
+00007FF736AD138D  movzx        edi, al
+00007FF736AD1390  test         dil, dil
+00007FF736AD1393  je           static void Fabled_Engine::main+11Ah (00007FF736AD13DAh)
+00007FF736AD1395  mov          rbx, rdi
+00007FF736AD1398  shl          rbx, 6h
+00007FF736AD139C  mov          rcx, qword ptr [00007FF736AF31C8h]
+00007FF736AD13A3  test         rcx, rcx
+00007FF736AD13A6  jne          static void Fabled_Engine::main+FCh (00007FF736AD13BCh)
+00007FF736AD13A8  call         GetProcessHeap (00007FF736AE8F42h)
+00007FF736AD13AD  test         rax, rax
+00007FF736AD13B0  je           static void Fabled_Engine::main+10Bh (00007FF736AD13CBh)
+00007FF736AD13B2  mov          rcx, rax
+00007FF736AD13B5  mov          qword ptr [00007FF736AF31C8h], rax
+00007FF736AD13BC  xor          edx, edx
+00007FF736AD13BE  mov          r8, rbx
+00007FF736AD13C1  call         HeapAlloc (00007FF736AE8F48h)
+00007FF736AD13C6  test         rax, rax
+00007FF736AD13C9  jne          static void Fabled_Engine::main+11Fh (00007FF736AD13DFh)
+00007FF736AD13CB  mov          edx, 10h
+00007FF736AD13D0  mov          rcx, rbx
+00007FF736AD13D3  call         static void alloc::alloc::handle_alloc_error (00007FF736AEA150h)
+00007FF736AD13D8  ud2
+00007FF736AD13DA  mov          eax, 10h
+00007FF736AD13DF  movzx        ecx, bpl
+00007FF736AD13E3  add          ecx, ecx
+00007FF736AD13E5  lea          ecx, [rcx+rcx*2]
+00007FF736AD13E8  movzx        ebx, cl
+00007FF736AD13EB  mov          qword ptr [rsp+48h], rax
+00007FF736AD13F0  mov          qword ptr [rsp+50h], rdi
+00007FF736AD13F5  mov          qword ptr [rsp+58h], 0h
+00007FF736AD13FE  test         cl, cl
+00007FF736AD1400  je           static void Fabled_Engine::main+18Bh (00007FF736AD144Bh)
+00007FF736AD1402  lea          rbp, [rbx*8]
+00007FF736AD140A  mov          rcx, qword ptr [00007FF736AF31C8h]
+00007FF736AD1411  test         rcx, rcx
+00007FF736AD1414  jne          static void Fabled_Engine::main+16Ah (00007FF736AD142Ah)
+00007FF736AD1416  call         GetProcessHeap (00007FF736AE8F42h)
+00007FF736AD141B  test         rax, rax
+00007FF736AD141E  je           static void Fabled_Engine::main+17Ch (00007FF736AD143Ch)
+00007FF736AD1420  mov          rcx, rax
+00007FF736AD1423  mov          qword ptr [00007FF736AF31C8h], rax
+00007FF736AD142A  xor          edx, edx
+00007FF736AD142C  mov          r8, rbp
+00007FF736AD142F  call         HeapAlloc (00007FF736AE8F48h)
+00007FF736AD1434  mov          r15, rax
+00007FF736AD1437  test         rax, rax
+00007FF736AD143A  jne          static void Fabled_Engine::main+191h (00007FF736AD1451h)
+00007FF736AD143C  mov          edx, 8h
+00007FF736AD1441  mov          rcx, rbp
+00007FF736AD1444  call         static void alloc::alloc::handle_alloc_error (00007FF736AEA150h)
+00007FF736AD1449  ud2
+00007FF736AD144B  mov          r15d, 8h
+00007FF736AD1451  mov          qword ptr [rsp+28h], r15
+00007FF736AD1456  mov          qword ptr [rsp+30h], rbx
+00007FF736AD145B  mov          qword ptr [rsp+38h], 0h
+00007FF736AD1464  test         r14b, r14b
+00007FF736AD1467  je           static void Fabled_Engine::main+2E3h (00007FF736AD15A3h)
+00007FF736AD146D  movzx        eax, sil
+00007FF736AD1471  xorps        xmm0, xmm0
+00007FF736AD1474  cvtsi2ss     xmm0, eax
+00007FF736AD1478  movss        xmm9, dword ptr [__real@3f800000 (00007FF736AEC528h)]
+00007FF736AD1481  movaps       xmm13, xmm9
+00007FF736AD1485  divss        xmm13, xmm0
+00007FF736AD148A  xorps        xmm0, xmm0
+00007FF736AD148D  xor          edx, edx
+00007FF736AD148F  movss        xmm10, dword ptr [__real@bf000000 (00007FF736AEC52Ch)]
+00007FF736AD1498  lea          r13, [rsp+48h]
+00007FF736AD149D  mov          ebp, dword ptr [00007FF736AEDA38h]
+00007FF736AD14A3  mov          rdi, qword ptr [00007FF736AEDA30h]
+00007FF736AD14AA  movaps       xmm11, xmmword ptr [00007FF736AEDA40h]
+00007FF736AD14B2  movaps       xmm12, xmmword ptr [00007FF736AEDA50h]
+00007FF736AD14BA  xor          r12d, r12d
+00007FF736AD14BD  jmp          static void Fabled_Engine::main+216h (00007FF736AD14D6h)
+00007FF736AD14BF  nop
+00007FF736AD14C0  addss        xmm0, xmm9
+00007FF736AD14C5  lea          eax, [r12+1h]
+00007FF736AD14CA  cmp          r12b, sil
+00007FF736AD14CD  mov          r12d, eax
+00007FF736AD14D0  je           static void Fabled_Engine::main+2DAh (00007FF736AD159Ah)
+00007FF736AD14D6  movaps       xmm15, xmm13
+00007FF736AD14DA  mulss        xmm15, xmm0
+00007FF736AD14DF  movaps       xmm14, xmm15
+00007FF736AD14E3  addss        xmm14, xmm10
+00007FF736AD14E8  mov          bl, FFh
+00007FF736AD14EA  xorps        xmm6, xmm6
+00007FF736AD14ED  jmp          static void Fabled_Engine::main+28Bh (00007FF736AD154Bh)
+00007FF736AD14EF  nop
+00007FF736AD14F0  mov          rcx, rdx
+00007FF736AD14F3  mov          rdx, qword ptr [rsp+48h]
+00007FF736AD14F8  shl          rcx, 6h
+00007FF736AD14FC  movss        dword ptr [rdx+rcx*1], xmm8
+00007FF736AD1502  mov          dword ptr [rdx+rcx*1+4h], 0h
+00007FF736AD150A  movss        dword ptr [rdx+rcx*1+8h], xmm14
+00007FF736AD1511  movss        dword ptr [rdx+rcx*1+Ch], xmm7
+00007FF736AD1517  movss        dword ptr [rdx+rcx*1+10h], xmm15
+00007FF736AD151E  mov          dword ptr [rdx+rcx*1+1Ch], ebp
+00007FF736AD1522  mov          qword ptr [rdx+rcx*1+14h], rdi
+00007FF736AD1527  movaps       xmmword ptr [rdx+rcx*1+20h], xmm11
+00007FF736AD152D  movaps       xmmword ptr [rdx+rcx*1+30h], xmm12
+00007FF736AD1533  mov          rdx, rax
+00007FF736AD1536  add          rdx, 1h
+00007FF736AD153A  mov          qword ptr [rsp+58h], rdx
+00007FF736AD153F  add          bl, 1h
+00007FF736AD1542  cmp          sil, bl
+00007FF736AD1545  je           static void Fabled_Engine::main+200h (00007FF736AD14C0h)
+00007FF736AD154B  movaps       xmm7, xmm13
+00007FF736AD154F  mulss        xmm7, xmm6
+00007FF736AD1553  addss        xmm6, xmm9
+00007FF736AD1558  movaps       xmm8, xmm7
+00007FF736AD155C  addss        xmm8, xmm10
+00007FF736AD1561  mov          rax, qword ptr [rsp+58h]
+00007FF736AD1566  cmp          rdx, qword ptr [rsp+50h]
+00007FF736AD156B  jne          static void Fabled_Engine::main+230h (00007FF736AD14F0h)
+00007FF736AD156D  mov          rcx, rax
+00007FF736AD1570  cmp          rdx, rax
+00007FF736AD1573  jne          static void Fabled_Engine::main+233h (00007FF736AD14F3h)
+00007FF736AD1579  mov          rcx, r13
+00007FF736AD157C  movss        dword ptr [rsp+60h], xmm0
+00007FF736AD1582  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<fabled_render::mesh::container::vertex::Vertex,alloc::alloc::Global> (00007FF736AEAA70h)
+00007FF736AD1587  movss        xmm0, dword ptr [rsp+60h]
+00007FF736AD158D  mov          rax, qword ptr [rsp+58h]
+00007FF736AD1592  mov          rcx, rax
+00007FF736AD1595  jmp          static void Fabled_Engine::main+233h (00007FF736AD14F3h)
+00007FF736AD159A  test         sil, sil
+00007FF736AD159D  je           static void Fabled_Engine::main+48Dh (00007FF736AD174Dh)
+00007FF736AD15A3  movzx        eax, sil
+00007FF736AD15A7  mov          qword ptr [rsp+98h], rax
+00007FF736AD15AF  xor          ebx, ebx
+00007FF736AD15B1  xor          edx, edx
+00007FF736AD15B3  xor          eax, eax
+00007FF736AD15B5  jmp          static void Fabled_Engine::main+311h (00007FF736AD15D1h)
+00007FF736AD15B7  nop          word ptr [rax+rax*1], ax
+00007FF736AD15C0  add          bl, r14b
+00007FF736AD15C3  mov          rax, qword ptr [rsp+60h]
+00007FF736AD15C8  cmp          al, sil
+00007FF736AD15CB  je           static void Fabled_Engine::main+48Dh (00007FF736AD174Dh)
+00007FF736AD15D1  add          al, 1h
+00007FF736AD15D3  mov          qword ptr [rsp+60h], rax
+00007FF736AD15D8  test         sil, sil
+00007FF736AD15DB  je           static void Fabled_Engine::main+300h (00007FF736AD15C0h)
+00007FF736AD15DD  mov          rbp, qword ptr [rsp+98h]
+00007FF736AD15E5  mov          r13d, ebx
+00007FF736AD15E8  jmp          static void Fabled_Engine::main+347h (00007FF736AD1607h)
+00007FF736AD15EA  nop          word ptr [rax+rax*1], ax
+00007FF736AD15F0  mov          qword ptr [r15+rdx*8], r12
+00007FF736AD15F4  add          rdx, 1h
+00007FF736AD15F8  mov          qword ptr [rsp+38h], rdx
+00007FF736AD15FD  add          r13b, 1h
+00007FF736AD1601  add          rbp, FFFFFFFFFFFFFFFFh
+00007FF736AD1605  je           static void Fabled_Engine::main+300h (00007FF736AD15C0h)
+00007FF736AD1607  cmp          rdx, qword ptr [rsp+30h]
+00007FF736AD160C  je           static void Fabled_Engine::main+41Ah (00007FF736AD16DAh)
+00007FF736AD1612  lea          edi, [r14+r13*1]
+00007FF736AD1616  movzx        r12d, r13b
+00007FF736AD161A  mov          qword ptr [r15+rdx*8], r12
+00007FF736AD161E  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD1623  add          rdx, 1h
+00007FF736AD1627  mov          qword ptr [rsp+38h], rdx
+00007FF736AD162C  cmp          rdx, qword ptr [rsp+30h]
+00007FF736AD1631  je           static void Fabled_Engine::main+433h (00007FF736AD16F3h)
+00007FF736AD1637  movzx        edi, dil
+00007FF736AD163B  mov          rax, qword ptr [rsp+28h]
+00007FF736AD1640  mov          qword ptr [rax+rdx*8], rdi
+00007FF736AD1644  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD1649  add          rdx, 1h
+00007FF736AD164D  mov          qword ptr [rsp+38h], rdx
+00007FF736AD1652  add          r12, 1h
+00007FF736AD1656  cmp          rdx, qword ptr [rsp+30h]
+00007FF736AD165B  je           static void Fabled_Engine::main+447h (00007FF736AD1707h)
+00007FF736AD1661  mov          qword ptr [rax+rdx*8], r12
+00007FF736AD1665  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD166A  add          rdx, 1h
+00007FF736AD166E  mov          qword ptr [rsp+38h], rdx
+00007FF736AD1673  cmp          rdx, qword ptr [rsp+30h]
+00007FF736AD1678  je           static void Fabled_Engine::main+460h (00007FF736AD1720h)
+00007FF736AD167E  mov          qword ptr [rax+rdx*8], rdi
+00007FF736AD1682  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD1687  add          rdx, 1h
+00007FF736AD168B  mov          qword ptr [rsp+38h], rdx
+00007FF736AD1690  add          rdi, 1h
+00007FF736AD1694  cmp          rdx, qword ptr [rsp+30h]
+00007FF736AD1699  je           static void Fabled_Engine::main+479h (00007FF736AD1739h)
+00007FF736AD169F  mov          r15, qword ptr [rsp+28h]
+00007FF736AD16A4  mov          qword ptr [r15+rdx*8], rdi
+00007FF736AD16A8  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD16AD  add          rdx, 1h
+00007FF736AD16B1  mov          qword ptr [rsp+38h], rdx
+00007FF736AD16B6  cmp          rdx, qword ptr [rsp+30h]
+00007FF736AD16BB  jne          static void Fabled_Engine::main+330h (00007FF736AD15F0h)
+00007FF736AD16C1  lea          rcx, [rsp+28h]
+00007FF736AD16C6  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF736AEAB30h)
+00007FF736AD16CB  mov          r15, qword ptr [rsp+28h]
+00007FF736AD16D0  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD16D5  jmp          static void Fabled_Engine::main+330h (00007FF736AD15F0h)
+00007FF736AD16DA  lea          rcx, [rsp+28h]
+00007FF736AD16DF  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF736AEAB30h)
+00007FF736AD16E4  mov          r15, qword ptr [rsp+28h]
+00007FF736AD16E9  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD16EE  jmp          static void Fabled_Engine::main+352h (00007FF736AD1612h)
+00007FF736AD16F3  lea          rcx, [rsp+28h]
+00007FF736AD16F8  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF736AEAB30h)
+00007FF736AD16FD  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD1702  jmp          static void Fabled_Engine::main+377h (00007FF736AD1637h)
+00007FF736AD1707  lea          rcx, [rsp+28h]
+00007FF736AD170C  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF736AEAB30h)
+00007FF736AD1711  mov          rax, qword ptr [rsp+28h]
+00007FF736AD1716  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD171B  jmp          static void Fabled_Engine::main+3A1h (00007FF736AD1661h)
+00007FF736AD1720  lea          rcx, [rsp+28h]
+00007FF736AD1725  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF736AEAB30h)
+00007FF736AD172A  mov          rax, qword ptr [rsp+28h]
+00007FF736AD172F  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD1734  jmp          static void Fabled_Engine::main+3BEh (00007FF736AD167Eh)
+00007FF736AD1739  lea          rcx, [rsp+28h]
+00007FF736AD173E  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF736AEAB30h)
+00007FF736AD1743  mov          rdx, qword ptr [rsp+38h]
+00007FF736AD1748  jmp          static void Fabled_Engine::main+3DFh (00007FF736AD169Fh)
+00007FF736AD174D  mov          rax, qword ptr [rsp+38h]
+00007FF736AD1752  mov          qword ptr [rsp+7Ch], rax
+00007FF736AD1757  movups       xmm0, xmmword ptr [rsp+28h]
+00007FF736AD175C  movups       xmmword ptr [rsp+6Ch], xmm0
+00007FF736AD1761  mov          rcx, qword ptr [00007FF736AF31C8h]
+00007FF736AD1768  test         rcx, rcx
+00007FF736AD176B  jne          static void Fabled_Engine::main+4C5h (00007FF736AD1785h)
+00007FF736AD176D  call         GetProcessHeap (00007FF736AE8F42h)
+00007FF736AD1772  test         rax, rax
+00007FF736AD1775  je           static void Fabled_Engine::main+794h (00007FF736AD1A54h)
+00007FF736AD177B  mov          rcx, rax
+00007FF736AD177E  mov          qword ptr [00007FF736AF31C8h], rax
+00007FF736AD1785  mov          r8d, 40h
+00007FF736AD178B  xor          edx, edx
+00007FF736AD178D  call         HeapAlloc (00007FF736AE8F48h)
+00007FF736AD1792  test         rax, rax
+00007FF736AD1795  je           static void Fabled_Engine::main+794h (00007FF736AD1A54h)
+00007FF736AD179B  mov          rsi, rax
+00007FF736AD179E  mov          rax, qword ptr [rsp+58h]
+00007FF736AD17A3  mov          qword ptr [rsi+10h], rax
+00007FF736AD17A7  movups       xmm0, xmmword ptr [rsp+48h]
+00007FF736AD17AC  movups       xmmword ptr [rsi], xmm0
+00007FF736AD17AF  movups       xmm0, xmmword ptr [rsp+68h]
+00007FF736AD17B4  movups       xmm1, xmmword ptr [rsp+74h]
+00007FF736AD17B9  movups       xmmword ptr [rsi+1Ch], xmm0
+00007FF736AD17BD  movups       xmmword ptr [rsi+28h], xmm1
+00007FF736AD17C1  mov          dword ptr [rsi+18h], 0h
+00007FF736AD17C8  lea          rax, [00007FF736AEFAA0h]
+00007FF736AD17CF  mov          qword ptr [rsp+A0h], rax
+00007FF736AD17D7  mov          qword ptr [rsp+A8h], 6h

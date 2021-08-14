@@ -56,7 +56,7 @@ impl From<Cube> for Model {
     fn from(cube: Cube) -> Self {
         const CUBE_DATA: &CubeData = &CUBE_FACE_DATA;
 
-        let mut container = Vec::with_capacity(24);
+        let mut container = Vec::with_capacity(6);
         let mut face_vert_storage = [Vertex::default(); 4];
 
         for chunk in 0..6 {
