@@ -86,14 +86,15 @@ impl From<Cone> for Model {
             let bi_tangent = normal.cross(tangent);
 
             vertex_buffer.push(Vertex {
-                position: vertex.to_array(),
+                position: [vertex.x, vertex.y, vertex.z],
                 tex_coord: [side as f32 / tessellation_slice as f32, 0.0],
-                normal: normal.to_array(),
-                tangent: tangent.extend(1.0).to_array(),
-                bi_tangent: bi_tangent.extend(1.0).to_array(),
+                normal: [normal.x, normal.y, normal.z],
+                tangent: [tangent.x, tangent.y, tangent.z, 1.0],
+                bi_tangent: [bi_tangent.x, bi_tangent.y, bi_tangent.z, 1.0],
             });
         }
 
+        //todo improve this
         //indices
         for point in 2..tessellation_slice + 2 {
             indices.push(0); // top

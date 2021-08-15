@@ -12,13 +12,14 @@ mod uvsphere;
 pub use capsule::*;
 pub use cone::*;
 pub use cube::*;
+pub use icosphere::*;
 pub use plane::*;
 pub use quad::*;
 
 #[cfg(test)]
 mod struct_test {
     use crate::mesh::primitive::plane::Plane;
-    use crate::mesh::{Capsule, Cone, Cube, Quad};
+    use crate::mesh::{Capsule, Cone, Cube, IcoSphere, Quad};
 
     #[test]
     fn data_size_test() {
@@ -60,5 +61,13 @@ mod struct_test {
         let quad_alignment = std::mem::align_of::<Quad>();
         assert_eq!(quad_alignment & (quad_alignment - 1), 0);
         println!("Quad is aligned to {} bytes", quad_alignment);
+
+        //---------------- Ico Sphere --------------------------
+
+        let ico_size = std::mem::size_of::<IcoSphere>();
+        assert_eq!(ico_size & (ico_size - 1), 0);
+        let ico_alignment = std::mem::align_of::<IcoSphere>();
+        assert_eq!(ico_alignment & (ico_alignment - 1), 0);
+        println!("Ico Sphere is aligned to {} bytes", ico_alignment);
     }
 }

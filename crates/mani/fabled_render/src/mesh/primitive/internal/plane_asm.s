@@ -211,7 +211,7 @@
 00007FF736AD16D5  jmp          static void Fabled_Engine::main+330h (00007FF736AD15F0h)
 00007FF736AD16DA  lea          rcx, [rsp+28h]
 00007FF736AD16DF  call         static void alloc::raw_vec::{{impl}}::reserve::do_reserve_and_handle<usize,alloc::alloc::Global> (00007FF736AEAB30h)
-00007FF736AD16E4  mov          r15, qword ptr [rsp+28h]
+    [rsp+28h]
 00007FF736AD16E9  mov          rdx, qword ptr [rsp+38h]
 00007FF736AD16EE  jmp          static void Fabled_Engine::main+352h (00007FF736AD1612h)
 00007FF736AD16F3  lea          rcx, [rsp+28h]
