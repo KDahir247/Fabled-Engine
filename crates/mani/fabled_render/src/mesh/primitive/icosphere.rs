@@ -22,7 +22,7 @@ impl IcoSphere {
         }
     }
 
-    //todo optimize this function.
+    //todo maybe unfold this.
     fn middle_point(
         p1: usize,
         p2: usize,
@@ -30,8 +30,8 @@ impl IcoSphere {
         vertices: &mut Vec<f32>,
         cache: &mut rustc_hash::FxHashMap<usize, usize>,
     ) -> usize {
-        //((a + b) * (a + b + 1) / 2) + Math.min(a, b)
-        let key = (((p1 + p2) * (p1 + p2 + 1)) << 1) + min_ss(p1 as f32, p2 as f32) as usize; //todo create a min for usize type
+        let cantor_encode = p1 + p2;
+        let key = ((cantor_encode * (cantor_encode + 1)) << 1) + std::cmp::min(p1, p2); // Cantor's pairing function
 
         match cache.remove(&key) {
             Some(value) => {
@@ -50,9 +50,7 @@ impl IcoSphere {
                 //Normalize it and scale by radius
                 let vec = glam::const_vec3a!([x, y, z]).normalize() * radius;
 
-                vertices.push(vec.x); // X
-                vertices.push(vec.y); // Y
-                vertices.push(vec.z); // Z
+                vertices.extend(vec.to_array());
 
                 len
             }
@@ -119,9 +117,9 @@ impl From<IcoSphere> for Model {
         ];
 
         // Very fast hash algorithm we don't care or are worried of Dos Attack so we will use a fast non-cryptographic algorithm
-        // todo maybe reduce it to u32, u32
         let mut middle_index_cache : rustc_hash::FxHashMap<usize, usize>  = rustc_hash::FxHashMap::default();
-        
+
+
         for index in 0..ico_sphere.tessellation{
             let target_len = 60_usize * 4usize.pow(index + 1);
             let mut face_2: Vec<usize> = vec![0; target_len];
@@ -140,6 +138,7 @@ impl From<IcoSphere> for Model {
                 let b = self::IcoSphere::middle_point(v2, v3, ico_sphere.radius,&mut normalized_vertices, &mut middle_index_cache);
                 let c = self::IcoSphere::middle_point(v3, v1, ico_sphere.radius,&mut normalized_vertices, &mut middle_index_cache);
 
+                
                 let sub_divide_triangle_chunk = [v1, a, c, v2, b, a, v3, c, b, a, b, c];
                 
                 {
@@ -148,11 +147,16 @@ impl From<IcoSphere> for Model {
                     let (target_left, _) = face_2[offset..].split_at_mut(12);
                     target_left.copy_from_slice(&sub_divide_triangle_chunk);
                 }
+                
             }
 
             triangles = face_2;
         }
 
+        
+        
+        
+        //todo optimize this.
         let mut vertex_data = Vec::new();
         //Correct
         for vertex in normalized_vertices.chunks_exact_mut(3){
@@ -190,7 +194,7 @@ mod test {
         let ico_sphere = IcoSphere::new(1.0, 3);
         let ico_model: Model = ico_sphere.into();
         for a in &ico_model.meshes[0].vertices {
-            println!("{:?}", a.position);
+            //println!("{:?}", a.position);
         }
     }
 }

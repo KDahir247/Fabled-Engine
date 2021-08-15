@@ -37,9 +37,15 @@ glam = {version = "*", features = ["bytemuck"]}
 ansi_term = {version = "0.12.1"}
 
 
+
+#remove
+superluminal-perf = "*"
+
 # Features
 [features]
 "ktx_low" = ["libktx-rs-sys"]
+
+
 
 
 [dependencies.libktx-rs-sys]
