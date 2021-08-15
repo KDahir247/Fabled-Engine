@@ -6,7 +6,7 @@ fn main() {
 
     superluminal_perf::begin_event("Creating Primitive");
 
-    let plane = fabled_render::mesh::IcoSphere::new(1.0, 1);
+    let plane = fabled_render::mesh::IcoSphere::new(1.0, 3);
     let plane_model: fabled_render::mesh::Model = plane.into();
 
     println!("a");
