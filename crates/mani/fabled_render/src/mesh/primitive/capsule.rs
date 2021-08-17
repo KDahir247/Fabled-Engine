@@ -1,5 +1,4 @@
 use crate::mesh::primitive::capsule::CapsuleUvProfile::Aspect;
-use crate::mesh::util::min_ss;
 use crate::mesh::{Mesh, Model, Vertex};
 
 #[derive(Debug, Copy, Clone)]
@@ -45,9 +44,9 @@ impl Capsule {
            cache thrashing or memory can't be allocated error.
         */
 
-        latitude = min_ss(latitude as f32, 90.0) as u8;
-        longitude = min_ss(longitude as f32, 180.0) as u8;
-        rings = min_ss(rings as f32, 5.) as u8;
+        latitude = latitude.min(90);
+        longitude = longitude.min(180);
+        rings = rings.min(5);
 
         Capsule {
             radius,
@@ -80,7 +79,7 @@ impl From<Capsule> for Model {
         let longitude = longitude as usize;
         let latitude = latitude as usize;
 
-        let calc_middle = min_ss(rings as f32, 1.0);
+        let calc_middle = rings.min(1);
         let half_lats = latitude >> 1; //equal to latitude / 2;
         let half_lats_sub_1 = half_lats - 1;
         let half_lats_sub_2 = half_lats_sub_1 - 1;
@@ -125,7 +124,6 @@ impl From<Capsule> for Model {
         let vt_aspect_north = 1.0 - vt_aspect_ratio;
         let vt_aspect_south = vt_aspect_ratio;
 
-        //test out vec
         let mut theta_cartesian: Vec<glam::Vec2> = vec![glam::Vec2::ZERO; longitude];
         let mut rho_theta_cartesian: Vec<glam::Vec2> = vec![glam::Vec2::ZERO; longitude];
         let mut s_texture_cache: Vec<f32> = vec![0.0; longs_add_1];
@@ -156,8 +154,8 @@ impl From<Capsule> for Model {
         for (j, cache) in s_texture_cache.iter_mut().enumerate() {
             let s_texture = 1.0 - j as f32 * inv_long;
             *cache = s_texture;
-            // Wrap to first element upon reaching last.
 
+            // Wrap to first element upon reaching last.
             let j_mod = j % longitude;
 
             let tc = theta_cartesian[j_mod];
@@ -185,7 +183,6 @@ impl From<Capsule> for Model {
             let (sin_phi_south, cos_phi_south) = phi.sin_cos();
 
             // Symmetrical hemispheres means cosine and sine only needs
-            // to be calculated once.
             let cos_phi_north = sin_phi_south;
             let sin_phi_north = -cos_phi_south;
 
@@ -243,7 +240,7 @@ impl From<Capsule> for Model {
         let to_fac = 1.0 / rings_add_1 as f32;
         let mut idx_cyl_lat = vertex_offset_cylinder;
 
-        for h in 1..(rings_add_1 * calc_middle as usize) {
+        for h in 1..(rings_add_1 * calc_middle) {
             let fac = h as f32 * to_fac;
             let cmp_l_fac = 1.0 - fac;
             let t_texture = cmp_l_fac * vt_aspect_north + fac * vt_aspect_south;
@@ -391,8 +388,8 @@ impl From<Capsule> for Model {
                 position: vs[i].to_array(),
                 tex_coord: vts[i].to_array(),
                 normal: vns[i].to_array(),
-                tangent: [0.0; 4],    //todo not done
-                bi_tangent: [0.0; 4], //todo not done
+                tangent: [0.0; 4],
+                bi_tangent: [0.0; 4],
             };
         }
 
@@ -415,8 +412,9 @@ mod test {
     fn test() {
         let capsule = Capsule::default();
         let capsule_model: Model = capsule.into();
-        /*for mesh in capsule_model.meshes {
-            println!("{:?}", mesh.indices);
-        }*/
+        for mesh in &capsule_model.meshes {
+            println!("{:?}", mesh.vertices);
+        }
+        println!("{:?}", capsule_model.meshes[0].indices);
     }
 }

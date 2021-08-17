@@ -1,10 +1,7 @@
-use crate::mesh::util::min_ss;
 use crate::mesh::{Mesh, Model, Vertex};
 
 // The normal vector of the front face plane
 const NORMAL_FRONT: [f32; 3] = [0.0, 1.0, 0.0];
-const TANGENT: [f32; 4] = [-1.0, 0.0, 0.0, 1.0];
-const BI_TANGENT: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PlaneInstruction {
@@ -54,8 +51,8 @@ impl Plane {
             previous plane.
         */
 
-        tessellation_width = min_ss(tessellation_width as f32, 10.0) as u8;
-        tessellation_height = min_ss(tessellation_height as f32, 10.0) as u8;
+        tessellation_width = tessellation_width.min(10);
+        tessellation_height = tessellation_height.min(10);
 
         Self {
             width,
@@ -106,8 +103,8 @@ impl From<Plane> for Model {
                     position: [xf * scale_x - width * 0.5, 0.0, yf * scale_y - height * 0.5],
                     tex_coord: [inv_tessellation_width * xf, inv_tessellation_height * yf],
                     normal: NORMAL_FRONT,
-                    tangent: TANGENT,
-                    bi_tangent: BI_TANGENT,
+                    tangent: [0.0; 4],
+                    bi_tangent: [0.0; 4],
                 });
             }
         }

@@ -1,8 +1,6 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
 const NORMAL: [f32; 3] = [0.0, 0.0, 1.0];
-const TANGENT: [f32; 4] = [-1.0, 0.0, 0.0, 1.0];
-const BI_TANGENT: [f32; 4] = [0.0, -1.0, 0.0, 1.0];
 const INDICES: [usize; 6] = [0, 1, 2, 0, 3, 2];
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -38,8 +36,8 @@ impl From<Quad> for Model {
                 position: [x * quad.width, y * quad.height, 0.0],
                 tex_coord: [x + 0.5, y + 0.5],
                 normal: NORMAL,
-                tangent: TANGENT,
-                bi_tangent: BI_TANGENT,
+                tangent: [0.0; 4],
+                bi_tangent: [0.0; 4],
             };
         }
 

@@ -56,8 +56,8 @@ impl From<Cube> for Model {
     fn from(cube: Cube) -> Self {
         const CUBE_DATA: &CubeData = &CUBE_FACE_DATA;
 
-        let mut container = Vec::with_capacity(6);
-        let mut face_vert_storage = [Vertex::default(); 4];
+        let mut vertex_storage = vec![Vertex::default(); 24];
+        let mut indices_storage = vec![0; 36];
 
         for chunk in 0..6 {
             let normal = CUBE_DATA.normal[chunk];
@@ -71,7 +71,7 @@ impl From<Cube> for Model {
                 (normal + bi_tangent - tangent) * cube.size,
             ];
 
-            let indices = vec![
+            let indices = [
                 chunk * 3,
                 chunk * 3 + 1,
                 chunk * 3 + 2,
@@ -80,11 +80,13 @@ impl From<Cube> for Model {
                 chunk * 3,
             ];
 
-            let normal_result = normal.to_array();
-            let tangent_result = tangent.extend(1.0).to_array();
-            let bi_tangent_result = bi_tangent.extend(1.0).to_array();
+            {
+                let offset = chunk * 6;
+                let (target_left, _) = indices_storage[offset..].split_at_mut(6);
+                target_left.copy_from_slice(&indices);
+            }
 
-            for face in corners.chunks_exact(4) {
+            for (index, face) in corners.chunks_exact(4).enumerate() {
                 let vert_1 = face[0];
                 let vert_2 = face[1];
                 let vert_3 = face[2];
@@ -95,47 +97,60 @@ impl From<Cube> for Model {
                 let tex_coord_3 = [vert_3.signum().x * 0.5 + 0.5, vert_3.signum().y * 0.5 + 0.5];
                 let tex_coord_4 = [vert_4.signum().x * 0.5 + 0.5, vert_4.signum().y * 0.5 + 0.5];
 
-                face_vert_storage[0] = Vertex {
+                let first_vertex_chunk = Vertex {
                     position: vert_1.to_array(),
                     tex_coord: tex_coord_1,
-                    normal: normal_result,
-                    tangent: tangent_result,
-                    bi_tangent: bi_tangent_result,
+                    normal: normal.to_array(),
+                    tangent: [0.0; 4],
+                    bi_tangent: [0.0; 4],
                 };
 
-                face_vert_storage[1] = Vertex {
+                let second_vertex_chunk = Vertex {
                     position: vert_2.to_array(),
                     tex_coord: tex_coord_2,
-                    normal: normal_result,
-                    tangent: tangent_result,
-                    bi_tangent: bi_tangent_result,
+                    normal: normal.to_array(),
+                    tangent: [0.0; 4],
+                    bi_tangent: [0.0; 4],
                 };
 
-                face_vert_storage[2] = Vertex {
+                let third_vertex_chunk = Vertex {
                     position: vert_3.to_array(),
                     tex_coord: tex_coord_3,
-                    normal: normal_result,
-                    tangent: tangent_result,
-                    bi_tangent: bi_tangent_result,
+                    normal: normal.to_array(),
+                    tangent: [0.0; 4],
+                    bi_tangent: [0.0; 4],
                 };
 
-                face_vert_storage[3] = Vertex {
+                let fourth_vertex_chunk = Vertex {
                     position: vert_4.to_array(),
                     tex_coord: tex_coord_4,
-                    normal: normal_result,
-                    tangent: tangent_result,
-                    bi_tangent: bi_tangent_result,
+                    normal: normal.to_array(),
+                    tangent: [0.0; 4],
+                    bi_tangent: [0.0; 4],
                 };
-            }
 
-            container.push(Mesh {
-                vertices: face_vert_storage.to_vec(),
-                material_id: 0,
-                indices,
-            });
+                let face_vertices = [
+                    first_vertex_chunk,
+                    second_vertex_chunk,
+                    third_vertex_chunk,
+                    fourth_vertex_chunk,
+                ];
+
+                {
+                    let offset = (index + chunk) * 4;
+                    let (target_left, _) = vertex_storage[offset..].split_at_mut(4);
+                    target_left.copy_from_slice(&face_vertices);
+                }
+            }
         }
 
-        Model { meshes: container }
+        let mesh = Mesh {
+            vertices: vertex_storage,
+            material_id: 0,
+            indices: indices_storage,
+        };
+
+        Model { meshes: vec![mesh] }
     }
 }
 
@@ -148,8 +163,8 @@ mod test {
     fn test() {
         let cube = Cube::new(0.7);
         let cube_model: Model = cube.into();
-        for mesh in cube_model.meshes {
-            println!("{:?}", mesh.vertices);
+        for mesh in &cube_model.meshes[0].vertices {
+            println!("{:?}", mesh);
         }
     }
 }

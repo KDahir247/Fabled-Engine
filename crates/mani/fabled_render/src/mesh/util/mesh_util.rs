@@ -1,79 +1,66 @@
-use core::arch::x86_64::*;
-//todo move max_ss, min_ss, and clamp_ss to fabled_math when possible.
+use crate::mesh::Mesh;
 
-pub fn transpose_4x4_array<T: Copy>(
-    input: &[T; 16],
-    output: &mut [T; 16],
-    width: usize,
-    height: usize,
-) {
-    //Note this is a internal implementation and should not be considered to be public.
-    for y in 0..height {
-        for x in 0..width {
-            let input_index = y + x * width;
-            let output_index = x + y * height;
+//todo got to look over this and test it before using it in code source.
+pub fn calculate_tangents(mesh: &mut Mesh) {
+    let triangles = &mesh.indices;
 
-            *output.get_mut(output_index).expect("") = *input.get(input_index).expect("");
+    let vertices_data = &mut mesh.vertices;
+
+    let uniform_len = vertices_data.len();
+
+    let mut tangents = vec![glam::Vec4::ZERO; uniform_len];
+    let mut bi_tangent = vec![glam::Vec4::ZERO; uniform_len];
+
+    for tri in triangles.chunks_exact(3) {
+        let i1 = tri[0];
+        let i2 = tri[1];
+        let i3 = tri[2];
+
+        let p0 = glam::Vec3A::from_slice(&vertices_data[i1].position);
+        let p1 = glam::Vec3A::from_slice(&vertices_data[i2].position);
+        let p2 = glam::Vec3A::from_slice(&vertices_data[i3].position);
+
+        let w0 = glam::Vec2::from_slice(&vertices_data[i1].tex_coord);
+        let w1 = glam::Vec2::from_slice(&vertices_data[i2].tex_coord);
+        let w2 = glam::Vec2::from_slice(&vertices_data[i3].tex_coord);
+
+        let e1 = p1 - p0;
+        let e2 = p2 - p0;
+
+        let xy1 = w1 - w0;
+        let xy2 = w2 - w0;
+
+        let r = 1.0 / (xy1.x * xy2.y - xy2.x * xy1.y);
+        let t = (e1 * xy2.y - e2 * xy1.y) * r;
+        let b = (e2 * xy1.x - e1 * xy2.x) * r;
+
+        tangents[i1] = t.extend(0.0);
+        tangents[i2] = t.extend(0.0);
+        tangents[i3] = t.extend(0.0);
+
+        bi_tangent[i1] = b.extend(0.0);
+        bi_tangent[i2] = b.extend(0.0);
+        bi_tangent[i3] = b.extend(0.0);
+
+        // Orthonormalize each tangent and calculate its handedness
+        for i in 0..uniform_len {
+            let t = tangents[i].truncate();
+            let b = bi_tangent[i].truncate();
+            let n = glam::Vec3::from_slice(&vertices_data[i].normal);
+
+            let tangent = reject(n, t).normalize();
+            let handedness = ((t.cross(b).dot(n)) - f32::EPSILON).signum();
+
+            vertices_data[i].tangent = [tangent.x, tangent.y, tangent.z, handedness];
+
+            //to calculate the bi_tangent
+            let bi_tangent = n.cross(tangent).extend(1.0) * handedness;
+            vertices_data[i].bi_tangent = bi_tangent.to_array();
         }
     }
 }
 
-pub fn min_ss(mut a: f32, b: f32) -> f32 {
-    #[cfg(target_feature = "sse2")]
-    unsafe {
-        /*
-         1. Store Single Scalar Floating Point (MOVSS) to a
-         2. MINSS instruction. Compare the low single precision floating-point value to a, b.
-            If a is less then it returns a otherwise b is copied to a.
-         3. Converting f32 to __m128 128-bit wide set of four `f32` types on the lowest set and zero out the other element.
-            eg. (value, 0.0, 0.0, 0.0)
-        */
-        _mm_store_ss(&mut a, _mm_min_ss(_mm_set_ss(a), _mm_set_ss(b)));
-        return a;
-    }
-
-    //Could do >> 1, but doesn't work on float point type unless casting to integer type which
-    (a + b - (a - b).abs()) * 0.5
-}
-
-pub fn max_ss(mut a: f32, b: f32) -> f32 {
-    #[cfg(all(target_feature = "sse2"))]
-    unsafe {
-        /*
-         1. Store Single Scalar Floating Point (MOVSS) to a
-         2. MAXSS instruction. Compare the low single precision floating-point value to a, b.
-            If a is greater then it returns a otherwise b is copied to a.
-         3. Converting f32 to __m128 128-bit wide set of four `f32` types on the lowest set and zero out the other element.
-            eg. (value, 0.0, 0.0, 0.0)
-        */
-        _mm_store_ss(&mut a, _mm_max_ss(_mm_set_ss(a), _mm_set_ss(b)));
-        return a;
-    }
-
-    //Could do >> 1, but doesn't work on float point type unless casting to integer type which
-    (a + b + (a - b).abs()) * 0.5
-}
-
-pub fn clamp_ss(mut value: f32, min: f32, max: f32) -> f32 {
-    #[cfg(all(target_feature = "sse2"))]
-    unsafe {
-        /*
-        1. Store Single Scalar Floating Point (MOVSS) to value
-        2. MAXSS instruction. Compare the low single precision floating-point value to max, max(min, min_instruction()(3)).
-        3. MINSS instruction. Compare the low single precision floating-point value to min, min(max,value)
-        4. Set_SS (set single scalar floating point) Converting f32 to __m128 128-bit wide set of four `f32` types on the lowest set and zero out the other element.
-            eg. (value, 0.0, 0.0, 0.0)
-        */
-        _mm_store_ss(
-            &mut value,
-            _mm_max_ss(
-                _mm_set_ss(min),
-                _mm_min_ss(_mm_set_ss(max), _mm_set_ss(value)),
-            ),
-        );
-        return value;
-    }
-
-    //Call in-order to perform saturation of min and max to value.
-    max_ss(min, min_ss(max, value))
+pub fn reject(axis: glam::Vec3, direction: glam::Vec3) -> glam::Vec3 {
+    let axis = axis.normalize();
+    direction - axis * direction.dot(axis)
 }

@@ -1,4 +1,3 @@
-use crate::mesh::util::min_ss;
 use crate::mesh::{Mesh, Model, Vertex};
 
 pub struct IcoSphere {
@@ -22,11 +21,9 @@ impl IcoSphere {
         }
     }
 
-    //todo maybe unfold this.
     fn middle_point(
         p1: usize,
         p2: usize,
-        radius: f32,
         vertices: &mut Vec<f32>,
         cache: &mut rustc_hash::FxHashMap<usize, usize>,
     ) -> usize {
@@ -47,8 +44,8 @@ impl IcoSphere {
                 let y = (vertices[3 * p1 + 1] + vertices[3 * p2 + 1]) * 0.5; // Y
                 let z = (vertices[3 * p1 + 2] + vertices[3 * p2 + 2]) * 0.5; // Z
 
-                //Normalize it and scale by radius
-                let vec = glam::const_vec3a!([x, y, z]).normalize() * radius;
+                //Normalize it
+                let vec = glam::const_vec3a!([x, y, z]).normalize();
 
                 vertices.extend(vec.to_array());
 
@@ -61,28 +58,27 @@ impl IcoSphere {
 #[rustfmt::skip] //todo temporary to see indention on data for implementation
 impl From<IcoSphere> for Model {
     fn from(ico_sphere: IcoSphere) -> Self {
-        //let vertex_size = 4i32.pow(ico_sphere.tessellation) * 10 + 2;
+        let vertex_size = 4usize.pow(ico_sphere.tessellation) * 10 * 3 + 2;
         
         //truncated Golden_Ratio (Phi) = 1.618_034
         //Normalization of (1, Phi)
         //(0.52573, 0.85065)
-        let modified_vert = (0.525_73 * ico_sphere.radius, 0.850_65 * ico_sphere.radius);
-
+        //let modified_vert = (0.525_73 * ico_sphere.radius, 0.850_65 * ico_sphere.radius);
         let mut normalized_vertices = vec![
-            -modified_vert.0, modified_vert.1, 0.0, //0
-            modified_vert.0, modified_vert.1, 0.0, //1,
-            -modified_vert.0, -modified_vert.1, 0.0, //2 
-            modified_vert.0, -modified_vert.1, 0.0, //3
+            -0.525_73, 0.850_65, 0.0, //0
+            0.525_73, 0.850_65, 0.0, //1,
+            -0.525_73, -0.850_65, 0.0, //2 
+            0.525_73, -0.850_65, 0.0, //3
             
-            0.0, -modified_vert.0, modified_vert.1, //4
-            0.0, modified_vert.0, modified_vert.1, //5
-            0.0, -modified_vert.0, -modified_vert.1, //6
-            0.0, modified_vert.0, -modified_vert.1, //7
+            0.0, -0.525_73, 0.850_65, //4
+            0.0, 0.525_73, 0.850_65, //5
+            0.0, -0.525_73, -0.850_65, //6
+            0.0, 0.525_73, -0.850_65, //7
 
-            modified_vert.1, 0.0, -modified_vert.0, //8
-            modified_vert.1, 0.0, modified_vert.0, //9
-            -modified_vert.1, 0.0, -modified_vert.0, //10
-            -modified_vert.1, 0.0, modified_vert.0,// 11
+            0.850_65, 0.0, -0.525_73, //8
+            0.850_65, 0.0, 0.525_73, //9
+            -0.850_65, 0.0, -0.525_73, //10
+            -0.850_65, 0.0, 0.525_73,// 11
         ];
         
         let mut triangles: Vec<usize> = vec![
@@ -99,15 +95,15 @@ impl From<IcoSphere> for Model {
             11, 10, 2, //2
             10, 7, 6, //3
             7, 1, 8, //4
-            
+
             //5 faces around point 3
             3, 9, 4, //0
             3, 4, 2, //1
             3, 2, 6, //2
             3, 6, 8, //3
             3, 8, 9, //4
-            
-            
+
+
             // 5 adjacent faces
             4, 9, 5, //0
             2, 4, 11, //1
@@ -118,7 +114,6 @@ impl From<IcoSphere> for Model {
 
         // Very fast hash algorithm we don't care or are worried of Dos Attack so we will use a fast non-cryptographic algorithm
         let mut middle_index_cache : rustc_hash::FxHashMap<usize, usize>  = rustc_hash::FxHashMap::default();
-
 
         for index in 0..ico_sphere.tessellation{
             let target_len = 60_usize * 4usize.pow(index + 1);
@@ -131,12 +126,9 @@ impl From<IcoSphere> for Model {
                 let v2 : usize = tri[1];
                 let v3 : usize = tri[2];
                 
-                //let faces = [v1, v1, v2, v2, v3, v3, v1];
-
-                //todo maybe just put the v1 v2 v2 v3  v3 v1  in a collection [v1, v2, v2, v3, v3, v1] and chunk iter and do calculate here to prevent any miss on auto vectorization and unfold this method.
-                let a = self::IcoSphere::middle_point(v1,v2, ico_sphere.radius,&mut normalized_vertices, &mut middle_index_cache);
-                let b = self::IcoSphere::middle_point(v2, v3, ico_sphere.radius,&mut normalized_vertices, &mut middle_index_cache);
-                let c = self::IcoSphere::middle_point(v3, v1, ico_sphere.radius,&mut normalized_vertices, &mut middle_index_cache);
+                let a = self::IcoSphere::middle_point(v1,v2, &mut normalized_vertices, &mut middle_index_cache);
+                let b = self::IcoSphere::middle_point(v2, v3, &mut normalized_vertices, &mut middle_index_cache);
+                let c = self::IcoSphere::middle_point(v3, v1, &mut normalized_vertices, &mut middle_index_cache);
 
                 
                 let sub_divide_triangle_chunk = [v1, a, c, v2, b, a, v3, c, b, a, b, c];
@@ -153,30 +145,56 @@ impl From<IcoSphere> for Model {
             triangles = face_2;
         }
 
+
+        //UV map
+        let mut uvs = vec![0.0; vertex_size];
+        for (index, chunk) in normalized_vertices.chunks_exact(3).enumerate(){
+
+            let inv_pi = 1.0 / std::f32::consts::PI;
+            
+            //TODO The Last batch of triangles loop back from high uv to zero 
+            // A temporary hack is for the Coordinate (U or V) is to use the absolute value of chunk[2] (z).atan2(chunk[0](x)) .
+            // chunk[2].abs().atan2(chunk[0]) * (inv_pi * 0.5) + 0.5, // U
+            let uv = [
+                chunk[2].atan2(chunk[0]) * (inv_pi * 0.5) + 0.5, // U
+                chunk[1].asin() * inv_pi + 0.5 // V
+            ];
+
+            {
+                let offset = index * 2;
+                let (target_left, _) = uvs[offset..].split_at_mut(2);
+                target_left.copy_from_slice(&uv);
+            }
+        }
         
-        
-        
-        //todo optimize this.
+
         let mut vertex_data = Vec::new();
         //Correct
-        for vertex in normalized_vertices.chunks_exact_mut(3){
+        //todo can optimize this.
+        for (vertex,i) in normalized_vertices.chunks_exact_mut(3).zip(uvs.chunks_exact(2)){
+            let pos_x = vertex[0];
+            let pos_y = vertex[1];
+            let pos_z = vertex[2];
+
+            let u = i[0];
+            let v = i[1];
             
             vertex_data.push(Vertex{
-                position: [vertex[0], vertex[1], vertex[2]],
-                tex_coord: [0.0, 0.0],
-                normal: [0.0, 0.0, 0.0],
-                tangent: [0.0, 0.0, 0.0, 0.0],
-                bi_tangent: [0.0, 0.0, 0.0, 0.0]
+                position: [pos_x * ico_sphere.radius, pos_y * ico_sphere.radius, pos_z * ico_sphere.radius],
+                tex_coord: [u, v],
+                normal: [pos_x, pos_y, pos_z],
+                tangent: [0.0; 4],
+                bi_tangent: [0.0; 4]
             });
         
         }
-        
+
         let mesh = Mesh{
             vertices: vertex_data,
             material_id: 0,
             indices: triangles
         };
-        
+
         
         Model{
             meshes: vec![mesh]
@@ -191,10 +209,11 @@ mod test {
 
     #[test]
     fn test() {
-        let ico_sphere = IcoSphere::new(1.0, 3);
+        let ico_sphere = IcoSphere::new(1.0, 1);
         let ico_model: Model = ico_sphere.into();
-        for a in &ico_model.meshes[0].vertices {
-            //println!("{:?}", a.position);
+        for mesh in &ico_model.meshes {
+            println!("{:?}", mesh.vertices);
         }
+        println!("{:?}", ico_model.meshes[0].indices);
     }
 }

@@ -10,7 +10,7 @@ pub struct Cone {
 
 impl Default for Cone {
     fn default() -> Self {
-        Self::new(5.0, 1, 2., [0., 2., 0.])
+        Self::new(5.0, 16, 2., [0., 2., 0.])
     }
 }
 
@@ -83,14 +83,13 @@ impl From<Cone> for Model {
 
             let tangent = glam::Vec3A::new(-vertex_direction.z, 0.0, vertex_direction.x);
             let normal = slant_height_vector.cross(tangent).normalize();
-            let bi_tangent = normal.cross(tangent);
 
             vertex_buffer.push(Vertex {
                 position: [vertex.x, vertex.y, vertex.z],
                 tex_coord: [side as f32 / tessellation_slice as f32, 0.0],
                 normal: [normal.x, normal.y, normal.z],
-                tangent: [tangent.x, tangent.y, tangent.z, 1.0],
-                bi_tangent: [bi_tangent.x, bi_tangent.y, bi_tangent.z, 1.0],
+                tangent: [0.0; 4],
+                bi_tangent: [0.0; 4],
             });
         }
 
@@ -123,10 +122,11 @@ mod test {
 
     #[test]
     fn test() {
-        let a = Cone::new(5.0, 12, 2., [0.0, 1.0, 0.0]);
-        let data: Model = a.into();
-        for mesh in data.meshes {
+        let cone = Cone::new(5.0, 12, 2., [0.0, 1.0, 0.0]);
+        let cone_model: Model = cone.into();
+        for mesh in &cone_model.meshes {
             println!("{:?}", mesh.vertices);
         }
+        println!("{:?}", cone_model.meshes[0].indices);
     }
 }
