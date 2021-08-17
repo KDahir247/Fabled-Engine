@@ -1,306 +1,200 @@
 # --------------- Cube Dissassembly -------------------
-00007FF79ECD1348  mov          qword ptr [rsp+C0h], 0h
-00007FF79ECD1354  mov          dword ptr [rsp+C8h], 0h
-00007FF79ECD135F  mov          qword ptr [rsp+D0h], 0h
-00007FF79ECD136B  mov          dword ptr [rsp+D8h], 0h
-00007FF79ECD1376  xorps        xmm0, xmm0
-00007FF79ECD1379  movaps       xmmword ptr [rsp+E0h], xmm0
-00007FF79ECD1381  movaps       xmmword ptr [rsp+100h], xmm0
-00007FF79ECD1389  mov          rcx, qword ptr [00007FF79ECF31C8h]
-00007FF79ECD1390  test         rcx, rcx
-00007FF79ECD1393  jne          static void Fabled_Engine::main+EDh (00007FF79ECD13ADh)
-00007FF79ECD1395  call         GetProcessHeap (00007FF79ECE8F32h)
-00007FF79ECD139A  test         rax, rax
-00007FF79ECD139D  je           static void Fabled_Engine::main+8FBh (00007FF79ECD1BBBh)
-00007FF79ECD13A3  mov          rcx, rax
-00007FF79ECD13A6  mov          qword ptr [00007FF79ECF31C8h], rax
-00007FF79ECD13AD  mov          r8d, 600h
-00007FF79ECD13B3  xor          edx, edx
-00007FF79ECD13B5  call         HeapAlloc (00007FF79ECE8F38h)
-00007FF79ECD13BA  test         rax, rax
-00007FF79ECD13BD  je           static void Fabled_Engine::main+8FBh (00007FF79ECD1BBBh)
-00007FF79ECD13C3  mov          qword ptr [rsp+40h], rax
-00007FF79ECD13C8  movaps       xmm0, xmmword ptr [__xmm@00000000000000000000000000000018 (00007FF79ECEC520h)]
-00007FF79ECD13CF  movups       xmmword ptr [rsp+48h], xmm0
-00007FF79ECD13D4  mov          rcx, qword ptr [rsp+C0h]
-00007FF79ECD13DC  mov          qword ptr [rsp+60h], rcx
-00007FF79ECD13E1  mov          ecx, dword ptr [rsp+C8h]
-00007FF79ECD13E8  mov          dword ptr [rsp+68h], ecx
-00007FF79ECD13EC  mov          rcx, qword ptr [rsp+D0h]
-00007FF79ECD13F4  mov          qword ptr [rsp+70h], rcx
-00007FF79ECD13F9  mov          ecx, dword ptr [rsp+D8h]
-00007FF79ECD1400  mov          dword ptr [rsp+78h], ecx
-00007FF79ECD1404  movaps       xmm0, xmmword ptr [rsp+E0h]
-00007FF79ECD140C  movaps       xmmword ptr [rsp+80h], xmm0
-00007FF79ECD1414  movaps       xmm0, xmmword ptr [rsp+100h]
-00007FF79ECD141C  movaps       xmmword ptr [rsp+30h], xmm0
-00007FF79ECD1421  xor          ecx, ecx
-00007FF79ECD1423  nop          word ptr cs:[rax+rax*1], ax
-00007FF79ECD142D  nop          dword ptr [rax], eax
-00007FF79ECD1430  mov          edx, dword ptr [rsp+68h]
-00007FF79ECD1434  mov          dword ptr [rax+rcx*1+8h], edx
-00007FF79ECD1438  mov          rdx, qword ptr [rsp+60h]
-00007FF79ECD143D  mov          qword ptr [rax+rcx*1], rdx
-00007FF79ECD1441  mov          qword ptr [rax+rcx*1+Ch], 0h
-00007FF79ECD144A  mov          edx, dword ptr [rsp+78h]
-00007FF79ECD144E  mov          dword ptr [rax+rcx*1+1Ch], edx
-00007FF79ECD1452  mov          rdx, qword ptr [rsp+70h]
-00007FF79ECD1457  mov          qword ptr [rax+rcx*1+14h], rdx
-00007FF79ECD145C  movaps       xmm0, xmmword ptr [rsp+80h]
-00007FF79ECD1464  movaps       xmmword ptr [rax+rcx*1+20h], xmm0
-00007FF79ECD1469  movaps       xmm0, xmmword ptr [rsp+30h]
-00007FF79ECD146E  movaps       xmmword ptr [rax+rcx*1+30h], xmm0
-00007FF79ECD1473  add          rcx, 40h
-00007FF79ECD1477  cmp          rcx, 5C0h
-00007FF79ECD147E  jne          static void Fabled_Engine::main+170h (00007FF79ECD1430h)
-00007FF79ECD1480  mov          edx, dword ptr [rsp+68h]
-00007FF79ECD1484  mov          dword ptr [rax+rcx*1+8h], edx
-00007FF79ECD1488  mov          rdx, qword ptr [rsp+60h]
-00007FF79ECD148D  mov          qword ptr [rax+rcx*1], rdx
-00007FF79ECD1491  mov          qword ptr [rax+rcx*1+Ch], 0h
-00007FF79ECD149A  mov          edx, dword ptr [rsp+78h]
-00007FF79ECD149E  mov          dword ptr [rax+rcx*1+1Ch], edx
-00007FF79ECD14A2  mov          rdx, qword ptr [rsp+70h]
-00007FF79ECD14A7  mov          qword ptr [rax+rcx*1+14h], rdx
-00007FF79ECD14AC  movaps       xmm0, xmmword ptr [rsp+80h]
-00007FF79ECD14B4  movaps       xmmword ptr [rax+rcx*1+20h], xmm0
-00007FF79ECD14B9  movaps       xmm0, xmmword ptr [rsp+30h]
-00007FF79ECD14BE  movaps       xmmword ptr [rax+rcx*1+30h], xmm0
-00007FF79ECD14C3  mov          qword ptr [rsp+50h], 18h
-00007FF79ECD14CC  mov          rcx, qword ptr [00007FF79ECF31C8h]
-00007FF79ECD14D3  test         rcx, rcx
-00007FF79ECD14D6  jne          static void Fabled_Engine::main+230h (00007FF79ECD14F0h)
-00007FF79ECD14D8  call         GetProcessHeap (00007FF79ECE8F32h)
-00007FF79ECD14DD  test         rax, rax
-00007FF79ECD14E0  je           static void Fabled_Engine::main+902h (00007FF79ECD1BC2h)
-00007FF79ECD14E6  mov          rcx, rax
-00007FF79ECD14E9  mov          qword ptr [00007FF79ECF31C8h], rax
-00007FF79ECD14F0  mov          r8d, 120h
-00007FF79ECD14F6  mov          edx, 8h
-00007FF79ECD14FB  call         HeapAlloc (00007FF79ECE8F38h)
-00007FF79ECD1500  test         rax, rax
-00007FF79ECD1503  je           static void Fabled_Engine::main+902h (00007FF79ECD1BC2h)
-00007FF79ECD1509  mov          r14, rax
-00007FF79ECD150C  mov          rdx, qword ptr [rsp+50h]
-00007FF79ECD1511  mov          eax, E0h
-00007FF79ECD1516  add          rax, qword ptr [rsp+40h]
-00007FF79ECD151B  mov          qword ptr [rsp+F8h], r14
-00007FF79ECD1523  add          r14, 28h
-00007FF79ECD1527  xor          r9d, r9d
-00007FF79ECD152A  lea          r8, [00007FF79ECEDA50h]
-00007FF79ECD1531  xorps        xmm8, xmm8
-00007FF79ECD1535  mov          rcx, BF800000BF800000h
-00007FF79ECD153F  movq         xmm9, rcx
-00007FF79ECD1544  mov          rcx, 3F8000003F800000h
-00007FF79ECD154E  movq         xmm10, rcx
-00007FF79ECD1553  movss        xmm11, dword ptr [__real@3f000000 (00007FF79ECEC530h)]
-00007FF79ECD155C  mov          r12, rdx
-00007FF79ECD155F  xor          ecx, ecx
-00007FF79ECD1561  nop          word ptr cs:[rax+rax*1], ax
-00007FF79ECD156B  nop          dword ptr [rax+rax*1], eax
-00007FF79ECD1570  mov          rbp, r9
-00007FF79ECD1573  movaps       xmm0, xmmword ptr [r8+rcx*4]
-00007FF79ECD1578  movaps       xmm1, xmmword ptr [r8+rcx*4+60h]
-00007FF79ECD157E  movaps       xmm2, xmmword ptr [r8+rcx*4+C0h]
-00007FF79ECD1587  movaps       xmm3, xmm0
-00007FF79ECD158A  subps        xmm3, xmm2
-00007FF79ECD158D  movaps       xmm4, xmm1
-00007FF79ECD1590  addps        xmm4, xmm3
-00007FF79ECD1593  subps        xmm3, xmm1
-00007FF79ECD1596  addps        xmm2, xmm0
-00007FF79ECD1599  movaps       xmm5, xmm1
-00007FF79ECD159C  addps        xmm5, xmm2
-00007FF79ECD159F  subps        xmm2, xmm1
-00007FF79ECD15A2  movaps       xmmword ptr [rsp+80h], xmm3
-00007FF79ECD15AA  movaps       xmmword ptr [rsp+90h], xmm4
-00007FF79ECD15B2  movaps       xmmword ptr [rsp+A0h], xmm5
-00007FF79ECD15BA  movaps       xmmword ptr [rsp+B0h], xmm2
-00007FF79ECD15C2  lea          rbx, [r9+1h]
-00007FF79ECD15C6  lea          rdi, [r9+2h]
-00007FF79ECD15CA  add          r9, 3h
-00007FF79ECD15CE  mov          qword ptr [r14-28h], rbp
-00007FF79ECD15D2  mov          qword ptr [r14-20h], rbx
-00007FF79ECD15D6  mov          qword ptr [r14-18h], rdi
-00007FF79ECD15DA  mov          qword ptr [r14-10h], rdi
-00007FF79ECD15DE  mov          qword ptr [r14-8h], r9
-00007FF79ECD15E2  mov          qword ptr [r14], rbp
-00007FF79ECD15E5  cmp          rdx, rcx
-00007FF79ECD15E8  jb           static void Fabled_Engine::main+8D3h (00007FF79ECD1B93h)
-00007FF79ECD15EE  cmp          r12, 3h
-00007FF79ECD15F2  jbe          static void Fabled_Engine::main+8E1h (00007FF79ECD1BA1h)
-00007FF79ECD15F8  movd         r13d, xmm0
-00007FF79ECD15FD  movaps       xmm1, xmm0
-00007FF79ECD1600  shufps       xmm1, xmm0, 55h
-00007FF79ECD1604  movd         r11d, xmm1
-00007FF79ECD1609  punpckhqdq   xmm0, xmm0
-00007FF79ECD160D  movd         r10d, xmm0
-00007FF79ECD1612  movaps       xmm3, xmmword ptr [rsp+80h]
-00007FF79ECD161A  movaps       xmm0, xmmword ptr [rsp+90h]
-00007FF79ECD1622  movaps       xmm2, xmmword ptr [rsp+A0h]
-00007FF79ECD162A  movaps       xmm13, xmmword ptr [rsp+B0h]
-00007FF79ECD1633  xorps        xmm4, xmm4
-00007FF79ECD1636  cmpps        xmm4, xmm3, 2h
-00007FF79ECD163A  movaps       xmm5, xmm4
-00007FF79ECD163D  andnps       xmm5, xmm9
-00007FF79ECD1641  andps        xmm4, xmm10
-00007FF79ECD1645  orps         xmm4, xmm5
-00007FF79ECD1648  movaps       xmm7, xmm3
-00007FF79ECD164B  cmpps        xmm7, xmm3, 3h
-00007FF79ECD164F  movaps       xmm5, xmm7
-00007FF79ECD1652  andnps       xmm5, xmm4
-00007FF79ECD1655  andps        xmm7, xmm3
-00007FF79ECD1658  orps         xmm7, xmm5
-00007FF79ECD165B  xorps        xmm4, xmm4
-00007FF79ECD165E  cmpps        xmm4, xmm0, 2h
-00007FF79ECD1662  movaps       xmm5, xmm4
-00007FF79ECD1665  andnps       xmm5, xmm9
-00007FF79ECD1669  andps        xmm4, xmm10
-00007FF79ECD166D  orps         xmm4, xmm5
-00007FF79ECD1670  movaps       xmm6, xmm0
-00007FF79ECD1673  cmpps        xmm6, xmm0, 3h
-00007FF79ECD1677  movaps       xmm5, xmm6
-00007FF79ECD167A  andnps       xmm5, xmm4
-00007FF79ECD167D  andps        xmm6, xmm0
-00007FF79ECD1680  orps         xmm6, xmm5
-00007FF79ECD1683  xorps        xmm4, xmm4
-00007FF79ECD1686  cmpps        xmm4, xmm2, 2h
-00007FF79ECD168A  movaps       xmm5, xmm4
-00007FF79ECD168D  andnps       xmm5, xmm9
-00007FF79ECD1691  andps        xmm4, xmm10
-00007FF79ECD1695  orps         xmm4, xmm5
-00007FF79ECD1698  movaps       xmm1, xmm2
-00007FF79ECD169B  cmpps        xmm1, xmm2, 3h
-00007FF79ECD169F  movaps       xmm5, xmm1
-00007FF79ECD16A2  andnps       xmm5, xmm4
-00007FF79ECD16A5  andps        xmm1, xmm2
-00007FF79ECD16A8  orps         xmm1, xmm5
-00007FF79ECD16AB  xorps        xmm5, xmm5
-00007FF79ECD16AE  cmpps        xmm5, xmm13, 2h
-00007FF79ECD16B3  movaps       xmm4, xmm5
-00007FF79ECD16B6  andnps       xmm4, xmm9
-00007FF79ECD16BA  andps        xmm5, xmm10
-00007FF79ECD16BE  orps         xmm5, xmm4
-00007FF79ECD16C1  movaps       xmm4, xmm13
-00007FF79ECD16C5  cmpps        xmm4, xmm13, 3h
-00007FF79ECD16CA  movaps       xmm12, xmm4
-00007FF79ECD16CE  andnps       xmm12, xmm5
-00007FF79ECD16D2  movaps       xmm5, xmm3
-00007FF79ECD16D5  shufps       xmm5, xmm3, 55h
-00007FF79ECD16D9  movd         ebx, xmm5
-00007FF79ECD16DD  movd         ebp, xmm3
-00007FF79ECD16E1  punpckhqdq   xmm3, xmm3
-00007FF79ECD16E5  movd         r15d, xmm3
-00007FF79ECD16EA  movaps       xmm3, xmm0
-00007FF79ECD16ED  shufps       xmm3, xmm0, 55h
-00007FF79ECD16F1  movd         edi, xmm3
-00007FF79ECD16F5  shl          rbx, 20h
-00007FF79ECD16F9  or           rbp, rbx
-00007FF79ECD16FC  movd         ebx, xmm0
-00007FF79ECD1700  punpckhqdq   xmm0, xmm0
-00007FF79ECD1704  mov          qword ptr [rax-E0h], rbp
-00007FF79ECD170B  movd         ebp, xmm0
-00007FF79ECD170F  movaps       xmm0, xmm2
-00007FF79ECD1712  shufps       xmm0, xmm2, 55h
-00007FF79ECD1716  mov          dword ptr [rax-D8h], r15d
-00007FF79ECD171D  movd         esi, xmm0
-00007FF79ECD1721  pshufd       xmm0, xmm7, 55h
-00007FF79ECD1726  mulss        xmm7, xmm11
-00007FF79ECD172B  addss        xmm7, xmm11
-00007FF79ECD1730  movss        dword ptr [rax-D4h], xmm7
-00007FF79ECD1738  mulss        xmm0, xmm11
-00007FF79ECD173D  addss        xmm0, xmm11
-00007FF79ECD1742  movss        dword ptr [rax-D0h], xmm0
-00007FF79ECD174A  shl          r11, 20h
-00007FF79ECD174E  or           r13, r11
-00007FF79ECD1751  shl          rdi, 20h
-00007FF79ECD1755  or           rbx, rdi
-00007FF79ECD1758  movd         edi, xmm2
-00007FF79ECD175C  punpckhqdq   xmm2, xmm2
-00007FF79ECD1760  mov          qword ptr [rax-CCh], r13
-00007FF79ECD1767  mov          dword ptr [rax-C4h], r10d
-00007FF79ECD176E  movaps       xmmword ptr [rax-C0h], xmm8
-00007FF79ECD1776  movaps       xmmword ptr [rax-B0h], xmm8
-00007FF79ECD177E  mov          qword ptr [rax-A0h], rbx
-00007FF79ECD1785  movd         ebx, xmm2
-00007FF79ECD1789  movaps       xmm0, xmm13
-00007FF79ECD178D  shufps       xmm0, xmm13, 55h
-00007FF79ECD1792  mov          dword ptr [rax-98h], ebp
-00007FF79ECD1798  movd         ebp, xmm0
-00007FF79ECD179C  pshufd       xmm0, xmm6, 55h
-00007FF79ECD17A1  mulss        xmm6, xmm11
-00007FF79ECD17A6  addss        xmm6, xmm11
-00007FF79ECD17AB  movss        dword ptr [rax-94h], xmm6
-00007FF79ECD17B3  mulss        xmm0, xmm11
-00007FF79ECD17B8  addss        xmm0, xmm11
-00007FF79ECD17BD  movss        dword ptr [rax-90h], xmm0
-00007FF79ECD17C5  shl          rsi, 20h
-00007FF79ECD17C9  or           rdi, rsi
-00007FF79ECD17CC  andps        xmm4, xmm13
-00007FF79ECD17D0  mov          qword ptr [rax-8Ch], r13
-00007FF79ECD17D7  mov          dword ptr [rax-84h], r10d
-00007FF79ECD17DE  movaps       xmmword ptr [rax-80h], xmm8
-00007FF79ECD17E3  movaps       xmmword ptr [rax-70h], xmm8
-00007FF79ECD17E8  mov          qword ptr [rax-60h], rdi
-00007FF79ECD17EC  movd         edi, xmm13
-00007FF79ECD17F1  punpckhqdq   xmm13, xmm13
-00007FF79ECD17F6  mov          dword ptr [rax-58h], ebx
-00007FF79ECD17F9  movd         ebx, xmm13
-00007FF79ECD17FE  pshufd       xmm0, xmm1, 55h
-00007FF79ECD1803  mulss        xmm1, xmm11
-00007FF79ECD1808  addss        xmm1, xmm11
-00007FF79ECD180D  movss        dword ptr [rax-54h], xmm1
-00007FF79ECD1812  mulss        xmm0, xmm11
-00007FF79ECD1817  addss        xmm0, xmm11
-00007FF79ECD181C  movss        dword ptr [rax-50h], xmm0
-00007FF79ECD1821  shl          rbp, 20h
-00007FF79ECD1825  or           rdi, rbp
-00007FF79ECD1828  mov          qword ptr [rax-4Ch], r13
-00007FF79ECD182C  mov          dword ptr [rax-44h], r10d
-00007FF79ECD1830  movaps       xmmword ptr [rax-40h], xmm8
-00007FF79ECD1835  movaps       xmmword ptr [rax-30h], xmm8
-00007FF79ECD183A  mov          dword ptr [rax-18h], ebx
-00007FF79ECD183D  mov          qword ptr [rax-20h], rdi
-00007FF79ECD1841  orps         xmm4, xmm12
-00007FF79ECD1845  pshufd       xmm0, xmm4, 55h
-00007FF79ECD184A  mulss        xmm4, xmm11
-00007FF79ECD184F  addss        xmm4, xmm11
-00007FF79ECD1854  movss        dword ptr [rax-14h], xmm4
-00007FF79ECD1859  mulss        xmm0, xmm11
-00007FF79ECD185E  addss        xmm0, xmm11
-00007FF79ECD1863  movss        dword ptr [rax-10h], xmm0
-00007FF79ECD1868  mov          dword ptr [rax-4h], r10d
-00007FF79ECD186C  mov          qword ptr [rax-Ch], r13
-00007FF79ECD1870  movaps       xmmword ptr [rax], xmm8
-00007FF79ECD1874  movaps       xmmword ptr [rax+10h], xmm8
-00007FF79ECD1879  add          rcx, 4h
-00007FF79ECD187D  add          rax, 100h
-00007FF79ECD1883  add          r12, FFFFFFFFFFFFFFFCh
-00007FF79ECD1887  add          r14, 30h
-00007FF79ECD188B  cmp          r9, 12h
-00007FF79ECD188F  jne          static void Fabled_Engine::main+2B0h (00007FF79ECD1570h)
-00007FF79ECD1895  mov          rcx, qword ptr [00007FF79ECF31C8h]
-00007FF79ECD189C  test         rcx, rcx
-00007FF79ECD189F  jne          static void Fabled_Engine::main+5F9h (00007FF79ECD18B9h)
-00007FF79ECD18A1  call         GetProcessHeap (00007FF79ECE8F32h)
-00007FF79ECD18A6  test         rax, rax
-00007FF79ECD18A9  je           static void Fabled_Engine::main+913h (00007FF79ECD1BD3h)
-00007FF79ECD18AF  mov          rcx, rax
-00007FF79ECD18B2  mov          qword ptr [00007FF79ECF31C8h], rax
-00007FF79ECD18B9  mov          r8d, 40h
-00007FF79ECD18BF  xor          edx, edx
-00007FF79ECD18C1  call         HeapAlloc (00007FF79ECE8F38h)
-00007FF79ECD18C6  test         rax, rax
-00007FF79ECD18C9  je           static void Fabled_Engine::main+913h (00007FF79ECD1BD3h)
-00007FF79ECD18CF  mov          rdi, rax
-00007FF79ECD18D2  mov          rax, qword ptr [rsp+50h]
-00007FF79ECD18D7  mov          qword ptr [rdi+10h], rax
-00007FF79ECD18DB  movups       xmm0, xmmword ptr [rsp+40h]
-00007FF79ECD18E0  movups       xmmword ptr [rdi], xmm0
-00007FF79ECD18E3  mov          rax, qword ptr [rsp+F8h]
-00007FF79ECD18EB  mov          qword ptr [rdi+20h], rax
-00007FF79ECD18EF  movaps       xmm0, xmmword ptr [__xmm@00000000000000240000000000000024 (00007FF79ECEC540h)]
-00007FF79ECD18F6  movups       xmmword ptr [rdi+28h], xmm0
-00007FF79ECD18FA  mov          dword ptr [rdi+18h], 0h
-00007FF79ECD1901  lea          rax, [00007FF79ECEFC18h]
-00007FF79ECD1908  mov          qword ptr [rsp+E0h], rax
-00007FF79ECD1910  mov          qword ptr [rsp+E8h], 6h
+00007FF70D621309  mov          qword ptr [rsp+C0h], 0h
+00007FF70D621315  mov          dword ptr [rsp+C8h], 0h
+00007FF70D621320  mov          qword ptr [rsp+D0h], 0h
+00007FF70D62132C  mov          dword ptr [rsp+D8h], 0h
+00007FF70D621337  xorps        xmm0, xmm0
+00007FF70D62133A  movaps       xmmword ptr [rsp+E0h], xmm0
+00007FF70D621342  movaps       xmmword ptr [rsp+100h], xmm0
+00007FF70D62134A  mov          rcx, qword ptr [00007FF70D6431C8h]
+00007FF70D621351  test         rcx, rcx
+00007FF70D621354  jne          static void Fabled_Engine::main+AEh (00007FF70D62136Eh)
+00007FF70D621356  call         GetProcessHeap (00007FF70D638D02h)
+00007FF70D62135B  test         rax, rax
+00007FF70D62135E  je           static void Fabled_Engine::main+6D0h (00007FF70D621990h)
+00007FF70D621364  mov          rcx, rax
+00007FF70D621367  mov          qword ptr [00007FF70D6431C8h], rax
+00007FF70D62136E  mov          r8d, 600h
+00007FF70D621374  xor          edx, edx
+00007FF70D621376  call         HeapAlloc (00007FF70D638D08h)
+00007FF70D62137B  test         rax, rax
+00007FF70D62137E  je           static void Fabled_Engine::main+6D0h (00007FF70D621990h)
+00007FF70D621384  mov          qword ptr [rsp+40h], rax
+00007FF70D621389  movaps       xmm0, xmmword ptr [__xmm@00000000000000000000000000000018 (00007FF70D63C520h)]
+00007FF70D621390  movups       xmmword ptr [rsp+48h], xmm0
+00007FF70D621395  mov          rcx, qword ptr [rsp+C0h]
+00007FF70D62139D  mov          qword ptr [rsp+60h], rcx
+00007FF70D6213A2  mov          ecx, dword ptr [rsp+C8h]
+00007FF70D6213A9  mov          dword ptr [rsp+68h], ecx
+00007FF70D6213AD  mov          rcx, qword ptr [rsp+D0h]
+00007FF70D6213B5  mov          qword ptr [rsp+70h], rcx
+00007FF70D6213BA  mov          ecx, dword ptr [rsp+D8h]
+00007FF70D6213C1  mov          dword ptr [rsp+78h], ecx
+00007FF70D6213C5  movaps       xmm0, xmmword ptr [rsp+E0h]
+00007FF70D6213CD  movaps       xmmword ptr [rsp+80h], xmm0
+00007FF70D6213D5  movaps       xmm0, xmmword ptr [rsp+100h]
+00007FF70D6213DD  movaps       xmmword ptr [rsp+30h], xmm0
+00007FF70D6213E2  xor          ecx, ecx
+00007FF70D6213E4  nop          word ptr cs:[rax+rax*1], ax
+00007FF70D6213EE  nop
+00007FF70D6213F0  mov          edx, dword ptr [rsp+68h]
+00007FF70D6213F4  mov          dword ptr [rax+rcx*1+8h], edx
+00007FF70D6213F8  mov          rdx, qword ptr [rsp+60h]
+00007FF70D6213FD  mov          qword ptr [rax+rcx*1], rdx
+00007FF70D621401  mov          qword ptr [rax+rcx*1+Ch], 0h
+00007FF70D62140A  mov          edx, dword ptr [rsp+78h]
+00007FF70D62140E  mov          dword ptr [rax+rcx*1+1Ch], edx
+00007FF70D621412  mov          rdx, qword ptr [rsp+70h]
+00007FF70D621417  mov          qword ptr [rax+rcx*1+14h], rdx
+00007FF70D62141C  movaps       xmm0, xmmword ptr [rsp+80h]
+00007FF70D621424  movaps       xmmword ptr [rax+rcx*1+20h], xmm0
+00007FF70D621429  movaps       xmm0, xmmword ptr [rsp+30h]
+00007FF70D62142E  movaps       xmmword ptr [rax+rcx*1+30h], xmm0
+00007FF70D621433  add          rcx, 40h
+00007FF70D621437  cmp          rcx, 5C0h
+00007FF70D62143E  jne          static void Fabled_Engine::main+130h (00007FF70D6213F0h)
+00007FF70D621440  mov          edx, dword ptr [rsp+68h]
+00007FF70D621444  mov          dword ptr [rax+rcx*1+8h], edx
+00007FF70D621448  mov          rdx, qword ptr [rsp+60h]
+00007FF70D62144D  mov          qword ptr [rax+rcx*1], rdx
+00007FF70D621451  mov          qword ptr [rax+rcx*1+Ch], 0h
+00007FF70D62145A  mov          edx, dword ptr [rsp+78h]
+00007FF70D62145E  mov          dword ptr [rax+rcx*1+1Ch], edx
+00007FF70D621462  mov          rdx, qword ptr [rsp+70h]
+00007FF70D621467  mov          qword ptr [rax+rcx*1+14h], rdx
+00007FF70D62146C  movaps       xmm0, xmmword ptr [rsp+80h]
+00007FF70D621474  movaps       xmmword ptr [rax+rcx*1+20h], xmm0
+00007FF70D621479  movaps       xmm0, xmmword ptr [rsp+30h]
+00007FF70D62147E  movaps       xmmword ptr [rax+rcx*1+30h], xmm0
+00007FF70D621483  mov          qword ptr [rsp+50h], 18h
+00007FF70D62148C  mov          rcx, qword ptr [00007FF70D6431C8h]
+00007FF70D621493  test         rcx, rcx
+00007FF70D621496  jne          static void Fabled_Engine::main+1F0h (00007FF70D6214B0h)
+00007FF70D621498  call         GetProcessHeap (00007FF70D638D02h)
+00007FF70D62149D  test         rax, rax
+00007FF70D6214A0  je           static void Fabled_Engine::main+6D7h (00007FF70D621997h)
+00007FF70D6214A6  mov          rcx, rax
+00007FF70D6214A9  mov          qword ptr [00007FF70D6431C8h], rax
+00007FF70D6214B0  mov          r8d, 120h
+00007FF70D6214B6  mov          edx, 8h
+00007FF70D6214BB  call         HeapAlloc (00007FF70D638D08h)
+00007FF70D6214C0  test         rax, rax
+00007FF70D6214C3  je           static void Fabled_Engine::main+6D7h (00007FF70D621997h)
+00007FF70D6214C9  mov          rdi, rax
+00007FF70D6214CC  mov          rdx, qword ptr [rsp+50h]
+00007FF70D6214D1  mov          eax, E0h
+00007FF70D6214D6  add          rax, qword ptr [rsp+40h]
+00007FF70D6214DB  mov          qword ptr [rsp+F8h], rdi
+00007FF70D6214E3  add          rdi, 28h
+00007FF70D6214E7  xor          ecx, ecx
+00007FF70D6214E9  lea          r10, [00007FF70D63DA40h]
+00007FF70D6214F0  xorps        xmm0, xmm0
+00007FF70D6214F3  mov          r11, rdx
+00007FF70D6214F6  nop          word ptr cs:[rax+rax*1], ax
+00007FF70D621500  movaps       xmm1, xmmword ptr [r10+rcx*4]
+00007FF70D621505  movaps       xmm2, xmmword ptr [r10+rcx*4+60h]
+00007FF70D62150B  movaps       xmm3, xmmword ptr [r10+rcx*4+C0h]
+00007FF70D621514  movaps       xmm4, xmm1
+00007FF70D621517  subps        xmm4, xmm3
+00007FF70D62151A  movaps       xmm5, xmm2
+00007FF70D62151D  addps        xmm5, xmm4
+00007FF70D621520  subps        xmm4, xmm2
+00007FF70D621523  addps        xmm3, xmm1
+00007FF70D621526  movaps       xmm6, xmm2
+00007FF70D621529  addps        xmm6, xmm3
+00007FF70D62152C  subps        xmm3, xmm2
+00007FF70D62152F  movaps       xmmword ptr [rsp+80h], xmm4
+00007FF70D621537  movaps       xmmword ptr [rsp+90h], xmm5
+00007FF70D62153F  movaps       xmmword ptr [rsp+A0h], xmm6
+00007FF70D621547  movaps       xmmword ptr [rsp+B0h], xmm3
+00007FF70D62154F  lea          rbp, [rcx+2h]
+00007FF70D621553  lea          rsi, [rcx+1h]
+00007FF70D621557  lea          rbx, [rcx+3h]
+00007FF70D62155B  mov          qword ptr [rdi-28h], rbp
+00007FF70D62155F  mov          qword ptr [rdi-20h], rsi
+00007FF70D621563  mov          qword ptr [rdi-18h], rcx
+00007FF70D621567  mov          qword ptr [rdi-10h], rcx
+00007FF70D62156B  mov          qword ptr [rdi-8h], rbx
+00007FF70D62156F  mov          qword ptr [rdi], rbp
+00007FF70D621572  cmp          rdx, rcx
+00007FF70D621575  jb           static void Fabled_Engine::main+6A8h (00007FF70D621968h)
+00007FF70D62157B  cmp          r11, 3h
+00007FF70D62157F  jbe          static void Fabled_Engine::main+6B6h (00007FF70D621976h)
+00007FF70D621585  movd         ebp, xmm1
+00007FF70D621589  movaps       xmm2, xmm1
+00007FF70D62158C  shufps       xmm2, xmm1, 55h
+00007FF70D621590  movd         esi, xmm2
+00007FF70D621594  shl          rsi, 20h
+00007FF70D621598  or           rbp, rsi
+00007FF70D62159B  mov          esi, dword ptr [rsp+88h]
+00007FF70D6215A2  mov          rbx, qword ptr [rsp+80h]
+00007FF70D6215AA  mov          r15d, dword ptr [rsp+98h]
+00007FF70D6215B2  mov          r12, qword ptr [rsp+90h]
+00007FF70D6215BA  mov          r13, qword ptr [rsp+A0h]
+00007FF70D6215C2  mov          r14d, dword ptr [rsp+A8h]
+00007FF70D6215CA  mov          r8d, dword ptr [rsp+B8h]
+00007FF70D6215D2  mov          r9, qword ptr [rsp+B0h]
+00007FF70D6215DA  mov          qword ptr [rax-E0h], rbx
+00007FF70D6215E1  punpckhqdq   xmm1, xmm1
+00007FF70D6215E5  mov          dword ptr [rax-D8h], esi
+00007FF70D6215EB  movd         esi, xmm1
+00007FF70D6215EF  mov          qword ptr [rax-D4h], 3F800000h
+00007FF70D6215FA  mov          qword ptr [rax-CCh], rbp
+00007FF70D621601  mov          dword ptr [rax-C4h], esi
+00007FF70D621607  movaps       xmmword ptr [rax-C0h], xmm0
+00007FF70D62160E  movaps       xmmword ptr [rax-B0h], xmm0
+00007FF70D621615  mov          qword ptr [rax-A0h], r12
+00007FF70D62161C  mov          dword ptr [rax-98h], r15d
+00007FF70D621623  mov          rbx, 3F8000003F800000h
+00007FF70D62162D  mov          qword ptr [rax-94h], rbx
+00007FF70D621634  mov          qword ptr [rax-8Ch], rbp
+00007FF70D62163B  mov          dword ptr [rax-84h], esi
+00007FF70D621641  movaps       xmmword ptr [rax-80h], xmm0
+00007FF70D621645  movaps       xmmword ptr [rax-70h], xmm0
+00007FF70D621649  mov          qword ptr [rax-60h], r13
+00007FF70D62164D  mov          dword ptr [rax-58h], r14d
+00007FF70D621651  mov          rbx, 3F80000000000000h
+00007FF70D62165B  mov          qword ptr [rax-54h], rbx
+00007FF70D62165F  mov          qword ptr [rax-4Ch], rbp
+00007FF70D621663  mov          dword ptr [rax-44h], esi
+00007FF70D621666  movaps       xmmword ptr [rax-40h], xmm0
+00007FF70D62166A  movaps       xmmword ptr [rax-30h], xmm0
+00007FF70D62166E  mov          qword ptr [rax-20h], r9
+00007FF70D621672  mov          dword ptr [rax-18h], r8d
+00007FF70D621676  mov          qword ptr [rax-14h], 0h
+00007FF70D62167E  mov          qword ptr [rax-Ch], rbp
+00007FF70D621682  mov          dword ptr [rax-4h], esi
+00007FF70D621685  movaps       xmmword ptr [rax+10h], xmm0
+00007FF70D621689  movaps       xmmword ptr [rax], xmm0
+00007FF70D62168C  add          rcx, 4h
+00007FF70D621690  add          rax, 100h
+00007FF70D621696  add          r11, FFFFFFFFFFFFFFFCh
+00007FF70D62169A  add          rdi, 30h
+00007FF70D62169E  cmp          rcx, 18h
+00007FF70D6216A2  jne          static void Fabled_Engine::main+240h (00007FF70D621500h)
+00007FF70D6216A8  mov          rcx, qword ptr [00007FF70D6431C8h]
+00007FF70D6216AF  test         rcx, rcx
+00007FF70D6216B2  jne          static void Fabled_Engine::main+40Ch (00007FF70D6216CCh)
+00007FF70D6216B4  call         GetProcessHeap (00007FF70D638D02h)
+00007FF70D6216B9  test         rax, rax
+00007FF70D6216BC  je           static void Fabled_Engine::main+6E8h (00007FF70D6219A8h)
+00007FF70D6216C2  mov          rcx, rax
+00007FF70D6216C5  mov          qword ptr [00007FF70D6431C8h], rax
+00007FF70D6216CC  mov          r8d, 40h
+00007FF70D6216D2  xor          edx, edx
+00007FF70D6216D4  call         HeapAlloc (00007FF70D638D08h)
+00007FF70D6216D9  test         rax, rax
+00007FF70D6216DC  je           static void Fabled_Engine::main+6E8h (00007FF70D6219A8h)
+00007FF70D6216E2  mov          rsi, rax
+00007FF70D6216E5  mov          rax, qword ptr [rsp+50h]
+00007FF70D6216EA  mov          qword ptr [rsi+10h], rax
+00007FF70D6216EE  movups       xmm0, xmmword ptr [rsp+40h]
+00007FF70D6216F3  movups       xmmword ptr [rsi], xmm0
+00007FF70D6216F6  mov          rax, qword ptr [rsp+F8h]
+00007FF70D6216FE  mov          qword ptr [rsi+20h], rax
+00007FF70D621702  movaps       xmm0, xmmword ptr [__xmm@00000000000000240000000000000024 (00007FF70D63C530h)]
+00007FF70D621709  movups       xmmword ptr [rsi+28h], xmm0
+00007FF70D62170D  mov          dword ptr [rsi+18h], 0h
+00007FF70D621714  lea          rax, [00007FF70D63FC08h]
+00007FF70D62171B  mov          qword ptr [rsp+E0h], rax
+00007FF70D621723  mov          qword ptr [rsp+E8h], 6hr [rsp+E8h], 6h

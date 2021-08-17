@@ -122,10 +122,13 @@ mod test {
 
     #[test]
     fn test() {
-        let cone = Cone::new(5.0, 12, 2., [0.0, 1.0, 0.0]);
+        let cone = Cone::new(1.0, 64, 2., [0.0, 1.0, 0.0]);
         let cone_model: Model = cone.into();
-        for mesh in &cone_model.meshes {
-            println!("{:?}", mesh.vertices);
+        for vertex in &cone_model.meshes[0].vertices {
+            println!(
+                "new Vector3({:?}f, {}f, {}f),",
+                vertex.normal[0], vertex.normal[1], vertex.normal[2]
+            );
         }
         println!("{:?}", cone_model.meshes[0].indices);
     }

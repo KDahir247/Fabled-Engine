@@ -1,33 +1,26 @@
-use crate::mesh::{Mesh, Model, Vertex};
+use crate::mesh::{Mesh, Model, RenderInstruction, Vertex};
 
 // The normal vector of the front face plane
 const NORMAL_FRONT: [f32; 3] = [0.0, 1.0, 0.0];
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum PlaneInstruction {
-    SingleSided = 0,
-    DoubleSided = 1,
-}
-
-impl Default for PlaneInstruction {
+impl Default for RenderInstruction {
     fn default() -> Self {
-        PlaneInstruction::SingleSided
+        RenderInstruction::SingleSided
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-#[repr(align(16))]
 pub struct Plane {
     pub width: f32,
     pub height: f32,
-    pub tessellation_width: u8,
-    pub tessellation_height: u8,
-    pub plane_instruction: PlaneInstruction,
+    pub tessellation_width: usize,
+    pub tessellation_height: usize,
+    pub plane_instruction: RenderInstruction,
 }
 
 impl Default for Plane {
     fn default() -> Self {
-        Self::new(1.0, 1.0, 10, 10, PlaneInstruction::SingleSided)
+        Self::new(1.0, 1.0, 10, 10, RenderInstruction::SingleSided)
     }
 }
 
@@ -35,9 +28,9 @@ impl Plane {
     pub fn new(
         width: f32,
         height: f32,
-        mut tessellation_width: u8,
-        mut tessellation_height: u8,
-        instruction: PlaneInstruction,
+        mut tessellation_width: usize,
+        mut tessellation_height: usize,
+        instruction: RenderInstruction,
     ) -> Plane {
         /*
             Sanity check for the size of tesselation_width and tessellation_height.
@@ -80,9 +73,9 @@ impl From<Plane> for Model {
         // remap plane_instruction to SingleSided = 1, DoubleSided = 2,
         let double_sided_remap = plane_instruction as u8 + 1;
         let num_triangles =
-            (tessellation_width * (tessellation_height << 1) * 3 * double_sided_remap) as usize;
+            tessellation_width * (tessellation_height << 1) * 3 * double_sided_remap as usize;
 
-        let num_vertices = (w_line * h_line) as usize;
+        let num_vertices = w_line * h_line;
 
         let mut vertices: Vec<Vertex> = Vec::with_capacity(num_vertices);
         let mut indices: Vec<usize> = Vec::with_capacity(num_triangles);
@@ -114,8 +107,8 @@ impl From<Plane> for Model {
             let seg_1 = (y + 1) * w_line;
 
             for x in 0..tessellation_width {
-                let res_0 = (seg_0 + x) as usize;
-                let res_1 = (seg_1 + x) as usize;
+                let res_0 = seg_0 + x;
+                let res_1 = seg_1 + x;
 
                 indices.push(res_0);
                 indices.push(res_1);
@@ -128,9 +121,9 @@ impl From<Plane> for Model {
 
             //Calculate back face indices if back face is enabled.
             //Two sided
-            for x in 0..tessellation_width * plane_instruction as u8 {
-                let res_0 = (seg_0 + x) as usize;
-                let res_1 = (seg_1 + x) as usize;
+            for x in 0..tessellation_width * plane_instruction as usize {
+                let res_0 = seg_0 + x;
+                let res_1 = seg_1 + x;
 
                 indices.push(res_0);
                 indices.push(res_0 + 1);
@@ -154,14 +147,18 @@ impl From<Plane> for Model {
 #[cfg(test)]
 mod test {
     use crate::mesh::primitive::plane::Plane;
-    use crate::mesh::{Model, PlaneInstruction};
+    use crate::mesh::Model;
+    use crate::mesh::RenderInstruction;
 
     #[test]
     fn test() {
-        let plane = Plane::new(1.0, 1.0, 1, 1, PlaneInstruction::SingleSided);
+        let plane = Plane::new(3.0, 3.0, 10, 10, RenderInstruction::DoubleSided);
         let plane_model: Model = plane.into();
-        for vertices in &plane_model.meshes[0].vertices {
-            println!("{:?}", vertices.position);
+        for vertex in &plane_model.meshes[0].vertices {
+            println!(
+                "new Vector3({:?}f, {}f, {}f),",
+                vertex.position[0], vertex.position[1], vertex.position[2]
+            );
         }
         println!("{:?}", plane_model.meshes[0].indices);
     }

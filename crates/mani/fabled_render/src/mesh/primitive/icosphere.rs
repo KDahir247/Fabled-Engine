@@ -209,10 +209,13 @@ mod test {
 
     #[test]
     fn test() {
-        let ico_sphere = IcoSphere::new(1.0, 1);
+        let ico_sphere = IcoSphere::new(1.0, 2);
         let ico_model: Model = ico_sphere.into();
-        for mesh in &ico_model.meshes {
-            println!("{:?}", mesh.vertices);
+        for vertex in &ico_model.meshes[0].vertices {
+            println!(
+                "new Vector3({:?}f, {}f, {}f),",
+                vertex.normal[0], vertex.normal[1], vertex.normal[2]
+            );
         }
         println!("{:?}", ico_model.meshes[0].indices);
     }

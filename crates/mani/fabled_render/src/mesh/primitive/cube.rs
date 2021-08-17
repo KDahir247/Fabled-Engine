@@ -1,5 +1,7 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
+//todo LOOK AT
+
 #[repr(C, align(16))]
 #[derive(Debug)]
 struct CubeData {
@@ -19,19 +21,19 @@ const CUBE_FACE_DATA: CubeData = CubeData {
     ],
     tangent: [
         glam::const_vec3a!([-1.0, 0.0, 0.0]), // Front
-        glam::const_vec3a!([-1.0, 0.0, 0.0]), // Back
-        glam::const_vec3a!([0.0, 0.0, -1.0]), // Right
-        glam::const_vec3a!([0.0, 0.0, 1.0]),  // Left
-        glam::const_vec3a!([-1.0, 0.0, 0.0]), // Up
+        glam::const_vec3a!([1.0, 0.0, 0.0]),  // Back
+        glam::const_vec3a!([0.0, 0.0, 1.0]),  // Right
+        glam::const_vec3a!([0.0, 0.0, -1.0]), // Left
+        glam::const_vec3a!([1.0, 0.0, 0.0]),  // Up
         glam::const_vec3a!([-1.0, 0.0, 0.0]), // Down
     ],
     bi_tangent: [
-        glam::const_vec3a!([0.0, -1.0, 0.0]), // Front
-        glam::const_vec3a!([0.0, 1.0, 0.0]),  // Back
-        glam::const_vec3a!([0.0, 1.0, 0.0]),  // Right
-        glam::const_vec3a!([0.0, 1.0, 0.0]),  // Left
-        glam::const_vec3a!([0.0, 0.0, 1.0]),  // Up
-        glam::const_vec3a!([0.0, 0.0, -1.0]), // Down
+        glam::const_vec3a!([0.0, 1.0, 0.0]), // Front
+        glam::const_vec3a!([0.0, 1.0, 0.0]), // Back
+        glam::const_vec3a!([0.0, 1.0, 0.0]), // Right
+        glam::const_vec3a!([0.0, 1.0, 0.0]), // Left
+        glam::const_vec3a!([0.0, 0.0, 1.0]), // Up
+        glam::const_vec3a!([0.0, 0.0, 1.0]), // Down
     ],
 };
 
@@ -72,12 +74,12 @@ impl From<Cube> for Model {
             ];
 
             let indices = [
-                chunk * 3,
-                chunk * 3 + 1,
-                chunk * 3 + 2,
-                chunk * 3 + 2,
-                chunk * 3 + 3,
-                chunk * 3,
+                chunk * 4 + 2,
+                chunk * 4 + 1,
+                chunk * 4,
+                chunk * 4,
+                chunk * 4 + 3,
+                chunk * 4 + 2,
             ];
 
             {
@@ -87,43 +89,33 @@ impl From<Cube> for Model {
             }
 
             for (index, face) in corners.chunks_exact(4).enumerate() {
-                let vert_1 = face[0];
-                let vert_2 = face[1];
-                let vert_3 = face[2];
-                let vert_4 = face[3];
-
-                let tex_coord_1 = [vert_1.signum().x * 0.5 + 0.5, vert_1.signum().y * 0.5 + 0.5];
-                let tex_coord_2 = [vert_2.signum().x * 0.5 + 0.5, vert_2.signum().y * 0.5 + 0.5];
-                let tex_coord_3 = [vert_3.signum().x * 0.5 + 0.5, vert_3.signum().y * 0.5 + 0.5];
-                let tex_coord_4 = [vert_4.signum().x * 0.5 + 0.5, vert_4.signum().y * 0.5 + 0.5];
-
                 let first_vertex_chunk = Vertex {
-                    position: vert_1.to_array(),
-                    tex_coord: tex_coord_1,
+                    position: face[0].to_array(),
+                    tex_coord: [1.0, 0.0],
                     normal: normal.to_array(),
                     tangent: [0.0; 4],
                     bi_tangent: [0.0; 4],
                 };
 
                 let second_vertex_chunk = Vertex {
-                    position: vert_2.to_array(),
-                    tex_coord: tex_coord_2,
+                    position: face[1].to_array(),
+                    tex_coord: [1.0, 1.0],
                     normal: normal.to_array(),
                     tangent: [0.0; 4],
                     bi_tangent: [0.0; 4],
                 };
 
                 let third_vertex_chunk = Vertex {
-                    position: vert_3.to_array(),
-                    tex_coord: tex_coord_3,
+                    position: face[2].to_array(),
+                    tex_coord: [0.0, 1.0],
                     normal: normal.to_array(),
                     tangent: [0.0; 4],
                     bi_tangent: [0.0; 4],
                 };
 
                 let fourth_vertex_chunk = Vertex {
-                    position: vert_4.to_array(),
-                    tex_coord: tex_coord_4,
+                    position: face[3].to_array(),
+                    tex_coord: [0.0, 0.0],
                     normal: normal.to_array(),
                     tangent: [0.0; 4],
                     bi_tangent: [0.0; 4],
@@ -161,10 +153,14 @@ mod test {
 
     #[test]
     fn test() {
-        let cube = Cube::new(0.7);
+        let cube = Cube::new(1.0);
         let cube_model: Model = cube.into();
-        for mesh in &cube_model.meshes[0].vertices {
-            println!("{:?}", mesh);
+        for vertex in &cube_model.meshes[0].vertices {
+            println!(
+                "new Vector2({:?}f, {}f),",
+                vertex.tex_coord[0], vertex.tex_coord[1]
+            );
         }
+        println!("{:?}", cube_model.meshes[0].indices);
     }
 }

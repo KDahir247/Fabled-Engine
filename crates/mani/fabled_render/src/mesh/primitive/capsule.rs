@@ -412,8 +412,11 @@ mod test {
     fn test() {
         let capsule = Capsule::default();
         let capsule_model: Model = capsule.into();
-        for mesh in &capsule_model.meshes {
-            println!("{:?}", mesh.vertices);
+        for vertex in &capsule_model.meshes[0].vertices {
+            println!(
+                "new Vector2({:?}f, {}f),",
+                vertex.tex_coord[0], vertex.tex_coord[1]
+            );
         }
         println!("{:?}", capsule_model.meshes[0].indices);
     }

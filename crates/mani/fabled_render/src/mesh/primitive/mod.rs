@@ -16,6 +16,12 @@ pub use icosphere::*;
 pub use plane::*;
 pub use quad::*;
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum RenderInstruction {
+    SingleSided = 0,
+    DoubleSided = 1,
+}
+
 #[cfg(test)]
 mod struct_test {
     use crate::mesh::primitive::plane::Plane;
