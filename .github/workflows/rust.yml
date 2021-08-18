@@ -2,9 +2,13 @@ name: wgpu_obj_loader
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - render
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - render
 
 env:
   CARGO_TERM_COLOR: always
