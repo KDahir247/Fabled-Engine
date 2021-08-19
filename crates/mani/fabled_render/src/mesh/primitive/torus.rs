@@ -1,13 +1,5 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
-/*
-    Planning phase.
-    R major radius (the distance from the center of the tube to the center of the torus)
-    r minor radius (the radius of the tube)
-    //tessellation segment,
-    //tessellation tubes,
-*/
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(align(16))]
 pub struct Torus {
