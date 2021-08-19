@@ -4,11 +4,11 @@ use crate::mesh::{Mesh, Model, Vertex};
 #[repr(align(16))]
 pub struct Torus {
     /// The distance from the center of the tube to the center of the torus.
-    major_radius: f32,
+    pub major_radius: f32,
     /// The radius of the tube.
-    minor_radius: f32,
-    tessellation_segment: usize,
-    tessellation_side: usize,
+    pub minor_radius: f32,
+    pub tessellation_segment: usize,
+    pub tessellation_side: usize,
 }
 
 impl Default for Torus {
@@ -19,11 +19,15 @@ impl Default for Torus {
 
 impl Torus {
     pub fn new(
-        major_radius: f32,
-        minor_radius: f32,
+        mut major_radius: f32,
+        mut minor_radius: f32,
         tessellation_segment: usize,
         tessellation_side: usize,
     ) -> Torus {
+        // Sanity Check
+        major_radius = major_radius.max(0.1);
+        minor_radius = minor_radius.max(0.1);
+
         Self {
             major_radius,
             minor_radius,
