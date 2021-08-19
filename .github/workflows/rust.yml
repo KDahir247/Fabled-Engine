@@ -1,4 +1,4 @@
-name: wgpu_obj_loader
+name: Fabled_Engine
 
 on:
   push:
