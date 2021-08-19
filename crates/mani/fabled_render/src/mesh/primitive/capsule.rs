@@ -1,14 +1,14 @@
 use crate::mesh::primitive::capsule::CapsuleUvProfile::Aspect;
 use crate::mesh::{Mesh, Model, Vertex};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum CapsuleUvProfile {
     Aspect = 0,
     Uniform = 1,
     Fixed = 2,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(align(16))]
 pub struct Capsule {
     pub radius: f32,

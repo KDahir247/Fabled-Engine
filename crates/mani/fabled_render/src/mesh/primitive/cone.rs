@@ -1,6 +1,6 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Cone {
     pub radius: f32,
     pub tessellation_slice: usize,

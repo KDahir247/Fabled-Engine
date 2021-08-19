@@ -1,5 +1,6 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct IcoSphere {
     pub radius: f32,
     pub tessellation: u32,

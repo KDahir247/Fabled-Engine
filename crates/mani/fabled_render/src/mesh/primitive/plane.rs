@@ -9,7 +9,7 @@ impl Default for RenderInstruction {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Plane {
     pub width: f32,
     pub height: f32,

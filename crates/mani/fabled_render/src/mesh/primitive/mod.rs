@@ -15,6 +15,7 @@ pub use cube::*;
 pub use icosphere::*;
 pub use plane::*;
 pub use quad::*;
+pub use torus::*;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum RenderInstruction {
@@ -25,7 +26,7 @@ pub enum RenderInstruction {
 #[cfg(test)]
 mod struct_test {
     use crate::mesh::primitive::plane::Plane;
-    use crate::mesh::{Capsule, Cone, Cube, IcoSphere, Quad};
+    use crate::mesh::{Capsule, Cone, Cube, IcoSphere, Quad, Torus};
 
     #[test]
     fn data_size_test() {
@@ -68,12 +69,20 @@ mod struct_test {
         assert_eq!(quad_alignment & (quad_alignment - 1), 0);
         println!("Quad is aligned to {} bytes", quad_alignment);
 
-        //---------------- Ico Sphere --------------------------
+        //---------------- Ico Sphere ---------------------------
 
         let ico_size = std::mem::size_of::<IcoSphere>();
         assert_eq!(ico_size & (ico_size - 1), 0);
         let ico_alignment = std::mem::align_of::<IcoSphere>();
         assert_eq!(ico_alignment & (ico_alignment - 1), 0);
         println!("Ico Sphere is aligned to {} bytes", ico_alignment);
+
+        //-------------------- Torus ------------------------------
+
+        let torus_size = std::mem::size_of::<Torus>();
+        assert_eq!(torus_size & (torus_size - 1), 0);
+        let torus_alignment = std::mem::align_of::<Torus>();
+        assert_eq!(torus_alignment & (torus_alignment - 1), 0);
+        println!("Torus is aligned to {} bytes", torus_alignment);
     }
 }

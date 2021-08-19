@@ -37,7 +37,7 @@ const CUBE_FACE_DATA: CubeData = CubeData {
     ],
 };
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Cube {
     pub size: f32,
 }
