@@ -5,7 +5,6 @@ mod cylinder;
 mod icosphere;
 mod plane;
 mod quad;
-mod sphere;
 mod torus;
 mod uvsphere;
 

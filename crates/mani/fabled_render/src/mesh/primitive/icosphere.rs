@@ -214,7 +214,7 @@ mod test {
         let ico_model: Model = ico_sphere.into();
         for vertex in &ico_model.meshes[0].vertices {
             println!(
-                "new Vector3({:?}f, {}f, {}f),",
+                "new Vector3({}f, {}f, {}f),",
                 vertex.normal[0], vertex.normal[1], vertex.normal[2]
             );
         }

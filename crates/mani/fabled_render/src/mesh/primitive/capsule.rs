@@ -414,8 +414,8 @@ mod test {
         let capsule_model: Model = capsule.into();
         for vertex in &capsule_model.meshes[0].vertices {
             println!(
-                "new Vector2({:?}f, {}f),",
-                vertex.tex_coord[0], vertex.tex_coord[1]
+                "new Vector3({}f, {}f, {}f),",
+                vertex.normal[0], vertex.normal[1], vertex.normal[2]
             );
         }
         println!("{:?}", capsule_model.meshes[0].indices);

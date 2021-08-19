@@ -126,7 +126,7 @@ mod test {
         let cone_model: Model = cone.into();
         for vertex in &cone_model.meshes[0].vertices {
             println!(
-                "new Vector3({:?}f, {}f, {}f),",
+                "new Vector3({}f, {}f, {}f),",
                 vertex.normal[0], vertex.normal[1], vertex.normal[2]
             );
         }

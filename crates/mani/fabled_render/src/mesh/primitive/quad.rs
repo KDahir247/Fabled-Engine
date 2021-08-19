@@ -79,8 +79,8 @@ mod test {
         let quad_model: Model = quad.into();
         for vertex in &quad_model.meshes[0].vertices {
             println!(
-                "new Vector3({:?}f, {}f, {}f),",
-                vertex.position[0], vertex.position[1], vertex.position[2]
+                "new Vector3({}f, {}f, {}f),",
+                vertex.normal[0], vertex.normal[1], vertex.normal[2]
             );
         }
         println!("{:?}", quad_model.meshes[0].indices);
