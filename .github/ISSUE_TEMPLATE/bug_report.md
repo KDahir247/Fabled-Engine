@@ -10,6 +10,12 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+**Severity**
+(HIGH(3), MEDIUM(2), LOW(1))
+
+**Priority**
+(HIGH(3), MEDIUM(2), LOW(1))
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
@@ -36,3 +42,6 @@ If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
+**Snippet**
+Add any code snippet that cause the bug, log files. or anything that will help track the source.
