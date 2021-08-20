@@ -1,5 +1,5 @@
 use crate::mesh::{Mesh, Model, Vertex};
-//TODO Note don't use still Experimenting and it doesn't work yet.
+
 /*
     Thought of Variables.
     Planning Phase

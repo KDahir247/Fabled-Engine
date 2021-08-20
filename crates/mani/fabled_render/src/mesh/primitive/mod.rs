@@ -15,6 +15,7 @@ pub use icosphere::*;
 pub use plane::*;
 pub use quad::*;
 pub use torus::*;
+pub use uvsphere::*;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum RenderInstruction {
