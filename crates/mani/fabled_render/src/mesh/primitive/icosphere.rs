@@ -82,7 +82,7 @@ impl From<IcoSphere> for Model {
             -0.850_65, 0.0, 0.525_73,// 11
         ];
         
-        let mut triangles: Vec<usize> = vec![
+        let mut indices: Vec<usize> = vec![
             //5 faces around point 0
             0, 11, 5, //0
             0, 5, 1, //1
@@ -121,7 +121,7 @@ impl From<IcoSphere> for Model {
             let mut face_2: Vec<usize> = vec![0; target_len];
 
 
-            for  (index, tri) in triangles.chunks_exact(3).enumerate(){
+            for  (index, tri) in indices.chunks_exact(3).enumerate(){
                 // X, Y, Z
                 let v1 : usize = tri[0];
                 let v2 : usize = tri[1];
@@ -143,7 +143,7 @@ impl From<IcoSphere> for Model {
                 
             }
 
-            triangles = face_2;
+            indices = face_2;
         }
 
 
@@ -169,7 +169,7 @@ impl From<IcoSphere> for Model {
         }
         
 
-        let mut vertex_data = Vec::new();
+        let mut vertices = Vec::new();
         //Correct
         //todo can optimize this.
         for (vertex,i) in normalized_vertices.chunks_exact_mut(3).zip(uvs.chunks_exact(2)){
@@ -179,8 +179,8 @@ impl From<IcoSphere> for Model {
 
             let u = i[0];
             let v = i[1];
-            
-            vertex_data.push(Vertex{
+
+            vertices.push(Vertex{
                 position: [pos_x * ico_sphere.radius, pos_y * ico_sphere.radius, pos_z * ico_sphere.radius],
                 tex_coord: [u, v],
                 normal: [pos_x, pos_y, pos_z],
@@ -191,12 +191,12 @@ impl From<IcoSphere> for Model {
         }
 
         let mesh = Mesh{
-            vertices: vertex_data,
+            vertices,
             material_id: 0,
-            indices: triangles
+            indices
         };
 
-        
+
         Model{
             meshes: vec![mesh]
         }

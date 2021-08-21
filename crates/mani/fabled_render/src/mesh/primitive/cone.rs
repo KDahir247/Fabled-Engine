@@ -42,7 +42,7 @@ impl From<Cone> for Model {
         } = cone;
 
         let mut indices = Vec::with_capacity(tessellation_slice * 6);
-        let mut vertex_buffer: Vec<Vertex> = Vec::with_capacity(tessellation_slice + 2);
+        let mut vertices: Vec<Vertex> = Vec::with_capacity(tessellation_slice + 2);
 
         let apex_position = glam::const_vec3a!(apex_position);
 
@@ -53,7 +53,7 @@ impl From<Cone> for Model {
         let angle_inc = 2.0 * std::f32::consts::PI / tessellation_slice as f32;
 
         // Apex Vertex
-        vertex_buffer.push(Vertex {
+        vertices.push(Vertex {
             position: apex_position.to_array(),
             tex_coord: [0.0, 1.0],
             normal: [0.0, 1.0, 0.0],
@@ -62,7 +62,7 @@ impl From<Cone> for Model {
         });
 
         // Base Center Vertex
-        vertex_buffer.push(Vertex {
+        vertices.push(Vertex {
             position: center.to_array(),
             tex_coord: [0.0, -1.0],
             normal: [0.0, -1.0, 0.0],
@@ -84,7 +84,7 @@ impl From<Cone> for Model {
             let tangent = glam::Vec3A::new(-vertex_direction.z, 0.0, vertex_direction.x);
             let normal = slant_height_vector.cross(tangent).normalize();
 
-            vertex_buffer.push(Vertex {
+            vertices.push(Vertex {
                 position: [vertex.x, vertex.y, vertex.z],
                 tex_coord: [side as f32 / tessellation_slice as f32, 0.0],
                 normal: [normal.x, normal.y, normal.z],
@@ -106,7 +106,7 @@ impl From<Cone> for Model {
         }
 
         let mesh = Mesh {
-            vertices: vertex_buffer,
+            vertices,
             material_id: 0,
             indices,
         };

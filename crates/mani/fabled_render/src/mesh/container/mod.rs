@@ -1,7 +1,9 @@
+pub use indices::*;
 pub use mesh_data::*;
 pub use model::*;
 pub use vertex::*;
 
+mod indices;
 mod mesh_data;
 mod model;
 mod vertex;

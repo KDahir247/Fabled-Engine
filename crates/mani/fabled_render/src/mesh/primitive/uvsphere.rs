@@ -1,14 +1,5 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
-/*
-    Planning Phase.
-    Longitude and Latitude?.
-    Center?
-    rings?
-    height?
-    width?
-
-*/
 pub struct UvSphere {
     pub radius: f32,
     pub tessellation_stack: usize,
@@ -78,7 +69,7 @@ impl From<UvSphere> for Model {
             let mut k1 = i * (uv_sphere.tessellation_sector + 1);
             let mut k2 = k1 + uv_sphere.tessellation_sector + 1;
 
-            for j in 0..uv_sphere.tessellation_sector {
+            for _j in 0..uv_sphere.tessellation_sector {
                 if i != 0 {
                     indices.push(k1);
                     indices.push(k2);
@@ -117,8 +108,8 @@ mod test {
         let sphere_model: Model = sphere.into();
         for vertex in &sphere_model.meshes[0].vertices {
             println!(
-                "new Vector2({}f, {}f),",
-                vertex.tex_coord[0], vertex.tex_coord[1]
+                "new Vector3({}f, {}f, {}f),",
+                vertex.normal[0], vertex.normal[1], vertex.normal[2]
             );
         }
         println!("{:?}", sphere_model.meshes[0].indices);

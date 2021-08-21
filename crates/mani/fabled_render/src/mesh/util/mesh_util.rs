@@ -1,4 +1,51 @@
+use crate::mesh::util::NormalInstruction;
 use crate::mesh::Mesh;
+
+pub fn calculate_bi_tangent() {}
+
+pub fn calculate_normals(mesh: &mut Mesh, instruction: NormalInstruction) {
+    let indices = &mesh.indices;
+
+    // 3 indices make a triangle.
+    for triangle in indices.chunks_exact(3) {
+        let ia = triangle[0];
+        let ib = triangle[1];
+        let ic = triangle[2];
+
+        let aa = &mesh.vertices[ia].position;
+        let ab = &mesh.vertices[ib].position;
+        let ac = &mesh.vertices[ic].position;
+
+        let va = glam::Vec3A::from_slice(aa);
+        let vb = glam::Vec3A::from_slice(ab);
+        let vc = glam::Vec3A::from_slice(ac);
+
+        let e1 = vb - va;
+        let e2 = vc - va;
+        let no = e1.cross(e2);
+
+        let mut anormal = glam::Vec3A::ZERO;
+        let mut bnormal = glam::Vec3A::ZERO;
+        let mut cnormal = glam::Vec3A::ZERO;
+
+        match instruction {
+            NormalInstruction::Flat => {
+                anormal = no;
+                bnormal = no;
+                cnormal = no;
+            }
+            NormalInstruction::Smooth => {
+                anormal = va + no;
+                bnormal = vb + no;
+                cnormal = vc + no;
+            }
+        }
+
+        mesh.vertices[ia].normal = anormal.normalize().to_array();
+        mesh.vertices[ib].normal = bnormal.normalize().to_array();
+        mesh.vertices[ic].normal = cnormal.normalize().to_array();
+    }
+}
 
 //todo got to look over this and test it before using it in code source.
 pub fn calculate_tangents(mesh: &mut Mesh) {
@@ -60,6 +107,7 @@ pub fn calculate_tangents(mesh: &mut Mesh) {
     }
 }
 
+//todo move to fabled_math.
 pub fn reject(axis: glam::Vec3, direction: glam::Vec3) -> glam::Vec3 {
     let axis = axis.normalize();
     direction - axis * direction.dot(axis)

@@ -276,7 +276,7 @@ impl From<Capsule> for Model {
         let tri_offset_south_cap = tri_offset_south_hemisphere + hemisphere_lon;
 
         let fs_len = tri_offset_south_cap + lon_mul_3;
-        let mut tris: Vec<usize> = vec![0; fs_len];
+        let mut indices: Vec<usize> = vec![0; fs_len];
 
         // Polar caps.
         let mut i = 0;
@@ -285,14 +285,14 @@ impl From<Capsule> for Model {
 
         while i < longitude {
             // North.
-            tris[k] = i;
-            tris[k + 1] = vert_offset_north_hemisphere + i;
-            tris[k + 2] = vert_offset_north_hemisphere + i + 1;
+            indices[k] = i;
+            indices[k + 1] = vert_offset_north_hemisphere + i;
+            indices[k + 2] = vert_offset_north_hemisphere + i + 1;
 
             // South.
-            tris[m] = vert_offset_south_cap + i;
-            tris[m + 1] = vert_offset_south_polar + i + 1;
-            tris[m + 2] = vert_offset_south_polar + i;
+            indices[m] = vert_offset_south_cap + i;
+            indices[m + 1] = vert_offset_south_polar + i + 1;
+            indices[m + 2] = vert_offset_south_polar + i;
 
             i += 1;
             k += 3;
@@ -321,13 +321,13 @@ impl From<Capsule> for Model {
                 let north11 = vert_next_lat_north + j + 1;
                 let north10 = vert_curr_lat_north + j + 1;
 
-                tris[k] = north00;
-                tris[k + 1] = north11;
-                tris[k + 2] = north10;
+                indices[k] = north00;
+                indices[k + 1] = north11;
+                indices[k + 2] = north10;
 
-                tris[k + 3] = north00;
-                tris[k + 4] = north01;
-                tris[k + 5] = north11;
+                indices[k + 3] = north00;
+                indices[k + 4] = north01;
+                indices[k + 5] = north11;
 
                 // South.
                 let south00 = vert_curr_lat_south + j;
@@ -335,13 +335,13 @@ impl From<Capsule> for Model {
                 let south11 = vert_next_lat_south + j + 1;
                 let south10 = vert_curr_lat_south + j + 1;
 
-                tris[m] = south00;
-                tris[m + 1] = south11;
-                tris[m + 2] = south10;
+                indices[m] = south00;
+                indices[m + 1] = south11;
+                indices[m + 2] = south10;
 
-                tris[m + 3] = south00;
-                tris[m + 4] = south01;
-                tris[m + 5] = south11;
+                indices[m + 3] = south00;
+                indices[m + 4] = south01;
+                indices[m + 5] = south11;
 
                 j += 1;
                 k += 6;
@@ -366,13 +366,13 @@ impl From<Capsule> for Model {
                 let cy11 = vert_next_lat + j + 1;
                 let cy10 = vert_curr_lat + j + 1;
 
-                tris[k] = cy00;
-                tris[k + 1] = cy11;
-                tris[k + 2] = cy10;
+                indices[k] = cy00;
+                indices[k + 1] = cy11;
+                indices[k + 2] = cy10;
 
-                tris[k + 3] = cy00;
-                tris[k + 4] = cy01;
-                tris[k + 5] = cy11;
+                indices[k + 3] = cy00;
+                indices[k + 4] = cy01;
+                indices[k + 5] = cy11;
 
                 j += 1;
                 k += 6;
@@ -396,7 +396,7 @@ impl From<Capsule> for Model {
         let mesh = Mesh {
             vertices,
             material_id: 0,
-            indices: tris,
+            indices,
         };
 
         Model { meshes: vec![mesh] }

@@ -1,7 +1,5 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
-//todo LOOK AT
-
 #[repr(C, align(16))]
 #[derive(Debug)]
 struct CubeData {
@@ -58,8 +56,8 @@ impl From<Cube> for Model {
     fn from(cube: Cube) -> Self {
         const CUBE_DATA: &CubeData = &CUBE_FACE_DATA;
 
-        let mut vertex_storage = vec![Vertex::default(); 24];
-        let mut indices_storage = vec![0; 36];
+        let mut vertices = vec![Vertex::default(); 24];
+        let mut indices = vec![0; 36];
 
         for chunk in 0..6 {
             let normal = CUBE_DATA.normal[chunk];
@@ -73,7 +71,7 @@ impl From<Cube> for Model {
                 (normal + bi_tangent - tangent) * cube.size,
             ];
 
-            let indices = [
+            let indices_face = [
                 chunk * 4 + 2,
                 chunk * 4 + 1,
                 chunk * 4,
@@ -84,8 +82,8 @@ impl From<Cube> for Model {
 
             {
                 let offset = chunk * 6;
-                let (target_left, _) = indices_storage[offset..].split_at_mut(6);
-                target_left.copy_from_slice(&indices);
+                let (target_left, _) = indices[offset..].split_at_mut(6);
+                target_left.copy_from_slice(&indices_face);
             }
 
             for (index, face) in corners.chunks_exact(4).enumerate() {
@@ -130,16 +128,16 @@ impl From<Cube> for Model {
 
                 {
                     let offset = (index + chunk) * 4;
-                    let (target_left, _) = vertex_storage[offset..].split_at_mut(4);
+                    let (target_left, _) = vertices[offset..].split_at_mut(4);
                     target_left.copy_from_slice(&face_vertices);
                 }
             }
         }
 
         let mesh = Mesh {
-            vertices: vertex_storage,
+            vertices,
             material_id: 0,
-            indices: indices_storage,
+            indices,
         };
 
         Model { meshes: vec![mesh] }

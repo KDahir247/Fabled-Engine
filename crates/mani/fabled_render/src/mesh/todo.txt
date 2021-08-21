@@ -2,6 +2,4 @@
 // Get the vertex, tangent, bi-tangent
 // If the bi-tangent or tangent is missing calculate the tangent and bi-normal
 // Instancing support???
-// Indices U16(Vec<u16>) and U32(Vec<u32>)
 // Model should a collection of vertex data, option of Indices.
-// The module should have support for primitive shapes, such as capsule, cube, sphere, cylinder, maybe cone, plane, maybe torus, quad, maybe geosphere, maybe teapot

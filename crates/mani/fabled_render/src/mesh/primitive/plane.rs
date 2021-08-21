@@ -140,6 +140,7 @@ impl From<Plane> for Model {
             material_id: 0,
             indices,
         };
+
         Model { meshes: vec![mesh] }
     }
 }
@@ -156,7 +157,7 @@ mod test {
         let plane_model: Model = plane.into();
         for vertex in &plane_model.meshes[0].vertices {
             println!(
-                "new Vector3({:?}f, {}f, {}f),",
+                "new Vector3({}f, {}f, {}f),",
                 vertex.normal[0], vertex.normal[1], vertex.normal[2]
             );
         }

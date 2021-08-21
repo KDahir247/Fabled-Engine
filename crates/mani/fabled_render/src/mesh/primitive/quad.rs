@@ -33,10 +33,7 @@ impl From<Quad> for Model {
         let mut vertices = [Vertex::default(); 4];
 
         let vertex = &mut [
-            -0.5, -0.5, 0.0, //
-            -0.5, 0.5, 0.0, //
-            0.5, 0.5, 0.0, //
-            0.5, -0.5, 0.0, //
+            -0.5, -0.5, 0.0, -0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5, -0.5, 0.0,
         ];
 
         for (index, vert) in vertex.chunks_exact(3).enumerate() {
