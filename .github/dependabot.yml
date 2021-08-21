@@ -7,18 +7,12 @@ updates:
     labels:
       - "dependences"
     ignore:
-    - dependency-name wgpu # we want to handle wgpu (rendering) dependency since it might have breaking changes
+    - dependency-name: wgpu 
       versions:
       - 0.10.1
-    - dependency-name naga
+    - dependency-name: naga
       versions:
       - 0.6.0 
-    - dependency-name libktx-rs
-      versions:
-      - 0.3.2
-    - dependency-name libktx_rs_sys
-      versions:
-      - 0.3.1+v4.0.0
   
   - package-ecosystem: "github-actions"
     directory: "/"
