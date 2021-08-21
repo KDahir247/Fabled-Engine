@@ -32,7 +32,7 @@ logger = ["log" ,"env_logger"]
 [dependencies]
 image = "*"
 winit = "*"
-wgpu = "0.8"
+wgpu = "0.10"
 futures = "*"
 bytemuck = {version = "*", features = ["derive"]}
 tobj = "*"
