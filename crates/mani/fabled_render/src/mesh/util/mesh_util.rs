@@ -30,14 +30,14 @@ pub fn calculate_normals(mesh: &mut Mesh, instruction: NormalInstruction) {
 
         match instruction {
             NormalInstruction::Flat => {
-                anormal = no;
-                bnormal = no;
-                cnormal = no;
+                anormal += no;
+                bnormal += no;
+                cnormal += no;
             }
             NormalInstruction::Smooth => {
-                anormal = va + no;
-                bnormal = vb + no;
-                cnormal = vc + no;
+                anormal += va + no;
+                bnormal += vb + no;
+                cnormal += vc + no;
             }
         }
 
