@@ -41,4 +41,4 @@ rayon = "1.4"
 glam = {version = "*", features = ["bytemuck"]}
 shipyard = {version = "*", features = ["default", "thread_local"]}
 superluminal-perf = "*"
-naga = {version = "0.4.2", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga
+naga = {version = "0.6.0", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga
