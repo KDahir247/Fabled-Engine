@@ -1,7 +1,32 @@
 use crate::mesh::util::NormalInstruction;
 use crate::mesh::Mesh;
 
-pub fn calculate_bi_tangent() {}
+pub fn calculate_bi_tangent(mesh: &mut Mesh) {
+    let vertices_data = &mesh.vertices;
+
+    let has_normal = vertices_data
+        .iter()
+        .any(|&vertex| vertex.normal.ne(&[0.0; 3]));
+
+    let has_tangent = vertices_data
+        .iter()
+        .any(|&vertex| vertex.tangent.ne(&[0.0; 4]));
+
+    if !has_normal {
+        calculate_normals(mesh, NormalInstruction::Flat);
+    }
+
+    if !has_tangent {
+        calculate_tangents(mesh);
+    }
+
+    for vertex in &mut mesh.vertices {
+        let n = glam::Vec3A::from_slice(&vertex.normal);
+        let t = glam::Vec3A::from_slice(&vertex.tangent);
+        let bi_tangent = n.cross(t) * vertex.tangent[2];
+        vertex.bi_tangent = [bi_tangent.x, bi_tangent.y, bi_tangent.z, vertex.tangent[2]];
+    }
+}
 
 pub fn calculate_normals(mesh: &mut Mesh, instruction: NormalInstruction) {
     let indices = &mesh.indices;
@@ -55,60 +80,64 @@ pub fn calculate_tangents(mesh: &mut Mesh) {
 
     let uniform_len = vertices_data.len();
 
-    let mut tangents = vec![glam::Vec4::ZERO; uniform_len];
-    let mut bi_tangent = vec![glam::Vec4::ZERO; uniform_len];
+    let mut tangents = vec![glam::Vec3A::ZERO; uniform_len * 2];
+    let mut bi_tangent = vec![glam::Vec3A::ZERO; uniform_len + uniform_len];
 
     for tri in triangles.chunks_exact(3) {
         let i1 = tri[0];
         let i2 = tri[1];
         let i3 = tri[2];
 
-        let p0 = glam::Vec3A::from_slice(&vertices_data[i1].position);
-        let p1 = glam::Vec3A::from_slice(&vertices_data[i2].position);
-        let p2 = glam::Vec3A::from_slice(&vertices_data[i3].position);
+        let v1 = glam::Vec3A::from_slice(&vertices_data[i1].position);
+        let v2 = glam::Vec3A::from_slice(&vertices_data[i2].position);
+        let v3 = glam::Vec3A::from_slice(&vertices_data[i3].position);
 
-        let w0 = glam::Vec2::from_slice(&vertices_data[i1].tex_coord);
-        let w1 = glam::Vec2::from_slice(&vertices_data[i2].tex_coord);
-        let w2 = glam::Vec2::from_slice(&vertices_data[i3].tex_coord);
+        let w1 = glam::Vec2::from_slice(&vertices_data[i1].tex_coord);
+        let w2 = glam::Vec2::from_slice(&vertices_data[i2].tex_coord);
+        let w3 = glam::Vec2::from_slice(&vertices_data[i3].tex_coord);
 
-        let e1 = p1 - p0;
-        let e2 = p2 - p0;
+        let x1 = v2.x - v1.x;
+        let x2 = v3.x - v1.x;
+        let y1 = v2.y - v1.y;
+        let y2 = v3.y - v1.y;
+        let z1 = v2.z - v1.z;
+        let z2 = v3.z - v1.z;
 
-        let xy1 = w1 - w0;
-        let xy2 = w2 - w0;
+        let s1 = w2.x - w1.x;
+        let s2 = w3.x - w1.x;
+        let t1 = w2.y - w1.y;
+        let t2 = w3.y - w1.y;
 
-        let r = 1.0 / (xy1.x * xy2.y - xy2.x * xy1.y);
-        let t = (e1 * xy2.y - e2 * xy1.y) * r;
-        let b = (e2 * xy1.x - e1 * xy2.x) * r;
+        let r = 1.0 / (s1 * t2 - s2 * t1);
 
-        tangents[i1] = t.extend(0.0);
-        tangents[i2] = t.extend(0.0);
-        tangents[i3] = t.extend(0.0);
+        let t = glam::vec3a(
+            (t2 * x1 - t1 * x2) * r,
+            (t2 * y1 - t1 * y2) * r,
+            (t2 * z1 - t1 * z2) * r,
+        );
 
-        bi_tangent[i1] = b.extend(0.0);
-        bi_tangent[i2] = b.extend(0.0);
-        bi_tangent[i3] = b.extend(0.0);
+        let b = glam::vec3a(
+            (s1 * x2 - s2 * x1) * r,
+            (s1 * y2 - s2 * y1) * r,
+            (s1 * z2 - s2 * z1) * r,
+        );
 
-        // Orthonormalize each tangent and calculate its handedness
-        for i in 0..uniform_len {
-            let t = tangents[i].truncate();
-            let b = bi_tangent[i].truncate();
-            let n = glam::Vec3::from_slice(&vertices_data[i].normal);
+        tangents[i1] += t;
+        tangents[i2] += t;
+        tangents[i3] += t;
 
-            let tangent = reject(n, t).normalize();
-            let handedness = ((t.cross(b).dot(n)) - f32::EPSILON).signum();
-
-            vertices_data[i].tangent = [tangent.x, tangent.y, tangent.z, handedness];
-
-            //to calculate the bi_tangent
-            let bi_tangent = n.cross(tangent).extend(1.0) * handedness;
-            vertices_data[i].bi_tangent = bi_tangent.to_array();
-        }
+        bi_tangent[i1] += b;
+        bi_tangent[i2] += b;
+        bi_tangent[i3] += b;
     }
-}
+    // Orthonormalize each tangent and calculate its handedness
+    for i in 0..uniform_len {
+        let n = glam::Vec3A::from_slice(&vertices_data[i].normal);
+        let t = tangents[i];
+        let b = bi_tangent[i];
+        let tangent = (t - n * n.dot(t)).normalize();
 
-//todo move to fabled_math.
-pub fn reject(axis: glam::Vec3, direction: glam::Vec3) -> glam::Vec3 {
-    let axis = axis.normalize();
-    direction - axis * direction.dot(axis)
+        let handedness = (t.cross(b).dot(n) - f32::EPSILON).signum();
+        vertices_data[i].tangent = [tangent.x, tangent.y, tangent.z, handedness];
+    }
 }

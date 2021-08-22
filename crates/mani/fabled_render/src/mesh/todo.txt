@@ -1,5 +1,0 @@
-// Use POD
-// Get the vertex, tangent, bi-tangent
-// If the bi-tangent or tangent is missing calculate the tangent and bi-normal
-// Instancing support???
-// Model should a collection of vertex data, option of Indices.
