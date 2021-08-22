@@ -1,28 +1,16 @@
+use crate::material::MaterialTargetFormat;
 use naga::{ScalarKind, TypeInner, VectorSize};
 use serde::*;
 
-//todo data not aligned.
-
 #[derive(Debug, Serialize, Deserialize)]
-pub struct MaterialTree {
-    pub material_name: String,
-    pub shader: String,
-    pub attributes: [MaterialLeaf; 9],
+pub enum EmptyTarget {
+    None,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MaterialLeaf {
-    pub type_name: String,
-    pub types: Vec<MaterialNode>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MaterialNode {
-    pub value_name: String,
-    pub value_type: naga::TypeInner,
-    pub value_group: Option<u32>,
-    pub value_binding: Option<u32>,
-    pub value: MaterialTarget,
+impl From<EmptyTarget> for MaterialTargetFormat {
+    fn from(_: EmptyTarget) -> Self {
+        MaterialTargetFormat::Undefined
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,13 +22,13 @@ pub enum MaterialTarget {
     Float(f32), //4 bytes
     Bool(bool), //1 byte
 
-    Vec2SInt([i32; 2]),     //8 bytes
     Vec2UInt([u32; 2]),     //8 bytes
+    Vec2SInt([i32; 2]),     //8 bytes
     Vec2Float([f32; 2]),    //8 bytes
     Vec2Boolean([bool; 2]), //2 bytes
 
-    Vec4SInt([i32; 4]),     // 16 bytes
     Vec4UInt([u32; 4]),     // 16 bytes
+    Vec4SInt([i32; 4]),     // 16 bytes
     Vec4Float([f32; 4]),    // 16 bytes
     Vec4Boolean([bool; 4]), // 4 bytes
 
@@ -49,11 +37,34 @@ pub enum MaterialTarget {
     Matrix4x4([f32; 16]), // 64 bytes
 
     Sampler(bool), // 1 byte
-    //
 
     //UnAligned
     //todo replay with a POD (Plain old data type) that is aligned to the power of two. rather than a string.
     Texture(String), // 24 bytes
+}
+
+impl From<MaterialTarget> for MaterialTargetFormat {
+    fn from(target: MaterialTarget) -> Self {
+        match target {
+            MaterialTarget::None => MaterialTargetFormat::Undefined,
+            MaterialTarget::Uint(_) => MaterialTargetFormat::UnsignedInt,
+            MaterialTarget::Sint(_) => MaterialTargetFormat::SignedInt,
+            MaterialTarget::Float(_) => MaterialTargetFormat::Float,
+            MaterialTarget::Bool(_) => MaterialTargetFormat::Boolean,
+            MaterialTarget::Vec2UInt(_) => MaterialTargetFormat::Vector2UnsignedInt,
+            MaterialTarget::Vec2SInt(_) => MaterialTargetFormat::Vector2SignedInt,
+            MaterialTarget::Vec2Float(_) => MaterialTargetFormat::Vector2Float,
+            MaterialTarget::Vec2Boolean(_) => MaterialTargetFormat::Vector2Boolean,
+            MaterialTarget::Vec4UInt(_) => MaterialTargetFormat::Vector4UnsignedInt,
+            MaterialTarget::Vec4SInt(_) => MaterialTargetFormat::Vector4SignedInt,
+            MaterialTarget::Vec4Float(_) => MaterialTargetFormat::Vector4Float,
+            MaterialTarget::Vec4Boolean(_) => MaterialTargetFormat::Vector4Boolean,
+            MaterialTarget::Matrix2x2(_) => MaterialTargetFormat::Matrix2x2Float,
+            MaterialTarget::Matrix4x4(_) => MaterialTargetFormat::Matrix4x4Float,
+            MaterialTarget::Sampler(_) => MaterialTargetFormat::Sampler,
+            MaterialTarget::Texture(_) => MaterialTargetFormat::Texture,
+        }
+    }
 }
 
 impl From<&naga::TypeInner> for MaterialTarget {
@@ -125,21 +136,12 @@ impl MaterialTarget {
 }
 
 #[cfg(test)]
-mod data_alignment_test {
-    use crate::material::{MaterialLeaf, MaterialNode, MaterialTarget, MaterialTree};
+mod test {
+    use crate::material::MaterialTarget;
 
     #[test]
-    fn data_alignment() {
-        let material_tree = std::mem::size_of::<MaterialTree>();
-        println!("{}", material_tree);
-
-        let material_leaf = std::mem::size_of::<MaterialLeaf>();
-        println!("{}", material_leaf);
-
-        let material_node = std::mem::size_of::<MaterialNode>();
-        println!("{}", material_node);
-
-        let material_target = std::mem::size_of::<MaterialTarget>();
-        println!("{}", material_target);
+    fn test() {
+        let a = std::mem::size_of::<MaterialTarget>();
+        println!("{}", a);
     }
 }

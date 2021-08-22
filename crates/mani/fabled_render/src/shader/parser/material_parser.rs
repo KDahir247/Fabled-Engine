@@ -13,51 +13,8 @@ impl Default for MaterialParser {
 
 impl MaterialParser {
     pub fn new(head: &str) -> Self {
-        let parser_leaf: [MaterialLeaf; 9] = [
-            MaterialLeaf {
-                type_name: "Scalar".to_string(),
-                types: vec![],
-            },
-            MaterialLeaf {
-                type_name: "Vector".to_string(),
-                types: vec![],
-            },
-            MaterialLeaf {
-                type_name: "Matrix".to_string(),
-                types: vec![],
-            },
-            MaterialLeaf {
-                type_name: "Pointer".to_string(),
-                types: vec![],
-            },
-            MaterialLeaf {
-                type_name: "ValuePointer".to_string(),
-                types: vec![],
-            },
-            MaterialLeaf {
-                type_name: "Array".to_string(),
-                types: vec![],
-            },
-            MaterialLeaf {
-                type_name: "Struct".to_string(),
-                types: vec![],
-            },
-            MaterialLeaf {
-                type_name: "Image".to_string(),
-                types: vec![],
-            },
-            MaterialLeaf {
-                type_name: "Sampler".to_string(),
-                types: vec![],
-            },
-        ];
-
         Self {
-            material_head: MaterialTree {
-                material_name: head.to_string(),
-                shader: "Material".to_string(),
-                attributes: parser_leaf,
-            },
+            material_head: MaterialTree::new(head.to_string(), "material".to_string()),
         }
     }
 
@@ -98,13 +55,24 @@ impl MaterialParser {
             //todo find a cleaner solution then this.
             let index = MaterialTarget::index(&node.value_type);
 
-            self.material_head.attributes[index].types.push(node);
+            match &mut self.material_head.attributes[index] {
+                Attributes::Scalar(scalar) => scalar.push(node),
+                Attributes::Vector(vector) => vector.push(node),
+                Attributes::Matrix(matrix) => matrix.push(node),
+                Attributes::Pointer(pointer) => pointer.push(node.into()),
+                Attributes::ValuePointer(val_pointer) => val_pointer.push(node.into()),
+                Attributes::Array(array) => array.push(node.into()),
+                Attributes::Struct(structure) => structure.push(node.into()),
+                Attributes::Image(img) => img.push(node),
+                Attributes::Sampler(sampler) => sampler.push(node),
+                _ => {}
+            }
         }
 
         let pretty = ron::ser::PrettyConfig::new()
             .with_separate_tuple_members(true)
             .with_decimal_floats(true)
-            .with_depth_limit(5)
+            .with_depth_limit(8)
             .with_enumerate_arrays(true);
 
         let ron_material = ron::ser::to_string_pretty(&self.material_head, pretty).expect("failed to serialize shader data into a material representation.\n failed on writing out the data to ron format.");
