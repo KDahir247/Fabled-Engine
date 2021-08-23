@@ -1,15 +1,11 @@
-use crate::material::{EmptyNode, MaterialNode, MaterialTarget};
+use crate::material::MaterialKey;
 use serde::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Attributes {
-    Scalar(Vec<MaterialNode>),
-    Vector(Vec<MaterialNode>),
-    Matrix(Vec<MaterialNode>),
-    Pointer(Vec<EmptyNode>),
-    ValuePointer(Vec<EmptyNode>),
-    Array(Vec<EmptyNode>),
-    Struct(Vec<EmptyNode>),
-    Image(Vec<MaterialNode>),
-    Sampler(Vec<MaterialNode>),
+    Scalar(Vec<MaterialKey>),
+    Vector(Vec<MaterialKey>),
+    Matrix(Vec<MaterialKey>),
+    Image(Vec<MaterialKey>),
+    Sampler(Vec<MaterialKey>),
 }

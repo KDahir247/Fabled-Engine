@@ -1,8 +1,13 @@
 use crate::material::*;
 use crate::shader;
+use serde::*;
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialParser {
-    material_head: MaterialTree,
+    material: MaterialTree,
+    //This will have a number of values for each type variable of a material maybe.
+    //It will Have an Arena of Type and the Material Tree Attribute Handle will have the handles for the type.
+    map: slotmap::SlotMap<slotmap::DefaultKey, i32>, //This will have a materialNode for the value.
 }
 
 impl Default for MaterialParser {
@@ -14,7 +19,8 @@ impl Default for MaterialParser {
 impl MaterialParser {
     pub fn new(head: &str) -> Self {
         Self {
-            material_head: MaterialTree::new(head.to_string(), "material".to_string()),
+            material: MaterialTree::new(head.to_string(), "material".to_string()),
+            map: Default::default(),
         }
     }
 
@@ -55,7 +61,8 @@ impl MaterialParser {
             //todo find a cleaner solution then this.
             let index = MaterialTarget::index(&node.value_type);
 
-            match &mut self.material_head.attributes[index] {
+            //This will append the material node to map and put the key in the attributes
+            /*match &mut self.material.attributes[index] {
                 Attributes::Scalar(scalar) => scalar.push(node),
                 Attributes::Vector(vector) => vector.push(node),
                 Attributes::Matrix(matrix) => matrix.push(node),
@@ -66,7 +73,7 @@ impl MaterialParser {
                 Attributes::Image(img) => img.push(node),
                 Attributes::Sampler(sampler) => sampler.push(node),
                 _ => {}
-            }
+            }*/
         }
 
         let pretty = ron::ser::PrettyConfig::new()
@@ -75,7 +82,7 @@ impl MaterialParser {
             .with_depth_limit(8)
             .with_enumerate_arrays(true);
 
-        let ron_material = ron::ser::to_string_pretty(&self.material_head, pretty).expect("failed to serialize shader data into a material representation.\n failed on writing out the data to ron format.");
+        let ron_material = ron::ser::to_string_pretty(&self, pretty).expect("failed to serialize shader data into a material representation.\n failed on writing out the data to ron format.");
 
         Ok(ron_material)
     }

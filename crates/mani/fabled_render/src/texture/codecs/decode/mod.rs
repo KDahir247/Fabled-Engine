@@ -29,8 +29,14 @@ impl Default for TextureDescriptor {
 mod codecs_test {
     use crate::texture::codecs::TextureDescriptor;
     #[test]
+    fn data_size() {
+        let tex_desc_size = std::mem::size_of::<TextureDescriptor>();
+        assert_eq!(tex_desc_size & (tex_desc_size - 1), 0);
+    }
+
+    #[test]
     fn data_alignment() {
-        let tex_desc = std::mem::size_of::<TextureDescriptor>();
-        assert_eq!(tex_desc & (tex_desc - 1), 0);
+        let tex_desc_alignment = std::mem::align_of::<TextureDescriptor>();
+        assert_eq!(tex_desc_alignment & (tex_desc_alignment - 1), 0);
     }
 }

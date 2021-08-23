@@ -214,7 +214,7 @@ pub struct PixelManipulation {
 }
 
 #[derive(Debug, Copy, Clone)]
-#[repr(align(32))]
+#[repr(align(16))]
 pub struct TranscodeDescriptor {
     texture_format: TranscodeTextureFormat,
     decode_flags: TranscodeDecodeFlags,
@@ -232,49 +232,115 @@ impl Default for TranscodeDescriptor {
 }
 
 #[cfg(test)]
-mod data_alignment_test {
+mod compression_test {
     use crate::texture::compression::*;
 
     #[test]
-    fn data_alignment() {
+    fn data_size() {
         //Test for data alignment.
-        let basis_compression_algorithm = std::mem::size_of::<BasisCompressionFormat>();
+        let basis_compression_algorithm_size = std::mem::size_of::<BasisCompressionFormat>();
         assert_eq!(
-            basis_compression_algorithm & (basis_compression_algorithm - 1),
+            basis_compression_algorithm_size & (basis_compression_algorithm_size - 1),
             0
         );
 
-        let compression_quality = std::mem::size_of::<CompressionQuality>();
-        assert_eq!(compression_quality & (compression_quality - 1), 0);
+        let compression_quality_size = std::mem::size_of::<CompressionQuality>();
+        assert_eq!(compression_quality_size & (compression_quality_size - 1), 0);
 
-        let mipmap_desc = std::mem::size_of::<MipmapDescriptor>();
-        assert_eq!(mipmap_desc & (mipmap_desc - 1), 0);
+        let mipmap_desc_size = std::mem::size_of::<MipmapDescriptor>();
+        assert_eq!(mipmap_desc_size & (mipmap_desc_size - 1), 0);
 
-        let rdo_desc = std::mem::size_of::<RDODescriptor>();
-        assert_eq!(rdo_desc & (rdo_desc - 1), 0);
+        let rdo_desc_size = std::mem::size_of::<RDODescriptor>();
+        assert_eq!(rdo_desc_size & (rdo_desc_size - 1), 0);
 
-        let user_data = std::mem::size_of::<UserData>();
-        assert_eq!(user_data & (user_data - 1), 0);
+        let user_data_size = std::mem::size_of::<UserData>();
+        assert_eq!(user_data_size & (user_data_size - 1), 0);
 
-        let compression_desc = std::mem::size_of::<CompressionDescriptor>();
-        assert_eq!(compression_desc & (compression_desc - 1), 0);
+        let compression_desc_size = std::mem::size_of::<CompressionDescriptor>();
+        assert_eq!(compression_desc_size & (compression_desc_size - 1), 0);
 
-        let basis_texture = std::mem::size_of::<BasisTexture>();
-        assert_eq!(basis_texture & (basis_texture - 1), 0);
+        let basis_texture_size = std::mem::size_of::<BasisTexture>();
+        assert_eq!(basis_texture_size & (basis_texture_size - 1), 0);
 
-        let transcode_source = std::mem::size_of::<TranscodeSource>();
-        assert_eq!(transcode_source & (transcode_source - 1), 0);
+        let transcode_source_size = std::mem::size_of::<TranscodeSource>();
+        assert_eq!(transcode_source_size & (transcode_source_size - 1), 0);
 
-        let transcode_texture_format = std::mem::size_of::<TranscodeTextureFormat>();
-        assert_eq!(transcode_texture_format & (transcode_texture_format - 1), 0);
+        let transcode_texture_format_size = std::mem::size_of::<TranscodeTextureFormat>();
+        assert_eq!(
+            transcode_texture_format_size & (transcode_texture_format_size - 1),
+            0
+        );
 
-        let transcode_decode_flag = std::mem::size_of::<TranscodeDecodeFlags>();
-        assert_eq!(transcode_decode_flag & (transcode_decode_flag - 1), 0);
+        let transcode_decode_flag_size = std::mem::size_of::<TranscodeDecodeFlags>();
+        assert_eq!(
+            transcode_decode_flag_size & (transcode_decode_flag_size - 1),
+            0
+        );
 
-        let pixel_manipulation = std::mem::size_of::<PixelManipulation>();
-        assert_eq!(pixel_manipulation & (pixel_manipulation - 1), 0);
+        let pixel_manipulation_size = std::mem::size_of::<PixelManipulation>();
+        assert_eq!(pixel_manipulation_size & (pixel_manipulation_size - 1), 0);
 
-        let transcode_desc = std::mem::size_of::<TranscodeDescriptor>();
-        assert_eq!(transcode_desc & (transcode_desc - 1), 0);
+        let transcode_desc_size = std::mem::size_of::<TranscodeDescriptor>();
+        assert_eq!(transcode_desc_size & (transcode_desc_size - 1), 0);
+    }
+
+    #[test]
+    fn data_alignment() {
+        let basis_compression_algorithm_alignment = std::mem::align_of::<BasisCompressionFormat>();
+        assert_eq!(
+            basis_compression_algorithm_alignment & (basis_compression_algorithm_alignment - 1),
+            0
+        );
+
+        let compression_quality_alignment = std::mem::align_of::<CompressionQuality>();
+        assert_eq!(
+            compression_quality_alignment & (compression_quality_alignment - 1),
+            0
+        );
+
+        let mipmap_desc_alignment = std::mem::align_of::<MipmapDescriptor>();
+        assert_eq!(mipmap_desc_alignment & (mipmap_desc_alignment - 1), 0);
+
+        let rdo_desc_alignment = std::mem::align_of::<RDODescriptor>();
+        assert_eq!(rdo_desc_alignment & (rdo_desc_alignment - 1), 0);
+
+        let user_data_alignment = std::mem::align_of::<UserData>();
+        assert_eq!(user_data_alignment & (user_data_alignment - 1), 0);
+
+        let compression_desc_alignment = std::mem::align_of::<CompressionDescriptor>();
+        assert_eq!(
+            compression_desc_alignment & (compression_desc_alignment - 1),
+            0
+        );
+
+        let basis_texture_alignment = std::mem::align_of::<BasisTexture>();
+        assert_eq!(basis_texture_alignment & (basis_texture_alignment - 1), 0);
+
+        let transcode_source_alignment = std::mem::align_of::<TranscodeSource>();
+        assert_eq!(
+            transcode_source_alignment & (transcode_source_alignment - 1),
+            0
+        );
+
+        let transcode_texture_format_alignment = std::mem::align_of::<TranscodeTextureFormat>();
+        assert_eq!(
+            transcode_texture_format_alignment & (transcode_texture_format_alignment - 1),
+            0
+        );
+
+        let transcode_decode_flag_alignment = std::mem::align_of::<TranscodeDecodeFlags>();
+        assert_eq!(
+            transcode_decode_flag_alignment & (transcode_decode_flag_alignment - 1),
+            0
+        );
+
+        let pixel_manipulation_alignment = std::mem::align_of::<PixelManipulation>();
+        assert_eq!(
+            pixel_manipulation_alignment & (pixel_manipulation_alignment - 1),
+            0
+        );
+
+        let transcode_desc_alignment = std::mem::align_of::<TranscodeDescriptor>();
+        assert_eq!(transcode_desc_alignment & (transcode_desc_alignment - 1), 0);
     }
 }

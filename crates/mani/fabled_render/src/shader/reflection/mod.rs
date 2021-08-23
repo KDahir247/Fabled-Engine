@@ -63,27 +63,60 @@ impl<'a> Default for ShaderRefEntry<'a> {
 }
 
 #[cfg(test)]
-mod data_alignment_test {
+mod data_test {
     use crate::shader::reflection::*;
 
     #[test]
+    fn data_size() {
+        let func_arg_size = std::mem::size_of::<FunctionArgument>();
+        println!("FunctionArgument is {} bytes", func_arg_size);
+
+        let func_result_size = std::mem::size_of::<FunctionResult>();
+        println!("FunctionResult is {} bytes", func_result_size);
+
+        let local_var_size = std::mem::size_of::<LocalVariables>();
+        println!("Local Variable is {} bytes", local_var_size);
+
+        let named_expr_size = std::mem::size_of::<NamedExpressions>();
+        println!("Named Expressions is {} bytes", named_expr_size);
+
+        let ref_func_size = std::mem::size_of::<ShaderRefFunc>();
+        println!("ShaderRefFunc is {} bytes", ref_func_size);
+
+        let ref_entry_size = std::mem::size_of::<ShaderRefEntry>();
+        println!("ShaderRefEntry is {} bytes", ref_entry_size);
+    }
+
+    #[test]
     fn data_alignment() {
-        let func_arg = std::mem::size_of::<FunctionArgument>();
-        println!("FunctionArgument is {} bytes", func_arg);
+        let func_arg_alignment = std::mem::size_of::<FunctionArgument>();
+        println!(
+            "Function Argument is aligned to {} bytes",
+            func_arg_alignment
+        );
 
-        let func_result = std::mem::size_of::<FunctionResult>();
-        println!("FunctionResult is {} bytes", func_result);
+        let func_result_alignment = std::mem::align_of::<FunctionResult>();
+        println!(
+            "Function Result is aligned to {} bytes",
+            func_result_alignment
+        );
 
-        let local_var = std::mem::size_of::<LocalVariables>();
-        println!("Local Variable is {} bytes", local_var);
+        let local_var_alignment = std::mem::align_of::<LocalVariables>();
+        println!(
+            "Local Variables is aligned to {} bytes",
+            local_var_alignment
+        );
 
-        let named_expr = std::mem::size_of::<NamedExpressions>();
-        println!("Named Expressions is {} bytes", named_expr);
+        let named_expr_alignment = std::mem::align_of::<NamedExpressions>();
+        println!(
+            "Named Expression is aligned to {} bytes",
+            named_expr_alignment
+        );
 
-        let ref_func = std::mem::size_of::<ShaderRefFunc>();
-        println!("ShaderRefFunc is {} bytes", ref_func);
+        let ref_func_alignment = std::mem::align_of::<ShaderRefFunc>();
+        println!(" ShaderRefFunc is aligned to {} bytes", ref_func_alignment);
 
-        let ref_entry = std::mem::size_of::<ShaderRefEntry>();
-        println!("ShaderRefEntry is {} bytes", ref_entry);
+        let ref_entry_alignment = std::mem::align_of::<ShaderRefEntry>();
+        println!(" ShaderRefEntry is {} bytes", ref_entry_alignment);
     }
 }

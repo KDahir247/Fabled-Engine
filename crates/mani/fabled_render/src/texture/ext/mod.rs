@@ -5,8 +5,8 @@ use crate::texture::container::FlipAxis;
 
 use bitflags::*;
 
-#[repr(align(16))]
 #[derive(Copy, Clone, Debug)]
+#[repr(align(16))]
 pub struct KTXDescriptor {
     pub flip_axis: Option<FlipAxis>,
     pub transcode_flag: KtxTranscodeFlag,
@@ -90,19 +90,34 @@ pub enum KtxTranscodeFormat {
 }
 
 #[cfg(test)]
-mod ktx_test {
+mod data_test {
 
     use crate::texture::ext::*;
 
     #[test]
+    fn data_size() {
+        let transcode_size = std::mem::size_of::<KtxTranscodeFlag>();
+        assert_eq!(transcode_size & (transcode_size - 1), 0);
+
+        let transcode_format_size = std::mem::size_of::<KtxTranscodeFormat>();
+        assert_eq!(transcode_format_size & (transcode_format_size - 1), 0);
+
+        let ktx_desc_size = std::mem::size_of::<KTXDescriptor>();
+        assert_eq!(ktx_desc_size & (ktx_desc_size - 1), 0);
+    }
+
+    #[test]
     fn data_alignment() {
-        let transcode = std::mem::size_of::<KtxTranscodeFlag>();
-        assert_eq!(transcode & (transcode - 1), 0);
+        let transcode_alignment = std::mem::align_of::<KtxTranscodeFlag>();
+        assert_eq!(transcode_alignment & (transcode_alignment - 1), 0);
 
-        let transcode_format = std::mem::size_of::<KtxTranscodeFormat>();
-        assert_eq!(transcode_format & (transcode_format - 1), 0);
+        let transcode_format_alignment = std::mem::align_of::<KtxTranscodeFormat>();
+        assert_eq!(
+            transcode_format_alignment & (transcode_format_alignment - 1),
+            0
+        );
 
-        let ktx_desc = std::mem::size_of::<KTXDescriptor>();
-        assert_eq!(ktx_desc & (ktx_desc - 1), 0);
+        let ktx_desc_alignment = std::mem::align_of::<KTXDescriptor>();
+        assert_eq!(ktx_desc_alignment & (ktx_desc_alignment - 1), 0);
     }
 }

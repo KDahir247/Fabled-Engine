@@ -5,7 +5,6 @@ use std::io::{Read, Write};
 #[allow(dead_code)]
 const AUTO_GEN_MESSAGE : &str = "//This is auto generated code. Do not modify code! Modification can break interpreted solution.\n//Modify shader code if you know what you're doing.\n\n";
 
-#[repr(align(128))]
 pub struct ShaderParser {
     //todo maybe remove struct and just return naga::module
     pub module: naga::Module,

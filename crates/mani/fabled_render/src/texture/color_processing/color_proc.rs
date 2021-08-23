@@ -2,7 +2,7 @@ use crate::texture::container::{ColorTarget, ColorType, Extent3d, Texture};
 use anyhow::Context;
 use image::GenericImageView;
 
-#[repr(align(64))]
+#[repr(align(32))]
 pub struct ColorProcessing {
     dyn_texture: image::DynamicImage,
 }

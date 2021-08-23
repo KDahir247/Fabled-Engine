@@ -119,6 +119,7 @@ impl From<&naga::TypeInner> for MaterialTarget {
     }
 }
 
+//
 impl MaterialTarget {
     pub fn index(target: &naga::TypeInner) -> usize {
         match target {
@@ -132,16 +133,5 @@ impl MaterialTarget {
             TypeInner::Image { .. } => 7,
             TypeInner::Sampler { .. } => 8,
         }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use crate::material::MaterialTarget;
-
-    #[test]
-    fn test() {
-        let a = std::mem::size_of::<MaterialTarget>();
-        println!("{}", a);
     }
 }

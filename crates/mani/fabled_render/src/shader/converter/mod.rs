@@ -52,26 +52,48 @@ pub enum ShaderConvertResult {
 }
 
 #[cfg(test)]
-mod data_alignment_test {
+mod data_test {
 
     use crate::shader::converter::*;
 
     #[test]
-    fn data_alignment() {
+    fn data_size() {
         //version
-        let version_data = std::mem::size_of::<Version>();
-        assert_eq!(version_data & (version_data - 1), 0);
+        let version_size = std::mem::size_of::<Version>();
+        assert_eq!(version_size & (version_size - 1), 0);
 
         //result
-        let shader_result_data = std::mem::size_of::<ShaderConvertResult>();
-        assert_eq!(shader_result_data & (shader_result_data - 1), 0);
+        let shader_result_size = std::mem::size_of::<ShaderConvertResult>();
+        assert_eq!(shader_result_size & (shader_result_size - 1), 0);
 
         //spv option
-        let spv_option_data = std::mem::size_of::<SpvOptions>();
-        assert_eq!(spv_option_data & (spv_option_data - 1), 0);
+        let spv_option_size = std::mem::size_of::<SpvOptions>();
+        assert_eq!(spv_option_size & (spv_option_size - 1), 0);
 
         //option
-        let shader_option_data = std::mem::size_of::<ShaderConvertOption>();
-        assert_eq!(shader_option_data & (shader_option_data - 1), 0);
+        let shader_option_size = std::mem::size_of::<ShaderConvertOption>();
+        assert_eq!(shader_option_size & (shader_option_size - 1), 0);
+    }
+
+    #[test]
+    fn data_alignment() {
+        let version_alignment = std::mem::align_of::<Version>();
+        assert_eq!(version_alignment & (version_alignment - 1), 0);
+        println!("Version is aligned to {} bytes", version_alignment);
+
+        let shader_result_alignment = std::mem::align_of::<ShaderConvertResult>();
+        assert_eq!(shader_result_alignment & (shader_result_alignment - 1), 0);
+        println!("Result is aligned to {} bytes", shader_result_alignment);
+
+        let spv_option_alignment = std::mem::align_of::<SpvOptions>();
+        assert_eq!(spv_option_alignment & (spv_option_alignment - 1), 0);
+        println!("Spv options is aligned to {} bytes", spv_option_alignment);
+
+        let shader_option_alignment = std::mem::align_of::<ShaderConvertOption>();
+        assert_eq!(shader_option_alignment & (shader_option_alignment - 1), 0);
+        println!(
+            "Shader option is aligned to {} bytes",
+            shader_option_alignment
+        );
     }
 }
