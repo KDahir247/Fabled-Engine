@@ -22,9 +22,6 @@ struct Uniforms{
 [[group(0), binding(0)]]
 var<uniform> uniform : Uniforms;
 
-[[binding(1)]]
-var a : f32 = 1.0;
-
 struct VertexOutput{
         [[builtin(position)]] v_position : vec4<f32>;
         [[location(0)]] position : vec3<f32>;
@@ -59,7 +56,6 @@ fn vs_main([[builtin(vertex_index)]] vertex_index: u32) -> VertexOutput{
 
 //---------------------------- Fragment Shader ----------------------------
 
-
 struct FragmentOutput{
      [[builtin(frag_depth)]] depth: f32;
      [[location(0)]] color: vec4<f32>;
@@ -74,7 +70,6 @@ let grid_alpha : f32 = 0.5;
 fn checkerboard(R : vec2<f32>, scale : f32) -> f32{
     return (floor(R.x / scale) + floor(R.y / scale)) % 2.0;
 }
-
 
 //Give depth to the grid system, but cause z fighting with model that are located at the same x, z plane as the grid.
 fn computeDepth(pos : vec3<f32>) -> f32{

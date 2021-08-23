@@ -1,0 +1,16 @@
+Since only struct can have a [[group(0), binding(0)]] var<uniform> type what i will do is to disassemble the vairables
+in the struct and put them in the correct Material Node type. The mtrl file will contain all the variable type in the structure.
+if the do this then i will need some sort of identifier for the type or for which struct they belong to since more
+complex shader can have multiple struct types.
+
+One the end user changes the variables in the struct. The disassemble variables should be assembled in the same correct
+struct type and should be passed to the shader.
+
+Variables in the shader that should not be disassemble will be and which is required for every shader are.
+The Vertex Position.
+The Normal Position.
+The Tangent Position.
+The Bi-Tangent Position.
+The UV Coordinates.
+
+You can update variables to update the immutable types above
