@@ -25,8 +25,10 @@ glob = "0.3.0"
 fabled_core = {path = "../fabled_core", version = "*"}
 rayon = {version = "1.5.1"}
 rustc-hash = {version = "1.0.1"}
-ulid = "0.4.1"
+ulid = {version = "0.4.1", features = ["serde"] }
 slotmap = {version = "*", features = ["serde"] }
+
+
 # Shader
 naga = {version = "0.5.0", features = ["wgsl-in", "wgsl-out", "glsl-in", "glsl-out", "spv-out", "spv-in", "serialize", "deserialize"]}
 ron = "0.6.0"

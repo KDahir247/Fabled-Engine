@@ -2,7 +2,8 @@ use crate::material::MaterialTargetFormat;
 use naga::{ScalarKind, TypeInner, VectorSize};
 use serde::*;
 
-#[derive(Debug, Serialize, Deserialize)]
+//todo future support for array and struct types.
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum EmptyTarget {
     None,
 }
@@ -13,34 +14,36 @@ impl From<EmptyTarget> for MaterialTargetFormat {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[repr(C)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum MaterialTarget {
     None,
     //Aligned
-    Uint(u32),  //4 bytes
-    Sint(i32),  //4 bytes
-    Float(f32), //4 bytes
-    Bool(bool), //1 byte
+    Uint(u32),
+    Sint(i32),
+    Float(f32),
+    Bool(bool),
 
-    Vec2UInt([u32; 2]),     //8 bytes
-    Vec2SInt([i32; 2]),     //8 bytes
-    Vec2Float([f32; 2]),    //8 bytes
-    Vec2Boolean([bool; 2]), //2 bytes
+    Vec2UInt([u32; 2]),
+    Vec2SInt([i32; 2]),
+    Vec2Float([f32; 2]),
+    Vec2Boolean([bool; 2]),
 
-    Vec4UInt([u32; 4]),     // 16 bytes
-    Vec4SInt([i32; 4]),     // 16 bytes
-    Vec4Float([f32; 4]),    // 16 bytes
-    Vec4Boolean([bool; 4]), // 4 bytes
+    Vec4UInt([u32; 4]),
+    Vec4SInt([i32; 4]),
+    Vec4Float([f32; 4]),
+    Vec4Boolean([bool; 4]),
 
     //Column Major Matrix
-    Matrix2x2([f32; 4]),  // 16 bytes
-    Matrix4x4([f32; 16]), // 64 bytes
+    Matrix2x2([f32; 4]),
+    Matrix4x4([f32; 16]),
 
     Sampler(bool), // 1 byte
 
-    //UnAligned
-    //todo replay with a POD (Plain old data type) that is aligned to the power of two. rather than a string.
-    Texture(String), // 24 bytes
+                   //UnAligned
+                   //todo replay with a POD (Plain old data type) that is aligned to the power of two. rather than a string.
+                   //todo got to find a better identifier for this type.
+                   //Texture(&'static [u8]), //), // 24 bytes
 }
 
 impl From<MaterialTarget> for MaterialTargetFormat {
@@ -62,7 +65,7 @@ impl From<MaterialTarget> for MaterialTargetFormat {
             MaterialTarget::Matrix2x2(_) => MaterialTargetFormat::Matrix2x2Float,
             MaterialTarget::Matrix4x4(_) => MaterialTargetFormat::Matrix4x4Float,
             MaterialTarget::Sampler(_) => MaterialTargetFormat::Sampler,
-            MaterialTarget::Texture(_) => MaterialTargetFormat::Texture,
+            //MaterialTarget::Texture(_) => MaterialTargetFormat::Texture,
         }
     }
 }
@@ -112,26 +115,9 @@ impl From<&naga::TypeInner> for MaterialTarget {
                     _ => MaterialTarget::None,
                 },
             },
-            TypeInner::Image { .. } => MaterialTarget::Texture("".to_string()),
+            //TypeInner::Image { .. } => MaterialTarget::Texture(&"".to_string().into_bytes()),
             TypeInner::Sampler { comparison } => MaterialTarget::Sampler(*comparison),
             _ => MaterialTarget::None,
-        }
-    }
-}
-
-//
-impl MaterialTarget {
-    pub fn index(target: &naga::TypeInner) -> usize {
-        match target {
-            TypeInner::Scalar { .. } => 0,
-            TypeInner::Vector { .. } => 1,
-            TypeInner::Matrix { .. } => 2,
-            TypeInner::Pointer { .. } => 3,
-            TypeInner::ValuePointer { .. } => 4,
-            TypeInner::Array { .. } => 5,
-            TypeInner::Struct { .. } => 6,
-            TypeInner::Image { .. } => 7,
-            TypeInner::Sampler { .. } => 8,
         }
     }
 }

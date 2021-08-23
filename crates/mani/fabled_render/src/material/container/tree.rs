@@ -1,25 +1,44 @@
-use crate::material::Attributes;
+use crate::material::{Attributes, MaterialBranch, MaterialTargetFormat};
 pub use serde::*;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialTree {
-    pub name: String,
     pub shader: String,
-    pub attributes: [Attributes; 5], // ulid store it an identifier that will identify the id of the attribute.
-                                     //The attribute (Scalar, Vector, Matrix, Pointer, ValuePointer, Array, Struct, Image, Sampler, will have an id if the id and the identifier match then it will be appended)
+    pub branch: Vec<MaterialBranch>,
 }
 
 impl MaterialTree {
-    pub fn new(name: String, shader: String) -> Self {
+    pub fn new(shader: String) -> Self {
         Self {
-            name,
             shader,
-            attributes: [
-                Attributes::Scalar(Vec::new()),
-                Attributes::Vector(Vec::new()),
-                Attributes::Matrix(Vec::new()),
-                Attributes::Image(Vec::new()),
-                Attributes::Sampler(Vec::new()),
+            branch: vec![
+                MaterialBranch::new(Attributes::Scalar),
+                MaterialBranch::new(Attributes::Vector),
+                MaterialBranch::new(Attributes::Matrix),
+                MaterialBranch::new(Attributes::Image),
+                MaterialBranch::new(Attributes::Sampler),
             ],
+        }
+    }
+
+    pub fn get(&self, target: MaterialTargetFormat) -> Option<usize> {
+        match target {
+            MaterialTargetFormat::Undefined => None,
+            MaterialTargetFormat::UnsignedInt
+            | MaterialTargetFormat::SignedInt
+            | MaterialTargetFormat::Float
+            | MaterialTargetFormat::Boolean => Some(0),
+            MaterialTargetFormat::Vector2UnsignedInt
+            | MaterialTargetFormat::Vector2SignedInt
+            | MaterialTargetFormat::Vector2Float
+            | MaterialTargetFormat::Vector2Boolean
+            | MaterialTargetFormat::Vector4UnsignedInt
+            | MaterialTargetFormat::Vector4SignedInt
+            | MaterialTargetFormat::Vector4Float
+            | MaterialTargetFormat::Vector4Boolean => Some(1),
+            MaterialTargetFormat::Matrix2x2Float | MaterialTargetFormat::Matrix4x4Float => Some(2),
+            MaterialTargetFormat::Texture => Some(3),
+            MaterialTargetFormat::Sampler => Some(4),
         }
     }
 }

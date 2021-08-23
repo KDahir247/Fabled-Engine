@@ -1,13 +1,12 @@
 use crate::material::*;
 use crate::shader;
-use serde::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialParser {
     material: MaterialTree,
     //This will have a number of values for each type variable of a material maybe.
     //It will Have an Arena of Type and the Material Tree Attribute Handle will have the handles for the type.
-    map: slotmap::SlotMap<slotmap::DefaultKey, i32>, //This will have a materialNode for the value.
+    map: slotmap::SlotMap<MaterialKey, MaterialNode>,
 }
 
 impl Default for MaterialParser {
@@ -19,7 +18,7 @@ impl Default for MaterialParser {
 impl MaterialParser {
     pub fn new(head: &str) -> Self {
         Self {
-            material: MaterialTree::new(head.to_string(), "material".to_string()),
+            material: MaterialTree::new("material".to_string()),
             map: Default::default(),
         }
     }
@@ -42,12 +41,11 @@ impl MaterialParser {
 
         for (offset, global) in globals
             .iter()
-            .filter(|has_name| has_name.name.is_some())
+            .filter(|has_binding| has_binding.binding.is_some())
             .enumerate()
         {
             let type_var: naga::Type;
 
-            //todo don't like this nested condition. use another method. bitwise operators?.
             if global.ty.index() == 0 {
                 type_var = types.remove(0);
             } else if global.ty.index() >= offset {
@@ -57,23 +55,12 @@ impl MaterialParser {
             }
 
             let node = Self::create_node(global.to_owned(), type_var.inner);
+            let id = self.material.get(node.value.into());
 
-            //todo find a cleaner solution then this.
-            let index = MaterialTarget::index(&node.value_type);
-
-            //This will append the material node to map and put the key in the attributes
-            /*match &mut self.material.attributes[index] {
-                Attributes::Scalar(scalar) => scalar.push(node),
-                Attributes::Vector(vector) => vector.push(node),
-                Attributes::Matrix(matrix) => matrix.push(node),
-                Attributes::Pointer(pointer) => pointer.push(node.into()),
-                Attributes::ValuePointer(val_pointer) => val_pointer.push(node.into()),
-                Attributes::Array(array) => array.push(node.into()),
-                Attributes::Struct(structure) => structure.push(node.into()),
-                Attributes::Image(img) => img.push(node),
-                Attributes::Sampler(sampler) => sampler.push(node),
-                _ => {}
-            }*/
+            if let Some(id) = id {
+                let material_key = self.map.insert(node);
+                self.material.branch[id].keys.push(material_key);
+            }
         }
 
         let pretty = ron::ser::PrettyConfig::new()
@@ -91,16 +78,14 @@ impl MaterialParser {
         let node_type = inner;
 
         let resource = global_var.binding;
-
+        println!("{:?}", resource);
         let (group, binding) = match resource {
             None => (None, None),
             Some(resource) => (Some(resource.group), Some(resource.binding)),
         };
 
         MaterialNode {
-            value_name: global_var.name.unwrap(),
             value: MaterialTarget::from(&node_type),
-            value_type: node_type,
             value_group: group,
             value_binding: binding,
         }

@@ -9,7 +9,7 @@ mod model;
 mod vertex;
 
 #[cfg(test)]
-mod data_alignment_test {
+mod data_test {
     use crate::mesh::{Mesh, Model, Vertex};
 
     #[test]

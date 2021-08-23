@@ -1,11 +1,13 @@
-use crate::material::MaterialKey;
-use serde::*;
+use serde::{Deserialize, Serialize};
 
+//todo future support for array and struct types
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Attributes {
-    Scalar(Vec<MaterialKey>),
-    Vector(Vec<MaterialKey>),
-    Matrix(Vec<MaterialKey>),
-    Image(Vec<MaterialKey>),
-    Sampler(Vec<MaterialKey>),
+    Scalar,
+    Vector,
+    Matrix,
+    Image,
+    Sampler,
+    //Array,
+    //Struct
 }
