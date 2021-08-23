@@ -37,24 +37,14 @@ impl MaterialParser {
 
         let globals = global_variables.into_inner();
 
-        let mut types = types.into_inner();
+        for global in globals.iter().filter(|glob_var| glob_var.binding.is_some()) {
+            println!("{} {}", types.len(), global.ty.index() - 1);
 
-        for (offset, global) in globals
-            .iter()
-            .filter(|has_binding| has_binding.binding.is_some())
-            .enumerate()
-        {
-            let type_var: naga::Type;
+            let type_var = types.try_get(global.ty).unwrap();
 
-            if global.ty.index() == 0 {
-                type_var = types.remove(0);
-            } else if global.ty.index() >= offset {
-                type_var = types.remove(global.ty.index() - offset);
-            } else {
-                type_var = types.remove(global.ty.index());
-            }
+            println!("{:?}", type_var.name);
 
-            let node = Self::create_node(global.to_owned(), type_var.inner);
+            let node = Self::create_node(global.to_owned(), &type_var.inner);
             let id = self.material.get(node.value.into());
 
             if let Some(id) = id {
@@ -74,7 +64,7 @@ impl MaterialParser {
         Ok(ron_material)
     }
 
-    fn create_node(global_var: naga::GlobalVariable, inner: naga::TypeInner) -> MaterialNode {
+    fn create_node(global_var: naga::GlobalVariable, inner: &naga::TypeInner) -> MaterialNode {
         let node_type = inner;
 
         let resource = global_var.binding;
@@ -85,7 +75,7 @@ impl MaterialParser {
         };
 
         MaterialNode {
-            value: MaterialTarget::from(&node_type),
+            value: MaterialTarget::from(node_type),
             value_group: group,
             value_binding: binding,
         }
