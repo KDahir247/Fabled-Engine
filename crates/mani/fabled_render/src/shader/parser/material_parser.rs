@@ -1,6 +1,5 @@
 use crate::material::*;
 use crate::shader;
-use std::ffi::OsStr;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialParser {

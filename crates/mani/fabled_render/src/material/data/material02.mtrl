@@ -39,8 +39,8 @@ WGSL TREE:
         ),// [0]
         (
             value: Some((
-                value_group: None,
-                value_binding: None,
+                value_group: Some(0),
+                value_binding: Some(0),
                 value: Vec4Float((
                     0.0,
                     0.0,
@@ -52,8 +52,8 @@ WGSL TREE:
         ),// [1]
         (
             value: Some((
-                value_group: None,
-                value_binding: None,
+                value_group: Some(0),
+                value_binding: Some(0),
                 value: Matrix4x4((
                     0.0,
                     0.0,
@@ -77,8 +77,8 @@ WGSL TREE:
         ),// [2]
         (
             value: Some((
-                value_group: None,
-                value_binding: None,
+                value_group: Some(0),
+                value_binding: Some(0),
                 value: Matrix4x4((
                     0.0,
                     0.0,
@@ -102,8 +102,8 @@ WGSL TREE:
         ),// [3]
         (
             value: Some((
-                value_group: None,
-                value_binding: None,
+                value_group: Some(0),
+                value_binding: Some(0),
                 value: Matrix4x4((
                     0.0,
                     0.0,
@@ -127,8 +127,8 @@ WGSL TREE:
         ),// [4]
         (
             value: Some((
-                value_group: None,
-                value_binding: None,
+                value_group: Some(0),
+                value_binding: Some(0),
                 value: Matrix4x4((
                     0.0,
                     0.0,
