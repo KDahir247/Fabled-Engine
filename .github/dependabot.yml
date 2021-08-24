@@ -13,6 +13,8 @@ updates:
     - dependency-name: naga
       versions:
       - 0.5.0 
+    reviewers:
+    - KDahir247
   
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -20,4 +22,5 @@ updates:
       interval: "daily"
     labels:
       - "dependences"
-  
+   reviewers:
+  - KDahir247
