@@ -18,7 +18,12 @@ impl Material {
     ) -> Self {
         let color_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Material Color Buffer"),
-            contents: bytemuck::cast_slice(&[material_color]),
+            contents: bytemuck::cast_slice(&[
+                material_color.ambient_color,
+                material_color.diffuse_color,
+                material_color.specular_color,
+                material_color.factor.extend(1.0),
+            ]),
             usage: wgpu::BufferUsage::UNIFORM,
         });
 

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialBranch {
     pub attribute: Attributes,
-    pub keys: Vec<MaterialKey>, //maybe hashmap ?
+    pub keys: Vec<MaterialKey>,
 }
 
 impl MaterialBranch {

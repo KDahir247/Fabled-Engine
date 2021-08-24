@@ -87,7 +87,7 @@ impl MaterialParser {
         }
 
         let pretty = ron::ser::PrettyConfig::new()
-            .with_separate_tuple_members(true)
+            .with_separate_tuple_members(false)
             .with_decimal_floats(true)
             .with_depth_limit(5)
             .with_enumerate_arrays(true);

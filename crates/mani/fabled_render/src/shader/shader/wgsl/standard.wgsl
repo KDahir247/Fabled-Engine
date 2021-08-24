@@ -132,6 +132,7 @@ struct MaterialColor {
     specular : vec4<f32>;
 
     factor : vec3<f32>;
+    __padding__ : f32;
 
 };
 
@@ -194,5 +195,5 @@ fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
 
     let a = calculate_smooth_attenuation(in.world_position, light.position);
 
-   return vec4<f32>(result.xyz * object_color.xyz , 1.0);
+   return vec4<f32>(result.xyz * object_color.xyz, 1.0);
 }

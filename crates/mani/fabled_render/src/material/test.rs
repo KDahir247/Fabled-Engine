@@ -1,5 +1,3 @@
-pub struct Material {}
-
 //testing struct
 #[allow(dead_code)]
 pub struct PrototypeMaterial {

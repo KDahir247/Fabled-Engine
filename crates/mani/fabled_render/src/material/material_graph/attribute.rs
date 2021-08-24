@@ -9,5 +9,4 @@ pub enum Attributes {
     Image,
     Sampler,
     //Array,
-    //Struct
 }

@@ -1,4 +1,4 @@
-use crate::material::MaterialTargetFormat;
+use crate::material::{MaterialTargetFormat, TypeFormat};
 use naga::{ScalarKind, TypeInner, VectorSize};
 use serde::*;
 
@@ -13,7 +13,7 @@ impl From<EmptyTarget> for MaterialTargetFormat {
     }
 }
 
-//todo future support for array and struct types.
+//todo future support for array and all other variable types in TypeInner.
 #[repr(C)]
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum MaterialTarget {
@@ -41,6 +41,7 @@ pub enum MaterialTarget {
     Sampler(bool), // 1 byte
 
                    //UnAligned
+                   // Texture should store an Option of Tiling and Offset and a way to reference the texture.
                    //todo replay with a POD (Plain old data type) that is aligned to the power of two. rather than a string.
                    //todo got to find a better identifier for this type.
                    //Texture(&'static [u8]), //), // 24 bytes
@@ -66,6 +67,33 @@ impl From<MaterialTarget> for MaterialTargetFormat {
             MaterialTarget::Matrix4x4(_) => MaterialTargetFormat::Matrix4x4Float,
             MaterialTarget::Sampler(_) => MaterialTargetFormat::Sampler,
             //MaterialTarget::Texture(_) => MaterialTargetFormat::Texture,
+        }
+    }
+}
+
+impl From<MaterialTarget> for TypeFormat {
+    fn from(material_type: MaterialTarget) -> Self {
+        //Convert material variable type with data to variable primitive type
+        match material_type {
+            MaterialTarget::None | MaterialTarget::Sampler(_) => TypeFormat::Undefined,
+
+            MaterialTarget::Uint(_) | MaterialTarget::Vec2UInt(_) | MaterialTarget::Vec4UInt(_) => {
+                TypeFormat::Uint32
+            }
+
+            MaterialTarget::Sint(_) | MaterialTarget::Vec2SInt(_) | MaterialTarget::Vec4SInt(_) => {
+                TypeFormat::SInt32
+            }
+
+            MaterialTarget::Float(_)
+            | MaterialTarget::Vec2Float(_)
+            | MaterialTarget::Vec4Float(_)
+            | MaterialTarget::Matrix2x2(_)
+            | MaterialTarget::Matrix4x4(_) => TypeFormat::Float32,
+
+            MaterialTarget::Bool(_)
+            | MaterialTarget::Vec2Boolean(_)
+            | MaterialTarget::Vec4Boolean(_) => TypeFormat::Boolean,
         }
     }
 }

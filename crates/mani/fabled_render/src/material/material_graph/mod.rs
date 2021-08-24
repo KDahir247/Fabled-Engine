@@ -1,20 +1,20 @@
 mod attribute;
 mod branch;
 mod key;
-mod material;
 mod node;
 mod target;
 mod target_format;
 mod tree;
+mod type_format;
 
 pub use attribute::*;
 pub use branch::*;
 pub use key::*;
-pub use material::*;
 pub use node::*;
 pub use target::*;
 pub use target_format::*;
 pub use tree::*;
+pub use type_format::*;
 
 #[cfg(test)]
 mod data_size_test {
