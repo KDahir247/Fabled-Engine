@@ -47,7 +47,7 @@ pub struct CameraRaw {
 }
 
 pub struct CameraUniform {
-    pub raw: CameraRaw, // internal camera matrix container
+    pub raw: CameraRaw, // internal camera matrix material_graph
     pub buffer: wgpu::Buffer,
     pub group: wgpu::BindGroup,
     pub group_layout: wgpu::BindGroupLayout,

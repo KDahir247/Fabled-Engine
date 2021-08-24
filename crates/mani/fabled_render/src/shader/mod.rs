@@ -6,6 +6,7 @@ mod shader_validator;
 mod validation_rule;
 
 use crate::shader;
+pub use parser::*;
 pub use validation_rule::*;
 
 pub fn init_shader_test_env() {

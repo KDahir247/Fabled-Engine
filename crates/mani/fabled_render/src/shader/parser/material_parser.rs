@@ -1,18 +1,17 @@
 use crate::material::*;
 use crate::shader;
+use std::ops::IndexMut;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialParser {
     material: MaterialTree,
-    //This will have a number of values for each type variable of a material maybe.
-    //It will Have an Arena of Type and the Material Tree Attribute Handle will have the handles for the type.
     map: slotmap::SlotMap<MaterialKey, MaterialNode>,
 }
 
 impl Default for MaterialParser {
     fn default() -> Self {
         Self {
-            material: MaterialTree::new("".to_string()),
+            material: MaterialTree::new(),
             map: Default::default(),
         }
     }
@@ -23,13 +22,6 @@ impl MaterialParser {
         &mut self,
         path: P,
     ) -> anyhow::Result<String> {
-        let name = match path.as_ref().file_name() {
-            None => "shader",
-            Some(file_name) => file_name.to_str().unwrap_or("shader"),
-        };
-
-        self.material.shader = name.to_string();
-
         let shader = shader::parser::ShaderParser::parse(path)?;
 
         let naga::Module {
@@ -44,9 +36,7 @@ impl MaterialParser {
             let type_var = types.try_get(global.ty).unwrap();
 
             if let naga::TypeInner::Struct {
-                top_level,
-                members,
-                span,
+                top_level, members, ..
             } = &type_var.inner
             {
                 if *top_level {
@@ -56,19 +46,18 @@ impl MaterialParser {
                     let (group, binding) = (res_binding.group, res_binding.binding);
 
                     for member in members {
-                        if let Some(ty) = types.try_get(member.ty) {
-                            //we will append it the the key node.
+                        if let Some(member_ty) = types.try_get(member.ty) {
                             let material_node = MaterialNode {
                                 value_group: Some(group),
                                 value_binding: Some(binding),
-                                value: MaterialTarget::from(&ty.inner),
+                                value: MaterialTarget::from(&member_ty.inner),
                             };
 
                             let id = self.material.get(material_node.value.into());
 
                             if let Some(id) = id {
                                 let material_key = self.map.insert(material_node);
-                                self.material.branch[id].keys.push(material_key);
+                                self.material.index_mut(id).keys.push(material_key);
                             }
                         }
                     }
@@ -78,12 +67,22 @@ impl MaterialParser {
             }
 
             // Handle case where the binding variable in the shader is a sampler or a texture.
-            let node = Self::create_node(global.to_owned(), &type_var.inner);
-            let id = self.material.get(node.value.into());
+            let (group, binding) = match &global.binding {
+                None => (None, None),
+                Some(details) => (Some(details.group), Some(details.binding)),
+            };
+
+            let material_node = MaterialNode {
+                value_group: group,
+                value_binding: binding,
+                value: MaterialTarget::from(&type_var.inner),
+            };
+
+            let id = self.material.get(material_node.value.into());
 
             if let Some(id) = id {
-                let material_key = self.map.insert(node);
-                self.material.branch[id].keys.push(material_key);
+                let material_key = self.map.insert(material_node);
+                self.material.index_mut(id).keys.push(material_key);
             }
         }
 
@@ -98,24 +97,34 @@ impl MaterialParser {
         Ok(ron_material)
     }
 
-    fn create_node(global_var: naga::GlobalVariable, inner: &naga::TypeInner) -> MaterialNode {
-        let node_type = inner;
+    pub fn get_group(&self, index: u32) -> Vec<(MaterialKey, MaterialNode)> {
+        let mut key_value_collection: Vec<(MaterialKey, MaterialNode)> = Vec::new();
 
-        let resource = global_var.binding;
-        let (group, binding) = match resource {
-            None => (None, None),
-            Some(resource) => (Some(resource.group), Some(resource.binding)),
-        };
-
-        MaterialNode {
-            value: MaterialTarget::from(node_type),
-            value_group: group,
-            value_binding: binding,
+        for key_value_pair in self
+            .map
+            .iter()
+            .filter(|key_value| key_value.1.value_group.eq(&Some(index)))
+        {
+            key_value_collection.push((key_value_pair.0, *key_value_pair.1));
         }
+
+        key_value_collection
+    }
+
+    pub fn get_binding(&self, index: u32) -> Vec<(MaterialKey, MaterialNode)> {
+        let mut key_value_collection: Vec<(MaterialKey, MaterialNode)> = Vec::new();
+
+        for key_value_pair in self
+            .map
+            .iter()
+            .filter(|key_value| key_value.1.value_binding.eq(&Some(index)))
+        {
+            key_value_collection.push((key_value_pair.0, *key_value_pair.1))
+        }
+
+        key_value_collection
     }
 }
-
-// ------------- Test --------------
 
 #[cfg(test)]
 mod material_test {
@@ -127,15 +136,20 @@ mod material_test {
     fn display_material() {
         init_shader_test_env();
 
+        // ----------------------- WEB GPU -----------------------
+
         let wgsl_path = std::env::var("WGSL_FILE").unwrap();
         let wgsl_path = std::path::Path::new(wgsl_path.as_str());
 
         let mut material_wgsl_parser = MaterialParser::default();
+
         let wgsl_tree = material_wgsl_parser
             .create_material_hierarchy(wgsl_path)
             .unwrap();
 
         println!("WGSL TREE:\n{}\n\n", wgsl_tree);
+
+        // ----------------------- SPIR-V -----------------------
 
         let spv_path = std::env::var("SPV_FILE").unwrap();
         let spv_path = std::path::Path::new(spv_path.as_str());
@@ -147,15 +161,20 @@ mod material_test {
             .unwrap();
         println!("SPV TREE:\n{}\n\n", spv_tree);
 
+        // ----------------------- GLSL Vertex -----------------------
+
         let vertex_path = std::env::var("VERT_FILE").unwrap();
         let vertex_path = std::path::Path::new(vertex_path.as_str());
 
         let mut material_vert_parser = MaterialParser::default();
+
         let vertex_tree = material_vert_parser
             .create_material_hierarchy(vertex_path)
             .unwrap();
 
         println!("GLSL VERTEX TREE:\n{}\n\n", vertex_tree);
+
+        // ----------------------- GLSL Fragment -----------------------
 
         let frag_path = std::env::var("FRAG_FILE").unwrap();
         let frag_path = std::path::Path::new(frag_path.as_str());
@@ -168,6 +187,8 @@ mod material_test {
 
         println!("GLSL FRAGMENT TREE:\n{}\n\n", fragment_tree);
 
+        // ----------------------- GLSL Compute -----------------------
+
         let compute_path = std::env::var("COMP_FILE").unwrap();
         let compute_path = std::path::Path::new(compute_path.as_str());
 
@@ -178,5 +199,49 @@ mod material_test {
             .unwrap();
 
         println!("GLSL COMPUTE TREE:\n{}\n\n", compute_tree);
+    }
+
+    #[test]
+    fn display_group() {
+        init_shader_test_env();
+
+        let vertex_path = std::env::var("VERT_FILE").unwrap();
+        let vertex_path = std::path::Path::new(vertex_path.as_str());
+
+        let mut material_parser = MaterialParser::default();
+
+        let vertex_tree = material_parser
+            .create_material_hierarchy(vertex_path)
+            .unwrap();
+
+        println!("GLSL VERTEX TREE:\n{}\n\n", vertex_tree);
+
+        let struct_members = material_parser.get_group(0);
+
+        for (index, member) in struct_members.iter().enumerate() {
+            println!("{} variable in struct is {:?}", index, member.1);
+        }
+    }
+
+    #[test]
+    fn print_binding() {
+        init_shader_test_env();
+
+        let vertex_path = std::env::var("VERT_FILE").unwrap();
+        let vertex_path = std::path::Path::new(vertex_path.as_str());
+
+        let mut material_parser = MaterialParser::default();
+
+        let vertex_tree = material_parser
+            .create_material_hierarchy(vertex_path)
+            .unwrap();
+
+        println!("GLSL VERTEX TREE:\n{}\n\n", vertex_tree);
+
+        let binding_members = material_parser.get_binding(0);
+
+        for binding in binding_members.iter() {
+            println!("{:?}", binding.1);
+        }
     }
 }

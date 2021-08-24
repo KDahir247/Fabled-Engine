@@ -32,6 +32,7 @@ impl ShaderParser {
                 let result = naga::front::spv::parse_u8_slice(&input, &options);
                 result?
             }
+
             stage @ "vert" | stage @ "frag" | stage @ "comp" => {
                 let input = std::fs::read_to_string(file)?;
                 let mut entry_points = naga::FastHashMap::default();

@@ -1,5 +1,5 @@
-mod material_parser;
-mod shader_parser;
+pub mod material_parser;
+pub mod shader_parser;
 
 pub use material_parser::*;
 pub use shader_parser::*;

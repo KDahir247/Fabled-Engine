@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-//todo future support for array and struct types
+//todo future support for array
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Attributes {
     Scalar,

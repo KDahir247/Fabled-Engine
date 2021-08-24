@@ -2,7 +2,6 @@ use crate::material::MaterialTargetFormat;
 use naga::{ScalarKind, TypeInner, VectorSize};
 use serde::*;
 
-//todo future support for array and struct types.
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum EmptyTarget {
     None,
@@ -14,6 +13,7 @@ impl From<EmptyTarget> for MaterialTargetFormat {
     }
 }
 
+//todo future support for array and struct types.
 #[repr(C)]
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum MaterialTarget {

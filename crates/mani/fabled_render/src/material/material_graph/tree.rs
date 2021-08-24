@@ -1,16 +1,30 @@
 use crate::material::{Attributes, MaterialBranch, MaterialTargetFormat};
 pub use serde::*;
+use std::ops::{Index, IndexMut};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialTree {
-    pub shader: String,
-    pub branch: Vec<MaterialBranch>,
+    //shader: String,
+    branch: Vec<MaterialBranch>,
+}
+
+impl Index<usize> for MaterialTree {
+    type Output = MaterialBranch;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.branch[index]
+    }
+}
+
+impl IndexMut<usize> for MaterialTree {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.branch[index]
+    }
 }
 
 impl MaterialTree {
-    pub fn new(shader: String) -> Self {
+    pub fn new() -> Self {
         Self {
-            shader,
             branch: vec![
                 MaterialBranch::new(Attributes::Scalar),
                 MaterialBranch::new(Attributes::Vector),
