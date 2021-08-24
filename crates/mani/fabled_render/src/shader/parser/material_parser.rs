@@ -224,7 +224,7 @@ mod material_test {
     }
 
     #[test]
-    fn print_binding() {
+    fn display_binding() {
         init_shader_test_env();
 
         let vertex_path = std::env::var("VERT_FILE").unwrap();
