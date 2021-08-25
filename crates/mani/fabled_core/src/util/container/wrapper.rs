@@ -39,7 +39,9 @@ mod wrapper_test {
         let data = wrapper_struct.get_bytes();
         println!("{:?}", data);
 
-        let data: &[u8] = bytemuck::cast_slice(&[10.0, 5.0, 3.0, 1.0]);
+        let a = (10.0, 5.0, 3.0, 1.0);
+        let data: Vec<u8> = bytemuck::cast_slice(&[a.0, a.1, a.2, a.3]).to_owned();
+
         println!("{:?}", data);
     }
 
