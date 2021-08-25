@@ -1,4 +1,4 @@
-use crate::material::{MaterialTargetFormat, TypeFormat};
+use crate::material::{MaterialTargetFormat, Wrapper};
 use naga::{ScalarKind, TypeInner, VectorSize};
 use serde::*;
 
@@ -13,38 +13,36 @@ impl From<EmptyTarget> for MaterialTargetFormat {
     }
 }
 
+#[rustfmt::skip]
 //todo future support for array and all other variable types in TypeInner.
 #[repr(C)]
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum MaterialTarget {
     None,
     //Aligned
-    Uint(u32),
-    Sint(i32),
-    Float(f32),
-    Bool(bool),
+    Uint(Wrapper<u32>),
+    Sint(Wrapper<i32>),
+    Float(Wrapper<f32>),
 
-    Vec2UInt([u32; 2]),
-    Vec2SInt([i32; 2]),
-    Vec2Float([f32; 2]),
-    Vec2Boolean([bool; 2]),
+    Vec2UInt(Wrapper<[u32; 2]>),
+    Vec2SInt(Wrapper<[i32; 2]>),
+    Vec2Float(Wrapper<[f32; 2]>),
 
-    Vec4UInt([u32; 4]),
-    Vec4SInt([i32; 4]),
-    Vec4Float([f32; 4]),
-    Vec4Boolean([bool; 4]),
+    Vec4UInt(Wrapper<[u32; 4]>),
+    Vec4SInt(Wrapper<[i32; 4]>),
+    Vec4Float(Wrapper<[f32; 4]>),
 
     //Column Major Matrix
-    Matrix2x2([f32; 4]),
-    Matrix4x4([f32; 16]),
+    Matrix2x2(Wrapper<[f32; 4]>),
+    Matrix4x4(Wrapper<[f32; 16]>),
 
-    Sampler(bool), // 1 byte
+    Sampler(Wrapper<u8>), // 1 byte
 
-                   //UnAligned
-                   // Texture should store an Option of Tiling and Offset and a way to reference the texture.
-                   //todo replay with a POD (Plain old data type) that is aligned to the power of two. rather than a string.
-                   //todo got to find a better identifier for this type.
-                   //Texture(&'static [u8]), //), // 24 bytes
+    //UnAligned
+    // Texture should store an Option of Tiling and Offset and a way to reference the texture.
+    //todo replay with a POD (Plain old data type) that is aligned to the power of two. rather than a string.
+    //todo got to find a better identifier for this type.
+    //Texture(&'static [u8]), //), // 24 bytes
 }
 
 impl From<MaterialTarget> for MaterialTargetFormat {
@@ -54,15 +52,12 @@ impl From<MaterialTarget> for MaterialTargetFormat {
             MaterialTarget::Uint(_) => MaterialTargetFormat::UnsignedInt,
             MaterialTarget::Sint(_) => MaterialTargetFormat::SignedInt,
             MaterialTarget::Float(_) => MaterialTargetFormat::Float,
-            MaterialTarget::Bool(_) => MaterialTargetFormat::Boolean,
             MaterialTarget::Vec2UInt(_) => MaterialTargetFormat::Vector2UnsignedInt,
             MaterialTarget::Vec2SInt(_) => MaterialTargetFormat::Vector2SignedInt,
             MaterialTarget::Vec2Float(_) => MaterialTargetFormat::Vector2Float,
-            MaterialTarget::Vec2Boolean(_) => MaterialTargetFormat::Vector2Boolean,
             MaterialTarget::Vec4UInt(_) => MaterialTargetFormat::Vector4UnsignedInt,
             MaterialTarget::Vec4SInt(_) => MaterialTargetFormat::Vector4SignedInt,
             MaterialTarget::Vec4Float(_) => MaterialTargetFormat::Vector4Float,
-            MaterialTarget::Vec4Boolean(_) => MaterialTargetFormat::Vector4Boolean,
             MaterialTarget::Matrix2x2(_) => MaterialTargetFormat::Matrix2x2Float,
             MaterialTarget::Matrix4x4(_) => MaterialTargetFormat::Matrix4x4Float,
             MaterialTarget::Sampler(_) => MaterialTargetFormat::Sampler,
@@ -71,80 +66,55 @@ impl From<MaterialTarget> for MaterialTargetFormat {
     }
 }
 
-impl From<MaterialTarget> for TypeFormat {
-    fn from(material_type: MaterialTarget) -> Self {
-        //Convert material variable type with data to variable primitive type
-        match material_type {
-            MaterialTarget::None | MaterialTarget::Sampler(_) => TypeFormat::Undefined,
-
-            MaterialTarget::Uint(_) | MaterialTarget::Vec2UInt(_) | MaterialTarget::Vec4UInt(_) => {
-                TypeFormat::Uint32
-            }
-
-            MaterialTarget::Sint(_) | MaterialTarget::Vec2SInt(_) | MaterialTarget::Vec4SInt(_) => {
-                TypeFormat::SInt32
-            }
-
-            MaterialTarget::Float(_)
-            | MaterialTarget::Vec2Float(_)
-            | MaterialTarget::Vec4Float(_)
-            | MaterialTarget::Matrix2x2(_)
-            | MaterialTarget::Matrix4x4(_) => TypeFormat::Float32,
-
-            MaterialTarget::Bool(_)
-            | MaterialTarget::Vec2Boolean(_)
-            | MaterialTarget::Vec4Boolean(_) => TypeFormat::Boolean,
-        }
-    }
-}
-
 impl From<&naga::TypeInner> for MaterialTarget {
     fn from(type_var: &naga::TypeInner) -> Self {
         match type_var {
             TypeInner::Scalar { kind, .. } => match kind {
-                ScalarKind::Sint => MaterialTarget::Sint(0),
-                ScalarKind::Uint => MaterialTarget::Uint(0),
-                ScalarKind::Float => MaterialTarget::Float(0.0),
-                ScalarKind::Bool => MaterialTarget::Bool(false),
+                ScalarKind::Sint => MaterialTarget::Sint(Wrapper::new(0)),
+                ScalarKind::Uint => MaterialTarget::Uint(Wrapper::new(0)),
+                ScalarKind::Float => MaterialTarget::Float(Wrapper::new(0.0)),
+                _ => MaterialTarget::None,
             },
             TypeInner::Vector { size, kind, .. } => match size {
                 VectorSize::Bi => match kind {
-                    ScalarKind::Sint => MaterialTarget::Vec2SInt([0i32; 2]),
-                    ScalarKind::Uint => MaterialTarget::Vec2UInt([0u32; 2]),
-                    ScalarKind::Float => MaterialTarget::Vec2Float([0.0f32; 2]),
-                    ScalarKind::Bool => MaterialTarget::Vec2Boolean([false; 2]),
+                    ScalarKind::Sint => MaterialTarget::Vec2SInt(Wrapper::new([0i32; 2])),
+                    ScalarKind::Uint => MaterialTarget::Vec2UInt(Wrapper::new([0u32; 2])),
+                    ScalarKind::Float => MaterialTarget::Vec2Float(Wrapper::new([0.0f32; 2])),
+                    _ => MaterialTarget::None,
                 },
                 VectorSize::Tri => match kind {
                     //Aligned data only. Any Tri-Vector will result to a Tri-Vector that is extend by 1 to a Quad-Vector.
-                    ScalarKind::Sint => MaterialTarget::Vec4SInt([0i32; 4]),
-                    ScalarKind::Uint => MaterialTarget::Vec4UInt([0u32; 4]),
-                    ScalarKind::Float => MaterialTarget::Vec4Float([0.0f32; 4]),
-                    ScalarKind::Bool => MaterialTarget::Vec4Boolean([false; 4]),
+                    ScalarKind::Sint => MaterialTarget::Vec4SInt(Wrapper::new([0i32; 4])),
+                    ScalarKind::Uint => MaterialTarget::Vec4UInt(Wrapper::new([0u32; 4])),
+                    ScalarKind::Float => MaterialTarget::Vec4Float(Wrapper::new([0.0f32; 4])),
+                    _ => MaterialTarget::None,
                 },
                 VectorSize::Quad => match kind {
-                    ScalarKind::Sint => MaterialTarget::Vec4SInt([0i32; 4]),
-                    ScalarKind::Uint => MaterialTarget::Vec4UInt([0u32; 4]),
-                    ScalarKind::Float => MaterialTarget::Vec4Float([0.0f32; 4]),
-                    ScalarKind::Bool => MaterialTarget::Vec4Boolean([false; 4]),
+                    ScalarKind::Sint => MaterialTarget::Vec4SInt(Wrapper::new([0i32; 4])),
+                    ScalarKind::Uint => MaterialTarget::Vec4UInt(Wrapper::new([0u32; 4])),
+                    ScalarKind::Float => MaterialTarget::Vec4Float(Wrapper::new([0.0f32; 4])),
+                    _ => MaterialTarget::None,
                 },
             },
             TypeInner::Matrix { columns, rows, .. } => match columns {
                 VectorSize::Bi => match rows {
-                    VectorSize::Bi => MaterialTarget::Matrix2x2([0.0f32; 4]),
+                    VectorSize::Bi => MaterialTarget::Matrix2x2(Wrapper::new([0.0f32; 4])),
                     _ => MaterialTarget::None,
                 },
                 VectorSize::Tri => match rows {
                     //Aligned data only. Any Tri-Matrix will result to a 4x4 Matrix where the last row and column are zero-ed out
-                    VectorSize::Tri => MaterialTarget::Matrix4x4([0.0f32; 16]),
+                    VectorSize::Tri => MaterialTarget::Matrix4x4(Wrapper::new([0.0f32; 16])),
                     _ => MaterialTarget::None,
                 },
                 VectorSize::Quad => match rows {
-                    VectorSize::Quad => MaterialTarget::Matrix4x4([0.0f32; 16]),
+                    VectorSize::Quad => MaterialTarget::Matrix4x4(Wrapper::new([0.0f32; 16])),
                     _ => MaterialTarget::None,
                 },
             },
             //TypeInner::Image { .. } => MaterialTarget::Texture(&"".to_string().into_bytes()),
-            TypeInner::Sampler { comparison } => MaterialTarget::Sampler(*comparison),
+            TypeInner::Sampler { comparison } => {
+                MaterialTarget::Sampler(Wrapper::new(*comparison as u8))
+            }
             _ => MaterialTarget::None,
         }
     }

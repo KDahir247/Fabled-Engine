@@ -7,3 +7,5 @@ edition = "2018"
 
 [dependencies]
 num_cpus = "1.13.0"
+serde = {version = "1.0.126", features = ["derive"]}
+bytemuck = {version = "1.7.0", features = ["derive"]}

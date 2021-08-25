@@ -50,10 +50,10 @@ impl MaterialParser {
                             let material_node = MaterialNode {
                                 value_group: Some(group),
                                 value_binding: Some(binding),
-                                value: MaterialTarget::from(&member_ty.inner),
+                                ty: MaterialTarget::from(&member_ty.inner),
                             };
 
-                            let id = self.material.get(material_node.value.into());
+                            let id = self.material.get(material_node.ty.into());
 
                             if let Some(id) = id {
                                 let material_key = self.map.insert(material_node);
@@ -75,10 +75,10 @@ impl MaterialParser {
             let material_node = MaterialNode {
                 value_group: group,
                 value_binding: binding,
-                value: MaterialTarget::from(&type_var.inner),
+                ty: MaterialTarget::from(&type_var.inner),
             };
 
-            let id = self.material.get(material_node.value.into());
+            let id = self.material.get(material_node.ty.into());
 
             if let Some(id) = id {
                 let material_key = self.map.insert(material_node);

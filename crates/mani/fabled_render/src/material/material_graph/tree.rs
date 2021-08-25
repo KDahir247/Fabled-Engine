@@ -22,6 +22,12 @@ impl IndexMut<usize> for MaterialTree {
     }
 }
 
+impl Default for MaterialTree {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MaterialTree {
     pub fn new() -> Self {
         Self {

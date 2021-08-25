@@ -1,12 +1,3 @@
-mod attribute;
-mod branch;
-mod key;
-mod node;
-mod target;
-mod target_format;
-mod tree;
-mod type_format;
-
 pub use attribute::*;
 pub use branch::*;
 pub use key::*;
@@ -14,7 +5,16 @@ pub use node::*;
 pub use target::*;
 pub use target_format::*;
 pub use tree::*;
-pub use type_format::*;
+
+pub use fabled_core::util::container::wrapper::Wrapper;
+
+mod attribute;
+mod branch;
+mod key;
+mod node;
+mod target;
+mod target_format;
+mod tree;
 
 #[cfg(test)]
 mod data_size_test {
