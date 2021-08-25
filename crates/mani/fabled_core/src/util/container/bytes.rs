@@ -35,6 +35,11 @@ impl<Q: Primitive, R: Primitive> Bytes2Array<Q, R> {
 
         prepend
     }
+
+    pub fn retrieve_type<T: bytemuck::Pod>(&self, bytes: Vec<u8>) -> T {
+        let data: &T = bytemuck::from_bytes(&bytes);
+        data.to_owned()
+    }
 }
 
 pub struct Bytes3Array<Q: Primitive, R: Primitive, S: Primitive>(Buffer3<Q, R, S>);
@@ -113,7 +118,7 @@ pub trait Primitive = bytemuck::Pod + bytemuck::Zeroable + Copy + Clone;
 mod test {
     use crate::util::container::bytes::{Bytes2Array, BytesArray};
 
-    #[derive(Default, bytemuck::Zeroable, bytemuck::Pod, Copy, Clone)]
+    #[derive(Default, Debug, bytemuck::Zeroable, bytemuck::Pod, Copy, Clone)]
     #[repr(C)]
     struct MockStruct {
         pub arg0: [f32; 3],
@@ -121,7 +126,7 @@ mod test {
         pub arg2: [f32; 2],
     }
 
-    #[derive(Default, bytemuck::Zeroable, bytemuck::Pod, Copy, Clone)]
+    #[derive(Default, Debug, bytemuck::Zeroable, bytemuck::Pod, Copy, Clone)]
     #[repr(C)]
     struct MockStruct1 {
         pub arg0: [f32; 3],
@@ -156,5 +161,13 @@ mod test {
         assert_eq!(byte_buffer01.len(), byte_buffer02.len());
 
         assert!(byte_buffer01.eq(&byte_buffer02));
+
+        let struct_data: MockStruct1 = byte_array.retrieve_type::<MockStruct1>(byte_buffer02);
+
+        //We can convert on struct to another. We can populate the data from the struct with the data passed in the Byte_Array.
+        println!(
+            "Converted MockStruct {:?}\n to  MockStruct1 {:?}",
+            mock_missing_arg3, struct_data
+        );
     }
 }
