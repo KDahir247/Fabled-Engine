@@ -10,18 +10,23 @@ type Buffer4<T, U, V, W> = (T, U, V, W);
 type Buffer5<T, U, V, W, X> = (T, U, V, W, X);
 
 #[derive(Copy, Clone)]
-pub struct BytesArray<Q: Primitive>(pub Q);
+pub struct BytesArray<Q: bytemuck::Pod + bytemuck::Zeroable>(pub Q);
 
-impl<Q: Primitive> BytesArray<Q> {
+impl<Q: bytemuck::Pod + bytemuck::Zeroable> BytesArray<Q> {
     pub fn retrieve_bytes(&self) -> Vec<u8> {
         let buf = vec![self.0];
         bytemuck::cast_slice(&buf).to_owned()
     }
 }
 
-pub struct Bytes2Array<Q: Primitive, R: Primitive>(Q, R);
+pub struct Bytes2Array<Q: bytemuck::Pod + bytemuck::Zeroable, R: bytemuck::Pod + bytemuck::Zeroable>(
+    Q,
+    R,
+);
 
-impl<Q: Primitive, R: Primitive> Bytes2Array<Q, R> {
+impl<Q: bytemuck::Pod + bytemuck::Zeroable, R: bytemuck::Pod + bytemuck::Zeroable>
+    Bytes2Array<Q, R>
+{
     pub fn retrieve_bytes(&self) -> Vec<u8> {
         let first = vec![self.0];
         let second = vec![self.1];
@@ -42,77 +47,84 @@ impl<Q: Primitive, R: Primitive> Bytes2Array<Q, R> {
     }
 }
 
-pub struct Bytes3Array<Q: Primitive, R: Primitive, S: Primitive>(Buffer3<Q, R, S>);
+pub struct Bytes3Array<
+    Q: bytemuck::Pod + bytemuck::Zeroable,
+    R: bytemuck::Pod + bytemuck::Zeroable,
+    S: bytemuck::Pod + bytemuck::Zeroable,
+>(Buffer3<Q, R, S>);
 
-pub struct Bytes4Array<Q: Primitive, R: Primitive, S: Primitive, T: Primitive>(Buffer4<Q, R, S, T>);
+pub struct Bytes4Array<
+    Q: bytemuck::Pod + bytemuck::Zeroable,
+    R: bytemuck::Pod + bytemuck::Zeroable,
+    S: bytemuck::Pod + bytemuck::Zeroable,
+    T: bytemuck::Pod + bytemuck::Zeroable,
+>(Buffer4<Q, R, S, T>);
 
 pub struct Bytes5Array<Q, R, S, T, U>(Buffer5<Q, R, S, T, U>)
 where
-    Q: Primitive,
-    R: Primitive,
-    S: Primitive,
-    T: Primitive,
-    U: Primitive;
+    Q: bytemuck::Pod + bytemuck::Zeroable,
+    R: bytemuck::Pod + bytemuck::Zeroable,
+    S: bytemuck::Pod + bytemuck::Zeroable,
+    T: bytemuck::Pod + bytemuck::Zeroable,
+    U: bytemuck::Pod + bytemuck::Zeroable;
 
 pub struct Bytes6Array<Q, R, S, T, U, V>(Buffer3<Q, R, S>, Buffer3<T, U, V>)
 where
-    Q: Primitive,
-    R: Primitive,
-    S: Primitive,
-    T: Primitive,
-    U: Primitive,
-    V: Primitive;
+    Q: bytemuck::Pod + bytemuck::Zeroable,
+    R: bytemuck::Pod + bytemuck::Zeroable,
+    S: bytemuck::Pod + bytemuck::Zeroable,
+    T: bytemuck::Pod + bytemuck::Zeroable,
+    U: bytemuck::Pod + bytemuck::Zeroable,
+    V: bytemuck::Pod + bytemuck::Zeroable;
 
 pub struct Bytes7Array<Q, R, S, T, U, V, W>(Buffer4<Q, R, S, T>, Buffer3<U, V, W>)
 where
-    Q: Primitive,
-    R: Primitive,
-    S: Primitive,
-    T: Primitive,
-    U: Primitive,
-    V: Primitive,
-    W: Primitive;
+    Q: bytemuck::Pod + bytemuck::Zeroable,
+    R: bytemuck::Pod + bytemuck::Zeroable,
+    S: bytemuck::Pod + bytemuck::Zeroable,
+    T: bytemuck::Pod + bytemuck::Zeroable,
+    U: bytemuck::Pod + bytemuck::Zeroable,
+    V: bytemuck::Pod + bytemuck::Zeroable,
+    W: bytemuck::Pod + bytemuck::Zeroable;
 
 pub struct Bytes8Array<Q, R, S, T, U, V, W, X>(Buffer4<Q, R, S, T>, Buffer4<U, V, W, X>)
 where
-    Q: Primitive,
-    R: Primitive,
-    S: Primitive,
-    T: Primitive,
-    U: Primitive,
-    V: Primitive,
-    W: Primitive,
-    X: Primitive;
+    Q: bytemuck::Pod + bytemuck::Zeroable,
+    R: bytemuck::Pod + bytemuck::Zeroable,
+    S: bytemuck::Pod + bytemuck::Zeroable,
+    T: bytemuck::Pod + bytemuck::Zeroable,
+    U: bytemuck::Pod + bytemuck::Zeroable,
+    V: bytemuck::Pod + bytemuck::Zeroable,
+    W: bytemuck::Pod + bytemuck::Zeroable,
+    X: bytemuck::Pod + bytemuck::Zeroable;
 
 pub struct Bytes9Array<Q, R, S, T, U, V, W, X, Y>(Buffer5<Q, R, S, T, U>, Buffer4<V, W, X, Y>)
 where
-    Q: Primitive,
-    R: Primitive,
-    S: Primitive,
-    T: Primitive,
-    U: Primitive,
-    V: Primitive,
-    W: Primitive,
-    X: Primitive,
-    Y: Primitive;
+    Q: bytemuck::Pod + bytemuck::Zeroable,
+    R: bytemuck::Pod + bytemuck::Zeroable,
+    S: bytemuck::Pod + bytemuck::Zeroable,
+    T: bytemuck::Pod + bytemuck::Zeroable,
+    U: bytemuck::Pod + bytemuck::Zeroable,
+    V: bytemuck::Pod + bytemuck::Zeroable,
+    W: bytemuck::Pod + bytemuck::Zeroable,
+    X: bytemuck::Pod + bytemuck::Zeroable,
+    Y: bytemuck::Pod + bytemuck::Zeroable;
 
 pub struct Bytes10Array<Q, R, S, T, U, V, W, X, Y, Z>(
     Buffer5<Q, R, S, T, U>,
     Buffer5<V, W, X, Y, Z>,
 )
 where
-    Q: Primitive,
-    R: Primitive,
-    S: Primitive,
-    T: Primitive,
-    U: Primitive,
-    V: Primitive,
-    W: Primitive,
-    X: Primitive,
-    Y: Primitive,
-    Z: Primitive;
-
-pub trait Primitive = bytemuck::Pod + bytemuck::Zeroable + Copy + Clone;
+    Q: bytemuck::Pod + bytemuck::Zeroable,
+    R: bytemuck::Pod + bytemuck::Zeroable,
+    S: bytemuck::Pod + bytemuck::Zeroable,
+    T: bytemuck::Pod + bytemuck::Zeroable,
+    U: bytemuck::Pod + bytemuck::Zeroable,
+    V: bytemuck::Pod + bytemuck::Zeroable,
+    W: bytemuck::Pod + bytemuck::Zeroable,
+    X: bytemuck::Pod + bytemuck::Zeroable,
+    Y: bytemuck::Pod + bytemuck::Zeroable,
+    Z: bytemuck::Pod + bytemuck::Zeroable;
 
 #[cfg(test)]
 mod test {
