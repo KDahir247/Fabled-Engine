@@ -1,5 +1,5 @@
 pub mod concurrent;
-pub mod util;
+pub mod prime;
 
 pub use concurrent::*;
-pub use util::*;
+pub use prime::*;

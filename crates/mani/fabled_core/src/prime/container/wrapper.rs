@@ -1,16 +1,24 @@
+use crate::prime::container::primitive::Primitive;
 use serde::{Deserialize, Serialize};
+
+// todo create enum for different size primitive and (Eg. 8, 16, 32, 64, 128, and usize)
+//  take the explicit size into account when getting the bytes an length from the generic type as a function.
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub struct Wrapper<T> {
     data: T,
+    length: usize,
 }
 
 impl<'de, T> Wrapper<T>
 where
-    T: Serialize + Deserialize<'de> + bytemuck::Pod + bytemuck::Zeroable,
+    T: bytemuck::Pod + bytemuck::Zeroable,
 {
     pub fn new(value: T) -> Wrapper<T> {
-        Self { data: value }
+        Self {
+            data: value,
+            length: std::mem::size_of::<T>(),
+        }
     }
 
     pub fn get_bytes(&self) -> Vec<u8> {
@@ -27,11 +35,19 @@ where
     pub fn retrieve_self(&self) -> T {
         self.data
     }
+
+    pub fn len(&self) -> usize {
+        self.length
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.length.le(&0)
+    }
 }
 
 #[cfg(test)]
 mod wrapper_test {
-    use crate::util::container::wrapper::Wrapper;
+    use crate::prime::container::wrapper::Wrapper;
 
     #[test]
     fn bytes_check() {
@@ -54,5 +70,16 @@ mod wrapper_test {
     }
 
     #[test]
-    fn retrieve_self() {}
+    fn retrieve_self() {
+        let wrapper = Wrapper::new([10.0, 5.0]);
+        let data = wrapper.retrieve_self();
+        assert!(data.eq(&[10.0, 5.0]));
+    }
+
+    #[test]
+    fn copy_test() {
+        let wrapper = Wrapper::new(30);
+        let wrapper1 = wrapper;
+        print!("{:?}", wrapper);
+    }
 }

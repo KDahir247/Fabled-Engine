@@ -1,6 +1,12 @@
-use crate::material::{MaterialTargetFormat, Wrapper};
+use crate::material::MaterialTargetFormat;
+
+use fabled_core::prime::container::wrapper::Wrapper;
+
 use naga::{ScalarKind, TypeInner, VectorSize};
+
 use serde::*;
+
+use fabled_core::prime::container::primitive::Primitive;
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum EmptyTarget {
@@ -14,7 +20,7 @@ impl From<EmptyTarget> for MaterialTargetFormat {
 }
 
 #[rustfmt::skip]
-//todo future support for array and all other variable types in TypeInner.
+//this will extend primitives to support sampler and texture.
 #[repr(C)]
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum MaterialTarget {

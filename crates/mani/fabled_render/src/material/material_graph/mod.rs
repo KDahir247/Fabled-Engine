@@ -6,7 +6,7 @@ pub use target::*;
 pub use target_format::*;
 pub use tree::*;
 
-pub use fabled_core::util::container::wrapper::Wrapper;
+pub use fabled_core::prime::container::wrapper::Wrapper;
 
 mod attribute;
 mod branch;
