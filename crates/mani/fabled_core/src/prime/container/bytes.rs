@@ -7,6 +7,8 @@ use crate::prime::container::wrapper::Wrapper;
 
 type WR<T> = Wrapper<T>;
 
+type Buffer2<T, U> = (WR<T>, WR<U>);
+
 type Buffer3<T, U, V> = (WR<T>, WR<U>, WR<V>);
 
 type Buffer4<T, U, V, W> = (WR<T>, WR<U>, WR<V>, WR<W>);
@@ -68,9 +70,8 @@ where
         result.to_owned()
     }
 
-    pub fn retrieve_self(&self) -> (Q, R) {
-        let (var_x, var_y) = self.0;
-        (var_x.retrieve_self(), var_y.retrieve_self())
+    pub fn retrieve_self(&self) -> Buffer2<Q, R> {
+        self.0
     }
 }
 
@@ -107,13 +108,8 @@ where
         result.to_owned()
     }
 
-    pub fn retrieve_self(&self) -> (Q, R, S) {
-        let (var_x, var_y, var_z) = self.0;
-        (
-            var_x.retrieve_self(),
-            var_y.retrieve_self(),
-            var_z.retrieve_self(),
-        )
+    pub fn retrieve_self(&self) -> Buffer3<Q, R, S> {
+        self.0
     }
 }
 
@@ -160,14 +156,8 @@ where
         result.to_owned()
     }
 
-    pub fn retrieve_self(&self) -> (Q, R, S, T) {
-        let (var_w, var_x, var_y, var_z) = self.0;
-        (
-            var_w.retrieve_self(),
-            var_x.retrieve_self(),
-            var_y.retrieve_self(),
-            var_z.retrieve_self(),
-        )
+    pub fn retrieve_self(&self) -> Buffer4<Q, R, S, T> {
+        self.0
     }
 }
 
@@ -217,15 +207,8 @@ where
         result.to_owned()
     }
 
-    pub fn retrieve_self(&self) -> (Q, R, S, T, U) {
-        let (var_v, var_w, var_x, var_y, var_z) = self.0;
-        (
-            var_v.retrieve_self(),
-            var_w.retrieve_self(),
-            var_x.retrieve_self(),
-            var_y.retrieve_self(),
-            var_z.retrieve_self(),
-        )
+    pub fn retrieve_self(&self) -> Buffer5<Q, R, S, T, U> {
+        self.0
     }
 }
 
