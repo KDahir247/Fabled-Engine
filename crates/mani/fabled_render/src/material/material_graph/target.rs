@@ -6,8 +6,6 @@ use naga::{ScalarKind, TypeInner, VectorSize};
 
 use serde::*;
 
-use fabled_core::prime::container::primitive::Primitive;
-
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum EmptyTarget {
     None,

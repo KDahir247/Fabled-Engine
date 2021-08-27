@@ -1,8 +1,4 @@
-use crate::prime::container::primitive::Primitive;
 use serde::{Deserialize, Serialize};
-
-// todo create enum for different size primitive and (Eg. 8, 16, 32, 64, 128, and usize)
-//  take the explicit size into account when getting the bytes an length from the generic type as a function.
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub struct Wrapper<T> {
@@ -22,8 +18,7 @@ where
     }
 
     pub fn get_bytes(&self) -> Vec<u8> {
-        let data = self.data;
-        let bytes: Vec<u8> = bytemuck::cast_slice(&[data]).to_vec();
+        let bytes: Vec<u8> = bytemuck::bytes_of(&self.data).to_vec();
         bytes
     }
 
@@ -51,35 +46,36 @@ mod wrapper_test {
 
     #[test]
     fn bytes_check() {
-        let wrapper_struct = Wrapper::new([10.0, 5.0, 3.0, 1.0]);
-        let data = wrapper_struct.get_bytes();
-        println!("{:?}", data);
+        let wrapper_struct = Wrapper::new([10.0, 21.123, 0.5]);
+        let wrapped_data = wrapper_struct.get_bytes();
 
-        let a = (10.0, 5.0, 3.0, 1.0);
-        let data: Vec<u8> = bytemuck::cast_slice(&[a.0, a.1, a.2, a.3]).to_owned();
+        let a = [10.0, 21.123, 0.5];
+        let data: Vec<u8> = bytemuck::cast_slice(&[a]).to_owned();
 
+        assert!(wrapped_data.eq(&data));
+        assert!(wrapped_data.len().eq(&data.len()));
+
+        println!("{:?}", wrapped_data);
         println!("{:?}", data);
     }
 
     #[test]
     fn undo_bytes_cast() {
-        let wrapper_struct = Wrapper::new([10.0, 5.0, 1.0]);
+        let initial_value = [10.0, 5.0, 1.0];
+
+        let wrapper_struct = Wrapper::new(initial_value);
         let data = wrapper_struct.get_bytes();
         let wrapper: [f64; 3] = Wrapper::retrieve_type(data);
+
         println!("{:?}", wrapper);
     }
 
     #[test]
     fn retrieve_self() {
-        let wrapper = Wrapper::new([10.0, 5.0]);
+        let initial_value = [10.0, 5.0];
+        let wrapper = Wrapper::new(initial_value);
         let data = wrapper.retrieve_self();
-        assert!(data.eq(&[10.0, 5.0]));
-    }
 
-    #[test]
-    fn copy_test() {
-        let wrapper = Wrapper::new(30);
-        let wrapper1 = wrapper;
-        print!("{:?}", wrapper);
+        assert!(data.eq(&initial_value));
     }
 }
