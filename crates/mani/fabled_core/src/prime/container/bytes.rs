@@ -1,5 +1,4 @@
-// If you need more than 10 variables to pass through to the buffer then you should probably create
-// a new Buffer and/or normalize your data. You can also extend the BytesArray if absolutely necessary.
+// Generic are constrained to Plain Old Types that can Zeroed and struct that contain only POD that can Zeroed.
 
 use crate::prime::container::wrapper::Wrapper;
 

@@ -1,26 +1,22 @@
-pub use attribute::*;
-pub use branch::*;
-pub use key::*;
-pub use node::*;
-pub use target::*;
-pub use target_format::*;
-pub use tree::*;
+pub use material_attributes::*;
+pub use material_branch::*;
+pub use material_key::*;
+pub use material_node::*;
+pub use material_target::*;
+pub use material_tree::*;
 
-pub use fabled_core::prime::container::wrapper::Wrapper;
-
-mod attribute;
-mod branch;
-mod key;
-mod node;
-mod target;
-mod target_format;
-mod tree;
+mod material_attributes;
+mod material_branch;
+mod material_key;
+mod material_node;
+mod material_target;
+mod material_tree;
 
 #[cfg(test)]
 mod data_size_test {
     use crate::material::{
-        Attributes, EmptyNode, EmptyTarget, MaterialBranch, MaterialKey, MaterialNode,
-        MaterialTarget, MaterialTargetFormat, MaterialTree,
+        EmptyNode, EmptyTarget, MaterialAttributes, MaterialBranch, MaterialKey, MaterialNode,
+        MaterialTarget, MaterialTree,
     };
 
     #[test]
@@ -29,9 +25,9 @@ mod data_size_test {
         println!("material tree {}", material_tree_size);
 
         let material_branch_size = std::mem::size_of::<MaterialBranch>();
-        println!("material branch {}", material_branch_size);
+        assert_eq!(material_branch_size & (material_branch_size - 1), 0);
 
-        let attributes_size = std::mem::size_of::<Attributes>();
+        let attributes_size = std::mem::size_of::<MaterialAttributes>();
         assert_eq!(attributes_size & (attributes_size - 1), 0);
 
         let material_key_size = std::mem::size_of::<MaterialKey>();
@@ -41,45 +37,39 @@ mod data_size_test {
         println!("material target {}", material_target_size);
 
         let empty_target_size = std::mem::size_of::<EmptyTarget>();
-        println!("empty target {}", empty_target_size);
+        assert_eq!(empty_target_size, 0);
 
         let material_node_size = std::mem::size_of::<MaterialNode>();
         println!("material node {}", material_node_size);
 
         let empty_node_size = std::mem::size_of::<EmptyNode>();
-        println!("empty node {}", empty_node_size);
-
-        let material_target_format_size = std::mem::size_of::<MaterialTargetFormat>();
-        println!("material target format {}", material_target_format_size);
+        assert_eq!(empty_node_size, 0);
     }
 
     #[test]
     fn data_alignment() {
         let material_tree_size = std::mem::align_of::<MaterialTree>();
-        println!("material tree {}", material_tree_size);
+        assert_eq!(material_tree_size & (material_tree_size - 1), 0);
 
         let material_branch_size = std::mem::align_of::<MaterialBranch>();
-        println!("material branch {}", material_branch_size);
+        assert_eq!(material_branch_size & (material_branch_size - 1), 0);
 
-        let attributes_size = std::mem::align_of::<Attributes>();
+        let attributes_size = std::mem::align_of::<MaterialAttributes>();
         assert_eq!(attributes_size & (attributes_size - 1), 0);
 
         let material_key_size = std::mem::align_of::<MaterialKey>();
         assert_eq!(material_key_size & (material_key_size - 1), 0);
 
         let material_target_size = std::mem::align_of::<MaterialTarget>();
-        println!("material target {}", material_target_size);
+        assert_eq!(material_target_size & (material_target_size - 1), 0);
 
         let empty_target_size = std::mem::align_of::<EmptyTarget>();
-        println!("empty target {}", empty_target_size);
+        assert_eq!(empty_target_size & (empty_target_size - 1), 0);
 
         let material_node_size = std::mem::align_of::<MaterialNode>();
-        println!("material node {}", material_node_size);
+        assert_eq!(material_node_size & (material_node_size - 1), 0);
 
         let empty_node_size = std::mem::align_of::<EmptyNode>();
-        println!("empty node {}", empty_node_size);
-
-        let material_target_format_size = std::mem::align_of::<MaterialTargetFormat>();
-        println!("material target format {}", material_target_format_size);
+        assert_eq!(empty_node_size & (empty_node_size - 1), 0);
     }
 }
