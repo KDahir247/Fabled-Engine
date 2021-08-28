@@ -1,4 +1,4 @@
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum ColorType {
     L8,
 
@@ -42,6 +42,7 @@ impl From<image::ColorType> for ColorType {
 }
 
 #[repr(align(64))]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ColorTarget {
     ImageLuma8(GrayImage),
     ImageLuma16(Gray16Image),

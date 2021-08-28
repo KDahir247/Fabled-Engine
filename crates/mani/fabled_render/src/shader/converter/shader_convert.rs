@@ -1,31 +1,33 @@
 use crate::shader::converter::*;
+use crate::shader::parser::*;
 use crate::shader::validation_rule::ValidationLayer;
 
-pub fn convert_shader(
+pub fn convert_shader<P: AsRef<std::path::Path>>(
     conversion: ShaderConvertOption,
-    shader_module: &naga::Module,
+    path: P,
 ) -> anyhow::Result<ShaderConvertResult> {
-    let shader_info = shader_module.validate(naga::valid::ValidationFlags::all())?;
+    let module = parse_shader(path, None)?;
+
+    let shader_info = module.validate(naga::valid::ValidationFlags::all())?;
 
     let conversion_res = match conversion {
         ShaderConvertOption::Wgsl => {
-            let wgsl_buffer = naga::back::wgsl::write_string(shader_module, &shader_info)?;
-
+            let wgsl_buffer = naga::back::wgsl::write_string(&module, &shader_info)?;
             ShaderConvertResult::Wgsl(wgsl_buffer)
         }
         ShaderConvertOption::Spv { option } => {
             let mut spv_option = naga::back::spv::Options::default();
 
             if let SpvOptions::Custom {
-                maj_min,
-                //capabilities,
+                maj_min, //capabilities,
             } = option
             {
                 //spv_option.capabilities = capabilities;
                 spv_option.lang_version = maj_min;
             };
 
-            let spv = naga::back::spv::write_vec(shader_module, &shader_info, &spv_option)?;
+            let spv = naga::back::spv::write_vec(&module, &shader_info, &spv_option)?;
+
             let bytes = spv
                 .iter()
                 .fold(Vec::with_capacity(spv.len() * 4), |mut acc, index| {
@@ -39,13 +41,13 @@ pub fn convert_shader(
             match version {
                 Version::Desktop(desk_prep) => {
                     assert!(
-                        desk_prep <= *naga::back::glsl::SUPPORTED_CORE_VERSIONS.last().unwrap(),
+                        naga::back::glsl::SUPPORTED_CORE_VERSIONS.contains(&desk_prep),
                         "Desktop preprocessor version is not supported. Supported versions are : [330, 400, 410, 420, 430, 440, 450]"
                     );
                 }
                 Version::Embedded(embed_prep) => {
                     assert!(
-                        embed_prep <= *naga::back::glsl::SUPPORTED_ES_VERSIONS.last().unwrap(),
+                        naga::back::glsl::SUPPORTED_ES_VERSIONS.contains(&embed_prep),
                         "Embedded preprocessor version is not supported. Supported versions are : [300, 310, 320]"
                     );
                 }
@@ -53,7 +55,7 @@ pub fn convert_shader(
 
             let mut glsl_buffer = String::new();
 
-            for entry in shader_module.entry_points.iter() {
+            for entry in module.entry_points.iter() {
                 let glsl_option = naga::back::glsl::Options {
                     version: version.into(),
                     shader_stage: entry.stage,
@@ -62,7 +64,7 @@ pub fn convert_shader(
 
                 let mut writer = naga::back::glsl::Writer::new(
                     &mut glsl_buffer,
-                    shader_module,
+                    &module,
                     &shader_info,
                     &glsl_option,
                 )?;
@@ -83,20 +85,20 @@ pub fn convert_shader(
 mod converter_test {
     use crate::shader::converter::*;
     use crate::shader::init_shader_test_env;
-    use crate::shader::parser::*;
 
     //unwrapping None fails the test since it throws an panic.
     #[test]
     fn convert_wgsl_to() {
         init_shader_test_env();
 
-        let wgsl_parse = ShaderParser::parse(std::env::var("WGSL_FILE").unwrap()).unwrap();
+        let env_wgsl = std::env::var("WGSL_FILE").unwrap();
+        let wgsl_path = std::path::Path::new(&env_wgsl);
 
         let glsl_desktop_representation = convert_shader(
             ShaderConvertOption::Glsl {
                 version: Version::Desktop(430),
             },
-            &wgsl_parse.module,
+            wgsl_path,
         )
         .unwrap();
 
@@ -113,7 +115,7 @@ mod converter_test {
             ShaderConvertOption::Glsl {
                 version: Version::Embedded(320),
             },
-            &wgsl_parse.module,
+            wgsl_path,
         )
         .unwrap();
 
@@ -130,7 +132,7 @@ mod converter_test {
             ShaderConvertOption::Spv {
                 option: SpvOptions::Default,
             },
-            &wgsl_parse.module,
+            wgsl_path,
         )
         .unwrap();
 
@@ -148,13 +150,14 @@ mod converter_test {
     fn convert_spv_to() {
         init_shader_test_env();
 
-        let spv_parse = ShaderParser::parse(std::env::var("SPV_FILE").unwrap()).unwrap();
+        let env_spv = std::env::var("SPV_FILE").unwrap();
+        let spv_path = std::path::Path::new(&env_spv);
 
         let glsl_desktop_representation = convert_shader(
             ShaderConvertOption::Glsl {
                 version: Version::Desktop(420),
             },
-            &spv_parse.module,
+            spv_path,
         )
         .unwrap();
 
@@ -173,7 +176,7 @@ mod converter_test {
             ShaderConvertOption::Glsl {
                 version: Version::Embedded(320),
             },
-            &spv_parse.module,
+            spv_path,
         )
         .unwrap();
 
@@ -188,8 +191,7 @@ mod converter_test {
 
         //WGSL
 
-        let wgsl_representation =
-            convert_shader(ShaderConvertOption::Wgsl, &spv_parse.module).unwrap();
+        let wgsl_representation = convert_shader(ShaderConvertOption::Wgsl, spv_path).unwrap();
 
         if let ShaderConvertResult::Wgsl(data) = wgsl_representation {
             println!("WEB_GPU INTERPRETATION\n {}", data);
@@ -205,18 +207,21 @@ mod converter_test {
     fn convert_glsl_to() {
         init_shader_test_env();
 
-        let glsl_vert_parse = ShaderParser::parse(std::env::var("VERT_FILE").unwrap()).unwrap();
-        let glsl_frag_parse = ShaderParser::parse(std::env::var("FRAG_FILE").unwrap()).unwrap();
-        let glsl_comp_parse = ShaderParser::parse(std::env::var("COMP_FILE").unwrap()).unwrap();
+        let env_glsl_vert = std::env::var("VERT_FILE").unwrap();
+        let env_glsl_frag = std::env::var("FRAG_FILE").unwrap();
+        let env_glsl_comp = std::env::var("COMP_FILE").unwrap();
+        let glsl_vert_path = std::path::Path::new(&env_glsl_vert);
+        let glsl_frag_path = std::path::Path::new(&env_glsl_frag);
+        let glsl_comp_path = std::path::Path::new(&env_glsl_comp);
 
         let wgsl_vertex_representation =
-            convert_shader(ShaderConvertOption::Wgsl, &glsl_vert_parse.module).unwrap();
+            convert_shader(ShaderConvertOption::Wgsl, &glsl_vert_path).unwrap();
 
         let wgsl_fragment_representation =
-            convert_shader(ShaderConvertOption::Wgsl, &glsl_frag_parse.module).unwrap();
+            convert_shader(ShaderConvertOption::Wgsl, &glsl_frag_path).unwrap();
 
         let wgsl_compute_representation =
-            convert_shader(ShaderConvertOption::Wgsl, &glsl_comp_parse.module).unwrap();
+            convert_shader(ShaderConvertOption::Wgsl, &glsl_comp_path).unwrap();
 
         //WGSL
 
@@ -251,21 +256,21 @@ mod converter_test {
             ShaderConvertOption::Spv {
                 option: SpvOptions::Default,
             },
-            &glsl_vert_parse.module,
+            glsl_vert_path,
         )
         .unwrap();
         let spir_v_fragment_representation = convert_shader(
             ShaderConvertOption::Spv {
                 option: SpvOptions::Default,
             },
-            &glsl_frag_parse.module,
+            glsl_frag_path,
         )
         .unwrap();
         let spir_v_compute_representation = convert_shader(
             ShaderConvertOption::Spv {
                 option: SpvOptions::Default,
             },
-            &glsl_comp_parse.module,
+            glsl_comp_path,
         )
         .unwrap();
 
@@ -302,13 +307,14 @@ mod converter_test {
     #[test]
     #[should_panic]
     fn invalid_convert() {
-        let wgsl_parse = ShaderParser::parse(std::env::var("WGSL_FILE").unwrap()).unwrap();
+        let env_wgsl = std::env::var("WGSL_FILE").unwrap();
+        let wgsl_path = std::path::Path::new(&env_wgsl);
 
         convert_shader(
             ShaderConvertOption::Glsl {
                 version: Version::Embedded(330), //Supported es glsl versions [300, 310, 320]
             },
-            &wgsl_parse.module,
+            wgsl_path,
         )
         .unwrap();
 
@@ -316,7 +322,7 @@ mod converter_test {
             ShaderConvertOption::Glsl {
                 version: Version::Desktop(460), // Supported core glsl versions [330, 400, 410, 420, 430, 440, 450]
             },
-            &wgsl_parse.module,
+            wgsl_path,
         )
         .unwrap();
     }

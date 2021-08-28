@@ -1,0 +1,14 @@
+digraph ControlFlowGraph {
+0 [ label = "%20(0) If" shape=ellipse ]
+1 [ label = "%25(1) Return" shape=ellipse ]
+2 [ label = "%26(2) Break" shape=ellipse ]
+3 [ label = "%24(3) Return" shape=ellipse ]
+subgraph cluster_Function { label = Function
+0 subgraph cluster_Selection { label = Selection
+0 1 2 3 }
+}
+0 -> 3 [ style=dotted ]
+0 -> 1 [ color=blue ]
+0 -> 2 [ color=red ]
+2 -> 3 [ color=yellow ]
+}

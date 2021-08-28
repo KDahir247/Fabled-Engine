@@ -1,6 +1,7 @@
 mod image_proc;
 pub use image_proc::*;
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum FilterType {
     Nearest,
     Triangle,

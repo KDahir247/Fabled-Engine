@@ -1,9 +1,11 @@
 mod ktx;
+
 pub use ktx::*;
+
+use bitflags::*;
 
 use crate::texture::container::FlipAxis;
 
-use bitflags::*;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(align(16))]

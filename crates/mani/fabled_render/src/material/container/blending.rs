@@ -1,3 +1,4 @@
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum TextureBlending {
     /// Set horizontal (U) texture blending to true. Set vertical (V) texture blending to false
     BlendU,

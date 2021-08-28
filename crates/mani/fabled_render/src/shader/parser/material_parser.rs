@@ -2,7 +2,7 @@ use anyhow::Context;
 use std::ops::IndexMut;
 
 use crate::material::*;
-use crate::shader;
+use crate::shader::parser::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialParser {
@@ -21,13 +21,13 @@ impl Default for MaterialParser {
 
 impl MaterialParser {
     pub fn parse_material<P: AsRef<std::path::Path>>(&mut self, path: P) -> anyhow::Result<String> {
-        let shader = shader::parser::ShaderParser::parse(path)?;
+        let module = parse_shader(path, None)?;
 
         let naga::Module {
             types,
             global_variables,
             ..
-        } = shader.module;
+        } = module;
 
         let globals = global_variables.into_inner();
 

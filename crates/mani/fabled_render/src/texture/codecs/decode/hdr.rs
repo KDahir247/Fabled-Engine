@@ -1,5 +1,6 @@
 use crate::texture::codecs::TextureDescriptor;
 use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
+
 #[derive(Default, Clone)]
 pub struct HdrTextureLoader;
 

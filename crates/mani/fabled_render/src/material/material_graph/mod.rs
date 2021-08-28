@@ -1,16 +1,16 @@
-pub use material_attributes::*;
-pub use material_branch::*;
-pub use material_key::*;
-pub use material_node::*;
-pub use material_target::*;
-pub use material_tree::*;
-
 mod material_attributes;
 mod material_branch;
 mod material_key;
 mod material_node;
 mod material_target;
 mod material_tree;
+
+pub use material_attributes::*;
+pub use material_branch::*;
+pub use material_key::*;
+pub use material_node::*;
+pub use material_target::*;
+pub use material_tree::*;
 
 #[cfg(test)]
 mod data_size_test {

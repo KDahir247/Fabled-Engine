@@ -1,5 +1,6 @@
 use crate::shader::reflection::*;
 
+//do we really need to pass the naga::module here? we can just get the file path and then parse and validate the module itself
 pub struct ShaderReflection {
     module: naga::Module,
 }
@@ -166,8 +167,8 @@ mod reflection_test {
 
         println!("-----------------------------------------------");
 
-        let wgsl_parser = ShaderParser::parse(std::env::var("WGSL_FILE").unwrap()).unwrap();
-        let wgsl_reflection = ShaderReflection::new(wgsl_parser.module);
+        let wgsl_module = parse_shader(std::env::var("WGSL_FILE").unwrap(), None).unwrap();
+        let wgsl_reflection = ShaderReflection::new(wgsl_module);
         let wgsl_entries = wgsl_reflection.reflect_entry();
 
         println!("WGSL REFLECTION\n");
@@ -175,24 +176,24 @@ mod reflection_test {
         println!("-----------------------------------------------");
 
         println!("\n\n\nGLSL REFLECTION\n");
-        let vert_parser = ShaderParser::parse(std::env::var("VERT_FILE").unwrap()).unwrap();
-        let vert_reflection = ShaderReflection::new(vert_parser.module);
+        let vert_module = parse_shader(std::env::var("VERT_FILE").unwrap(), None).unwrap();
+        let vert_reflection = ShaderReflection::new(vert_module);
         let vert_entries = vert_reflection.reflect_entry();
 
         println!("VERTEX REFLECTION\n");
         iter_reflection(vert_entries);
         println!("-----------------------------------------------");
 
-        let frag_parser = ShaderParser::parse(std::env::var("FRAG_FILE").unwrap()).unwrap();
-        let frag_reflection = ShaderReflection::new(frag_parser.module);
+        let frag_module = parse_shader(std::env::var("FRAG_FILE").unwrap(), None).unwrap();
+        let frag_reflection = ShaderReflection::new(frag_module);
         let frag_entries = frag_reflection.reflect_entry();
 
         println!("\n\nFRAGMENT REFLECTION\n");
         iter_reflection(frag_entries);
         println!("-----------------------------------------------");
 
-        let comp_parser = ShaderParser::parse(std::env::var("COMP_FILE").unwrap()).unwrap();
-        let comp_reflection = ShaderReflection::new(comp_parser.module);
+        let comp_module = parse_shader(std::env::var("COMP_FILE").unwrap(), None).unwrap();
+        let comp_reflection = ShaderReflection::new(comp_module);
         let comp_entries = comp_reflection.reflect_entry();
 
         println!("\n\nCOMPUTE REFLECTION\n");
@@ -201,8 +202,8 @@ mod reflection_test {
 
         println!("\n\n\nSPV REFLECTION\n");
 
-        let spv_parser = ShaderParser::parse(std::env::var("SPV_FILE").unwrap()).unwrap();
-        let spv_reflection = ShaderReflection::new(spv_parser.module);
+        let spv_module = parse_shader(std::env::var("SPV_FILE").unwrap(), None).unwrap();
+        let spv_reflection = ShaderReflection::new(spv_module);
         let spv_entries = spv_reflection.reflect_entry();
 
         iter_reflection(spv_entries);
@@ -282,8 +283,8 @@ mod reflection_test {
 
         //To make this work you have to call release on reflection type ex.
 
-        let wgsl_parse = ShaderParser::parse(std::env::var("WGSL_FILE").unwrap()).unwrap();
-        let wgsl_reflection = ShaderReflection::new(wgsl_parse.module);
+        let wgsl_module = parse_shader(std::env::var("WGSL_FILE").unwrap(), None).unwrap();
+        let wgsl_reflection = ShaderReflection::new(wgsl_module);
         let wgsl_entries = wgsl_reflection.reflect_entry();
 
         println!("WGSL Entry Reflection");

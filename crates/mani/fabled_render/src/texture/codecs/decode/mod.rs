@@ -4,12 +4,13 @@ mod jpg;
 mod png;
 mod tiff;
 
-use crate::texture::container::FlipAxis;
 pub use dds::*;
 pub use hdr::*;
 pub use jpg::*;
 pub use png::*;
 pub use tiff::*;
+
+use crate::texture::container::FlipAxis;
 
 #[derive(Clone, Debug)]
 pub struct TextureDescriptor {

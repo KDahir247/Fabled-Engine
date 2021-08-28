@@ -1,4 +1,4 @@
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum BorderColor {
     TransparentBlack,
 

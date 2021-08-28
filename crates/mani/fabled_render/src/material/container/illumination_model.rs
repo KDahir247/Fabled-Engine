@@ -1,5 +1,6 @@
 // Used in Obj Wavefront file.
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum IllumModel {
     /// Color on and Ambient off
     Color = 0,

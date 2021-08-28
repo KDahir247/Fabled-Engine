@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum FlipAxis {
     FlipX = 0,
     FlipY = 1,

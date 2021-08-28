@@ -1,17 +1,3 @@
-pub use border_color::*;
-pub use color_space::*;
-pub use color_type::*;
-pub use extent2d::*;
-pub use extent3d::*;
-pub use flip_axis::*;
-pub use texture_access::*;
-pub use texture_aspect::*;
-pub use texture_data::*;
-pub use texture_dimension::*;
-pub use texture_sample_type::*;
-pub use texture_sampler::*;
-pub use texture_view_dimension::*;
-
 mod border_color;
 mod color_space;
 mod color_type;
@@ -25,6 +11,20 @@ mod texture_dimension;
 mod texture_sample_type;
 mod texture_sampler;
 mod texture_view_dimension;
+
+pub use border_color::*;
+pub use color_space::*;
+pub use color_type::*;
+pub use extent2d::*;
+pub use extent3d::*;
+pub use flip_axis::*;
+pub use texture_access::*;
+pub use texture_aspect::*;
+pub use texture_data::*;
+pub use texture_dimension::*;
+pub use texture_sample_type::*;
+pub use texture_sampler::*;
+pub use texture_view_dimension::*;
 
 #[cfg(test)]
 pub mod data_test {

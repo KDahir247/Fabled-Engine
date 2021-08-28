@@ -1,7 +1,7 @@
 use crate::texture::container::{ColorType, Extent3d};
 
-#[derive(Debug)]
 #[repr(align(64))]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Texture {
     pub data: Vec<u8>,
     pub size: Extent3d,

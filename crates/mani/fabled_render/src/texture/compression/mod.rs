@@ -1,13 +1,13 @@
-use crate::texture::_core::convert::TryFrom;
-use crate::texture::container::ColorSpace;
-
-pub use bitflags::*;
-
 mod compress;
 mod transcode;
 
 pub use compress::*;
 pub use transcode::*;
+
+pub use bitflags::*;
+
+use crate::texture::_core::convert::TryFrom;
+use crate::texture::container::ColorSpace;
 
 //  ---------- Compression ----------
 

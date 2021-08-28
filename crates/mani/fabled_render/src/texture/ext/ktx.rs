@@ -1,7 +1,7 @@
 use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
 use crate::texture::ext::KTXDescriptor;
-
 use crate::texture::_core::convert::TryFrom;
+
 use libktx_rs as ktx;
 
 #[derive(Default)]

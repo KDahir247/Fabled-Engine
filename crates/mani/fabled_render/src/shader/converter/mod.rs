@@ -1,4 +1,5 @@
 mod shader_convert;
+
 pub use shader_convert::*;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -18,9 +19,8 @@ impl From<Version> for naga::back::glsl::Version {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(align(4))]
-#[allow(dead_code)]
 pub enum SpvOptions {
     Default,
     Custom {
@@ -35,8 +35,7 @@ impl Default for SpvOptions {
     }
 }
 
-#[derive(Debug)]
-#[allow(dead_code)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ShaderConvertOption {
     Wgsl,
     Spv { option: SpvOptions },
@@ -44,7 +43,6 @@ pub enum ShaderConvertOption {
 }
 
 #[derive(Debug, PartialEq)]
-#[allow(dead_code)]
 pub enum ShaderConvertResult {
     Wgsl(String),
     Spv(Vec<u8>),
@@ -79,21 +77,14 @@ mod data_test {
     fn data_alignment() {
         let version_alignment = std::mem::align_of::<Version>();
         assert_eq!(version_alignment & (version_alignment - 1), 0);
-        println!("Version is aligned to {} bytes", version_alignment);
 
         let shader_result_alignment = std::mem::align_of::<ShaderConvertResult>();
         assert_eq!(shader_result_alignment & (shader_result_alignment - 1), 0);
-        println!("Result is aligned to {} bytes", shader_result_alignment);
 
         let spv_option_alignment = std::mem::align_of::<SpvOptions>();
         assert_eq!(spv_option_alignment & (spv_option_alignment - 1), 0);
-        println!("Spv options is aligned to {} bytes", spv_option_alignment);
 
         let shader_option_alignment = std::mem::align_of::<ShaderConvertOption>();
         assert_eq!(shader_option_alignment & (shader_option_alignment - 1), 0);
-        println!(
-            "Shader option is aligned to {} bytes",
-            shader_option_alignment
-        );
     }
 }

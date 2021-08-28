@@ -1,14 +1,14 @@
-pub use blending::*;
-pub use illumination_model::*;
-pub use rma::*;
-pub use standard::*;
-pub use tex_option::*;
-
 mod blending;
 mod illumination_model;
 mod rma;
 mod standard;
 mod tex_option;
+
+pub use blending::*;
+pub use illumination_model::*;
+pub use rma::*;
+pub use standard::*;
+pub use tex_option::*;
 
 #[cfg(test)]
 mod data_test {

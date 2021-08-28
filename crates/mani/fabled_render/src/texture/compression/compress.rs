@@ -1,9 +1,8 @@
-use fabled_core::concurrent::container::thread_op::ThreadOperation;
-
 use crate::texture::compression::{BasisTexture, CompressionDescriptor, CompressionQuality};
 use crate::texture::container::{ColorType, Texture};
 
 use basis_universal::{Compressor, CompressorParams};
+use fabled_core::concurrent::container::thread_op::ThreadOperation;
 
 pub fn super_compress(
     texture: &Texture,
