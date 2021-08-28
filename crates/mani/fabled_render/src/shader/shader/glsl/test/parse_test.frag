@@ -1,3 +1,12 @@
+//This is auto generated code. Do not modify code! Modification can break interpreted solution.
+//Modify shader code if you know what you're doing.
+
+//This is auto generated code. Do not modify code! Modification can break interpreted solution.
+//Modify shader code if you know what you're doing.
+
+//This is auto generated code. Do not modify code! Modification can break interpreted solution.
+//Modify shader code if you know what you're doing.
+
 // AUTHOR: mrk-its
 // ISSUE: #210
 // FIX: #898

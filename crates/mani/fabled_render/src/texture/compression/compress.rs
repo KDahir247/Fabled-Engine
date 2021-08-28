@@ -5,7 +5,7 @@ use basis_universal::{Compressor, CompressorParams};
 use fabled_core::concurrent::container::thread_op::ThreadOperation;
 
 pub fn super_compress(
-    texture: &Texture,
+    texture: Texture,
     compression_desc: &CompressionDescriptor,
     thread_op: ThreadOperation,
 ) -> anyhow::Result<BasisTexture> {
@@ -99,10 +99,10 @@ mod basis_compression_test {
             .unwrap();
 
         let basis_texture = super_compress(
-            &jpg_yellow,
+            jpg_yellow,
             &CompressionDescriptor {
-                compression_format: BasisCompressionFormat::UASTC4x4,
-                compression_quality: CompressionQuality::Default,
+                compression_format: BasisCompressionFormat::ETC1S,
+                compression_quality: CompressionQuality::Maximum,
                 color_space: ColorSpace::GammaSpace,
                 mip_map_desc: None,
                 rdo_desc: None,

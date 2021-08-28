@@ -84,9 +84,11 @@ mod basis_transcode_test {
     use crate::texture::compression::*;
     #[test]
     fn transcoder_test() {
-        transcode(TranscodeSource::BasisPath {
-            path: "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\basis_yellow.basis".to_string(),
-        }, &TranscodeDescriptor::default())
-            .unwrap();
+        let path = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\file.basis".to_string();
+        transcode(
+            TranscodeSource::BasisPath { path },
+            &TranscodeDescriptor::default(),
+        )
+        .unwrap();
     }
 }

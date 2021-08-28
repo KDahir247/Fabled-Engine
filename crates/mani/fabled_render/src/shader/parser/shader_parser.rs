@@ -44,7 +44,7 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
                 options.adjust_coordinate_space = adjust_coordinate_space;
                 options.strict_capabilities = strict_capabilities;
             }
-
+            // Some performance lose avg 20.1%
             let input = std::fs::read(file)?;
             let result = naga::front::spv::parse_u8_slice(&input, &options);
             result?
@@ -68,6 +68,7 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
             };
 
             entry_points.insert(main_func_entry, target);
+            // most of the performance lose. 79.8%
             naga::front::glsl::parse_str(
                 &input,
                 &naga::front::glsl::Options {
