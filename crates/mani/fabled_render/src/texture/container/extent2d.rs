@@ -1,6 +1,6 @@
 use crate::texture::container::Extent3d;
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 pub struct Extent2d {
     pub width: u32,
     pub height: u32,
