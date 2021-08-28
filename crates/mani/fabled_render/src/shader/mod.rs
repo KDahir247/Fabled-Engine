@@ -1,7 +1,6 @@
 mod common;
 mod converter;
 mod parser;
-mod reflection;
 mod shader_validator;
 mod validation_rule;
 
@@ -9,7 +8,6 @@ use crate::shader;
 
 pub use converter::*;
 pub use parser::*;
-pub use reflection::*;
 pub use validation_rule::*;
 
 pub fn init_shader_test_env() {
