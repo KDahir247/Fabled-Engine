@@ -23,8 +23,8 @@ pub fn calculate_bi_tangent(mesh: &mut Mesh) {
     for vertex in &mut mesh.vertices {
         let n = glam::Vec3A::from_slice(&vertex.normal);
         let t = glam::Vec3A::from_slice(&vertex.tangent);
-        let bi_tangent = n.cross(t) * vertex.tangent[2];
-        vertex.bi_tangent = [bi_tangent.x, bi_tangent.y, bi_tangent.z, vertex.tangent[2]];
+        let bi_tangent = n.cross(t) * vertex.tangent[3];
+        vertex.bi_tangent = [bi_tangent.x, bi_tangent.y, bi_tangent.z, vertex.tangent[3]];
     }
 }
 
