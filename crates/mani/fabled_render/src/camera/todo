@@ -1,0 +1,62 @@
+should have oblique matrix give otho camera the illusion that it
+is 3d if the user want it.Eg.
+
+ Standard Facing Forward     cabinet projection Forward
+                            ___________
+   _________               /_________/ |
+  |         |             |         |  |
+  |         |             |         |  /
+  |         |             |         | /
+  |_________|             |_________|/
+
+ - The engine will only support Cabinet Project for the default Oblique Project
+   If there is any use or interest of other oblique projection calculation
+   Then I will add support for the others. (Military, Cavalier)
+
+
+   Look At target.
+   This will use Quaternion as standard rotation.
+
+
+-------------------------------------------------------------------------------
+
+ Converts a screen position to a position in world space.
+    ScreenPointToWorldPoint.
+
+-------------------------------------------------------------------------------
+
+ Converts a screen position to a position in view space.
+   ScreenToViewportPoint
+
+-------------------------------------------------------------------------------
+
+ Converts a viewport point to a position in world-space.
+   ViewportToScreenPoint
+-------------------------------------------------------------------------------
+
+ Converts a viewport point to a position in world-space.
+   ViewportPointToWorldPoint
+
+---------------------------------------------------------------------------------
+ Converts a point in world-space to the camera's screen-space non-stereoscopic.
+   WorldPointToScreenPoint
+
+-------------------------------------------------------------------------------
+
+ Converts a point in world-space to the camera's viewport-space non-stereoscopic.
+   WorldPointToViewportPoint
+
+-------------------------------------------------------------------------------
+
+Back ground Color for the camera.
+
+  Camera Render Order (Priority)
+   Camera with the higher Priority will be rendered first.
+   Camera wil the lower Priority will be rendered last.
+
+-------------------------------------------------------------------------------
+    FUTURE SUPPORT
+
+   CullMask Feature for Camera
+
+  cull matrix

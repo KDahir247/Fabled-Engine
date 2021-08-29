@@ -5,18 +5,18 @@ pub fn calc_camera_matrix(camera: &camera_component::CameraOrientation) -> glam:
     let position = camera.transformation_matrix.w_axis.truncate();
 
     //todo double check.
-    //Matrix View = Inverse Matrix Camera .
+    //this is rhs to get lhs just negate the camera forward.
+    //Matrix View = Inverse Matrix Camera.
 
     let f = camera.forward.normalize().truncate();
-
-    let l = f.cross(glam::Vec3::Y).normalize();
-    let u = l.cross(f);
+    let r = f.cross(glam::Vec3::Y).normalize();
+    let u = r.cross(f);
 
     glam::mat4(
-        glam::vec4(l.x, u.x, -f.x, 0.0),
-        glam::vec4(l.y, u.y, -f.y, 0.0),
-        glam::vec4(l.z, u.z, -f.z, 0.0),
-        glam::vec4(-position.dot(l), -position.dot(u), position.dot(f), 1.0),
+        glam::vec4(r.x, u.x, -f.x, 0.0),
+        glam::vec4(r.y, u.y, -f.y, 0.0),
+        glam::vec4(r.z, u.z, -f.z, 0.0),
+        glam::vec4(-position.dot(r), -position.dot(u), position.dot(f), 1.0),
     )
 }
 
