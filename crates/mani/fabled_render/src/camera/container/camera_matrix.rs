@@ -1,4 +1,4 @@
-use crate::camera::{Orientation, Projection};
+use crate::camera::{Orientation, Projection, ProjectionCoordinate};
 
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -10,13 +10,40 @@ pub struct CameraMatrix {
 }
 
 impl CameraMatrix {
-    pub fn calculate_view_matrix(&mut self, orientation: Orientation) {
+    /// The source position is transformed in the following spaces to reach screen space.
+    /// 1. From model space to world space by the world matrix,
+    /// 2. From world space to view space from the view matrix.
+    /// 3. from view space to screen space from the projection matrix.
+    pub fn project(&self, target: [f32; 3]) -> [f32; 3] {
+        //It will need the model matrix, projection matrix and view matrix.
+        todo!()
+    }
+
+    /// The source position is transformed in the following space to reach model space.
+    /// 1. From screen space to view space by the inverse projection matrix.
+    /// 2. From view space to world space by the inverse view matrix.
+    /// 3. From world space to model space by the inverse of the world matrix.
+    pub fn unproject(&self, target: [f32; 3]) -> [f32; 3] {
+        //It will need the the model matrix, projection matrix and the view matrix.
+        todo!()
+    }
+
+    // todo Add an option to specify if we are calculating the view matrix in left hand coordinate space.
+    // or right hand coordinate space
+    pub fn calculate_view_matrix(
+        &mut self,
+        orientation: Orientation,
+        coordinate_direction: ProjectionCoordinate,
+    ) {
         let Orientation {
             transformation_matrix,
             forward,
             ..
         } = orientation;
 
+        let coordinate_direction = coordinate_direction as i32;
+
+        println!("{}", coordinate_direction);
         let position = glam::Mat4::from_cols_array(&transformation_matrix)
             .w_axis
             .to_array();
@@ -25,7 +52,7 @@ impl CameraMatrix {
 
         let forward_slice = &forward[0..3];
 
-        let f = glam::Vec3A::from_slice(forward_slice).normalize();
+        let f = glam::Vec3A::from_slice(forward_slice).normalize() * coordinate_direction as f32;
         let s = f.cross(glam::Vec3A::Y).normalize();
         let u = s.cross(f);
 
@@ -50,7 +77,7 @@ impl CameraMatrix {
 
 #[cfg(test)]
 mod camera_matrix_test {
-    use crate::camera::{CameraMatrix, Orientation};
+    use crate::camera::{CameraMatrix, Orientation, ProjectionCoordinate};
 
     #[test]
     fn linear_to_glam_mat4_test() {
@@ -74,6 +101,7 @@ mod camera_matrix_test {
 
         println!("{:?}", glam.to_cols_array());
 
-        CameraMatrix::default().calculate_view_matrix(Orientation::default());
+        CameraMatrix::default()
+            .calculate_view_matrix(Orientation::default(), ProjectionCoordinate::default());
     }
 }

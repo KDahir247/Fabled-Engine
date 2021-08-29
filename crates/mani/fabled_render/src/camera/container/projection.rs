@@ -8,8 +8,14 @@ pub enum Projection {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ProjectionCoordinate {
-    LeftHandCoordinate,
-    RightHandCoordinate,
+    LeftHandCoordinate = -1,
+    RightHandCoordinate = 1,
+}
+
+impl Default for ProjectionCoordinate {
+    fn default() -> Self {
+        Self::RightHandCoordinate
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
