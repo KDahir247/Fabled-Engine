@@ -1,5 +1,5 @@
 //The method are only used to construct the component.
-use crate::util::camera::{calc_camera_matrix, calc_proj_matrix};
+use crate::util::camera::{calc_proj_matrix, calc_view_matrix};
 use glam::Vec4Swizzles;
 use wgpu::util::DeviceExt;
 
@@ -72,7 +72,7 @@ impl CameraUniform {
         //Mmvp = PM-1 camera * M object
 
         uniform_layout.proj = calc_proj_matrix(projection);
-        uniform_layout.view = calc_camera_matrix(orientation);
+        uniform_layout.view = calc_view_matrix(orientation);
         uniform_layout.inv_proj = uniform_layout.proj.inverse();
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {

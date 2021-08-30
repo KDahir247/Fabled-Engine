@@ -2,8 +2,8 @@ use crate::camera::{ProjectionCoordinate, YAxis};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PerspectiveOrientation {
-    Standard,
-    Reversed,
+    Standard = 0,
+    Reversed = -1,
 }
 
 impl Default for PerspectiveOrientation {

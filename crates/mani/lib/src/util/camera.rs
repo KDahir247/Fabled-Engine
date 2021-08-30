@@ -1,36 +1,39 @@
-use super::constant;
 use crate::component::camera_component;
 
-pub fn calc_camera_matrix(camera: &camera_component::CameraOrientation) -> glam::Mat4 {
+pub fn calc_view_matrix(camera: &camera_component::CameraOrientation) -> glam::Mat4 {
     let position = camera.transformation_matrix.w_axis.truncate();
 
     //todo double check.
     //this is rhs to get lhs just negate the camera forward.
     //Matrix View = Inverse Matrix Camera.
 
-    let f = camera.forward.normalize().truncate();
-    let r = f.cross(glam::Vec3::Y).normalize();
-    let u = r.cross(f);
+    let f = -camera.forward.normalize().truncate();
+    let r = glam::Vec3::Y.cross(f).normalize();
+    let u = f.cross(r);
 
     glam::mat4(
-        glam::vec4(r.x, u.x, -f.x, 0.0),
-        glam::vec4(r.y, u.y, -f.y, 0.0),
-        glam::vec4(r.z, u.z, -f.z, 0.0),
-        glam::vec4(-position.dot(r), -position.dot(u), position.dot(f), 1.0),
+        glam::vec4(r.x, u.x, f.x, 0.0),
+        glam::vec4(r.y, u.y, f.y, 0.0),
+        glam::vec4(r.z, u.z, f.z, 0.0),
+        glam::vec4(-position.dot(r), -position.dot(u), -position.dot(f), 1.0),
     )
 }
 
 pub fn calc_proj_matrix(projection: &camera_component::Projection) -> glam::Mat4 {
-    let t = (projection.fovy * 0.5).tan();
-    let sy = 1.0 / t;
-    let sx = sy / projection.aspect;
-    let nmf = projection.znear - projection.zfar;
+    let h = 1.0 / (projection.fovy * 0.5); //1/tan(x) == cot(x)
+    let w = h / projection.aspect;
+    let near_min_far = projection.znear - projection.zfar;
 
     glam::mat4(
-        glam::vec4(sx, 0.0, 0.0, 0.0),
-        glam::vec4(0.0, sy, 0.0, 0.0),
-        glam::vec4(0.0, 0.0, projection.zfar / nmf, -1.0),
-        glam::vec4(0.0, 0.0, projection.znear * projection.zfar / nmf, 0.0),
+        glam::vec4(w, 0.0, 0.0, 0.0),
+        glam::vec4(0.0, h, 0.0, 0.0),
+        glam::vec4(0.0, 0.0, projection.zfar / near_min_far, -1.0),
+        glam::vec4(
+            0.0,
+            0.0,
+            projection.znear * projection.zfar / near_min_far,
+            0.0,
+        ),
     )
 }
 

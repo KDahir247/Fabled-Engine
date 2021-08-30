@@ -1,16 +1,16 @@
-use crate::camera::{Orthographic, Perspective};
+use crate::camera::{Orthographic, OrthographicOption, Perspective, PerspectiveOption};
 
 //Lhs and Rhs, Direction (Y Up, Y Down).
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Projection {
-    Orthographic(Orthographic),
-    Perspective(Perspective),
+    Orthographic(Orthographic, Option<OrthographicOption>),
+    Perspective(Perspective, Option<PerspectiveOption>),
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ProjectionCoordinate {
-    LeftHandCoordinate = -1,
-    RightHandCoordinate = 1,
+    LeftHandCoordinate = 1,
+    RightHandCoordinate = -1,
 }
 
 impl Default for ProjectionCoordinate {
@@ -21,8 +21,8 @@ impl Default for ProjectionCoordinate {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum YAxis {
-    Up,
-    Down,
+    Up = 1,
+    Down = -1,
 }
 
 impl Default for YAxis {

@@ -25,16 +25,16 @@ mod data_test {
     #[test]
     fn data_size() {
         let orthographic_size = std::mem::size_of::<Orthographic>();
-        assert_eq!(orthographic_size & (orthographic_size - 1), 0);
+        println!("{}", orthographic_size);
 
         let perspective_size = std::mem::size_of::<Perspective>();
         assert_eq!(perspective_size & (perspective_size - 1), 0);
 
         let projection_size = std::mem::size_of::<Projection>();
-        println!("{}", projection_size);
+        println!("projection {}", projection_size);
 
         let camera_orientation_size = std::mem::size_of::<Orientation>();
-        println!("{}", camera_orientation_size);
+        println!("camera orientation {}", camera_orientation_size);
 
         let camera_matrix_size = std::mem::size_of::<CameraMatrix>();
         assert_eq!(camera_matrix_size & (camera_matrix_size - 1), 0);
@@ -91,13 +91,13 @@ mod data_test {
         );
 
         let camera_matrix_alignment = std::mem::align_of::<CameraMatrix>();
-        println!("{}", camera_matrix_alignment);
+        println!("camera matrix {}", camera_matrix_alignment);
 
         let viewport_alignment = std::mem::align_of::<ViewPort>();
-        println!("{}", viewport_alignment);
+        println!("viewport {}", viewport_alignment);
 
         let fov_axis_alignment = std::mem::align_of::<FovAxis>();
-        println!("{}", fov_axis_alignment);
+        println!("fov axis {}", fov_axis_alignment);
 
         let perspective_orientation_alignment = std::mem::align_of::<PerspectiveOrientation>();
         assert_eq!(

@@ -147,7 +147,7 @@ pub fn render_resize_system(
             .extend(1.0);
 
         camera.uniform.raw.proj = camera::calc_proj_matrix(&camera.projection);
-        camera.uniform.raw.view = camera::calc_camera_matrix(&camera.orientation);
+        camera.uniform.raw.view = camera::calc_view_matrix(&camera.orientation);
         camera.uniform.raw.inv_proj = camera.uniform.raw.proj.inverse();
 
         *depth_texture = texture::create_depth_texture(&render.core.device, size);
