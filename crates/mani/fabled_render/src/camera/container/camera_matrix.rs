@@ -76,12 +76,12 @@ impl CameraMatrix {
     }
 
     pub fn calculate_inverse_view_matrix(&mut self) {
-        let mat4_representation = glam::Mat4::from_cols_array(&self.view);
-        let inverse_view_matrix = mat4_representation.inverse();
+        let mat4_view_representation = glam::Mat4::from_cols_array(&self.view);
+        let inverse_view_matrix = mat4_view_representation.inverse();
         self.inv_view = inverse_view_matrix.to_cols_array()
     }
 
-    
+
     #[rustfmt::skip]
     /// [Orthographic Matrix Reference](https://en.wikipedia.org/wiki/Orthographic_projection) <br/>
     /// [DirectX/WEBGPU Implementation](https://blog.demofox.org/2017/03/31/orthogonal-projection-matrix-plainly-explained/) <br/>
@@ -192,6 +192,12 @@ impl CameraMatrix {
 
             }
         }
+    }
+
+    pub fn calculate_inverse_projection_matrix(&mut self) {
+        let mat4_projection_representation = glam::Mat4::from_cols_array(&self.proj);
+        let inverse_view_matrix = mat4_projection_representation.inverse();
+        self.inv_proj = inverse_view_matrix.to_cols_array()
     }
 }
 
