@@ -1,7 +1,15 @@
+use crate::camera::{ProjectionCoordinate, YAxis};
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PerspectiveOrientation {
     Standard,
     Reversed,
+}
+
+impl Default for PerspectiveOrientation {
+    fn default() -> Self {
+        Self::Standard
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -10,13 +18,19 @@ pub enum PerspectiveDistance {
     Infinite,
 }
 
+impl Default for PerspectiveDistance {
+    fn default() -> Self {
+        Self::Standard
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Perspective {
-    fovy: f32,
+    pub fovy: f32,
     /// Screen width / Screen height
-    aspect: f32,
-    z_near: f32,
-    z_far: f32,
+    pub aspect: f32,
+    pub z_near: f32,
+    pub z_far: f32,
 }
 
 impl Default for Perspective {
@@ -28,4 +42,12 @@ impl Default for Perspective {
             z_far: 2000.0,
         }
     }
+}
+
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
+pub struct PerspectiveOption {
+    pub direction: ProjectionCoordinate,
+    pub y_axis: YAxis,
+    pub orientation: PerspectiveOrientation,
+    pub distance: PerspectiveDistance,
 }

@@ -17,8 +17,9 @@ pub use viewport::*;
 #[cfg(test)]
 mod data_test {
     use crate::camera::{
-        CameraMatrix, Orientation, DepthClamp, FovAxis, Orthographic, Perspective,
-        PerspectiveDistance, PerspectiveOrientation, Projection, ProjectionCoordinate, ViewPort,
+        CameraMatrix, FovAxis, Orientation, Orthographic, OrthographicOption, Perspective,
+        PerspectiveDistance, PerspectiveOption, PerspectiveOrientation, Projection,
+        ProjectionCoordinate, ViewPort, YAxis,
     };
 
     #[test]
@@ -62,8 +63,14 @@ mod data_test {
             0
         );
 
-        let depth_clamp_size = std::mem::size_of::<DepthClamp>();
-        assert_eq!(depth_clamp_size & (depth_clamp_size - 1), 0);
+        let y_axis_size = std::mem::size_of::<YAxis>();
+        assert_eq!(y_axis_size & (y_axis_size - 1), 0);
+
+        let orthographic_option_size = std::mem::size_of::<OrthographicOption>();
+        assert_eq!(orthographic_option_size & (orthographic_option_size - 1), 0);
+
+        let perspective_option_size = std::mem::size_of::<PerspectiveOption>();
+        assert_eq!(perspective_option_size & (perspective_option_size - 1), 0);
     }
 
     #[test]
@@ -90,7 +97,7 @@ mod data_test {
         println!("{}", viewport_alignment);
 
         let fov_axis_alignment = std::mem::align_of::<FovAxis>();
-        print!("{}", fov_axis_alignment);
+        println!("{}", fov_axis_alignment);
 
         let perspective_orientation_alignment = std::mem::align_of::<PerspectiveOrientation>();
         assert_eq!(
@@ -110,7 +117,19 @@ mod data_test {
             0
         );
 
-        let depth_clamp_alignment = std::mem::align_of::<DepthClamp>();
-        assert_eq!(depth_clamp_alignment & (depth_clamp_alignment - 1), 0);
+        let y_axis_alignment = std::mem::align_of::<YAxis>();
+        assert_eq!(y_axis_alignment & (y_axis_alignment - 1), 0);
+
+        let orthographic_option_alignment = std::mem::align_of::<OrthographicOption>();
+        assert_eq!(
+            orthographic_option_alignment & (orthographic_option_alignment - 1),
+            0
+        );
+
+        let orthographic_option_alignment = std::mem::align_of::<OrthographicOption>();
+        assert_eq!(
+            orthographic_option_alignment & (orthographic_option_alignment - 1),
+            0
+        );
     }
 }

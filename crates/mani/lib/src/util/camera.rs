@@ -21,13 +21,17 @@ pub fn calc_camera_matrix(camera: &camera_component::CameraOrientation) -> glam:
 }
 
 pub fn calc_proj_matrix(projection: &camera_component::Projection) -> glam::Mat4 {
-    constant::OPENGL_TO_WGPU_MATRIX
-        * glam::Mat4::perspective_rh(
-            projection.fovy,
-            projection.aspect,
-            projection.znear,
-            projection.zfar,
-        )
+    let t = (projection.fovy * 0.5).tan();
+    let sy = 1.0 / t;
+    let sx = sy / projection.aspect;
+    let nmf = projection.znear - projection.zfar;
+
+    glam::mat4(
+        glam::vec4(sx, 0.0, 0.0, 0.0),
+        glam::vec4(0.0, sy, 0.0, 0.0),
+        glam::vec4(0.0, 0.0, projection.zfar / nmf, -1.0),
+        glam::vec4(0.0, 0.0, projection.znear * projection.zfar / nmf, 0.0),
+    )
 }
 
 pub fn update_camera_orientation(

@@ -1,5 +1,6 @@
 use crate::camera::{Orthographic, Perspective};
 
+//Lhs and Rhs, Direction (Y Up, Y Down).
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Projection {
     Orthographic(Orthographic),
@@ -19,7 +20,13 @@ impl Default for ProjectionCoordinate {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum DepthClamp {
-    ZeroToOne,   // Standard
-    NegOneToOne, //GL
+pub enum YAxis {
+    Up,
+    Down,
+}
+
+impl Default for YAxis {
+    fn default() -> Self {
+        Self::Up
+    }
 }

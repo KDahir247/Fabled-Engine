@@ -5,5 +5,3 @@ pub struct Orientation {
     pub forward: [f32; 4],
     pub right: [f32; 4],
 }
-
-//Can be decided if the look at is lh or rh in this script.

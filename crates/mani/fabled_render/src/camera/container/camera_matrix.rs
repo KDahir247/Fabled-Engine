@@ -28,8 +28,6 @@ impl CameraMatrix {
         todo!()
     }
 
-    // todo Add an option to specify if we are calculating the view matrix in left hand coordinate space.
-    // or right hand coordinate space
     pub fn calculate_view_matrix(
         &mut self,
         orientation: Orientation,
@@ -43,7 +41,7 @@ impl CameraMatrix {
 
         let coordinate_direction = coordinate_direction as i32;
 
-        println!("{}", coordinate_direction);
+        // We are getting the last column of the transformation matrix to retrieve the translation.
         let position = glam::Mat4::from_cols_array(&transformation_matrix)
             .w_axis
             .to_array();
@@ -52,6 +50,7 @@ impl CameraMatrix {
 
         let forward_slice = &forward[0..3];
 
+        // Forward translation vector is equal to the inverse if left hand coordinate space
         let f = glam::Vec3A::from_slice(forward_slice).normalize() * coordinate_direction as f32;
         let s = f.cross(glam::Vec3A::Y).normalize();
         let u = s.cross(f);
@@ -68,7 +67,30 @@ impl CameraMatrix {
         self.view = view_matrix;
     }
 
+    // todo Option that will be passes that will represent if the projection matrix will take
+    //  into account that the perspective is infinite, reverse or just normal. We will also need
+    //  to take into account if it is lh y down, lh y up, rh y down, rh y up
     pub fn calculate_projection_matrix(&mut self, projection: Projection) {
+        /*    let mut proj_param: [f32; 2] = [0.0; 2];
+                let mut z_near = 0.0;
+                let mut z_far = 0.0;
+
+                // We will need two method to calculate the different projection.
+                match projection {
+                    Projection::Orthographic(orthographic) => {
+                        proj_param[0] = orthographic.x_mag;
+                        proj_param[1] = orthographic.y_mag;
+                        z_near = orthographic.z_near;
+                        z_far = orthographic.z_far;
+                    }
+                    Projection::Perspective(perspective) => {
+                        proj_param[0] = perspective.fovy;
+                        proj_param[1] = perspective.aspect;
+                        z_near = perspective.z_near;
+                        z_far = perspective.z_far;
+                    }
+                }
+        */
         //
     }
 }

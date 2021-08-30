@@ -1,3 +1,5 @@
+use crate::camera::{ProjectionCoordinate, YAxis};
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Orthographic {
     pub x_mag: f32,
@@ -15,4 +17,10 @@ impl Default for Orthographic {
             z_far: 2000.0,
         }
     }
+}
+
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
+pub struct OrthographicOption {
+    pub direction: ProjectionCoordinate,
+    pub y_axis: YAxis,
 }

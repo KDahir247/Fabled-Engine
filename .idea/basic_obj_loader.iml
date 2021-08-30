@@ -143,6 +143,8 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-5fb927f6fcbc0a1d/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/im-d5df6996fd90842c/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/typenum-2a147a9e9788741f/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_cryptography/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_system/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />

@@ -14,6 +14,48 @@ is 3d if the user want it.Eg.
    Then I will add support for the others. (Military, Cavalier)
 
 
+-------------------------------------------------------------------------------
+There are 4 projection matrix we can use.
+
+ Left hand side coordinate system where y axis is down
+ - Orthographic projection.
+ - Perspective infinite projection.
+ - Projection infinite reverse projection.
+ - Perspective projection.
+
+ Left hand side coordinate system where y axis is up.
+ - Orthographic projection.
+ - Perspective infinite projection.
+ - Projection infinite reverse projection.
+ - Perspective projection.
+
+ Right hand side coordinate system where y axis is down
+ - Orthographic projection.
+ - Perspective infinite projection.
+ - Projection infinite reverse projection.
+ - Perspective projection.
+
+ Right hand side coordinate system where y axis is up.
+ - Orthographic projection.
+ - Perspective infinite projection.
+ - Projection infinite reverse projection.
+ - Perspective projection.
+
+ WEBGPU follow the matrix of Direct X
+
+ orthogonal projection
+ If the projection matrix is a orthogonal projection and is left then the value in column 3 and row 3 will be positive otherwise it will be negative.
+
+
+ perspective projection
+ If the project matrix is a perspective projection and is left then the value in column 4 and row 3 will be positive otherwise it will be negative.
+
+ We will not expose projection calculation that will be used for other graphics api's orientation.
+ which will cause confusion in the engine.
+
+-------------------------------------------------------------------------------
+
+
    Look At target.
    This will use Quaternion as standard rotation.
 
