@@ -12,12 +12,7 @@ pub fn camera_update_system(
     (&mut controller).fast_iter().for_each(|camera_controller| {
         camera::update_camera_orientation(&mut camera, camera_controller, delta_time.delta as f32);
 
-        camera.uniform.raw.view_position = camera
-            .orientation
-            .transformation_matrix
-            .w_axis
-            .xyz()
-            .extend(1.0);
+        camera.uniform.raw.view_position = camera.orientation.transformation_matrix.w_axis;
 
         camera.uniform.raw.proj = camera::calc_proj_matrix(&camera.projection);
         camera.uniform.raw.view = camera::calc_view_matrix(&camera.orientation);

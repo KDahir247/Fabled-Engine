@@ -48,22 +48,22 @@ pub fn register_key_input_system(
 
         match key_state.keycode {
             winit::event::VirtualKeyCode::W | winit::event::VirtualKeyCode::Up => {
-                controller.amount_matrix.x_axis.x = amount * controller.amount_matrix.x_axis.z;
+                controller.amount_translation.z = amount * controller.amount_translation.w;
             }
             winit::event::VirtualKeyCode::S | winit::event::VirtualKeyCode::Down => {
-                controller.amount_matrix.x_axis.y = amount * controller.amount_matrix.x_axis.z;
+                controller.amount_translation.z = -amount * controller.amount_translation.w;
             }
             winit::event::VirtualKeyCode::D | winit::event::VirtualKeyCode::Right => {
-                controller.amount_matrix.y_axis.x = amount * controller.amount_matrix.y_axis.z;
+                controller.amount_translation.x = -amount * controller.amount_translation.w;
             }
             winit::event::VirtualKeyCode::A | winit::event::VirtualKeyCode::Left => {
-                controller.amount_matrix.y_axis.y = amount * controller.amount_matrix.y_axis.z;
+                controller.amount_translation.x = amount * controller.amount_translation.w;
             }
             winit::event::VirtualKeyCode::Q => {
-                controller.amount_matrix.z_axis.x = amount * controller.amount_matrix.z_axis.z;
+                controller.amount_translation.y = amount * controller.amount_translation.w;
             }
             winit::event::VirtualKeyCode::E => {
-                controller.amount_matrix.z_axis.y = amount * controller.amount_matrix.z_axis.z;
+                controller.amount_translation.y = -amount * controller.amount_translation.w;
             }
             _ => {}
         }

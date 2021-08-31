@@ -1,11 +1,8 @@
 use crate::component::camera_component;
+use glam::Vec4Swizzles;
 
 pub fn calc_view_matrix(camera: &camera_component::CameraOrientation) -> glam::Mat4 {
     let position = camera.transformation_matrix.w_axis.truncate();
-
-    //todo double check.
-    //this is rhs to get lhs just negate the camera forward.
-    //Matrix View = Inverse Matrix Camera.
 
     let f = -camera.forward.normalize().truncate();
     let r = glam::Vec3::Y.cross(f).normalize();
@@ -42,24 +39,7 @@ pub fn update_camera_orientation(
     controller: &mut camera_component::CameraController,
     delta_time: f32,
 ) {
-    camera.orientation.forward = camera.orientation.transformation_matrix.z_axis;
-    camera.orientation.right = camera.orientation.transformation_matrix.x_axis;
-
-    camera.orientation.transformation_matrix.w_axis += camera.orientation.forward
-        * (controller.amount_matrix.x_axis.x - controller.amount_matrix.x_axis.y)
-        * controller.amount_matrix.x_axis.z
-        * delta_time;
-
-    camera.orientation.transformation_matrix.w_axis += camera.orientation.right
-        * (controller.amount_matrix.y_axis.y - controller.amount_matrix.y_axis.x)
-        * controller.amount_matrix.y_axis.z
-        * delta_time;
-
-    camera.orientation.transformation_matrix.w_axis.y += (controller.amount_matrix.z_axis.x
-        - controller.amount_matrix.z_axis.y)
-        * controller.amount_matrix.z_axis.z
-        * delta_time;
-
+    // Rotation
     let (_, rotation, _) = camera
         .orientation
         .transformation_matrix
@@ -75,40 +55,26 @@ pub fn update_camera_orientation(
 
     let desired_rotation = desired_rotation.normalize();
 
-    let x2 = desired_rotation.x * desired_rotation.x;
-    let y2 = desired_rotation.y * desired_rotation.y;
-    let z2 = desired_rotation.z * desired_rotation.z;
-    let xy = desired_rotation.x * desired_rotation.y;
-    let xz = desired_rotation.x * desired_rotation.z;
-    let yz = desired_rotation.y * desired_rotation.z;
-    let wx = desired_rotation.w * desired_rotation.x;
-    let wy = desired_rotation.w * desired_rotation.y;
-    let wz = desired_rotation.w * desired_rotation.z;
+    controller.amount_rotation = glam::Vec4::W * controller.amount_rotation.w;
 
-    //todo re-look at this the yaw move the camera up and down
-    let rotation = glam::mat3(
-        glam::vec3(
-            1.0f32 - 2.0f32 * y2 - 2.0f32 * z2,
-            2.0f32 * xy + 2.0f32 * wz,
-            2.0f32 * xz - 2.0f32 * wy,
-        ),
-        glam::vec3(
-            2.0f32 * xy - 2.0f32 * wz,
-            1.0f32 - 2.0f32 * x2 - 2.0f32 * z2,
-            2.0f32 * yz + 2.0f32 * wx,
-        ),
-        glam::vec3(
-            2.0f32 * xz + 2.0f32 * wy,
-            2.0f32 * yz - 2.0f32 * wx,
-            1.0f32 - 2.0f32 * x2 - 2.0f32 * y2,
-        ),
+    camera.orientation.forward = camera.orientation.transformation_matrix.z_axis.normalize();
+    camera.orientation.right = camera.orientation.transformation_matrix.x_axis.normalize();
+
+    let mut translation = camera.orientation.transformation_matrix.w_axis;
+
+    translation += camera.orientation.forward * controller.amount_translation.z * delta_time;
+
+    let negate_y = glam::vec4(1.0, 0.0, 1.0, 1.0) * delta_time;
+    translation += camera.orientation.right * controller.amount_translation.x * negate_y;
+
+    translation.y += controller.amount_translation.y * delta_time;
+
+    let affine_transform = glam::Affine3A::from_rotation_translation(
+        desired_rotation,
+        translation.xyz() * translation.w,
     );
 
-    camera.orientation.transformation_matrix.x_axis = rotation.x_axis.extend(0.0);
-    camera.orientation.transformation_matrix.y_axis = rotation.y_axis.extend(0.0);
-    camera.orientation.transformation_matrix.z_axis = rotation.z_axis.extend(0.0);
-
-    controller.amount_rotation = glam::Vec4::W * controller.amount_rotation.w;
+    camera.orientation.transformation_matrix = glam::Mat4::from(affine_transform);
 
     //Projection
     camera.projection.fovy += -controller.amount_scroll.x * controller.amount_scroll.y * delta_time;

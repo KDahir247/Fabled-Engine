@@ -2,6 +2,25 @@ unity 205 threads.
 unreal 157 threads.
 
 
+    //For reference to construct Rotation Matrix
+    /*let x2 = desired_rotation.x * desired_rotation.x;
+        let y2 = desired_rotation.y * desired_rotation.y;
+        let z2 = desired_rotation.z * desired_rotation.z;
+        let xy = desired_rotation.x * desired_rotation.y;
+        let xz = desired_rotation.x * desired_rotation.z;
+        let yz = desired_rotation.y * desired_rotation.z;
+        let wx = desired_rotation.w * desired_rotation.x;
+        let wy = desired_rotation.w * desired_rotation.y;
+        let wz = desired_rotation.w * desired_rotation.z;
+
+        let rotation_matrix = glam::mat3(
+            glam::vec3(1.0 - 2.0 * (y2 + z2), 2.0 * (xy + wz), 2.0 * (xz - wy)),
+            glam::vec3(2.0 * (xy - wz), 1.0 - 2.0 * (x2 + z2), 2.0 * (yz + wx)),
+            glam::vec3(2.0 * (xz + wy), 2.0 * (yz - wx), 1.0 - 2.0 * (x2 + y2)),
+        );
+    */
+
+
     Vision for web
     I want to use elm as the front end and rust as the back end.
 

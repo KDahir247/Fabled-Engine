@@ -24,12 +24,8 @@ pub struct Projection {
 }
 
 pub struct CameraController {
-    //Forward,   Right,   Up
-    //Backward,  Left,    Down
-    //Scalar,    Scalar,  Scalar
-    pub amount_matrix: glam::Mat3,
+    pub amount_translation: glam::Vec4,
 
-    //Pitch, Yaw, Roll, Scalar
     pub amount_rotation: glam::Vec4,
 
     //Amount, Scalar
@@ -67,7 +63,7 @@ impl CameraUniform {
             inv_view: Default::default(),
         };
 
-        uniform_layout.view_position = orientation.transformation_matrix.w_axis.xyz().extend(1.0);
+        uniform_layout.view_position = orientation.transformation_matrix.w_axis;
         //Mvp = PM-1 camera
         //Mmvp = PM-1 camera * M object
 

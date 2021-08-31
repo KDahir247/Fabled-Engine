@@ -86,9 +86,9 @@ fn setup_world_camera(
                 -90.0f32.to_radians(),
                 0.0f32.to_radians(),
             ),
-            glam::vec3(11.0, 2.0, 6.0),
+            glam::vec3(0.0, 2.0, 0.0),
         ),
-        forward: glam::Vec4::Z * -1.0,
+        forward: glam::Vec4::Z,
         right: glam::Vec4::X,
     };
 
@@ -113,11 +113,7 @@ fn setup_world_camera(
     )>()?;
 
     let camera_controller = CameraController {
-        amount_matrix: glam::Mat3::from_cols(
-            glam::Vec3::Z * 40.0,
-            glam::Vec3::Z * 40.0,
-            glam::Vec3::Z * 40.0,
-        ),
+        amount_translation: glam::Vec4::W * 1600.0,
         amount_rotation: glam::Vec4::W / 30.0,
         amount_scroll: glam::Vec2::Y * 30.0,
     };

@@ -2,6 +2,7 @@ use crate::camera::{
     Orientation, Orthographic, PerspectiveDistance, PerspectiveOrientation, Projection,
     ProjectionCoordinate, YAxis,
 };
+use glam::Vec4Swizzles;
 
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -31,7 +32,7 @@ impl CameraMatrix {
         todo!()
     }
 
-    pub fn calculate_view_matrix(
+    pub fn calculate_look_at_matrix(
         &mut self,
         orientation: Orientation,
         coordinate_direction: ProjectionCoordinate,
@@ -73,6 +74,38 @@ impl CameraMatrix {
         ];
 
         self.view = view_matrix;
+    }
+
+    //todo not tested.
+    pub fn calculate_arc_ball_matrix(
+        &mut self,
+        orientation: Orientation,
+        center: Option<[f32; 3]>,
+    ) {
+        let mat4_transformation_representation =
+            glam::Mat4::from_cols_array(&orientation.transformation_matrix);
+
+        //we will not get the translation from this method call
+        let (_, rotation, _) = mat4_transformation_representation.to_scale_rotation_translation();
+
+        let translation = mat4_transformation_representation.w_axis.xyz()
+            / mat4_transformation_representation.w_axis.w;
+
+        let center = glam::Vec3::from(center.unwrap_or([0.0; 3]));
+
+        let rotation_translation =
+            glam::Mat4::from_rotation_translation(rotation.inverse(), -translation);
+        let translation_to_center = glam::Mat4::from_translation(-center);
+
+        let result_view = rotation_translation * translation_to_center;
+
+        self.view = result_view.to_cols_array();
+    }
+
+    pub fn calculate_view_matrix_fast(&mut self, orientation: Orientation) {
+        let mat4_transformation_representation =
+            glam::Mat4::from_cols_array(&orientation.transformation_matrix);
+        self.view = mat4_transformation_representation.inverse().to_cols_array();
     }
 
     pub fn calculate_inverse_view_matrix(&mut self) {
@@ -230,6 +263,6 @@ mod camera_matrix_test {
         println!("{:?}", glam.to_cols_array());
 
         CameraMatrix::default()
-            .calculate_view_matrix(Orientation::default(), ProjectionCoordinate::default());
+            .calculate_look_at_matrix(Orientation::default(), ProjectionCoordinate::default());
     }
 }
