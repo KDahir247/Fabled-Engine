@@ -40,39 +40,39 @@ pub fn update_camera_orientation(
     delta_time: f32,
 ) {
     // Rotation
-    let (_, rotation, _) = camera
+    let (_, current_rotation, _) = camera
         .orientation
         .transformation_matrix
         .to_scale_rotation_translation();
 
-    let desired_rotation = rotation
-        * glam::Quat::from_euler(
-            glam::EulerRot::XYZ,
-            controller.amount_rotation.x.to_radians(),
-            controller.amount_rotation.y.to_radians(),
-            0.0,
-        );
+    let x_rotation = glam::Quat::from_rotation_x(controller.amount_rotation.x.to_radians());
+    let y_rotation = glam::Quat::from_rotation_y(controller.amount_rotation.y.to_radians());
 
-    let desired_rotation = desired_rotation.normalize();
+    let target_rotation = x_rotation * y_rotation;
+
+    let mut desired_rotation = current_rotation * target_rotation;
+
+    desired_rotation = desired_rotation.normalize();
 
     controller.amount_rotation = glam::Vec4::W * controller.amount_rotation.w;
 
     camera.orientation.forward = camera.orientation.transformation_matrix.z_axis.normalize();
     camera.orientation.right = camera.orientation.transformation_matrix.x_axis.normalize();
 
-    let mut translation = camera.orientation.transformation_matrix.w_axis;
+    let mut current_translation = camera.orientation.transformation_matrix.w_axis;
 
-    translation += camera.orientation.forward * controller.amount_translation.z * delta_time;
+    current_translation +=
+        camera.orientation.forward * controller.amount_translation.z * delta_time;
 
     let negate_y = glam::vec4(1.0, 0.0, 1.0, 1.0) * delta_time;
-    translation += camera.orientation.right * controller.amount_translation.x * negate_y;
+    current_translation += camera.orientation.right * controller.amount_translation.x * negate_y;
 
-    translation.y += controller.amount_translation.y * delta_time;
+    current_translation.y += controller.amount_translation.y * delta_time;
 
-    let affine_transform = glam::Affine3A::from_rotation_translation(
-        desired_rotation,
-        translation.xyz() * translation.w,
-    );
+    let desire_translation = current_translation.xyz() / current_translation.w;
+
+    let affine_transform =
+        glam::Affine3A::from_rotation_translation(desired_rotation, desire_translation);
 
     camera.orientation.transformation_matrix = glam::Mat4::from(affine_transform);
 
