@@ -19,7 +19,9 @@ pub fn register_scroll_input_system(
     (&mut camera_controller).fast_iter().for_each(|controller|{
         match input_state.scroll_delta.as_ref().unwrap().scroll_delta{
             winit::event::MouseScrollDelta::LineDelta(_, y_position) => {
-                controller.amount_scroll.x = y_position * controller.amount_scroll.y
+
+                controller.amount_scroll += y_position * 0.03;
+                controller.amount_scroll = controller.amount_scroll.clamp(0.0, 1.0);
             }
 
             winit::event::MouseScrollDelta::PixelDelta(_) => {

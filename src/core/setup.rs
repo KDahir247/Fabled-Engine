@@ -115,7 +115,7 @@ fn setup_world_camera(
     let camera_controller = CameraController {
         amount_translation: glam::Vec4::W * 1600.0,
         amount_rotation: glam::Vec4::W / 30.0,
-        amount_scroll: glam::Vec2::Y * 30.0,
+        amount_scroll: 0.0,
     };
 
     entities.add_entity(camera_controller_storage, camera_controller);

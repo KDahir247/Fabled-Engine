@@ -29,7 +29,7 @@ pub struct CameraController {
     pub amount_rotation: glam::Vec4,
 
     //Amount, Scalar
-    pub amount_scroll: glam::Vec2,
+    pub amount_scroll: f32,
 }
 
 #[repr(C)]

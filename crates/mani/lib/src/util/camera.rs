@@ -56,6 +56,7 @@ pub fn update_camera_orientation(
 
     controller.amount_rotation = glam::Vec4::W * controller.amount_rotation.w;
 
+    // Translation
     camera.orientation.forward = camera.orientation.transformation_matrix.z_axis.normalize();
     camera.orientation.right = camera.orientation.transformation_matrix.x_axis.normalize();
 
@@ -76,14 +77,13 @@ pub fn update_camera_orientation(
 
     camera.orientation.transformation_matrix = glam::Mat4::from(affine_transform);
 
-    //Projection
-    camera.projection.fovy += -controller.amount_scroll.x * controller.amount_scroll.y * delta_time;
+    // Fov
+    let hermite = controller.amount_scroll
+        * controller.amount_scroll
+        * (3.0 - 2.0 * controller.amount_scroll);
 
-    if camera.projection.fovy < 1.0_f32.to_radians() {
-        camera.projection.fovy = 1.0_f32.to_radians();
-    } else if camera.projection.fovy > 179.0_f32.to_radians() {
-        camera.projection.fovy = 179.0_f32.to_radians();
-    }
+    let frac_pi_3 = std::f32::consts::FRAC_PI_3;
+    let pi = std::f32::consts::PI;
 
-    controller.amount_scroll.x = 0.0;
+    camera.projection.fovy = (1.0 - hermite) * frac_pi_3 + hermite * pi;
 }
