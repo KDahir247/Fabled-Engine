@@ -20,6 +20,7 @@ bytemuck = {version = "1.7.0", features = ["derive"]}
 bitflags = "1.2.1"
 glob = "0.3.0"
 fabled_core = {path = "../fabled_core", version = "*"}
+fabled_math = {path = "../fabled_math", version = "*"}
 rayon = {version = "1.5.1"}
 rustc-hash = {version = "1.0.1"}
 ulid = {version = "0.4.1", features = ["serde"] }
@@ -30,7 +31,8 @@ naga = {version = "0.5.0", features = ["wgsl-in", "wgsl-out", "glsl-in", "glsl-o
 ron = "0.6.0"
 
 #Mesh
-glam = {version = "*", features = ["bytemuck"]}
+# Remove later since fabled_math will have all the mathematical calculation and function.
+glam = {version = "0.18.0", features = ["bytemuck"]}
 
 # Miscellaneous
 ansi_term = {version = "0.12.1"}

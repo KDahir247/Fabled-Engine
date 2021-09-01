@@ -1,7 +1,7 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+mod startup;
+mod subsystem;
+mod system;
+
+pub use startup::*;
+pub use subsystem::*;
+pub use system::*;

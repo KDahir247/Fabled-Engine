@@ -38,12 +38,12 @@ impl CameraMatrix {
         coordinate_direction: ProjectionCoordinate,
     ) {
         let Orientation {
-            transformation_matrix,
-            forward,
-            ..
+            transform, forward, ..
         } = orientation;
 
         let coordinate_direction = coordinate_direction as i32;
+
+        let transformation_matrix = transform.get_transformation_matrix();
 
         // We are getting the last column of the transformation matrix to retrieve the translation.
         let position = glam::Mat4::from_cols_array(&transformation_matrix)
@@ -82,8 +82,10 @@ impl CameraMatrix {
         orientation: Orientation,
         center: Option<[f32; 3]>,
     ) {
+        let transformation_matrix = orientation.transform.get_transformation_matrix();
+
         let mat4_transformation_representation =
-            glam::Mat4::from_cols_array(&orientation.transformation_matrix);
+            glam::Mat4::from_cols_array(&transformation_matrix);
 
         //we will not get the translation from this method call
         let (_, rotation, _) = mat4_transformation_representation.to_scale_rotation_translation();
@@ -103,8 +105,11 @@ impl CameraMatrix {
     }
 
     pub fn calculate_view_matrix_fast(&mut self, orientation: Orientation) {
+        let transformation_matrix = orientation.transform.get_transformation_matrix();
+
         let mat4_transformation_representation =
-            glam::Mat4::from_cols_array(&orientation.transformation_matrix);
+            glam::Mat4::from_cols_array(&transformation_matrix);
+
         self.view = mat4_transformation_representation.inverse().to_cols_array();
     }
 
