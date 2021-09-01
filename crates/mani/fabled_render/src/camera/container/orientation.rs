@@ -25,8 +25,9 @@ impl Orientation {
 
         let x_rotation = glam::Quat::from_rotation_x(rotation[0]);
         let y_rotation = glam::Quat::from_rotation_y(rotation[1]);
+        let z_rotation = glam::Quat::from_rotation_z(rotation[2]);
 
-        let target_rotation = x_rotation * y_rotation;
+        let target_rotation = x_rotation * y_rotation * z_rotation;
 
         let mut desired_rotation = current_rotation * target_rotation;
 
@@ -86,6 +87,35 @@ mod orientation_test {
         let mut orientation = Orientation::default();
 
         orientation.update_translation([1.0, 5.0, 2.0]);
-        println!("{:?}", orientation.transform.position);
+
+        let position = orientation.transform.position;
+
+        assert_eq!(position[0], 1.0);
+        assert_eq!(position[1], 5.0);
+        assert_eq!(position[2], 2.0);
+    }
+
+    #[test]
+    fn update_rotation() {
+        // Angle can't be greater than + 180 for quaternion if so it will map to the negative equivalent making the test fail.
+        let rotation_target = [
+            15.03f32.to_radians(),
+            60.123f32.to_radians(),
+            179f32.to_radians(),
+        ];
+
+        let error_threshold = 0.0001;
+        let mut orientation = Orientation::default();
+
+        orientation.update_rotation(rotation_target);
+
+        let rotation = orientation.transform.rotation;
+
+        //we will convert it to euler rotation for test.
+        let (x_rad, y_rad, z_rad) = glam::Quat::from_array(rotation).to_euler(glam::EulerRot::XYZ);
+
+        assert!((x_rad - rotation_target[0]).abs() < error_threshold);
+        assert!((y_rad - rotation_target[1]).abs() < error_threshold);
+        assert!((z_rad - rotation_target[2]).abs() < error_threshold);
     }
 }

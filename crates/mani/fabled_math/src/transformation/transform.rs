@@ -60,3 +60,96 @@ impl Transform {
         transformation_matrix.to_cols_array()
     }
 }
+
+#[cfg(test)]
+mod transform_test {
+    use crate::Transform;
+
+    #[test]
+    fn transformation_matrix() {
+        let threshold = 0.0000001;
+
+        let quaternion = glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            128.0f32.to_radians(),
+            18.5f32.to_radians(),
+            90.4f32.to_radians(),
+        );
+
+        println!("{}", quaternion);
+
+        let position = [3.153, 100.1, 1.5];
+
+        let transform = Transform::new(
+            position,
+            [quaternion.x, quaternion.y, quaternion.z, quaternion.w],
+            [1.0, 1.0, 1.0],
+        );
+
+        let transformation_matrix = transform.get_transformation_matrix();
+
+        let mut m4_transformation_representation =
+            glam::Mat4::from_cols_array(&transformation_matrix);
+
+        let decomposed_translation = m4_transformation_representation.w_axis.truncate();
+
+        assert!(position.eq(&decomposed_translation.to_array()));
+
+        /*let c1 = m4_transformation_representation.x_axis.truncate();
+        let c2 = m4_transformation_representation.y_axis.truncate();
+        let c3 = m4_transformation_representation.z_axis.truncate();
+
+        let angle_x = c3.y.atan2(c3.z).to_degrees();
+        let angle_y = c3.x.atan2((c3.y * c3.y + c3.z * c3.z).sqrt()).to_degrees();
+        let angle_z = c1.y.atan2(c1.x).to_degrees();*/
+
+        let (_scale, rotation, _position) =
+            m4_transformation_representation.to_scale_rotation_translation();
+
+        assert!((rotation.x - quaternion.x).abs() < threshold);
+        assert!((rotation.y - quaternion.y).abs() < threshold);
+        assert!((rotation.z - quaternion.z).abs() < threshold);
+        assert!((rotation.w - quaternion.w).abs() < threshold);
+    }
+
+    #[test]
+    fn rotation_matrix() {
+        let threshold = 0.0000001;
+
+        let quaternion = glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            45.0f32.to_radians(),
+            15.5f32.to_radians(),
+            190.4f32.to_radians(),
+        );
+
+        let transform = Transform::new(
+            [3.0, 2.0, 1.5],
+            [quaternion.x, quaternion.y, quaternion.z, quaternion.w],
+            [1.0, 1.0, 1.0],
+        );
+
+        let rotation_matrix = transform.get_rotation_matrix();
+        let transformation_matrix = transform.get_transformation_matrix();
+
+        //transformation matrix on the 3x3 on the top left should be the rotation matrix if there is no scaling.
+        assert!(rotation_matrix[0].eq(&transformation_matrix[0]));
+        assert!(rotation_matrix[1].eq(&transformation_matrix[1]));
+        assert!(rotation_matrix[2].eq(&transformation_matrix[2]));
+        // last row in the transformation matrix is zero.
+        assert!(rotation_matrix[4].eq(&transformation_matrix[5]));
+        assert!(rotation_matrix[5].eq(&transformation_matrix[6]));
+        // last row in the transformation matrix is zero.
+        assert!(rotation_matrix[6].eq(&transformation_matrix[8]));
+        assert!(rotation_matrix[7].eq(&transformation_matrix[9]));
+        assert!(rotation_matrix[8].eq(&transformation_matrix[10]));
+
+        let rotation_matrix = glam::Mat3::from_cols_array(&rotation_matrix);
+        let quaternion = glam::Quat::from_mat3(&rotation_matrix);
+
+        assert!((quaternion.x - transform.rotation[0]).abs() < threshold);
+        assert!((quaternion.y - transform.rotation[1]).abs() < threshold);
+        assert!((quaternion.z - transform.rotation[2]).abs() < threshold);
+        assert!((quaternion.w - transform.rotation[3]).abs() < threshold);
+    }
+}
