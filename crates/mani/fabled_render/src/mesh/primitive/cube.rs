@@ -87,6 +87,8 @@ impl From<Cube> for Model {
             }
 
             for (index, face) in corners.chunks_exact(4).enumerate() {
+                assert!(face.len().eq(&4));
+
                 let first_vertex_chunk = Vertex {
                     position: face[0].to_array(),
                     tex_coord: [1.0, 0.0],

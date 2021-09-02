@@ -71,6 +71,7 @@ impl From<Cone> for Model {
         });
 
         // Cone vertex
+        //todo improve this.
         for side in 0..=tessellation_slice {
             let (rad_sin, rad_cos) = (angle_inc * side as f32).sin_cos();
 

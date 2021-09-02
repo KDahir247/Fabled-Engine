@@ -1,13 +1,17 @@
+mod aspect_ratio;
 mod camera_matrix;
-mod fov_axis;
+mod clipping_plane;
+mod fov;
 mod orientation;
 mod orthographic;
 mod perspective;
 mod projection;
 mod viewport;
 
+pub use aspect_ratio::*;
 pub use camera_matrix::*;
-pub use fov_axis::*;
+pub use clipping_plane::*;
+pub use fov::*;
 pub use orientation::*;
 pub use orthographic::*;
 pub use perspective::*;
@@ -17,8 +21,8 @@ pub use viewport::*;
 #[cfg(test)]
 mod data_test {
     use crate::camera::{
-        CameraMatrix, FovAxis, Orientation, Orthographic, OrthographicOption, Perspective,
-        PerspectiveDistance, PerspectiveOption, PerspectiveOrientation, Projection,
+        CameraMatrix, ClippingPlane, FovAxis, Orientation, Orthographic, OrthographicOption,
+        Perspective, PerspectiveDistance, PerspectiveOption, PerspectiveOrientation, Projection,
         ProjectionCoordinate, ViewPort, YAxis,
     };
 
@@ -34,7 +38,7 @@ mod data_test {
         println!("projection {}", projection_size);
 
         let camera_orientation_size = std::mem::size_of::<Orientation>();
-        println!("camera orientation {}", camera_orientation_size);
+        assert_eq!(camera_orientation_size & (camera_orientation_size - 1), 0);
 
         let camera_matrix_size = std::mem::size_of::<CameraMatrix>();
         assert_eq!(camera_matrix_size & (camera_matrix_size - 1), 0);
@@ -71,6 +75,9 @@ mod data_test {
 
         let perspective_option_size = std::mem::size_of::<PerspectiveOption>();
         assert_eq!(perspective_option_size & (perspective_option_size - 1), 0);
+
+        let clipping_plane_size = std::mem::size_of::<ClippingPlane>();
+        assert_eq!(clipping_plane_size & (clipping_plane_size - 1), 0);
     }
 
     #[test]
@@ -91,13 +98,13 @@ mod data_test {
         );
 
         let camera_matrix_alignment = std::mem::align_of::<CameraMatrix>();
-        println!("camera matrix {}", camera_matrix_alignment);
+        assert_eq!(camera_matrix_alignment & (camera_matrix_alignment - 1), 0);
 
         let viewport_alignment = std::mem::align_of::<ViewPort>();
-        println!("viewport {}", viewport_alignment);
+        assert_eq!(viewport_alignment & (viewport_alignment - 1), 0);
 
         let fov_axis_alignment = std::mem::align_of::<FovAxis>();
-        println!("fov axis {}", fov_axis_alignment);
+        assert_eq!(fov_axis_alignment & (fov_axis_alignment - 1), 0);
 
         let perspective_orientation_alignment = std::mem::align_of::<PerspectiveOrientation>();
         assert_eq!(
@@ -131,5 +138,8 @@ mod data_test {
             orthographic_option_alignment & (orthographic_option_alignment - 1),
             0
         );
+
+        let clipping_plane_alignment = std::mem::align_of::<ClippingPlane>();
+        assert_eq!(clipping_plane_alignment & (clipping_plane_alignment - 1), 0);
     }
 }

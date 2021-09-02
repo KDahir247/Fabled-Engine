@@ -97,8 +97,21 @@ Back ground Color for the camera.
    Camera wil the lower Priority will be rendered last.
 
 -------------------------------------------------------------------------------
+
+Clipping Plane.
+
+    Far clip plane.
+    Near clip plane.
+
+-------------------------------------------------------------------------------
+Camera Fovy
+
+-------------------------------------------------------------------------------
+
     FUTURE SUPPORT
 
    CullMask Feature for Camera
 
   cull matrix
+  
+Camera resolution

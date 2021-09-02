@@ -28,6 +28,9 @@ impl IcoSphere {
         vertices: &mut Vec<f32>,
         cache: &mut rustc_hash::FxHashMap<usize, usize>,
     ) -> usize {
+        assert!(vertices.len() > 3 * p1 + 2);
+        assert!(vertices.len() > 3 * p2 + 2);
+
         let cantor_encode = p1 + p2;
         let key = ((cantor_encode * (cantor_encode + 1)) << 1) + std::cmp::min(p1, p2); // Cantor's pairing function
 
