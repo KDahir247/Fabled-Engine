@@ -1,6 +1,6 @@
 use crate::camera::{
     Orientation, Orthographic, PerspectiveDistance, PerspectiveOrientation, Projection,
-    ProjectionCoordinate, YAxis,
+    ProjectionCoordinate, ViewPort, YAxis,
 };
 use glam::Vec4Swizzles;
 
@@ -18,17 +18,36 @@ impl CameraMatrix {
     /// 1. From model space to world space by the world matrix,
     /// 2. From world space to view space from the view matrix.
     /// 3. from view space to screen space from the projection matrix.
-    pub fn project(&self, target: [f32; 3]) -> [f32; 3] {
+    pub fn project(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
         //It will need the model matrix, projection matrix and view matrix.
-        todo!()
+        let model_representation = glam::Mat4::from_cols_array(&model);
+        let projection_representation = glam::Mat4::from_cols_array(&self.proj);
+        let view_representation = glam::Mat4::from_cols_array(&self.view);
+
+        //[4.2807946, 0.4794702, 0.90410596]
+        let vector = model_representation
+            * view_representation
+            * projection_representation
+            * glam::Vec4::new(target[0], target[1], target[2], 1.0);
+
+        let normalized_factor = 1.0 / vector.w;
+
+        let project = glam::Vec3::new(
+            viewport.x + (viewport.w * ((vector.x * normalized_factor + 1.0) * 0.5)),
+            viewport.y + (viewport.h * ((-vector.y * normalized_factor + 1.0) * 0.5)),
+            vector.z * normalized_factor,
+        );
+
+        project.to_array()
     }
 
     /// The target position is transformed in the following space to reach model space.
     /// 1. From screen space to view space by the inverse projection matrix.
     /// 2. From view space to world space by the inverse view matrix.
     /// 3. From world space to model space by the inverse of the world matrix.
-    pub fn unproject(&self, target: [f32; 3]) -> [f32; 3] {
+    pub fn unproject(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
         //It will need the the model matrix, projection matrix and the view matrix.
+
         todo!()
     }
 

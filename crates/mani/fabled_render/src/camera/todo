@@ -106,6 +106,9 @@ Clipping Plane.
 -------------------------------------------------------------------------------
 Camera Fovy
 
+ We can get the aspect ratio from doing the following formula.
+    aspect ratio = tan(horizontal_fov / 2.0) / tan(vertical_fov / 2.0)
+
 -------------------------------------------------------------------------------
 
     FUTURE SUPPORT
@@ -113,5 +116,5 @@ Camera Fovy
    CullMask Feature for Camera
 
   cull matrix
-  
+
 Camera resolution
