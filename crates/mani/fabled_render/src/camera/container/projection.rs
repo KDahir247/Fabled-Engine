@@ -29,3 +29,8 @@ impl Default for YAxis {
         Self::Up
     }
 }
+
+#[cfg(test)]
+mod projection_test {
+    //no test needed for projection, since it very primitive
+}

@@ -95,6 +95,12 @@ mod fov_test {
             horizontal_fv.to_degrees()
         );
         assert!(horizontal_new.eq(&horizontal_fv));
+
+        let mut fov = Fov::new(horizontal_fv, FovAxis::Horizontal);
+
+        fov.convert_axis(FovAxis::Vertical, AspectRatio::default());
+
+        assert!(fov.radian.to_degrees().eq(&vertical_new.to_degrees()));
     }
 
     #[test]

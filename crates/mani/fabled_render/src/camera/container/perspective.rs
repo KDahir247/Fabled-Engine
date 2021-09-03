@@ -58,3 +58,8 @@ pub struct PerspectiveOption {
     pub orientation: PerspectiveOrientation,
     pub distance: PerspectiveDistance,
 }
+
+#[cfg(test)]
+mod perspective_test {
+    //no test needed for perspective, since it very primitive
+}

@@ -38,3 +38,8 @@ pub struct OrthographicOption {
     pub direction: ProjectionCoordinate,
     pub y_axis: YAxis,
 }
+
+#[cfg(test)]
+mod orthographic_test {
+    //no test needed for orthographic, since it very primitive
+}
