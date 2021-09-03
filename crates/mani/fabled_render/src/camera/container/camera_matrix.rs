@@ -207,7 +207,7 @@ impl CameraMatrix {
                 let y_axis = y_axis as i32;
 
                 let h = 1.0 / (perspective.fovy.radian * 0.5);
-                
+
                 let w  = h / (perspective.aspect.horizontal / perspective.aspect.vertical);
                 let near_min_far = perspective.clipping.near - perspective.clipping.far;
 

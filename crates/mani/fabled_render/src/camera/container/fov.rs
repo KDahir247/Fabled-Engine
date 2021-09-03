@@ -7,7 +7,7 @@ pub enum FovScalingAlgorithm {
     Anamorphic,
     //PixelBased, Not using since the engine is targeted to 3d
     VerticalMinus,
-    Stretch,
+    Stretch, //
 }
 
 impl Default for FovScalingAlgorithm {
