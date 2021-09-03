@@ -2,6 +2,7 @@ use crate::camera::{
     Orientation, Orthographic, PerspectiveDistance, PerspectiveOrientation, Projection,
     ProjectionCoordinate, ViewPort, YAxis,
 };
+
 use glam::Vec4Swizzles;
 
 #[repr(C)]
@@ -19,7 +20,6 @@ impl CameraMatrix {
     /// 2. From world space to view space from the view matrix.
     /// 3. from view space to screen space from the projection matrix.
     pub fn project(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
-        //It will need the model matrix, projection matrix and view matrix.
         let model_representation = glam::Mat4::from_cols_array(&model);
         let projection_representation = glam::Mat4::from_cols_array(&self.proj);
         let view_representation = glam::Mat4::from_cols_array(&self.view);
@@ -77,7 +77,6 @@ impl CameraMatrix {
 
         let transformation_matrix = transform.get_transformation_matrix();
 
-        // We are getting the last column of the transformation matrix to retrieve the translation.
         let position = glam::Mat4::from_cols_array(&transformation_matrix)
             .w_axis
             .to_array();
@@ -97,7 +96,6 @@ impl CameraMatrix {
             -position.dot(z_axis),
         );
 
-        // Column Major matrix
         let view_matrix = [
             x_axis.x, y_axis.x, z_axis.x, 0.0, //0
             x_axis.y, y_axis.y, z_axis.y, 0.0, //1
@@ -119,7 +117,6 @@ impl CameraMatrix {
         let mat4_transformation_representation =
             glam::Mat4::from_cols_array(&transformation_matrix);
 
-        //we will not get the translation from this method call
         let (_, rotation, _) = mat4_transformation_representation.to_scale_rotation_translation();
 
         let translation = mat4_transformation_representation.w_axis.xyz()
@@ -167,35 +164,29 @@ impl CameraMatrix {
                     y_axis = option.y_axis;
                 }
 
-                let Orthographic {
-                    right,
-                    left, top,
-                    bottom, z_near,
-                    z_far,
+                let Orthographic{
+                    right, left, top, bottom, clipping
                 } = orthographic;
 
                 let right_min_left = right - left;
                 let right_plus_left = right + left;
                 let top_min_bottom = top - bottom;
                 let top_plus_bottom = top + bottom;
-                let far_min_near = z_far - z_near;
+                let far_min_near = clipping.far - clipping.near;
 
                 let dir = direction as i32;
                 let axis =  y_axis as i32;
 
                 let y_direction = 0.5 * axis as f32;
 
-                // Coordinate direction is range from -1 to 1 because we are following DirectX matrix and not OpenGL
-                // Since OpenGL clip space for z is -1, to 1 while DirectX is 0 to 1
                 let coordinate_direction = dir as f32;
 
-                // Column Major matrix
                 let orthographic_matrix =
                     [
                         0.5 * right_min_left, 0.0,  0.0, 0.0,
                         0.0, y_direction * top_min_bottom, 0.0, 0.0,
                         0.0, 0.0, coordinate_direction / far_min_near, 0.0,
-                        -(right_plus_left/ right_min_left), -(top_plus_bottom/ top_min_bottom), -(z_near / far_min_near), 1.0
+                        -(right_plus_left/ right_min_left), -(top_plus_bottom/ top_min_bottom), -(clipping.near / far_min_near), 1.0
                     ];
 
 
@@ -215,34 +206,30 @@ impl CameraMatrix {
 
                 let y_axis = y_axis as i32;
 
-                //1/tan(x) == cot(x)
-                // h = cot(fovY/2)
-                let h = 1.0 / (perspective.fovy * 0.5);
-
-                // w = h / aspect ratio
-                let w  = h / perspective.aspect;
-                let near_min_far = perspective.z_near - perspective.z_far;
+                let h = 1.0 / (perspective.fovy.radian * 0.5);
+                
+                let w  = h / (perspective.aspect.horizontal / perspective.aspect.vertical);
+                let near_min_far = perspective.clipping.near - perspective.clipping.far;
 
                 let direction = direction as i32;
 
-                // Matrix Formula specified in microsoft's directx documentation.
-                let mut c3r3 = perspective.z_far / near_min_far;
-                let mut c4r3 = perspective.z_near * perspective.z_far / near_min_far;
+                let mut c3r3 = perspective.clipping.far / near_min_far;
+                let mut c4r3 = perspective.clipping.near * perspective.clipping.near / near_min_far;
 
                 match distance{
                     PerspectiveDistance::Standard => {
                         if orientation == PerspectiveOrientation::Reversed {
-                            c3r3 = -perspective.z_far / near_min_far -1.0;
-                            c4r3 = -perspective.z_near * perspective.z_far / near_min_far
+                            c3r3 = -perspective.clipping.far / near_min_far -1.0;
+                            c4r3 = -perspective.clipping.near * perspective.clipping.far / near_min_far
                         }
                     }
                     PerspectiveDistance::Infinite => {
                         c3r3 = -1.0;
-                        c4r3 = -perspective.z_near;
+                        c4r3 = -perspective.clipping.near;
 
                         if orientation == PerspectiveOrientation::Reversed{
                             c3r3 = 0.0;
-                            c4r3 = perspective.z_near
+                            c4r3 = perspective.clipping.near
                         }
 
                     }
@@ -271,35 +258,5 @@ impl CameraMatrix {
     }
 }
 
-//    pub view_position: [f32; 4], //transformation matrix orientation .xyz.extend(1.0)
-
 #[cfg(test)]
-mod camera_matrix_test {
-    use crate::camera::{CameraMatrix, Orientation, ProjectionCoordinate, ViewPort};
-
-    #[test]
-    fn linear_to_glam_mat4_test() {
-        let linear_matrix = [
-            1., 2., 3., 4., //1
-            5., 6., 7., 8., // 2
-            9., 10., 11., 12., // 3
-            13., 14., 15., 16.,
-        ];
-
-        let glam_rep = glam::Mat4::from_cols_array(&linear_matrix);
-
-        println!("{:#?}", glam_rep);
-
-        let glam = glam::mat4(
-            glam::vec4(2., 4., 6., 8.),
-            glam::vec4(10., 12., 14., 16.),
-            glam::vec4(18., 20., 22., 24.),
-            glam::vec4(26., 28., 30., 32.),
-        );
-
-        println!("{:?}", glam.to_cols_array());
-
-        CameraMatrix::default()
-            .calculate_look_at_matrix(Orientation::default(), ProjectionCoordinate::default());
-    }
-}
+mod camera_matrix_test {}

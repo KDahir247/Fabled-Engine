@@ -1,4 +1,4 @@
-use crate::camera::{ProjectionCoordinate, YAxis};
+use crate::camera::{ClippingPlane, ProjectionCoordinate, YAxis};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Orthographic {
@@ -6,8 +6,7 @@ pub struct Orthographic {
     pub left: f32,
     pub top: f32,
     pub bottom: f32,
-    pub z_near: f32,
-    pub z_far: f32,
+    pub clipping: ClippingPlane,
 }
 
 impl Default for Orthographic {
@@ -17,8 +16,19 @@ impl Default for Orthographic {
             left: 0.0,
             top: 1.0,
             bottom: 0.0,
-            z_near: 0.1,
-            z_far: 2000.0,
+            clipping: ClippingPlane::default(),
+        }
+    }
+}
+
+impl Orthographic {
+    pub fn new(right: f32, left: f32, top: f32, bottom: f32, z_near: f32, z_far: f32) -> Self {
+        Self {
+            right,
+            left,
+            top,
+            bottom,
+            clipping: ClippingPlane::new(z_far, z_near),
         }
     }
 }

@@ -41,7 +41,6 @@ impl Orientation {
         ];
     }
 
-    // local coordinates (model's forward and not the world forward).
     pub fn update_translation(&mut self, translation: [f32; 3]) {
         let mut transformation_matrix = self.transform.get_transformation_matrix();
         let m4_transformation_representation = glam::Mat4::from_cols_array(&transformation_matrix);
@@ -90,9 +89,9 @@ mod orientation_test {
 
         let position = orientation.transform.position;
 
-        assert_eq!(position[0], 1.0);
-        assert_eq!(position[1], 5.0);
-        assert_eq!(position[2], 2.0);
+        assert!(position[0].eq(&1.0));
+        assert!(position[1].eq(&5.0));
+        assert!(position[2].eq(&2.0));
     }
 
     #[test]

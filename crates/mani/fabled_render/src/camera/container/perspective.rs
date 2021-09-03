@@ -1,4 +1,4 @@
-use crate::camera::{ProjectionCoordinate, YAxis};
+use crate::camera::{AspectRatio, ClippingPlane, Fov, ProjectionCoordinate, YAxis};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PerspectiveOrientation {
@@ -26,20 +26,27 @@ impl Default for PerspectiveDistance {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Perspective {
-    pub fovy: f32,
-    /// Screen width / Screen height
-    pub aspect: f32,
-    pub z_near: f32,
-    pub z_far: f32,
+    pub fovy: Fov,
+    pub aspect: AspectRatio,
+    pub clipping: ClippingPlane,
 }
 
 impl Default for Perspective {
     fn default() -> Self {
         Self {
-            fovy: 60.0,
-            aspect: 1920.0 / 1080.0,
-            z_near: 0.1,
-            z_far: 2000.0,
+            fovy: Fov::default(),
+            aspect: AspectRatio::default(),
+            clipping: ClippingPlane::default(),
+        }
+    }
+}
+
+impl Perspective {
+    pub fn new(fov: Fov, aspect: AspectRatio, z_far: f32, z_near: f32) -> Self {
+        Self {
+            fovy: fov,
+            aspect,
+            clipping: ClippingPlane::new(z_far, z_near),
         }
     }
 }

@@ -88,8 +88,7 @@ mod transform_test {
 
         let transformation_matrix = transform.get_transformation_matrix();
 
-        let mut m4_transformation_representation =
-            glam::Mat4::from_cols_array(&transformation_matrix);
+        let m4_transformation_representation = glam::Mat4::from_cols_array(&transformation_matrix);
 
         let decomposed_translation = m4_transformation_representation.w_axis.truncate();
 

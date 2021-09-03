@@ -28,6 +28,7 @@ impl Default for FovAxis {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Fov {
     pub radian: f32,
     pub axis: FovAxis,
@@ -36,7 +37,7 @@ pub struct Fov {
 impl Default for Fov {
     fn default() -> Self {
         Self {
-            radian: std::f32::consts::FRAC_PI_3,
+            radian: 60.0f32.to_radians(),
             axis: Default::default(),
         }
     }
@@ -98,6 +99,8 @@ mod fov_test {
 
     #[test]
     fn conversion_test() {
+        let threshold = 0.00001;
+
         let mut fov = Fov::default();
 
         let initial_fov = fov.radian;
@@ -110,6 +113,7 @@ mod fov_test {
 
         fov.convert_axis(FovAxis::Vertical, AspectRatio::default());
 
-        assert!(initial_fov.to_degrees().eq(&fov.radian.to_degrees()));
+        println!("{} {}", initial_fov.to_degrees(), fov.radian.to_degrees());
+        assert!((initial_fov - fov.radian).abs() < threshold);
     }
 }

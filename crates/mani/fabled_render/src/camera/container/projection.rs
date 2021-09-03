@@ -1,6 +1,5 @@
 use crate::camera::{Orthographic, OrthographicOption, Perspective, PerspectiveOption};
 
-//Lhs and Rhs, Direction (Y Up, Y Down).
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Projection {
     Orthographic(Orthographic, Option<OrthographicOption>),
