@@ -24,7 +24,6 @@ impl CameraMatrix {
         let projection_representation = glam::Mat4::from_cols_array(&self.proj);
         let view_representation = glam::Mat4::from_cols_array(&self.view);
 
-        //[4.2807946, 0.4794702, 0.90410596]
         let vector = model_representation
             * view_representation
             * projection_representation
@@ -46,9 +45,23 @@ impl CameraMatrix {
     /// 2. From view space to world space by the inverse view matrix.
     /// 3. From world space to model space by the inverse of the world matrix.
     pub fn unproject(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
-        //It will need the the model matrix, projection matrix and the view matrix.
+        let model_representation = glam::Mat4::from_cols_array(&model);
+        let projection_representation = glam::Mat4::from_cols_array(&self.proj);
+        let view_representation = glam::Mat4::from_cols_array(&self.view);
 
-        todo!()
+        let matrix =
+            (projection_representation * (model_representation * view_representation)).inverse();
+
+        let vector = glam::vec4(
+            2.0 * (target[0] - viewport.x) / viewport.w - 1.0,
+            2.0 * (target[1] - viewport.y) / viewport.h - 1.0,
+            target[2],
+            1.0,
+        );
+
+        let result = matrix * vector;
+
+        (result.xyz() / result.w).to_array()
     }
 
     pub fn calculate_look_at_matrix(
@@ -262,7 +275,7 @@ impl CameraMatrix {
 
 #[cfg(test)]
 mod camera_matrix_test {
-    use crate::camera::{CameraMatrix, Orientation, ProjectionCoordinate};
+    use crate::camera::{CameraMatrix, Orientation, ProjectionCoordinate, ViewPort};
 
     #[test]
     fn linear_to_glam_mat4_test() {

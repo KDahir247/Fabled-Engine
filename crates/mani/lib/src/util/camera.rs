@@ -8,12 +8,15 @@ pub fn calc_view_matrix(camera: &camera_component::CameraOrientation) -> glam::M
     let r = glam::Vec3::Y.cross(f).normalize();
     let u = f.cross(r);
 
-    glam::mat4(
+    let a = glam::mat4(
         glam::vec4(r.x, u.x, f.x, 0.0),
         glam::vec4(r.y, u.y, f.y, 0.0),
         glam::vec4(r.z, u.z, f.z, 0.0),
         glam::vec4(-position.dot(r), -position.dot(u), -position.dot(f), 1.0),
-    )
+    );
+
+    println!("view {:?}", a.to_cols_array());
+    a
 }
 
 pub fn calc_proj_matrix(projection: &camera_component::Projection) -> glam::Mat4 {
@@ -21,7 +24,7 @@ pub fn calc_proj_matrix(projection: &camera_component::Projection) -> glam::Mat4
     let w = h / projection.aspect;
     let near_min_far = projection.znear - projection.zfar;
 
-    glam::mat4(
+    let a = glam::mat4(
         glam::vec4(w, 0.0, 0.0, 0.0),
         glam::vec4(0.0, h, 0.0, 0.0),
         glam::vec4(0.0, 0.0, projection.zfar / near_min_far, -1.0),
@@ -31,7 +34,9 @@ pub fn calc_proj_matrix(projection: &camera_component::Projection) -> glam::Mat4
             projection.znear * projection.zfar / near_min_far,
             0.0,
         ),
-    )
+    );
+    println!("projection {:?}", a.to_cols_array());
+    a
 }
 
 pub fn update_camera_orientation(
