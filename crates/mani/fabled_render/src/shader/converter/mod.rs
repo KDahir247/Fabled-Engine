@@ -4,7 +4,7 @@ pub use shader_convert::*;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Version {
-    ///`core` glsl
+    /// `core` glsl
     Desktop(u16),
     //`es` glsl
     Embedded(u16),
@@ -25,7 +25,7 @@ pub enum SpvOptions {
     Default,
     Custom {
         maj_min: (u8, u8),
-        //capabilities: Option<naga::FastHashSet<naga::back::spv::Capability>>,
+        // capabilities: Option<naga::FastHashSet<naga::back::spv::Capability>>,
     },
 }
 
@@ -56,19 +56,19 @@ mod data_test {
 
     #[test]
     fn data_size() {
-        //version
+        // version
         let version_size = std::mem::size_of::<Version>();
         assert_eq!(version_size & (version_size - 1), 0);
 
-        //result
+        // result
         let shader_result_size = std::mem::size_of::<ShaderConvertResult>();
         assert_eq!(shader_result_size & (shader_result_size - 1), 0);
 
-        //spv option
+        // spv option
         let spv_option_size = std::mem::size_of::<SpvOptions>();
         assert_eq!(spv_option_size & (spv_option_size - 1), 0);
 
-        //option
+        // option
         let shader_option_size = std::mem::size_of::<ShaderConvertOption>();
         assert_eq!(shader_option_size & (shader_option_size - 1), 0);
     }

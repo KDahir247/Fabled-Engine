@@ -5,7 +5,7 @@ use serde::*;
 pub struct TextureOptions {
     offset: [f32; 3],
     scale: [f32; 3],
-    //turbulence: [f64; 3],
+    // turbulence: [f64; 3],
 }
 
 impl Default for TextureOptions {
@@ -13,7 +13,7 @@ impl Default for TextureOptions {
         Self {
             offset: [0.0, 0.0, 0.0],
             scale: [1.0, 1.0, 1.0],
-            //turbulence: [0.0, 0.0, 0.0],
+            // turbulence: [0.0, 0.0, 0.0],
         }
     }
 }

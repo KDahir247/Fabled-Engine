@@ -1,4 +1,4 @@
-//todo will be convert to a Rect when implemented in the math module
+// todo will be convert to a Rect when implemented in the math module
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct ViewPort {
     pub x: f32,

@@ -112,7 +112,8 @@ impl Window {
                         }
 
                         winit::event::WindowEvent::DroppedFile(file_path) => {
-                            //todo add an entity to the world that will have the file_path and the string to represent the path to the shader.
+                            // todo add an entity to the world that will have the file_path and the
+                            // string to represent the path to the shader.
                             let model_id = world.add_entity((ModelData {
                                 path: file_path,
                                 shader_path: "../../shader/standard.wgsl".to_string(),

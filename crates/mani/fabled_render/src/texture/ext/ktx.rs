@@ -1,6 +1,6 @@
+use crate::texture::_core::convert::TryFrom;
 use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
 use crate::texture::ext::KTXDescriptor;
-use crate::texture::_core::convert::TryFrom;
 
 use libktx_rs as ktx;
 
@@ -126,11 +126,11 @@ impl KtxTextureLoader {
 
         let mut dimensions = Extent3d::default();
         let mut mip_level: u32 = 1;
-        //let mut faces = 0;
+        // let mut faces = 0;
 
         stream_tex
             .iterate_levels(|_mip, _face, width, height, depth, _| {
-                //faces = face;
+                // faces = face;
                 dimensions.width = width as u32;
                 dimensions.height = height as u32;
                 dimensions.depth_or_array_layers = depth as u32;

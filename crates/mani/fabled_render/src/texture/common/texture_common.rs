@@ -1,5 +1,6 @@
-//Directory of required texture for the game engine.
-//maybe use glob to get all the files that match a pattern, since the current solution is only possible for windows.
+// Directory of required texture for the game engine.
+// maybe use glob to get all the files that match a pattern, since the current
+// solution is only possible for windows.
 
 // Test DDS Texture
 pub const DDS_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\ddsyellow.dds";

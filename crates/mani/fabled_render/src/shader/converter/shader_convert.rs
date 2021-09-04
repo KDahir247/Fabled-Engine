@@ -19,10 +19,10 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
             let mut spv_option = naga::back::spv::Options::default();
 
             if let SpvOptions::Custom {
-                maj_min, //capabilities,
+                maj_min, // capabilities,
             } = option
             {
-                //spv_option.capabilities = capabilities;
+                // spv_option.capabilities = capabilities;
                 spv_option.lang_version = maj_min;
             };
 
@@ -86,7 +86,7 @@ mod converter_test {
     use crate::shader::converter::*;
     use crate::shader::init_shader_test_env;
 
-    //unwrapping None fails the test since it throws an panic.
+    // unwrapping None fails the test since it throws an panic.
     #[test]
     fn convert_wgsl_to() {
         init_shader_test_env();
@@ -161,7 +161,7 @@ mod converter_test {
         )
         .unwrap();
 
-        //GLSL
+        // GLSL
 
         if let ShaderConvertResult::Glsl(data) = glsl_desktop_representation {
             println!("GLSL Desktop INTERPRETATION\n {}", data);
@@ -189,7 +189,7 @@ mod converter_test {
             );
         }
 
-        //WGSL
+        // WGSL
 
         let wgsl_representation = convert_shader(ShaderConvertOption::Wgsl, spv_path).unwrap();
 
@@ -223,7 +223,7 @@ mod converter_test {
         let wgsl_compute_representation =
             convert_shader(ShaderConvertOption::Wgsl, &glsl_comp_path).unwrap();
 
-        //WGSL
+        // WGSL
 
         if let ShaderConvertResult::Wgsl(data) = wgsl_vertex_representation {
             println!("WEB_GPU VERTEX INTERPRETATION\n {}", data);
@@ -274,7 +274,7 @@ mod converter_test {
         )
         .unwrap();
 
-        //SPIR-V
+        // SPIR-V
 
         if let ShaderConvertResult::Spv(v) = spir_v_vertex_representation {
             println!("SPV VERTEX INTERPRETATION\n {:?}", v);
@@ -312,7 +312,7 @@ mod converter_test {
 
         convert_shader(
             ShaderConvertOption::Glsl {
-                version: Version::Embedded(330), //Supported es glsl versions [300, 310, 320]
+                version: Version::Embedded(330), // Supported es glsl versions [300, 310, 320]
             },
             wgsl_path,
         )
@@ -320,7 +320,8 @@ mod converter_test {
 
         convert_shader(
             ShaderConvertOption::Glsl {
-                version: Version::Desktop(460), // Supported core glsl versions [330, 400, 410, 420, 430, 440, 450]
+                version: Version::Desktop(460), /* Supported core glsl versions [330, 400, 410,
+                                                 * 420, 430, 440, 450] */
             },
             wgsl_path,
         )

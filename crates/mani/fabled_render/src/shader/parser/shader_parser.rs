@@ -25,8 +25,9 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
             result?
         }
         "spv" => {
-            // when we create filesystem module a more polished implementation will be substituted
-            // currently this will be sufficient, since it prevent TOCTTOU (Time-of-check to time-of-use) attack
+            // when we create filesystem module a more polished implementation will be
+            // substituted currently this will be sufficient, since it prevent
+            // TOCTTOU (Time-of-check to time-of-use) attack
             let mut render_module = env!("CARGO_MANIFEST_DIR").to_string();
             render_module.push_str("\\shader\\shader_dump");
             std::fs::create_dir_all(render_module.clone()).unwrap();
@@ -80,7 +81,7 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
         _ => naga::Module::default(),
     };
 
-    //validate shader module. Specifying a harsh validation on the shader.
+    // validate shader module. Specifying a harsh validation on the shader.
     module.validate(naga::valid::ValidationFlags::all())?;
 
     Ok(module)
@@ -212,7 +213,7 @@ mod shader_test {
 
         let target = std::path::Path::new(".\\src\\shader\\shader\\glsl\\test\\encode_test.glsl");
 
-        //we want something to read from
+        // we want something to read from
         encode_test();
 
         let decode_shader = decode_shader(target);

@@ -3,9 +3,10 @@ use fabled_core::prime::container::wrapper::Wrapper;
 use naga::{ScalarKind, TypeInner, VectorSize};
 use serde::*;
 
-//todo don't like how this is implemented. Should be re looked at later (MaterialTarget 80 bytes)
-// should be 8 bytes or 24 bytes at max. The code can get big very fast if adding supported for 3x2,
-// 2x3 etc... matrix and extra support for primitive.
+// todo don't like how this is implemented. Should be re looked at later
+// (MaterialTarget 80 bytes) should be 8 bytes or 24 bytes at max. The code can
+// get big very fast if adding supported for 3x2, 2x3 etc... matrix and extra
+// support for primitive.
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum EmptyTarget {
@@ -65,7 +66,7 @@ impl From<MaterialTarget> for Option<MaterialAttributes> {
                 Some(MaterialAttributes::Matrix)
             }
             MaterialTarget::Sampler(_) => Some(MaterialAttributes::Sampler),
-            //MaterialTarget::Texture(_) => MaterialTargetFormat::Texture,
+            // MaterialTarget::Texture(_) => MaterialTargetFormat::Texture,
         }
     }
 }
@@ -87,7 +88,8 @@ impl From<&naga::TypeInner> for MaterialTarget {
                     _ => MaterialTarget::None,
                 },
                 VectorSize::Tri => match kind {
-                    //Aligned data only. Any Tri-Vector will result to a Tri-Vector that is extend by 1 to a Quad-Vector.
+                    // Aligned data only. Any Tri-Vector will result to a Tri-Vector that is extend
+                    // by 1 to a Quad-Vector.
                     ScalarKind::Sint => MaterialTarget::Vec4SignedInt(Wrapper::new([0i32; 4])),
                     ScalarKind::Uint => MaterialTarget::Vec4UnsignedInt(Wrapper::new([0u32; 4])),
                     ScalarKind::Float => MaterialTarget::Vec4Float(Wrapper::new([0.0f32; 4])),
@@ -106,7 +108,8 @@ impl From<&naga::TypeInner> for MaterialTarget {
                     _ => MaterialTarget::None,
                 },
                 VectorSize::Tri => match rows {
-                    //Aligned data only. Any Tri-Matrix will result to a 4x4 Matrix where the last row and column are zero-ed out
+                    // Aligned data only. Any Tri-Matrix will result to a 4x4 Matrix where the last
+                    // row and column are zero-ed out
                     VectorSize::Tri => MaterialTarget::Matrix4x4Float(Wrapper::new([0.0f32; 16])),
                     _ => MaterialTarget::None,
                 },
@@ -115,7 +118,7 @@ impl From<&naga::TypeInner> for MaterialTarget {
                     _ => MaterialTarget::None,
                 },
             },
-            //TypeInner::Image { .. } => MaterialTarget::Texture(&"".to_string().into_bytes()),
+            // TypeInner::Image { .. } => MaterialTarget::Texture(&"".to_string().into_bytes()),
             TypeInner::Sampler { comparison } => {
                 MaterialTarget::Sampler(Wrapper::new(*comparison as u8))
             }

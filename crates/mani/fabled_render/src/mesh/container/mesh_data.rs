@@ -5,5 +5,5 @@ use crate::mesh::container::Vertex;
 pub struct Mesh {
     pub vertices: Vec<Vertex>,
     pub material_id: u32,
-    pub indices: Vec<usize>, //todo convert this to indices
+    pub indices: Vec<usize>, // todo convert this to indices
 }

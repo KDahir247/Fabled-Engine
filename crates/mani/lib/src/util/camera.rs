@@ -17,7 +17,7 @@ pub fn calc_view_matrix(camera: &camera_component::CameraOrientation) -> glam::M
 }
 
 pub fn calc_proj_matrix(projection: &camera_component::Projection) -> glam::Mat4 {
-    let h = 1.0 / (projection.fovy * 0.5); //1/tan(x) == cot(x)
+    let h = 1.0 / (projection.fovy * 0.5); // 1/tan(x) == cot(x)
     let w = h / projection.aspect;
     let near_min_far = projection.znear - projection.zfar;
 

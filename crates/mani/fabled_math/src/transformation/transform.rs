@@ -94,13 +94,13 @@ mod transform_test {
 
         assert!(position.eq(&decomposed_translation.to_array()));
 
-        /*let c1 = m4_transformation_representation.x_axis.truncate();
-        let c2 = m4_transformation_representation.y_axis.truncate();
-        let c3 = m4_transformation_representation.z_axis.truncate();
-
-        let angle_x = c3.y.atan2(c3.z).to_degrees();
-        let angle_y = c3.x.atan2((c3.y * c3.y + c3.z * c3.z).sqrt()).to_degrees();
-        let angle_z = c1.y.atan2(c1.x).to_degrees();*/
+        // let c1 = m4_transformation_representation.x_axis.truncate();
+        // let c2 = m4_transformation_representation.y_axis.truncate();
+        // let c3 = m4_transformation_representation.z_axis.truncate();
+        //
+        // let angle_x = c3.y.atan2(c3.z).to_degrees();
+        // let angle_y = c3.x.atan2((c3.y * c3.y + c3.z * c3.z).sqrt()).to_degrees();
+        // let angle_z = c1.y.atan2(c1.x).to_degrees();
 
         let (_scale, rotation, _position) =
             m4_transformation_representation.to_scale_rotation_translation();
@@ -131,7 +131,8 @@ mod transform_test {
         let rotation_matrix = transform.get_rotation_matrix();
         let transformation_matrix = transform.get_transformation_matrix();
 
-        //transformation matrix on the 3x3 on the top left should be the rotation matrix if there is no scaling.
+        // transformation matrix on the 3x3 on the top left should be the rotation
+        // matrix if there is no scaling.
         assert!(rotation_matrix[0].eq(&transformation_matrix[0]));
         assert!(rotation_matrix[1].eq(&transformation_matrix[1]));
         assert!(rotation_matrix[2].eq(&transformation_matrix[2]));

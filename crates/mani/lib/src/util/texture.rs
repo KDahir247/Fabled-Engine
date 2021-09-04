@@ -3,7 +3,7 @@ use fabled_render::texture::{
     KTXDescriptor, KtxTextureLoader, KtxTranscodeFlag, KtxTranscodeFormat,
 };
 
-//todo clean solution.
+// todo clean solution.
 pub fn load<P: AsRef<std::path::Path>>(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
@@ -12,26 +12,25 @@ pub fn load<P: AsRef<std::path::Path>>(
     //-------------------------For Png and JPEG Support-------------------------
     //-------------------------Works-------------------------
 
-    /*let dyn_img = if path.as_ref().exists() {
-            match path.as_ref().extension() {
-                None => image::open(std::path::Path::new(constant::invalid_map_path().as_str()))?,
-                Some(_) => image::open(path.as_ref())?, //todo check extension if it is a jpg use rgb. if it is a png use rgba
-            }
-        } else {
-            image::open(std::path::Path::new(constant::invalid_map_path().as_str()))?
-        };
-
-    //-------------------------For DDS Support-------------------------
-    //-------------------------Works-------------------------
-
-    */
+    // let dyn_img = if path.as_ref().exists() {
+    // match path.as_ref().extension() {
+    // None => image::open(std::path::Path::new(constant::invalid_map_path().
+    // as_str()))?, Some(_) => image::open(path.as_ref())?, //todo check
+    // extension if it is a jpg use rgb. if it is a png use rgba }
+    // } else {
+    // image::open(std::path::Path::new(constant::invalid_map_path().as_str()))?
+    // };
+    //
+    // -------------------------For DDS Support-------------------------
+    // -------------------------Works-------------------------
+    //
 
     //-------------------------For KTX2 Support-------------------------
 
     from_image(device, queue, path.as_ref().to_str().unwrap().to_string())
 }
 
-//todo don't get the size from winit::dpi::PhysicalSize, but an Texture struct.
+// todo don't get the size from winit::dpi::PhysicalSize, but an Texture struct.
 pub fn create_depth_texture(device: &wgpu::Device, size: winit::dpi::PhysicalSize<u32>) -> Texture {
     let extend3d = wgpu::Extent3d {
         width: size.width,
@@ -76,22 +75,23 @@ fn from_image(
     queue: &wgpu::Queue,
     _test: String,
 ) -> anyhow::Result<Texture> {
-    // todo Maybe make a abstract library is Sol that will read the extension of the file and will use the proper decode
-    //  if it fails to read then it will place a png purple image to signify that the texture has not been loaded and failed to load.
-    //todo arguments seem kind of big
+    // todo Maybe make a abstract library is Sol that will read the extension of the
+    // file and will use the proper decode  if it fails to read then it will
+    // place a png purple image to signify that the texture has not been loaded and
+    // failed to load. todo arguments seem kind of big
 
-    /* let dds = DdsTextureLoader::default();
-    let dyn_img = dds
-        .load(
-            _test,
-            &fabled_render::TextureDescriptor {
-                flip_axis: Default::default(),
-                dimensions: Default::default(),
-                format: 18,
-                usage: 6,
-            },
-        )
-        .unwrap();*/
+    // let dds = DdsTextureLoader::default();
+    // let dyn_img = dds
+    // .load(
+    // _test,
+    // &fabled_render::TextureDescriptor {
+    // flip_axis: Default::default(),
+    // dimensions: Default::default(),
+    // format: 18,
+    // usage: 6,
+    // },
+    // )
+    // .unwrap();
 
     let ktx = KtxTextureLoader::from_stream(
         std::fs::File::open(_test.as_str()).unwrap(),

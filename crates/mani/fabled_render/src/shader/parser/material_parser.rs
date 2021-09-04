@@ -72,7 +72,8 @@ impl MaterialParser {
                 }
             }
 
-            // Handle case where the binding variable in the shader is a sampler or a texture.
+            // Handle case where the binding variable in the shader is a sampler or a
+            // texture.
             let (group, binding) = (res_binding.group, res_binding.binding);
 
             let material_node = MaterialNode {

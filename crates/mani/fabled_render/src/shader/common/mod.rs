@@ -1,4 +1,4 @@
-//All the required shaders for the game engine will be kept in common.
+// All the required shaders for the game engine will be kept in common.
 
 mod glsl_common;
 mod spv_common;

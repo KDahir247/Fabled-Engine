@@ -14,8 +14,7 @@ impl ImageProcessing {
         color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
     ) -> anyhow::Result<ImageProcessing>
     where
-        T: image::Pixel<Subpixel = u8>,
-    {
+        T: image::Pixel<Subpixel = u8>, {
         let dyn_texture =
             image::ImageBuffer::from_raw(texture.size.width, texture.size.height, texture.data)
                 .expect(
@@ -104,8 +103,9 @@ impl ImageProcessing {
     }
 
     pub fn crop(mut self, start_point: Extent2d, end_point: Extent2d) -> Self {
-        //width = width value - x;  to get the length to crop from the width if the crop point start at x.
-        //height = height value - y; to get the length to crop from the height if the crop point start at y.
+        // width = width value - x;  to get the length to crop from the width if the
+        // crop point start at x. height = height value - y; to get the length
+        // to crop from the height if the crop point start at y.
 
         let delta_extent_width = end_point.width - start_point.width;
         let delta_extent_height = end_point.height - start_point.height;
@@ -218,7 +218,8 @@ mod image_processing_test {
             dds_texture.size, dds_texture.color_type
         );
 
-        //HDR file not supported for image processing only 8 bit channels currently(16 bit channel will be supported later).
+        // HDR file not supported for image processing only 8 bit channels currently(16
+        // bit channel will be supported later).
 
         // JPEG
         let jpg_loader = JpgTextureLoader::default();
@@ -304,7 +305,7 @@ mod image_processing_test {
         let result = img_proc.blur(10.0).build();
 
         write_back(PNG_TEST_TEXTURE_BLUR, result);
-        //Draw the result to a file
+        // Draw the result to a file
     }
 
     #[test]

@@ -77,8 +77,8 @@ pub fn transcode(
     })
 }
 
-//KTX file is not supported.
-//TODO ffi causes heap corruption
+// KTX file is not supported.
+// TODO ffi causes heap corruption
 #[cfg(test)]
 mod basis_transcode_test {
     use crate::texture::compression::*;

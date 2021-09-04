@@ -15,18 +15,17 @@ pub struct CameraMatrix {
 }
 
 impl CameraMatrix {
-    /// The target position is transformed in the following spaces to reach screen space.
-    /// 1. From model space to world space by the world matrix,
-    /// 2. From world space to view space from the view matrix.
+    /// The target position is transformed in the following spaces to reach
+    /// screen space. 1. From model space to world space by the world
+    /// matrix, 2. From world space to view space from the view matrix.
     /// 3. from view space to screen space from the projection matrix.
     pub fn project(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
         let model_representation = glam::Mat4::from_cols_array(&model);
         let projection_representation = glam::Mat4::from_cols_array(&self.proj);
         let view_representation = glam::Mat4::from_cols_array(&self.view);
 
-        let vector = model_representation
-            * view_representation
-            * projection_representation
+        let vector = projection_representation
+            * (model_representation * view_representation)
             * glam::Vec4::new(target[0], target[1], target[2], 1.0);
 
         let normalized_factor = 1.0 / vector.w;
@@ -40,10 +39,11 @@ impl CameraMatrix {
         project.to_array()
     }
 
-    /// The target position is transformed in the following space to reach model space.
-    /// 1. From screen space to view space by the inverse projection matrix.
-    /// 2. From view space to world space by the inverse view matrix.
-    /// 3. From world space to model space by the inverse of the world matrix.
+    /// The target position is transformed in the following space to reach model
+    /// space. 1. From screen space to view space by the inverse projection
+    /// matrix. 2. From view space to world space by the inverse view
+    /// matrix. 3. From world space to model space by the inverse of the
+    /// world matrix.
     pub fn unproject(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
         let model_representation = glam::Mat4::from_cols_array(&model);
         let projection_representation = glam::Mat4::from_cols_array(&self.proj);
@@ -97,16 +97,16 @@ impl CameraMatrix {
         );
 
         let view_matrix = [
-            x_axis.x, y_axis.x, z_axis.x, 0.0, //0
-            x_axis.y, y_axis.y, z_axis.y, 0.0, //1
-            x_axis.z, y_axis.z, z_axis.z, 0.0, //2
-            w.x, w.y, w.z, 1.0, //3
+            x_axis.x, y_axis.x, z_axis.x, 0.0, // 0
+            x_axis.y, y_axis.y, z_axis.y, 0.0, // 1
+            x_axis.z, y_axis.z, z_axis.z, 0.0, // 2
+            w.x, w.y, w.z, 1.0, // 3
         ];
 
         self.view = view_matrix;
     }
 
-    //todo not tested.
+    // todo not tested.
     pub fn calculate_arc_ball_matrix(
         &mut self,
         orientation: Orientation,
@@ -259,4 +259,89 @@ impl CameraMatrix {
 }
 
 #[cfg(test)]
-mod camera_matrix_test {}
+mod camera_matrix_test {
+    use crate::camera::{
+        CameraMatrix, Orientation, Perspective, Projection, ProjectionCoordinate, ViewPort,
+    };
+
+
+    #[test]
+    fn calculate_project() {
+        // Predefine data such as rotation translation and point target.
+        let rotation_target = [
+            30.0f32.to_radians(),
+            25.0f32.to_radians(),
+            160.0f32.to_radians(),
+        ];
+
+        let translation_target = [20.0, 1.0, 0.3];
+
+        let point_target = [1.0, 15.0, 20.2];
+
+        // Create camera orientation and update translation and rotation.
+        let mut camera_orientation = Orientation::default();
+        camera_orientation.update_translation(translation_target);
+        camera_orientation.update_rotation(rotation_target);
+
+        // Create a camera matrix and create a view matrix and a projection matrix.
+        let mut camera_matrix = CameraMatrix::default();
+
+        camera_matrix.calculate_look_at_matrix(
+            camera_orientation,
+            ProjectionCoordinate::RightHandCoordinate,
+        );
+
+        let perspective = Perspective::default();
+        let projection = Projection::Perspective(perspective, None);
+
+        camera_matrix.calculate_projection_matrix(projection);
+
+
+        println!("Perspective {:?}", camera_matrix.proj);
+        println!("View {:?}", camera_matrix.view);
+
+        // Create viewport and calculate the project.
+        let viewport = ViewPort::default();
+
+        let project_vector = camera_matrix.project(
+            point_target,
+            glam::Mat4::IDENTITY.to_cols_array(),
+            &viewport,
+        );
+
+        println!("Projected Vector is {:?}", project_vector);
+
+        assert!(!project_vector[0].is_nan());
+        assert!(!project_vector[1].is_nan());
+        assert!(!project_vector[2].is_nan());
+
+        // Tested in other game engine "project" function 1.0128548  -0.17180979
+        // 1.0000995
+        let tested_result = [1.0128548, -0.17180979, 1.0000995];
+
+        assert!(tested_result[0].eq(&project_vector[0]));
+        assert!(tested_result[1].eq(&project_vector[1]));
+        assert!(tested_result[2].eq(&project_vector[2]));
+    }
+
+    #[test]
+    fn calculate_unproject() {}
+
+    #[test]
+    fn calculate_look_at_matrix() {}
+
+    #[test]
+    fn calculate_arc_ball_matrix() {}
+
+    #[test]
+    fn calculate_view_matrix_fast() {}
+
+    #[test]
+    fn calculate_inverse_matrix() {}
+
+    #[test]
+    fn calculate_projection_matrix() {}
+
+    #[test]
+    fn calculate_inverse_projection_matrix() {}
+}

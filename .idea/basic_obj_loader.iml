@@ -150,6 +150,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_ai/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_animation/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_audio/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_concurrency/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_filesystem/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_gpu/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_input/src" isTestSource="false" />

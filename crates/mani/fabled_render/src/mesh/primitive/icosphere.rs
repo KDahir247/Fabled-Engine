@@ -14,7 +14,7 @@ impl Default for IcoSphere {
 
 impl IcoSphere {
     pub fn new(radius: f32, tessellation: u32) -> IcoSphere {
-        //clamp tessellation to a value.
+        // clamp tessellation to a value.
 
         Self {
             radius,
@@ -36,11 +36,11 @@ impl IcoSphere {
 
         match cache.remove(&key) {
             Some(value) => {
-                //Already Cached
+                // Already Cached
                 value
             }
             None => {
-                //Cache it
+                // Cache it
                 let len = vertices.len() / 3;
                 cache.insert(key, len);
 
@@ -48,7 +48,7 @@ impl IcoSphere {
                 let y = (vertices[3 * p1 + 1] + vertices[3 * p2 + 1]) * 0.5; // Y
                 let z = (vertices[3 * p1 + 2] + vertices[3 * p2 + 2]) * 0.5; // Z
 
-                //Normalize it
+                // Normalize it
                 let vec = glam::const_vec3a!([x, y, z]).normalize();
 
                 vertices.extend(vec.to_array());

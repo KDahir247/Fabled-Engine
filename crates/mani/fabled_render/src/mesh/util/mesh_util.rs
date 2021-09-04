@@ -72,7 +72,7 @@ pub fn calculate_normals(mesh: &mut Mesh, instruction: NormalInstruction) {
     }
 }
 
-//todo got to look over this and test it before using it in code source.
+// todo got to look over this and test it before using it in code source.
 pub fn calculate_tangents(mesh: &mut Mesh) {
     let triangles = &mesh.indices;
 

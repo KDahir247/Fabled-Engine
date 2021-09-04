@@ -13,8 +13,7 @@ impl ColorProcessing {
         color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
     ) -> anyhow::Result<ColorProcessing>
     where
-        T: image::Pixel<Subpixel = u8>,
-    {
+        T: image::Pixel<Subpixel = u8>, {
         let dyn_texture =
             image::ImageBuffer::from_raw(texture.size.width, texture.size.height, texture.data)
                 .context("ColorTarget matches requirement for creating ImageBuffer from texture")?;
@@ -107,8 +106,7 @@ mod tests {
         texture: Texture,
         color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
     ) where
-        T: image::Pixel<Subpixel = u8>,
-    {
+        T: image::Pixel<Subpixel = u8>, {
         let img_buf =
             image::ImageBuffer::from_raw(texture.size.width, texture.size.height, texture.data)
                 .expect("Created image buffer");

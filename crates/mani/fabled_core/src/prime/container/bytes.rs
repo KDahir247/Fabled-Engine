@@ -1,4 +1,5 @@
-// Generic are constrained to Plain Old Types that can Zeroed and struct that contain only POD that can Zeroed.
+// Generic are constrained to Plain Old Types that can Zeroed and struct that
+// contain only POD that can Zeroed.
 
 use crate::prime::container::wrapper::Wrapper;
 

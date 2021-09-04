@@ -1,6 +1,6 @@
 use crate::texture::container::BorderColor;
 
-//Filter and Sampler
+// Filter and Sampler
 #[repr(align(32))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TextureSampler {

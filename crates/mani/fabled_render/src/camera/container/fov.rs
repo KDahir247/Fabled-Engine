@@ -1,11 +1,11 @@
 use crate::camera::AspectRatio;
 
-//todo future implementation
+// todo future implementation
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum FovScalingAlgorithm {
     HorizontalPlus,
     Anamorphic,
-    //PixelBased, Not using since the engine is targeted to 3d
+    // PixelBased, Not using since the engine is targeted to 3d
     VerticalMinus,
     Stretch, //
 }

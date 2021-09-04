@@ -1,7 +1,7 @@
-//todo maybe remove both
+// todo maybe remove both
 pub struct Texture {
-    pub view: wgpu::TextureView, //24 bytes todo maybe remove this.
-    pub sampler: wgpu::Sampler,  //16 bytes
+    pub view: wgpu::TextureView, // 24 bytes todo maybe remove this.
+    pub sampler: wgpu::Sampler,  // 16 bytes
 }
 
 pub struct Core {

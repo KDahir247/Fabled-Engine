@@ -96,7 +96,8 @@ mod orientation_test {
 
     #[test]
     fn update_rotation() {
-        // Angle can't be greater than + 180 for quaternion if so it will map to the negative equivalent making the test fail.
+        // Angle can't be greater than + 180 for quaternion if so it will map to the
+        // negative equivalent making the test fail.
         let rotation_target = [
             15.03f32.to_radians(),
             60.123f32.to_radians(),
@@ -110,7 +111,7 @@ mod orientation_test {
 
         let rotation = orientation.transform.rotation;
 
-        //we will convert it to euler rotation for test.
+        // we will convert it to euler rotation for test.
         let (x_rad, y_rad, z_rad) = glam::Quat::from_array(rotation).to_euler(glam::EulerRot::XYZ);
 
         assert!((x_rad - rotation_target[0]).abs() < error_threshold);

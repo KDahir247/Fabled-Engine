@@ -4,7 +4,7 @@ use std::ops::{Index, IndexMut};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialTree {
-    //8 u8 for more metadata
+    // 8 u8 for more metadata
     branch: Vec<MaterialBranch>,
 }
 

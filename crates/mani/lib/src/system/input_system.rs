@@ -15,7 +15,7 @@ pub fn register_scroll_input_system(
 ) {
     input_state.scroll_delta = Some(scroll_state);
 
-    //camera controller
+    // camera controller
     (&mut camera_controller).fast_iter().for_each(|controller|{
         match input_state.scroll_delta.as_ref().unwrap().scroll_delta{
             winit::event::MouseScrollDelta::LineDelta(_, y_position) => {
@@ -38,7 +38,7 @@ pub fn register_key_input_system(
 ) {
     input_state.key_state = Some(key_state);
 
-    //camera controller
+    // camera controller
     (&mut camera_controller).fast_iter().for_each(|controller| {
         let key_state = input_state.key_state.as_ref().unwrap();
 
@@ -83,7 +83,7 @@ pub fn register_mouse_motion_system(
             && input_state.mouse_state.as_ref().unwrap().state
                 == winit::event::ElementState::Pressed;
 
-        //camera controller
+        // camera controller
         if condition {
             (&mut camera_controller).fast_iter().for_each(|controller| {
                 controller.amount_rotation.x -=

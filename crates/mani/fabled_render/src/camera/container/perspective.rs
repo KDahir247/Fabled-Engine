@@ -61,5 +61,5 @@ pub struct PerspectiveOption {
 
 #[cfg(test)]
 mod perspective_test {
-    //no test needed for perspective, since it very primitive
+    // no test needed for perspective, since it very primitive
 }

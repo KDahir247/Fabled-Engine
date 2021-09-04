@@ -46,7 +46,8 @@ pub enum CompressionQuality {
 pub struct MipmapDescriptor {
     pub generate_mipmap: bool,
     pub color_space: ColorSpace,
-    /// Smallest dimensions mipmap that will be generated. (Keep it to the power of two.)
+    /// Smallest dimensions mipmap that will be generated. (Keep it to the power
+    /// of two.)
     pub smallest_dimensions: u32,
 }
 
@@ -59,17 +60,18 @@ pub struct UserData {
 #[repr(align(16))]
 #[derive(Default, Debug, Copy, Clone)]
 pub struct RDODescriptor {
-    /// Enable/disable U_ASTC RDO post-processing and set U_ASTC RDO quality scalar to X. Lower
-    /// values=higher quality/larger LZ compressed files, higher values=lower quality/smaller LZ
-    /// compressed files. Good range to try is [.2-4]
+    /// Enable/disable U_ASTC RDO post-processing and set U_ASTC RDO quality
+    /// scalar to X. Lower values=higher quality/larger LZ compressed files,
+    /// higher values=lower quality/smaller LZ compressed files. Good range
+    /// to try is [.2-4]
     pub rdo_uastc_quality_scalar: Option<f32>,
 
-    /// Disable backend's endpoint rate distortion optimizations (slightly faster, less noisy
-    /// output, but lower quality per output bit)
+    /// Disable backend's endpoint rate distortion optimizations (slightly
+    /// faster, less noisy output, but lower quality per output bit)
     pub no_endpoint_rdo: bool,
 
-    /// Disable backend's selector rate distortion optimizations (slightly faster, less noisy
-    /// output, but lower quality per output bit)
+    /// Disable backend's selector rate distortion optimizations (slightly
+    /// faster, less noisy output, but lower quality per output bit)
     pub no_selector_rdo: bool,
 }
 
@@ -146,8 +148,8 @@ pub enum TranscodeTextureFormat {
     /// FXT1_RGB
     FXT1RGB = 17,
 
-    // ATC and FXT1 formats are not supported by some format type such as KTX2 as there are no equivalent VKFormats.
-    // Don't use with KTX2 format, KTX1 is supported though.
+    // ATC and FXT1 formats are not supported by some format type such as KTX2 as there are no
+    // equivalent VKFormats. Don't use with KTX2 format, KTX1 is supported though.
     /// PVRTC2_4_RGB
     PVRTC24RGB = 18,
     /// PVRTC2_4_RGBA
@@ -237,7 +239,7 @@ mod compression_test {
 
     #[test]
     fn data_size() {
-        //Test for data alignment.
+        // Test for data alignment.
         let basis_compression_algorithm_size = std::mem::size_of::<BasisCompressionFormat>();
         assert_eq!(
             basis_compression_algorithm_size & (basis_compression_algorithm_size - 1),

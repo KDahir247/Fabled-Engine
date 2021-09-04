@@ -2,10 +2,10 @@ use crate::component::render_component::Texture;
 use wgpu::util::DeviceExt;
 
 pub struct Material {
-    pub mat_name: String,           //24 bytes
-    pub mat_color: ColorRaw,        //64 bytes
-    pub mat_mapping: Mapping,       //40 bytes
-    pub mat_group: wgpu::BindGroup, //16 bytes
+    pub mat_name: String,           // 24 bytes
+    pub mat_color: ColorRaw,        // 64 bytes
+    pub mat_mapping: Mapping,       // 40 bytes
+    pub mat_group: wgpu::BindGroup, // 16 bytes
 }
 
 impl Material {
@@ -98,11 +98,11 @@ impl Material {
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct ColorRaw {
-    //RGB-Scalar
+    // RGB-Scalar
     pub ambient_color: glam::Vec4,
     pub diffuse_color: glam::Vec4,
     pub specular_color: glam::Vec4,
-    //Shininess, Dissolve, Optical Density
+    // Shininess, Dissolve, Optical Density
     pub factor: glam::Vec3,
     pub ___padding___: u32,
 }
@@ -118,7 +118,7 @@ pub struct VertexRaw {
     pub tex_coord: glam::Vec2,
     pub normal: glam::Vec3,
     pub tangent: glam::Vec4,
-    pub bi_tangent: glam::Vec4, //we don't want the bi_tangent in the shader
+    pub bi_tangent: glam::Vec4, // we don't want the bi_tangent in the shader
 }
 
 impl VertexRaw {

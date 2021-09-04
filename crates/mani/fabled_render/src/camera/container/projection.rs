@@ -32,5 +32,5 @@ impl Default for YAxis {
 
 #[cfg(test)]
 mod projection_test {
-    //no test needed for projection, since it very primitive
+    // no test needed for projection, since it very primitive
 }

@@ -34,15 +34,14 @@ impl Capsule {
         mut longitude: u8,
         profile: CapsuleUvProfile,
     ) -> Capsule {
-        /*
-            Sanity check for the size of latitude, longitude, and ring to prevent
-            Latitude from reaching beyond 90, longitude from reaching above 180,
-            and ring from reaching beyond 5.
-
-           Prevent increasing latitude and longitude intentional or unintentional
-           to the point where it cause  s extreme repeating KiPageFault and MmAccessFault resulting in
-           cache thrashing or memory can't be allocated error.
-        */
+        // Sanity check for the size of latitude, longitude, and ring to prevent
+        // Latitude from reaching beyond 90, longitude from reaching above 180,
+        // and ring from reaching beyond 5.
+        //
+        // Prevent increasing latitude and longitude intentional or unintentional
+        // to the point where it cause  s extreme repeating KiPageFault and
+        // MmAccessFault resulting in cache thrashing or memory can't be
+        // allocated error.
 
         latitude = latitude.min(90);
         longitude = longitude.min(180);
@@ -61,10 +60,8 @@ impl Capsule {
 
 impl From<Capsule> for Model {
     fn from(capsule: Capsule) -> Self {
-        /*
-          code adapted with modifications from https://behreajj.medium.com/making-a-capsule-mesh-via-script-in-five-3d-environments-c2214abf02db
-          provided by bevy. Thank you Bevy Community! \(ᵔᵕᵔ)/
-        */
+        // code adapted with modifications from https://behreajj.medium.com/making-a-capsule-mesh-via-script-in-five-3d-environments-c2214abf02db
+        // provided by bevy. Thank you Bevy Community! \(ᵔᵕᵔ)/
 
         let Capsule {
             radius,
@@ -80,7 +77,7 @@ impl From<Capsule> for Model {
         let latitude = latitude as usize;
 
         let calc_middle = rings.min(1);
-        let half_lats = latitude >> 1; //equal to latitude / 2;
+        let half_lats = latitude >> 1; // equal to latitude / 2;
         let half_lats_sub_1 = half_lats - 1;
         let half_lats_sub_2 = half_lats_sub_1 - 1;
         let rings_add_1 = rings + 1;
@@ -88,25 +85,25 @@ impl From<Capsule> for Model {
         let half_depth = depth * 0.5;
         let summit = half_depth + radius;
 
-        //Vertex index offsets;
+        // Vertex index offsets;
         let vert_offset_north_hemisphere = longitude;
         let vert_offset_north_equator =
             vert_offset_north_hemisphere + longs_add_1 * half_lats_sub_1;
         let vertex_offset_cylinder = vert_offset_north_equator + longs_add_1;
-        let vertex_offset_south_equator = vertex_offset_cylinder + longs_add_1 * rings; //if ring is zero then vertex_offset_cylinder + 0;
+        let vertex_offset_south_equator = vertex_offset_cylinder + longs_add_1 * rings; // if ring is zero then vertex_offset_cylinder + 0;
 
         let vert_offset_south_hemisphere = vertex_offset_south_equator + longs_add_1;
         let vert_offset_south_polar = vert_offset_south_hemisphere + longs_add_1 * half_lats_sub_2;
         let vert_offset_south_cap = vert_offset_south_polar + longs_add_1;
 
-        //Initialize arrays.
+        // Initialize arrays.
         let vert_len = vert_offset_south_cap + longitude;
 
         let mut vs: Vec<glam::Vec3A> = vec![glam::Vec3A::ZERO; vert_len];
         let mut vts: Vec<glam::Vec2> = vec![glam::Vec2::ZERO; vert_len];
         let mut vns: Vec<glam::Vec3A> = vec![glam::Vec3A::ZERO; vert_len];
 
-        let inv_long = 1.0 / longitude as f32; //to_tex_horizontal
+        let inv_long = 1.0 / longitude as f32; // to_tex_horizontal
         let inv_lats = 1.0 / latitude as f32;
 
         let to_theta = 2.0 * std::f32::consts::PI * inv_long;
@@ -114,9 +111,10 @@ impl From<Capsule> for Model {
         let to_tex_vertical = inv_lats * 2.0;
 
         let aspect_ratio_target = [
-            radius / (depth + radius + radius), //CapsuleUvProfile::Aspect
-            half_lats as f32 / (rings_add_1 + latitude) as f32, //CapsuleUvProfile::Uniform
-            0.333_333_34, //CapsuleUvProfile::Fixed f32 representation of 1.0 / 3.0
+            radius / (depth + radius + radius), // CapsuleUvProfile::Aspect
+            half_lats as f32 / (rings_add_1 + latitude) as f32, // CapsuleUvProfile::Uniform
+            0.333_333_34,                       /* CapsuleUvProfile::Fixed f32 representation of
+                                                 * 1.0 / 3.0 */
         ];
 
         let vt_aspect_ratio = aspect_ratio_target[v_profile as usize];
@@ -262,7 +260,7 @@ impl From<Capsule> for Model {
             }
         }
 
-        //Triangle indices.
+        // Triangle indices.
 
         // Stride is 3 for polar triangles;
         // stride is 6 for two triangles forming a quad.

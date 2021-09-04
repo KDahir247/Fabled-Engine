@@ -8,8 +8,9 @@ pub enum ThreadOperation {
     /// on the number of CPUs available on the current system.
     Automatic,
 
-    /// Multiple threaded or single threaded execution that run a operation in the
-    /// current thread if it is single else it will use the user defined number of threads to use.
+    /// Multiple threaded or single threaded execution that run a operation in
+    /// the current thread if it is single else it will use the user defined
+    /// number of threads to use.
     Custom { thread_amount: usize },
 }
 

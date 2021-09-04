@@ -21,7 +21,7 @@ pub fn super_compress(
 
     compression_params.set_basis_format(compression_desc.compression_format.into());
 
-    //Set the compression quality
+    // Set the compression quality
     match compression_desc.compression_quality {
         CompressionQuality::Minimum => {
             compression_params.set_etc1s_quality_level(basis_universal::ETC1S_QUALITY_MIN);
@@ -31,20 +31,20 @@ pub fn super_compress(
             compression_params.set_etc1s_quality_level(basis_universal::ETC1S_QUALITY_MAX);
             compression_params.set_uastc_quality_level(basis_universal::UASTC_QUALITY_MAX);
         }
-        _ => {} //Default compression quality for ETC1S and U_ASTC4x4 is set on creation
+        _ => {} // Default compression quality for ETC1S and U_ASTC4x4 is set on creation
     }
 
     compression_params.set_color_space(compression_desc.color_space.into());
 
     if let Some(mip_desc) = compression_desc.mip_map_desc {
-        //Set the mip map config
+        // Set the mip map config
         compression_params.set_generate_mipmaps(mip_desc.generate_mipmap);
         compression_params.set_mip_color_space(mip_desc.color_space.into());
         compression_params.set_mipmap_smallest_dimension(mip_desc.smallest_dimensions);
     }
 
     if let Some(rdo_desc) = compression_desc.rdo_desc {
-        //Set the rdo config
+        // Set the rdo config
         compression_params.set_rdo_uastc(rdo_desc.rdo_uastc_quality_scalar);
         compression_params.set_no_endpoint_rdo(rdo_desc.no_endpoint_rdo);
         compression_params.set_no_selector_rdo(rdo_desc.no_selector_rdo);
@@ -76,8 +76,9 @@ pub fn super_compress(
     })
 }
 
-//KTX file is not supported.
-//TODO ffi causes heap corruption. Source : CompressorParams dropping and Compressor.Init. Description: exit code: 0xc0000374, STATUS_HEAP_CORRUPTION
+// KTX file is not supported.
+// TODO ffi causes heap corruption. Source : CompressorParams dropping and
+// Compressor.Init. Description: exit code: 0xc0000374, STATUS_HEAP_CORRUPTION
 #[cfg(test)]
 mod basis_compression_test {
     use crate::texture::codecs::{JpgTextureLoader, TextureDescriptor};

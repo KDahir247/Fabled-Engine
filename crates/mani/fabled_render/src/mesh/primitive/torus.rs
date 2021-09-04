@@ -100,7 +100,7 @@ impl From<Torus> for Model {
                 let face_indices = [i1 + seg, i2 + seg, i3 + seg, i2 + seg, i4 + seg, i3 + seg];
 
                 {
-                    //memcpy face_indices to 6 * i1 element slice of indices.
+                    // memcpy face_indices to 6 * i1 element slice of indices.
                     let offset = i1 * 6;
                     let (target_left, _) = indices[offset..].split_at_mut(6);
                     target_left.copy_from_slice(&face_indices);

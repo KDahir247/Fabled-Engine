@@ -26,7 +26,7 @@ pub fn create_model_pipeline_system(
         });
 
         let render_pipeline = {
-            //Shader Module
+            // Shader Module
             let shader_module =
                 render
                     .core
@@ -39,7 +39,7 @@ pub fn create_model_pipeline_system(
                         flags: wgpu::ShaderFlags::all(),
                     });
 
-            //Pipeline Layout
+            // Pipeline Layout
             let pipeline_layout =
                 render
                     .core

@@ -32,17 +32,17 @@ impl Plane {
         mut tessellation_height: usize,
         instruction: RenderInstruction,
     ) -> Plane {
-        /*
-            Sanity check for the size of tesselation_width and tessellation_height.
-            Prevent increasing tessellation_height and tessellation_width intentional or unintentional
-            to the point where it causes repeating KiPageFault and MmAccessFault resulting in
-            cache thrashing or memory can't be allocated error.
-
-            Unity's plane mesh width and height tessellation caps at 10 width x 10 height.
-
-            If the end user want more tesselation on the plane create another plane and align it with the
-            previous plane.
-        */
+        // Sanity check for the size of tesselation_width and tessellation_height.
+        // Prevent increasing tessellation_height and tessellation_width intentional or
+        // unintentional to the point where it causes repeating KiPageFault and
+        // MmAccessFault resulting in cache thrashing or memory can't be
+        // allocated error.
+        //
+        // Unity's plane mesh width and height tessellation caps at 10 width x 10
+        // height.
+        //
+        // If the end user want more tesselation on the plane create another plane and
+        // align it with the previous plane.
 
         tessellation_width = tessellation_width.min(10);
         tessellation_height = tessellation_height.min(10);
@@ -91,7 +91,8 @@ impl From<Plane> for Model {
             for x in 0..w_line {
                 let xf = x as f32;
 
-                // Normal are point in forward side of the plane even on double sided and bi_tangent is assume the statement.
+                // Normal are point in forward side of the plane even on double sided and
+                // bi_tangent is assume the statement.
                 vertices.push(Vertex {
                     position: [xf * scale_x - width * 0.5, 0.0, yf * scale_y - height * 0.5],
                     tex_coord: [inv_tessellation_width * xf, inv_tessellation_height * yf],
@@ -119,8 +120,8 @@ impl From<Plane> for Model {
                 indices.push(res_0 + 1);
             }
 
-            //Calculate back face indices if back face is enabled.
-            //Two sided
+            // Calculate back face indices if back face is enabled.
+            // Two sided
             for x in 0..tessellation_width * plane_instruction as usize {
                 let res_0 = seg_0 + x;
                 let res_1 = seg_1 + x;

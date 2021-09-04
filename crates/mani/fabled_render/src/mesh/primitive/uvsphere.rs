@@ -24,10 +24,8 @@ impl UvSphere {
 
 impl From<UvSphere> for Model {
     fn from(uv_sphere: UvSphere) -> Self {
-        /*
-             code adapted with modifications from https://behreajj.medium.com/making-a-capsule-mesh-via-script-in-five-3d-environments-c2214abf02db
-             provided by bevy. Thank you Bevy Community! \(ᵔᵕᵔ)/
-        */
+        // code adapted with modifications from https://behreajj.medium.com/making-a-capsule-mesh-via-script-in-five-3d-environments-c2214abf02db
+        // provided by bevy. Thank you Bevy Community! \(ᵔᵕᵔ)/
 
         let vertex_size = uv_sphere.tessellation_stack * uv_sphere.tessellation_sector;
         let indices_size = (vertex_size << 1) * 3;

@@ -21,7 +21,8 @@ impl Cone {
         height: f32,
         apex_position: [f32; 3],
     ) -> Cone {
-        //We can't technically have a cone with less than three tessellation slice for the base. right?
+        // We can't technically have a cone with less than three tessellation slice for
+        // the base. right?
         tessellation_slice = tessellation_slice.max(3);
         Self {
             radius,
@@ -46,7 +47,9 @@ impl From<Cone> for Model {
 
         let apex_position = glam::const_vec3a!(apex_position);
 
-        //let base_to_apex_dir = apex_position.normalize(); // hard coded. Vec3A::Zero should be base position. (apex_position - glam::Vec3A::ZERO) //center instead of zero.
+        // let base_to_apex_dir = apex_position.normalize(); // hard coded. Vec3A::Zero
+        // should be base position. (apex_position - glam::Vec3A::ZERO) //center instead
+        // of zero.
         let forward_dir = glam::Vec3A::X.cross(apex_position.normalize());
         let center = apex_position + (-apex_position.normalize() * height);
 
@@ -71,13 +74,13 @@ impl From<Cone> for Model {
         });
 
         // Cone vertex
-        //todo improve this.
+        // todo improve this.
         for side in 0..=tessellation_slice {
             let (rad_sin, rad_cos) = (angle_inc * side as f32).sin_cos();
 
             let vertex = center + (glam::Vec3A::X * rad_cos + forward_dir * rad_sin) * radius;
 
-            //slant_height = slant_height_vector.length();
+            // slant_height = slant_height_vector.length();
             let slant_height_vector = glam::Vec3A::Y - vertex;
 
             let vertex_direction = vertex.normalize();
@@ -94,8 +97,8 @@ impl From<Cone> for Model {
             });
         }
 
-        //todo improve this
-        //indices
+        // todo improve this
+        // indices
         for point in 2..tessellation_slice + 2 {
             indices.push(0); // top
             indices.push(point + 1); // left

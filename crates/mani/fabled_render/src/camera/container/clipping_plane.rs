@@ -34,7 +34,8 @@ mod clipping_plane_test {
         println!("near {} far {}", clipping_plane.near, clipping_plane.far);
         assert!(clipping_plane.far > clipping_plane.near);
 
-        //We cant technically have a zero near for orthographic, but this isn't ok for prospective so we will add the same constraint to orthographic.
+        // We cant technically have a zero near for orthographic, but this isn't ok for
+        // prospective so we will add the same constraint to orthographic.
         let clipping_plane = ClippingPlane::new(1000.0, 0.0);
 
         assert!(clipping_plane.near.ne(&0.0));

@@ -83,11 +83,12 @@ pub enum KtxTranscodeFormat {
     // 4 bit per channel
     RGBA4444 = 16,
 
-    /// Value for automatic selection of RGB or RGBA depending if alpha is present
+    /// Value for automatic selection of RGB or RGBA depending if alpha is
+    /// present
     ETC = 22,
     BCLOR3 = 23,
 
-    ///No Selection specified
+    /// No Selection specified
     NoSelection = 2147483647,
 }
 

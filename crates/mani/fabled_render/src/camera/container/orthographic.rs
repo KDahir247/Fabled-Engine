@@ -41,5 +41,5 @@ pub struct OrthographicOption {
 
 #[cfg(test)]
 mod orthographic_test {
-    //no test needed for orthographic, since it very primitive
+    // no test needed for orthographic, since it very primitive
 }
