@@ -39,6 +39,10 @@ impl Orientation {
             desired_rotation.z,
             desired_rotation.w,
         ];
+
+        // Recalculate forward and right direction.
+        self.forward = (desired_rotation * glam::Vec3::Z).to_array();
+        self.right = (desired_rotation * glam::Vec3::X).to_array();
     }
 
     pub fn update_translation(&mut self, translation: [f32; 3]) {
@@ -117,5 +121,37 @@ mod orientation_test {
         assert!((x_rad - rotation_target[0]).abs() < error_threshold);
         assert!((y_rad - rotation_target[1]).abs() < error_threshold);
         assert!((z_rad - rotation_target[2]).abs() < error_threshold);
+    }
+
+
+    #[test]
+    pub fn recalculate_orientation() {
+        // Angle can't be greater than + 180 for quaternion if so it will map to the
+        // negative equivalent making the test fail.
+        let rotation_target = [
+            15.03f32.to_radians(),
+            60.123f32.to_radians(),
+            179f32.to_radians(),
+        ];
+
+        let mut orientation = Orientation::default();
+
+        orientation.update_rotation(rotation_target);
+
+
+        // Value have been extracted from popular developed game engines
+        // Forward (0.9, -0.1, 0.5)
+        // Right (-0.5, -0.2, 0.8)
+        let proven_forward = [0.9, -0.1, 0.5];
+        let proven_right = [-0.5, -0.2, 0.8];
+
+        assert!(((orientation.forward[0] * 10.0).round() / 10.0).eq(&proven_forward[0]));
+        assert!(((orientation.forward[1] * 10.0).round() / 10.0).eq(&proven_forward[1]));
+        assert!(((orientation.forward[2] * 10.0).round() / 10.0).eq(&proven_forward[2]));
+
+
+        assert!(((orientation.right[0] * 10.0).round() / 10.0).eq(&proven_right[0]));
+        assert!(((orientation.right[1] * 10.0).round() / 10.0).eq(&proven_right[1]));
+        assert!(((orientation.right[2] * 10.0).round() / 10.0).eq(&proven_right[2]));
     }
 }
