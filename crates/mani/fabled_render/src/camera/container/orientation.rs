@@ -1,3 +1,5 @@
+// todo this should be in fabled_transform module, since every entity will have
+// a forward, right, and transform
 use fabled_math::Transform;
 
 #[derive(Debug, Copy, Clone, PartialEq)]

@@ -7,13 +7,14 @@ use glam::Vec4Swizzles;
 
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct CameraMatrix {
+pub struct Camera {
     pub view: [f32; 16],
     pub proj: [f32; 16],
     pub inv_proj: [f32; 16],
     pub inv_view: [f32; 16],
 }
-impl CameraMatrix {
+
+impl Camera {
     pub fn project(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
         let model_representation = glam::Mat4::from_cols_array(&model);
         let projection_representation = glam::Mat4::from_cols_array(&self.proj);
@@ -54,9 +55,10 @@ impl CameraMatrix {
             1.0,
         );
 
-        let result = matrix * vector;
+        let w = vector.xyz() / vector.w;
+        let result = matrix.transform_point3(w);
 
-        (result.xyz() / result.w).to_array()
+        result.to_array()
     }
 
     // todo might remove coordinate direction to avoid branch on final check. (hot
@@ -175,13 +177,13 @@ impl CameraMatrix {
                 let dir = direction as i32;
                 let axis = y_axis as i32;
 
-                let y_direction = 0.5 * axis as f32;
+                let y_direction =  axis as f32;
 
                 let coordinate_direction = dir as f32;
 
                 let orthographic_matrix = [
                     0.5 * right_min_left, 0.0, 0.0, 0.0, // 0
-                    0.0, y_direction * top_min_bottom, 0.0, 0.0, // 1
+                    0.0, 0.5 * y_direction * top_min_bottom, 0.0, 0.0, // 1
                     0.0, 0.0, coordinate_direction / far_min_near, 0.0, // 2
                     -(right_plus_left / right_min_left), -(top_plus_bottom / top_min_bottom), -(clipping.near / far_min_near), 1.0, // 3
                 ];
@@ -259,13 +261,13 @@ impl CameraMatrix {
 #[cfg(test)]
 mod camera_matrix_test {
     use crate::camera::{
-        CameraMatrix, Orientation, Perspective, Projection, ProjectionCoordinate, ViewPort,
+        Camera, Orientation, Perspective, Projection, ProjectionCoordinate, ViewPort,
     };
 
     fn initialize_projection_view_matrix(
         translation_target: [f32; 3],
         rotation_target: [f32; 3],
-    ) -> CameraMatrix {
+    ) -> Camera {
         // Create camera orientation and update translation and rotation.
         let mut camera_orientation = Orientation::default();
         camera_orientation.update_translation(translation_target);
@@ -273,7 +275,7 @@ mod camera_matrix_test {
 
 
         // Create a camera matrix and create a view matrix and a projection matrix.
-        let mut camera_matrix = CameraMatrix::default();
+        let mut camera_matrix = Camera::default();
 
         camera_matrix.calculate_look_at_matrix(
             camera_orientation,
@@ -372,24 +374,26 @@ mod camera_matrix_test {
     fn calculate_look_at_matrix() {
         // Create camera orientation and update translation and rotation.
         let rotation = [
-            270.0f32.to_radians(),
+            90.0f32.to_radians(),
+            45.0f32.to_radians(),
             130.0f32.to_radians(),
-            185.0f32.to_radians(),
         ];
 
         let translation = [10.0f32, 20.0f32, 30.0f32];
 
         let mut camera_orientation = Orientation::default();
-        camera_orientation.update_rotation(rotation);
         camera_orientation.update_translation(translation);
 
+        camera_orientation.update_rotation(rotation);
+
         // Create a camera matrix and create a view matrix and a projection matrix.
-        let mut camera_matrix = CameraMatrix::default();
+        let mut camera_matrix = Camera::default();
 
         camera_matrix.calculate_look_at_matrix(
             camera_orientation,
             ProjectionCoordinate::RightHandCoordinate,
         );
+
 
         println!("view matrix {:?}", camera_matrix.view);
     }

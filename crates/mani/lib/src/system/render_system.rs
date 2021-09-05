@@ -82,6 +82,7 @@ pub fn begin_render_pass_system(
         then we unbind all the light shader storage
         */
         skybox_render.fast_iter().for_each(|render| {
+
             render_pass.set_pipeline(&render.pipeline);
 
             render_pass.set_bind_group(0, &camera.uniform.group, &[]);

@@ -50,7 +50,7 @@ impl Transform {
     }
 
     pub fn get_transformation_matrix(&self) -> [f32; 16] {
-        let rotation = glam::Quat::from_array(self.rotation);
+        let rotation = glam::Quat::from_array(self.rotation).normalize();
         let scale = glam::Vec3::from(self.scale);
         let translation = glam::Vec3::from(self.position);
 

@@ -46,7 +46,6 @@ There are 4 projection matrix we can use.
  orthogonal projection
  If the projection matrix is a orthogonal projection and is left then the value in column 3 and row 3 will be positive otherwise it will be negative.
 
-
  perspective projection
  If the project matrix is a perspective projection and is left then the value in column 4 and row 3 will be positive otherwise it will be negative.
 

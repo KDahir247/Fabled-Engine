@@ -1,5 +1,5 @@
 mod aspect_ratio;
-mod camera_matrix;
+mod camera;
 mod clipping_plane;
 mod fov;
 mod orientation;
@@ -9,7 +9,7 @@ mod projection;
 mod viewport;
 
 pub use aspect_ratio::*;
-pub use camera_matrix::*;
+pub use camera::*;
 pub use clipping_plane::*;
 pub use fov::*;
 pub use orientation::*;
@@ -21,7 +21,7 @@ pub use viewport::*;
 #[cfg(test)]
 mod data_test {
     use crate::camera::{
-        AspectRatio, CameraMatrix, ClippingPlane, Fov, FovAxis, FovScalingAlgorithm, Orientation,
+        AspectRatio, Camera, ClippingPlane, Fov, FovAxis, FovScalingAlgorithm, Orientation,
         Orthographic, OrthographicOption, Perspective, PerspectiveDistance, PerspectiveOption,
         PerspectiveOrientation, Projection, ProjectionCoordinate, ViewPort, YAxis,
     };
@@ -71,7 +71,7 @@ mod data_test {
         let camera_orientation_size = std::mem::size_of::<Orientation>();
         assert_eq!(camera_orientation_size & (camera_orientation_size - 1), 0);
 
-        let camera_matrix_size = std::mem::size_of::<CameraMatrix>();
+        let camera_matrix_size = std::mem::size_of::<Camera>();
         assert_eq!(camera_matrix_size & (camera_matrix_size - 1), 0);
 
         let y_axis_size = std::mem::size_of::<YAxis>();
@@ -150,7 +150,7 @@ mod data_test {
             0
         );
 
-        let camera_matrix_alignment = std::mem::align_of::<CameraMatrix>();
+        let camera_matrix_alignment = std::mem::align_of::<Camera>();
         assert_eq!(camera_matrix_alignment & (camera_matrix_alignment - 1), 0);
 
         let viewport_alignment = std::mem::align_of::<ViewPort>();
