@@ -53,24 +53,19 @@ impl Fov {
             let aspect_w = aspect_ratio.horizontal;
             let aspect_h = aspect_ratio.vertical;
 
+            let mut aspect_axis = aspect_w / aspect_h;
+
             match axis {
-                FovAxis::Horizontal => {
-                    self.axis = FovAxis::Horizontal;
-
-                    let horizontal_fov =
-                        2.0 * ((self.radian / 2.0).tan() * aspect_w / aspect_h).atan();
-
-                    self.radian = horizontal_fov;
-                }
+                FovAxis::Horizontal => self.axis = FovAxis::Horizontal,
                 FovAxis::Vertical => {
                     self.axis = FovAxis::Vertical;
-
-                    let vertical_fov =
-                        2.0 * ((self.radian / 2.0).tan() * aspect_h / aspect_w).atan();
-
-                    self.radian = vertical_fov;
+                    aspect_axis = aspect_h / aspect_w;
                 }
             }
+
+            let result_fov = 2.0 * ((self.radian / 2.0).tan() * aspect_axis).atan();
+
+            self.radian = result_fov;
         }
     }
 }

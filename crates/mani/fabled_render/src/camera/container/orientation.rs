@@ -1,5 +1,4 @@
 use fabled_math::Transform;
-use glam::Vec4Swizzles;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Orientation {
@@ -47,13 +46,6 @@ impl Orientation {
 
     pub fn update_translation(&mut self, translation: [f32; 3]) {
         let mut transformation_matrix = self.transform.get_transformation_matrix();
-        let m4_transformation_representation = glam::Mat4::from_cols_array(&transformation_matrix);
-
-        let forward = m4_transformation_representation.z_axis.normalize().xyz();
-        let right = m4_transformation_representation.x_axis.normalize().xyz();
-
-        self.forward = forward.to_array();
-        self.right = right.to_array();
 
         let (_rotation_matrix, target_translation) = transformation_matrix.split_at_mut(12);
 
@@ -67,7 +59,11 @@ impl Orientation {
         target_translation[1] += self.right[1] * translation[0];
         target_translation[2] += self.right[2] * translation[0];
 
-        let up = forward.cross(right).to_array();
+        let z = self.forward[0] * self.right[1] - self.forward[1] * self.right[0];
+        let x = self.forward[1] * self.right[2] - self.forward[2] * self.right[1];
+        let y = self.forward[2] * self.right[0] - self.forward[0] * self.right[2];
+
+        let up = [x, y, z];
 
         target_translation[0] += up[0] * translation[1];
         target_translation[1] += up[1] * translation[1];

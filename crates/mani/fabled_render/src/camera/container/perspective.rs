@@ -26,7 +26,7 @@ impl Default for PerspectiveDistance {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Perspective {
-    pub fovy: Fov,
+    pub fov: Fov,
     pub aspect: AspectRatio,
     pub clipping: ClippingPlane,
 }
@@ -34,7 +34,7 @@ pub struct Perspective {
 impl Default for Perspective {
     fn default() -> Self {
         Self {
-            fovy: Fov::default(),
+            fov: Fov::default(),
             aspect: AspectRatio::default(),
             clipping: ClippingPlane::default(),
         }
@@ -44,7 +44,7 @@ impl Default for Perspective {
 impl Perspective {
     pub fn new(fov: Fov, aspect: AspectRatio, z_far: f32, z_near: f32) -> Self {
         Self {
-            fovy: fov,
+            fov,
             aspect,
             clipping: ClippingPlane::new(z_far, z_near),
         }

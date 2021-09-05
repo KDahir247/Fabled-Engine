@@ -13,7 +13,6 @@ pub struct CameraMatrix {
     pub inv_proj: [f32; 16],
     pub inv_view: [f32; 16],
 }
-
 impl CameraMatrix {
     pub fn project(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
         let model_representation = glam::Mat4::from_cols_array(&model);
@@ -60,6 +59,8 @@ impl CameraMatrix {
         (result.xyz() / result.w).to_array()
     }
 
+    // todo might remove coordinate direction to avoid branch on final check. (hot
+    // code).
     pub fn calculate_look_at_matrix(
         &mut self,
         orientation: Orientation,
@@ -69,22 +70,26 @@ impl CameraMatrix {
             transform, forward, ..
         } = orientation;
 
-        let coordinate_direction = coordinate_direction as i32;
-
         let transformation_matrix = transform.get_transformation_matrix();
 
-        let position = glam::Mat4::from_cols_array(&transformation_matrix)
-            .w_axis
-            .to_array();
+        let position = [
+            transformation_matrix[12],
+            transformation_matrix[13],
+            transformation_matrix[14],
+        ];
 
-        let position = glam::Vec3A::from_slice(&position[0..3]);
+        let position = glam::Vec3A::from(position);
 
-        let forward_slice = &forward[0..3];
+        let mut handedness = -1.0;
 
-        let z_axis =
-            glam::Vec3A::from_slice(forward_slice).normalize() * coordinate_direction as f32;
+        if let ProjectionCoordinate::LeftHandCoordinate = coordinate_direction {
+            handedness = 1.0;
+        }
+
+        let z_axis = glam::Vec3A::from(forward).normalize() * handedness;
         let x_axis = glam::Vec3A::Y.cross(z_axis).normalize();
         let y_axis = z_axis.cross(x_axis);
+
 
         let w = glam::Vec3A::new(
             -position.dot(x_axis),
@@ -131,11 +136,17 @@ impl CameraMatrix {
 
     pub fn calculate_inverse_view_matrix(&mut self) {
         let mat4_view_representation = glam::Mat4::from_cols_array(&self.view);
-        let inverse_view_matrix = mat4_view_representation.inverse();
+        let mut inverse_view_matrix = mat4_view_representation.inverse();
+
+        let scalar = 0.0f32.max(1.0f32.min(inverse_view_matrix.determinant().abs()));
+        inverse_view_matrix *= scalar.round();
+
         self.inv_view = inverse_view_matrix.to_cols_array()
     }
 
     #[rustfmt::skip]
+    // todo might remove coordinate direction to avoid branch on final check. (hot
+    //  code). Also might separate orthographic projection from perspective.
     pub fn calculate_projection_matrix(&mut self, projection: Projection) {
         let mut direction = ProjectionCoordinate::default();
         let mut y_axis = YAxis::default();
@@ -190,24 +201,24 @@ impl CameraMatrix {
                 }
 
                 let y_axis = y_axis as i32;
+                let direction = direction as i32;
 
-                let h = 1.0 / (perspective.fovy.radian * 0.5).tan();
-
+                let h = 1.0 / (perspective.fov.radian * 0.5).tan();
                 let w = h / (perspective.aspect.horizontal / perspective.aspect.vertical);
 
                 let near_min_far = perspective.clipping.near - perspective.clipping.far;
 
-                let direction = direction as i32;
+                let inv_near_min_far = 1.0 / near_min_far;
 
-                let mut c3r3 = perspective.clipping.far / near_min_far;
-                let mut c4r3 = perspective.clipping.near * perspective.clipping.far / near_min_far;
+                let mut c3r3 = perspective.clipping.far * inv_near_min_far;
+                let mut c4r3 = perspective.clipping.near * perspective.clipping.far * inv_near_min_far;
 
                 match distance {
                     PerspectiveDistance::Standard => {
                         if orientation == PerspectiveOrientation::Reversed {
-                            c3r3 = -perspective.clipping.far / near_min_far - 1.0;
+                            c3r3 = -perspective.clipping.far * inv_near_min_far - 1.0;
                             c4r3 =
-                                -perspective.clipping.near * perspective.clipping.far / near_min_far
+                                -perspective.clipping.near * perspective.clipping.far * inv_near_min_far
                         }
                     }
                     PerspectiveDistance::Infinite => {
@@ -236,7 +247,11 @@ impl CameraMatrix {
 
     pub fn calculate_inverse_projection_matrix(&mut self) {
         let mat4_projection_representation = glam::Mat4::from_cols_array(&self.proj);
-        let inverse_view_matrix = mat4_projection_representation.inverse();
+        let mut inverse_view_matrix = mat4_projection_representation.inverse();
+
+        let scalar = 0.0f32.max(1.0f32.min(inverse_view_matrix.determinant().abs()));
+        inverse_view_matrix *= scalar.round();
+
         self.inv_proj = inverse_view_matrix.to_cols_array()
     }
 }
