@@ -3,7 +3,7 @@ use crate::camera::{
     ProjectionCoordinate, ViewPort, YAxis,
 };
 
-use glam::Vec4Swizzles;
+use glam::{Vec3Swizzles, Vec4Swizzles};
 
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -20,17 +20,17 @@ impl Camera {
         let projection_representation = glam::Mat4::from_cols_array(&self.proj);
         let view_representation = glam::Mat4::from_cols_array(&self.view);
 
-        let vector = projection_representation
-            * (model_representation * view_representation)
-            * glam::Vec4::new(target[0], target[1], target[2], 1.0);
+        let matrix = projection_representation * (model_representation * view_representation);
+
+        let vector = matrix * glam::Vec4::new(target[0], target[1], target[2], 1.0);
 
         let normalized_factor = 1.0 / vector.w;
 
         assert!(normalized_factor.ne(&0.0));
 
         let project = glam::Vec3::new(
-            viewport.x + (viewport.w * ((vector.x * normalized_factor + 1.0) * 0.5)),
-            viewport.y + (viewport.h * ((vector.y * normalized_factor + 1.0) * 0.5)),
+            (((vector.x * normalized_factor + 1.0) * 0.5) * viewport.w) + viewport.x,
+            (((vector.y * normalized_factor + 1.0) * 0.5) * viewport.h) + viewport.y,
             vector.z * normalized_factor,
         );
 

@@ -63,12 +63,14 @@ impl Camera {
         let test_model = glam::Mat4::IDENTITY.to_cols_array();
 
         let result = self.project(
-            [target_position[0], target_position[1], 0.1],
+            [target_position[0], target_position[1], target_position[2]],
             test_model,
             viewport,
         );
 
         println!("result is {:?}", result);
+
+        result
     }
 
     pub fn world_to_view(&self) -> [f32; 3] {
@@ -128,7 +130,7 @@ mod world_conversion_test {
         };
 
         let screen_to_world_point =
-            camera.screen_to_world([584.307_8, 197.837_28, 32.0], 0.1, orientation, &viewport);
+            camera.screen_to_world([13.307_8, 127.123_84, 208.243], 0.1, orientation, &viewport);
 
         println!("{:?}", screen_to_world_point)
     }
@@ -150,8 +152,34 @@ mod world_conversion_test {
         };
 
         let world_to_screen =
-            camera.world_to_screen([47.1225, -31.122223, 31.97122], orientation, &viewport);
+            camera.world_to_screen([437.74683, -218.76549, 208.05571], orientation, &viewport);
 
-        println!("{:?}", world_to_screen);
+        let a = (208.05571 * 0.0003806785) + 208.05571;
+        print!("{:?}", a);
+    }
+
+    #[test]
+    fn convert_test() {
+        let orientation = Orientation::default();
+
+        let camera = initialize_test(orientation);
+
+        let viewport = ViewPort {
+            x: 0.0,
+            y: 0.0,
+            w: 3840.0,
+            h: 2160.0,
+            min_depth: 0.1,
+            max_depth: 1000.0,
+        };
+
+        let a = camera.project(
+            [25.333, 12.27, 0.1],
+            glam::Mat4::IDENTITY.to_cols_array(),
+            &viewport,
+        );
+        println!("project value is {:?}", a);
+        let b = camera.unproject(a, glam::Mat4::IDENTITY.to_cols_array(), &viewport);
+        println!("unproject value is {:?}", b);
     }
 }
