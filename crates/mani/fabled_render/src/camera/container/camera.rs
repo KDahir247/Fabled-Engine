@@ -48,15 +48,18 @@ impl Camera {
 
         matrix *= scalar;
 
-        let vector = glam::vec4(
-            2.0 * (target[0] - viewport.x) / viewport.w - 1.0,
-            2.0 * (target[1] - viewport.y) / viewport.h - 1.0,
-            target[2],
+        let mut vector = glam::vec4(
+            ((target[0] - viewport.x) / viewport.w) * 2.0 - 1.0,
+            -(((target[1] - viewport.y) / viewport.h) * 2.0 - 1.0),
+            target[2], // 0 and +1 mapping (DirectX, WEBGPU) rather than -1 and +1 (OpenGL)
             1.0,
         );
 
-        let w = vector.xyz() / vector.w;
-        let result = matrix.transform_point3(w);
+        vector = matrix * vector;
+
+        assert!(vector.w.ne(&0.0));
+
+        let result = vector.xyz() / vector.w;
 
         result.to_array()
     }
@@ -88,7 +91,7 @@ impl Camera {
             handedness = 1.0;
         }
 
-        let z_axis = glam::Vec3A::from(forward).normalize() * handedness;
+        let z_axis = (glam::Vec3A::from(forward) * handedness).normalize();
         let x_axis = glam::Vec3A::Y.cross(z_axis).normalize();
         let y_axis = z_axis.cross(x_axis);
 

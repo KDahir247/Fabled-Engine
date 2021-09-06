@@ -28,6 +28,7 @@ impl Camera {
             test_model,
             viewport,
         );
+
         result
     }
 
@@ -82,7 +83,7 @@ mod world_conversion_test {
         camera.calculate_projection_matrix(Projection::Perspective(
             Perspective {
                 fov: Fov {
-                    radian: 60.0f32.to_radians(),
+                    radian: 100.0f32.to_radians(),
                     axis: FovAxis::Vertical,
                 },
                 aspect: AspectRatio {
@@ -102,11 +103,11 @@ mod world_conversion_test {
             y: 0.0,
             w: 1920.0,
             h: 1080.0,
-            min_depth: 0.0,
-            max_depth: 1.0,
+            min_depth: 0.1,
+            max_depth: 1000.0,
         };
 
-        let a = camera.screen_to_world([25.0, 3.3, 10.11], orientation, &viewport);
+        let a = camera.screen_to_world([584.307787, 197.837273, 0.1], orientation, &viewport); // multiple by the z in unity.
 
         println!("{:?}", a)
     }
