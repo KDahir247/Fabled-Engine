@@ -26,9 +26,11 @@ impl Camera {
 
         let normalized_factor = 1.0 / vector.w;
 
+        assert!(normalized_factor.ne(&0.0));
+
         let project = glam::Vec3::new(
             viewport.x + (viewport.w * ((vector.x * normalized_factor + 1.0) * 0.5)),
-            viewport.y + (viewport.h * ((-vector.y * normalized_factor + 1.0) * 0.5)),
+            viewport.y + (viewport.h * ((vector.y * normalized_factor + 1.0) * 0.5)),
             vector.z * normalized_factor,
         );
 
