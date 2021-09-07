@@ -95,32 +95,15 @@ mod world_conversion_test {
         camera
     }
 
-    // ---------------------- Screen To World ---------------------------
-
-    #[test]
-    fn screen_to_world() {
-        let orientation = Orientation::default();
-
-        let camera = initialize_test(orientation);
-
-        let viewport = ViewPort {
-            x: 0.0,
-            y: 0.0,
-            w: 3840.0,
-            h: 2160.0,
-            min_depth: 0.1,
-            max_depth: 1000.0,
-        };
-
-        let screen_to_world_point =
-            camera.screen_to_world([584.307_8, 197.837_28, 0.5], orientation, &viewport);
-        println!("{:?}", screen_to_world_point)
-    }
-
-    // ---------------------- World To Screen ---------------------------
+    // -------------- Screen To World ------- World To Screen----------------------
 
     #[test]
     fn world_to_screen() {
+        // Result has been tested with a proven game engine.
+        let world_point = [386.24023, 626.484, 496.431_12];
+
+        let error_threshold = 0.001;
+
         let orientation = Orientation::default();
 
         let camera = initialize_test(orientation);
@@ -134,22 +117,37 @@ mod world_conversion_test {
             max_depth: 1000.0,
         };
 
-        let world_to_screen =
-            camera.world_to_screen([0.7362891, 0.48628473, 0.49955022], orientation, &viewport);
+        println!("Starting world point {:?}", world_point);
 
-        println!("{:?}", world_to_screen);
+        let screen_point = camera.world_to_screen(world_point, orientation, &viewport);
+
+        println!("World to screen point : {:?}", screen_point);
+
+        let result_world_point = camera.screen_to_world(screen_point, orientation, &viewport);
+
+        println!("result screen to world point : {:?}", result_world_point);
+
+        let result_screen_point =
+            camera.world_to_screen(result_world_point, orientation, &viewport);
+
+        println!("result world to screen point : {:?}", result_screen_point);
 
 
-        let screen_to_world =
-            camera.screen_to_world([584.30786, 1962.1627, 0.4995503], orientation, &viewport);
+        assert!((world_point[0] - result_world_point[0]).abs() < error_threshold);
+        assert!((world_point[1] - result_world_point[1]).abs() < error_threshold);
+        assert!((world_point[2] - result_world_point[2]).abs() < error_threshold);
 
-        println!("{:?}", screen_to_world);
+        assert!((screen_point[0] - result_screen_point[0]).abs() < error_threshold);
+        assert!((screen_point[1] - result_screen_point[1]).abs() < error_threshold);
+        assert!((screen_point[2] - result_screen_point[2]).abs() < error_threshold);
     }
 
-    //
+    // ---------------------- Project ------- Unproject ---------------------------
 
     #[test]
     fn convert_test() {
+        let error_threshold = 0.001;
+
         let orientation = Orientation::default();
 
         let camera = initialize_test(orientation);
@@ -167,18 +165,34 @@ mod world_conversion_test {
 
         println!("starting value is {:?}", starting_value);
 
-        let b = camera.unproject(
+        let start_unproject = camera.unproject(
             starting_value,
             glam::Mat4::IDENTITY.to_cols_array(),
             &viewport,
         );
-        println!("unproject value is {:?}", b);
+        println!("unproject value is {:?}", start_unproject);
 
-        let a = camera.project(b, glam::Mat4::IDENTITY.to_cols_array(), &viewport);
-        println!("project value is {:?}", a);
+        let start_project = camera.project(
+            start_unproject,
+            glam::Mat4::IDENTITY.to_cols_array(),
+            &viewport,
+        );
+        println!("project value is {:?}", start_project);
 
-        let c = camera.unproject(a, glam::Mat4::IDENTITY.to_cols_array(), &viewport);
+        let end_unproject = camera.unproject(
+            start_project,
+            glam::Mat4::IDENTITY.to_cols_array(),
+            &viewport,
+        );
 
-        println!("unproject value is {:?}", c);
+        println!("unproject value is {:?}", end_unproject);
+
+        assert!((starting_value[0] - start_project[0]).abs() < error_threshold);
+        assert!((starting_value[1] - start_project[1]).abs() < error_threshold);
+        assert!((starting_value[2] - start_project[2]).abs() < error_threshold);
+
+        assert!((start_unproject[0] - end_unproject[0]).abs() < error_threshold);
+        assert!((start_unproject[1] - end_unproject[1]).abs() < error_threshold);
+        assert!((start_unproject[2] - end_unproject[2]).abs() < error_threshold)
     }
 }
