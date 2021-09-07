@@ -3,7 +3,7 @@ use crate::camera::{
     ProjectionCoordinate, ViewPort, YAxis,
 };
 
-use glam::{Vec3Swizzles, Vec4Swizzles};
+use glam::Vec4Swizzles;
 
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]

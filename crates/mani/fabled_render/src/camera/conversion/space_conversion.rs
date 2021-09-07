@@ -36,8 +36,22 @@ impl Camera {
         todo!()
     }
 
-    pub fn view_to_world(&self, view_position: [f32; 3]) -> [f32; 3] {
-        todo!()
+    pub fn view_to_world(
+        &self,
+        target_position: [f32; 3],
+        orientation: Orientation,
+        viewport: &ViewPort,
+    ) -> [f32; 3] {
+        // height == z;
+        let test_model = glam::Mat4::IDENTITY.to_cols_array();
+
+        let depth = viewport.max_depth * viewport.min_depth;
+        let vector = self.unproject(
+            [target_position[0], viewport.h - target_position[1], depth],
+            test_model,
+            viewport,
+        );
+        vector
     }
 
     pub fn world_to_screen(
@@ -57,8 +71,22 @@ impl Camera {
         [result[0], result[1], target_position[2]]
     }
 
-    pub fn world_to_view(&self) -> [f32; 3] {
-        todo!()
+    pub fn world_to_view(
+        &self,
+        target_position: [f32; 3],
+        orientation: Orientation,
+        viewport: &ViewPort,
+    ) -> [f32; 3] {
+        let target_position = [target_position[0], -target_position[1], target_position[2]];
+
+        let test_model = glam::Mat4::IDENTITY.to_cols_array();
+        let vector = self.project(target_position, test_model, viewport);
+
+        [
+            vector[0] / viewport.w, // x
+            vector[1] / viewport.h, // z
+            target_position[2],
+        ]
     }
 }
 
@@ -95,10 +123,10 @@ mod world_conversion_test {
         camera
     }
 
-    // -------------- Screen To World ------- World To Screen----------------------
+    // -------------- Screen To World ------- World To Screen ----------------------
 
     #[test]
-    fn world_to_screen() {
+    fn world_screen() {
         // Result has been tested with a proven game engine.
         let world_point = [386.24023, 626.484, 496.431_12];
 
@@ -142,11 +170,39 @@ mod world_conversion_test {
         assert!((screen_point[2] - result_screen_point[2]).abs() < error_threshold);
     }
 
+    // ------------ Viewport To World ------- World To Viewport --------------------
+
+    #[test]
+    fn viewport_world() {
+        let orientation = Orientation::default();
+
+        let camera = initialize_test(orientation);
+
+        let viewport = ViewPort {
+            x: 0.0,
+            y: 0.0,
+            w: 3840.0,
+            h: 2160.0,
+            min_depth: 0.1,
+            max_depth: 1000.0,
+        };
+
+
+        let view_point = camera.world_to_view([123.24, 30.3333, 34.5678], orientation, &viewport);
+
+        println!("World to Viewport Position {:?}", view_point);
+
+        let world_point = camera.view_to_world(view_point, orientation, &viewport);
+
+        println!("Viewport to World Position {:?}", world_point);
+    }
+
+
     // ---------------------- Project ------- Unproject ---------------------------
 
     #[test]
     fn convert_test() {
-        let error_threshold = 0.001;
+        let error_threshold = 0.2;
 
         let orientation = Orientation::default();
 
