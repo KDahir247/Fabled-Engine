@@ -20,9 +20,10 @@ impl Camera {
         let projection_representation = glam::Mat4::from_cols_array(&self.proj);
         let view_representation = glam::Mat4::from_cols_array(&self.view);
 
-        let matrix = projection_representation * (model_representation * view_representation);
-
-        let vector = matrix * glam::Vec4::new(target[0], target[1], target[2], 1.0);
+        let vector = projection_representation
+            * view_representation
+            * model_representation
+            * glam::Vec4::new(target[0], target[1], target[2], 1.0);
 
         let normalized_factor = 1.0 / vector.w;
 
@@ -30,8 +31,8 @@ impl Camera {
 
         let project = glam::Vec3::new(
             (((vector.x * normalized_factor + 1.0) * 0.5) * viewport.w) + viewport.x,
-            (((vector.y * normalized_factor + 1.0) * 0.5) * viewport.h) + viewport.y,
-            vector.z * normalized_factor,
+            (((-vector.y * normalized_factor + 1.0) * 0.5) * viewport.h) + viewport.y,
+            (vector.z * (viewport.max_depth - viewport.min_depth)) + viewport.min_depth,
         );
 
         project.to_array()
@@ -43,7 +44,7 @@ impl Camera {
         let view_representation = glam::Mat4::from_cols_array(&self.view);
 
         let mut matrix =
-            (projection_representation * (model_representation * view_representation)).inverse();
+            (projection_representation * (view_representation * model_representation)).inverse();
 
         // handle case where matrix is not invertible. It will return a zero matrix.
         let scalar = 0.0f32.max(1.0f32.min(matrix.determinant().abs()));
@@ -53,7 +54,7 @@ impl Camera {
         let mut vector = glam::vec4(
             ((target[0] - viewport.x) / viewport.w) * 2.0 - 1.0,
             -(((target[1] - viewport.y) / viewport.h) * 2.0 - 1.0),
-            target[2], // 0 and +1 mapping (DirectX, WEBGPU) rather than -1 and +1 (OpenGL)
+            (target[2] - viewport.min_depth) / (viewport.max_depth - viewport.min_depth), /* 0 and +1 mapping (DirectX, WEBGPU) rather than -1 and +1 (OpenGL) */
             1.0,
         );
 

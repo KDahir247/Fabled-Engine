@@ -1,22 +1,19 @@
 use crate::camera::{Camera, Orientation, ViewPort};
 
 // todo need to find a way to get the model matrix or the orientation to
-// construct a model matrix from. we need to have access to the camera most
-// recent orientation in the space
+//  construct a model matrix from. we need to have access to the camera most
+//  recent orientation in the space
 
 impl Camera {
-    // depth value will 0.1 unless developer know what they are doing.
     pub fn screen_to_world(
         &self,
         target_position: [f32; 3],
-        depth: f32,
         orientation: Orientation,
         viewport: &ViewPort,
     ) -> [f32; 3] {
-        assert!(depth >= 0.0);
-        assert!(depth <= 1.0);
-
         let test_model = glam::Mat4::IDENTITY.to_cols_array();
+
+        let depth = viewport.max_depth * viewport.min_depth;
 
         let result = self.unproject(
             [target_position[0], viewport.h - target_position[1], depth],
@@ -32,23 +29,14 @@ impl Camera {
     }
 
     pub fn screen_to_view(&self, target_position: [f32; 3]) -> [f32; 3] {
-        // we need the aspect ratio. we will get it by projection.11 / projection.00;
-
-        // self.project()
-
         todo!()
     }
 
     pub fn view_to_screen(&self) -> [f32; 3] {
-        // we need the aspect ratio. we will get it by projection.11 / projection.00;
-
         todo!()
     }
 
-    // need viewport.
     pub fn view_to_world(&self, view_position: [f32; 3]) -> [f32; 3] {
-        // we need the aspect ratio. we will get it by projection.11 / projection.00;
-
         todo!()
     }
 
@@ -58,24 +46,18 @@ impl Camera {
         orientation: Orientation,
         viewport: &ViewPort,
     ) -> [f32; 3] {
-        // we need the aspect ratio. we will get it by projection.11 / projection.00;
-
         let test_model = glam::Mat4::IDENTITY.to_cols_array();
 
         let result = self.project(
-            [target_position[0], target_position[1], target_position[2]],
+            [target_position[0], -target_position[1], target_position[2]],
             test_model,
             viewport,
         );
 
-        println!("result is {:?}", result);
-
-        result
+        [result[0], result[1], target_position[2]]
     }
 
     pub fn world_to_view(&self) -> [f32; 3] {
-        // we need the aspect ratio. we will get it by projection.11 / projection.00;
-
         todo!()
     }
 }
@@ -113,6 +95,7 @@ mod world_conversion_test {
         camera
     }
 
+    // ---------------------- Screen To World ---------------------------
 
     #[test]
     fn screen_to_world() {
@@ -130,11 +113,11 @@ mod world_conversion_test {
         };
 
         let screen_to_world_point =
-            camera.screen_to_world([13.307_8, 127.123_84, 208.243], 0.1, orientation, &viewport);
-
+            camera.screen_to_world([584.307_8, 197.837_28, 0.5], orientation, &viewport);
         println!("{:?}", screen_to_world_point)
     }
 
+    // ---------------------- World To Screen ---------------------------
 
     #[test]
     fn world_to_screen() {
@@ -152,11 +135,18 @@ mod world_conversion_test {
         };
 
         let world_to_screen =
-            camera.world_to_screen([437.74683, -218.76549, 208.05571], orientation, &viewport);
+            camera.world_to_screen([0.7362891, 0.48628473, 0.49955022], orientation, &viewport);
 
-        let a = (208.05571 * 0.0003806785) + 208.05571;
-        print!("{:?}", a);
+        println!("{:?}", world_to_screen);
+
+
+        let screen_to_world =
+            camera.screen_to_world([584.30786, 1962.1627, 0.4995503], orientation, &viewport);
+
+        println!("{:?}", screen_to_world);
     }
+
+    //
 
     #[test]
     fn convert_test() {
@@ -173,13 +163,22 @@ mod world_conversion_test {
             max_depth: 1000.0,
         };
 
-        let a = camera.project(
-            [25.333, 12.27, 0.1],
+        let starting_value = [25.333, 12.27, 0.1];
+
+        println!("starting value is {:?}", starting_value);
+
+        let b = camera.unproject(
+            starting_value,
             glam::Mat4::IDENTITY.to_cols_array(),
             &viewport,
         );
-        println!("project value is {:?}", a);
-        let b = camera.unproject(a, glam::Mat4::IDENTITY.to_cols_array(), &viewport);
         println!("unproject value is {:?}", b);
+
+        let a = camera.project(b, glam::Mat4::IDENTITY.to_cols_array(), &viewport);
+        println!("project value is {:?}", a);
+
+        let c = camera.unproject(a, glam::Mat4::IDENTITY.to_cols_array(), &viewport);
+
+        println!("unproject value is {:?}", c);
     }
 }
