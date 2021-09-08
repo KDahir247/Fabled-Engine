@@ -1,7 +1,4 @@
-use crate::camera::{
-    Orientation, Orthographic, PerspectiveDistance, PerspectiveOrientation, Projection,
-    ProjectionCoordinate, ViewPort, YAxis,
-};
+use crate::camera::{Orientation, Orthographic, Projection, ViewPort};
 
 use glam::Vec4Swizzles;
 
@@ -32,7 +29,8 @@ impl Camera {
         let project = glam::Vec3::new(
             (((vector.x * normalized_factor + 1.0) * 0.5) * viewport.w) + viewport.x,
             (((-vector.y * normalized_factor + 1.0) * 0.5) * viewport.h) + viewport.y,
-            (vector.z * (viewport.max_depth - viewport.min_depth)) + viewport.min_depth,
+            (vector.z * normalized_factor * (viewport.max_depth - viewport.min_depth))
+                + viewport.min_depth,
         );
 
         project.to_array()
@@ -54,7 +52,7 @@ impl Camera {
         let mut vector = glam::vec4(
             ((target[0] - viewport.x) / viewport.w) * 2.0 - 1.0,
             -(((target[1] - viewport.y) / viewport.h) * 2.0 - 1.0),
-            (target[2] - viewport.min_depth) / (viewport.max_depth - viewport.min_depth), /* 0 and +1 mapping (DirectX, WEBGPU) rather than -1 and +1 (OpenGL) */
+            (target[2] - viewport.min_depth) / (viewport.max_depth - viewport.min_depth),
             1.0,
         );
 
@@ -69,11 +67,7 @@ impl Camera {
 
     // todo might remove coordinate direction to avoid branch on final check. (hot
     // code).
-    pub fn calculate_look_at_matrix(
-        &mut self,
-        orientation: Orientation,
-        coordinate_direction: ProjectionCoordinate,
-    ) {
+    pub fn calculate_look_at_matrix(&mut self, orientation: Orientation) {
         let Orientation {
             transform, forward, ..
         } = orientation;
@@ -88,13 +82,8 @@ impl Camera {
 
         let position = glam::Vec3A::from(position);
 
-        let mut handedness = -1.0;
 
-        if let ProjectionCoordinate::LeftHandCoordinate = coordinate_direction {
-            handedness = 1.0;
-        }
-
-        let z_axis = (glam::Vec3A::from(forward) * handedness).normalize();
+        let z_axis = -glam::Vec3A::from(forward).normalize();
         let x_axis = glam::Vec3A::Y.cross(z_axis).normalize();
         let y_axis = z_axis.cross(x_axis);
 
@@ -153,18 +142,10 @@ impl Camera {
     }
 
     #[rustfmt::skip]
-    // todo might remove coordinate direction to avoid branch on final check. (hot
-    //  code). Also might separate orthographic projection from perspective.
+    // todo remove the if statement
     pub fn calculate_projection_matrix(&mut self, projection: Projection) {
-        let mut direction = ProjectionCoordinate::default();
-        let mut y_axis = YAxis::default();
-
         match projection {
-            Projection::Orthographic(orthographic, orthographic_option) => {
-                if let Some(option) = orthographic_option {
-                    direction = option.direction;
-                    y_axis = option.y_axis;
-                }
+            Projection::Orthographic(orthographic) => {
 
                 let Orthographic {
                     right,
@@ -180,36 +161,19 @@ impl Camera {
                 let top_plus_bottom = top + bottom;
                 let far_min_near = clipping.far - clipping.near;
 
-                let dir = direction as i32;
-                let axis = y_axis as i32;
-
-                let y_direction =  axis as f32;
-
-                let coordinate_direction = dir as f32;
-
                 let orthographic_matrix = [
                     0.5 * right_min_left, 0.0, 0.0, 0.0, // 0
-                    0.0, 0.5 * y_direction * top_min_bottom, 0.0, 0.0, // 1
-                    0.0, 0.0, coordinate_direction / far_min_near, 0.0, // 2
+                    0.0, 0.5 *  top_min_bottom, 0.0, 0.0, // 1
+                    0.0, 0.0, -1.0 / far_min_near, 0.0, // 2
                     -(right_plus_left / right_min_left), -(top_plus_bottom / top_min_bottom), -(clipping.near / far_min_near), 1.0, // 3
                 ];
 
 
                 self.proj = orthographic_matrix;
             }
-            Projection::Perspective(perspective, perspective_option) => {
-                let mut distance = PerspectiveDistance::default();
-                let mut orientation = PerspectiveOrientation::default();
 
-                if let Some(option) = perspective_option {
-                    direction = option.direction;
-                    y_axis = option.y_axis;
-                    distance = option.distance;
-                    orientation = option.orientation;
-                }
 
-                let y_axis = y_axis as i32;
-                let direction = direction as i32;
+            Projection::Perspective(perspective) => {
 
                 let h = 1.0 / (perspective.fov.radian * 0.5).tan();
                 let w = h / (perspective.aspect.horizontal / perspective.aspect.vertical);
@@ -218,33 +182,11 @@ impl Camera {
 
                 let inv_near_min_far = 1.0 / near_min_far;
 
-                let mut c3r3 = perspective.clipping.far * inv_near_min_far;
-                let mut c4r3 = perspective.clipping.near * perspective.clipping.far * inv_near_min_far;
-
-                match distance {
-                    PerspectiveDistance::Standard => {
-                        if orientation == PerspectiveOrientation::Reversed {
-                            c3r3 = -perspective.clipping.far * inv_near_min_far - 1.0;
-                            c4r3 =
-                                -perspective.clipping.near * perspective.clipping.far * inv_near_min_far
-                        }
-                    }
-                    PerspectiveDistance::Infinite => {
-                        c3r3 = -1.0;
-                        c4r3 = -perspective.clipping.near;
-
-                        if orientation == PerspectiveOrientation::Reversed {
-                            c3r3 = 0.0;
-                            c4r3 = perspective.clipping.near
-                        }
-                    }
-                }
-
                 let projection_matrix = [
                     w, 0.0, 0.0, 0.0, // 0
-                    0.0, h * y_axis as f32, 0.0, 0.0, // 1
-                    0.0, 0.0, c3r3, direction as f32, // 2
-                    0.0, 0.0, c4r3, 0.0, // 3
+                    0.0, h , 0.0, 0.0, // 1
+                    0.0, 0.0, perspective.clipping.far * inv_near_min_far, -1.0, // 2
+                    0.0, 0.0, perspective.clipping.near * perspective.clipping.far * inv_near_min_far, 0.0, // 3
                 ];
 
 
@@ -266,9 +208,7 @@ impl Camera {
 
 #[cfg(test)]
 mod camera_matrix_test {
-    use crate::camera::{
-        Camera, Orientation, Perspective, Projection, ProjectionCoordinate, ViewPort,
-    };
+    use crate::camera::{Camera, Orientation, Perspective, Projection, ViewPort};
 
     fn initialize_projection_view_matrix(
         translation_target: [f32; 3],
@@ -283,13 +223,10 @@ mod camera_matrix_test {
         // Create a camera matrix and create a view matrix and a projection matrix.
         let mut camera_matrix = Camera::default();
 
-        camera_matrix.calculate_look_at_matrix(
-            camera_orientation,
-            ProjectionCoordinate::RightHandCoordinate,
-        );
+        camera_matrix.calculate_look_at_matrix(camera_orientation);
 
         let perspective = Perspective::default();
-        let projection = Projection::Perspective(perspective, None);
+        let projection = Projection::Perspective(perspective);
 
         camera_matrix.calculate_projection_matrix(projection);
 
@@ -329,8 +266,6 @@ mod camera_matrix_test {
         // Tested in other game engine "project" function
         //         -2.2656322  4.9326377  1.0340623
         let tested_result = [-2.2656322, 4.9326377, 1.0340623];
-
-        println!("{} {}", tested_result[0], project_vector[0]);
 
         assert!((tested_result[0] - project_vector[0]).abs() < threshold);
         assert!((tested_result[1] - project_vector[1]).abs() < threshold);
@@ -395,10 +330,7 @@ mod camera_matrix_test {
         // Create a camera matrix and create a view matrix and a projection matrix.
         let mut camera_matrix = Camera::default();
 
-        camera_matrix.calculate_look_at_matrix(
-            camera_orientation,
-            ProjectionCoordinate::RightHandCoordinate,
-        );
+        camera_matrix.calculate_look_at_matrix(camera_orientation);
 
 
         println!("view matrix {:?}", camera_matrix.view);
@@ -515,5 +447,65 @@ mod camera_matrix_test {
         camera_matrix.calculate_inverse_projection_matrix();
 
         assert!(camera_matrix.inv_proj.eq(&inv_proj));
+    }
+
+
+    #[test]
+    fn convert_test() {
+        let error_threshold = 0.2;
+
+        let rotation = [
+            270.0f32.to_radians(),
+            130.0f32.to_radians(),
+            185.0f32.to_radians(),
+        ];
+
+        let translation = [10.0f32, 20.0f32, 30.0f32];
+
+
+        let camera = initialize_projection_view_matrix(translation, rotation);
+
+        let viewport = ViewPort {
+            x: 0.0,
+            y: 0.0,
+            w: 3840.0,
+            h: 2160.0,
+            min_depth: 0.1,
+            max_depth: 1000.0,
+        };
+
+        let starting_value = [25.333, 12.27, 0.1];
+
+        println!("starting value is {:?}", starting_value);
+
+        let start_unproject = camera.unproject(
+            starting_value,
+            glam::Mat4::IDENTITY.to_cols_array(),
+            &viewport,
+        );
+        println!("unproject value is {:?}", start_unproject);
+
+        let start_project = camera.project(
+            start_unproject,
+            glam::Mat4::IDENTITY.to_cols_array(),
+            &viewport,
+        );
+        println!("project value is {:?}", start_project);
+
+        let end_unproject = camera.unproject(
+            start_project,
+            glam::Mat4::IDENTITY.to_cols_array(),
+            &viewport,
+        );
+
+        println!("unproject value is {:?}", end_unproject);
+
+        assert!((starting_value[0] - start_project[0]).abs() < error_threshold);
+        assert!((starting_value[1] - start_project[1]).abs() < error_threshold);
+        assert!((starting_value[2] - start_project[2]).abs() < error_threshold);
+
+        assert!((start_unproject[0] - end_unproject[0]).abs() < error_threshold);
+        assert!((start_unproject[1] - end_unproject[1]).abs() < error_threshold);
+        assert!((start_unproject[2] - end_unproject[2]).abs() < error_threshold)
     }
 }
