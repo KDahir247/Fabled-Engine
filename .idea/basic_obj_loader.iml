@@ -160,6 +160,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_ui/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_window/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_winit/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_transform/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />

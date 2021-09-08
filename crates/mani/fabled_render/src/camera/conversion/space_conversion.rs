@@ -1,4 +1,5 @@
-use crate::camera::{Camera, Orientation, ViewPort};
+use crate::camera::{Camera, ViewPort};
+use fabled_transform::Orientation;
 
 impl Camera {
     pub fn screen_to_world(
@@ -93,9 +94,10 @@ impl Camera {
 
 #[cfg(test)]
 mod world_conversion_test {
+    use fabled_transform::Orientation;
+
     use crate::camera::{
-        AspectRatio, Camera, ClippingPlane, Fov, FovAxis, Orientation, Perspective, Projection,
-        ViewPort,
+        AspectRatio, Camera, ClippingPlane, Fov, FovAxis, Perspective, Projection, ViewPort,
     };
 
     fn initialize_test(orientation: Orientation) -> Camera {

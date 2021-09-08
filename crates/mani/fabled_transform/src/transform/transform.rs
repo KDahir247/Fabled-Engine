@@ -63,7 +63,7 @@ impl Transform {
 
 #[cfg(test)]
 mod transform_test {
-    use crate::Transform;
+    use crate::transform::transform::Transform;
 
     #[test]
     fn transformation_matrix() {
@@ -75,8 +75,6 @@ mod transform_test {
             18.5f32.to_radians(),
             90.4f32.to_radians(),
         );
-
-        println!("{}", quaternion);
 
         let position = [3.153, 100.1, 1.5];
 

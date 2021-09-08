@@ -1,6 +1,4 @@
-// todo this should be in fabled_transform module, since every entity will have
-// a forward, right, and transform
-use fabled_math::Transform;
+use crate::transform::transform::Transform;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Orientation {
@@ -81,7 +79,7 @@ impl Orientation {
 
 #[cfg(test)]
 mod orientation_test {
-    use crate::camera::Orientation;
+    use crate::Orientation;
 
     #[test]
     fn update_translation() {

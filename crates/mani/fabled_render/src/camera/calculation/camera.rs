@@ -1,4 +1,5 @@
-use crate::camera::{Orientation, Orthographic, Projection, ViewPort};
+use crate::camera::{Oblique, Orthographic, Projection, ViewPort};
+use fabled_transform::Orientation;
 
 use glam::Vec4Swizzles;
 
@@ -142,7 +143,6 @@ impl Camera {
     }
 
     #[rustfmt::skip]
-    // todo remove the if statement
     pub fn calculate_projection_matrix(&mut self, projection: Projection) {
         match projection {
             Projection::Orthographic(orthographic) => {
@@ -195,6 +195,23 @@ impl Camera {
         }
     }
 
+    #[rustfmt::skip]
+    pub fn calculate_oblique_projection_matrix(&mut self, orthographic: Orthographic, oblique: Oblique) {
+        Self::calculate_projection_matrix(self, Projection::Orthographic(orthographic));
+
+        let size = oblique.vertical_position / orthographic.top;
+
+        let rotation_x =  size * -oblique.angle_rad.sin();
+        let rotation_y  = -size * -oblique.angle_rad.cos();
+
+        self.proj = [
+            self.proj[0], self.proj[1], rotation_x, -oblique.depth_offset * rotation_x, // 0
+            self.proj[4], self.proj[5], rotation_y, -oblique.depth_offset * rotation_y, // 1
+            self.proj[8], self.proj[9], self.proj[10], self.proj[11], // 2
+            self.proj[12], self.proj[13], self.proj[14], self.proj[15]
+        ]
+    }
+
     pub fn calculate_inverse_projection_matrix(&mut self) {
         let mat4_projection_representation = glam::Mat4::from_cols_array(&self.proj);
         let mut inverse_view_matrix = mat4_projection_representation.inverse();
@@ -208,7 +225,9 @@ impl Camera {
 
 #[cfg(test)]
 mod camera_matrix_test {
-    use crate::camera::{Camera, Orientation, Perspective, Projection, ViewPort};
+
+    use crate::camera::{Camera, Perspective, Projection, ViewPort};
+    use fabled_transform::Orientation;
 
     fn initialize_projection_view_matrix(
         translation_target: [f32; 3],

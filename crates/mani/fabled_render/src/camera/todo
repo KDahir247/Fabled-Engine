@@ -1,65 +1,5 @@
-should have oblique matrix give otho camera the illusion that it
-is 3d if the user want it.Eg.
-
- Standard Facing Forward     cabinet projection Forward
-                            ___________
-   _________               /_________/ |
-  |         |             |         |  |
-  |         |             |         |  /
-  |         |             |         | /
-  |_________|             |_________|/
-
- - The engine will only support Cabinet Project for the default Oblique Project
-   If there is any use or interest of other oblique projection calculation
-   Then I will add support for the others. (Military, Cavalier)
-
-
--------------------------------------------------------------------------------
-There are 4 projection matrix we can use.
-
- Left hand side coordinate system where y axis is down
- - Orthographic projection.
- - Perspective infinite projection.
- - Projection infinite reverse projection.
- - Perspective projection.
-
- Left hand side coordinate system where y axis is up.
- - Orthographic projection.
- - Perspective infinite projection.
- - Projection infinite reverse projection.
- - Perspective projection.
-
- Right hand side coordinate system where y axis is down
- - Orthographic projection.
- - Perspective infinite projection.
- - Projection infinite reverse projection.
- - Perspective projection.
-
- Right hand side coordinate system where y axis is up.
- - Orthographic projection.
- - Perspective infinite projection.
- - Projection infinite reverse projection.
- - Perspective projection.
-
- WEBGPU follow the matrix of Direct X
-
- orthogonal projection
- If the projection matrix is a orthogonal projection and is left then the value in column 3 and row 3 will be positive otherwise it will be negative.
-
- perspective projection
- If the project matrix is a perspective projection and is left then the value in column 4 and row 3 will be positive otherwise it will be negative.
-
- We will not expose projection calculation that will be used for other graphics api's orientation.
- which will cause confusion in the engine.
-
--------------------------------------------------------------------------------
-
-
-   Look At target.
-   This will use Quaternion as standard rotation.
-
-
--------------------------------------------------------------------------------
+                    Support is Deferred
+-----------------------------------------------------------------------------
 
  Converts a screen position to a position in world space.
     ScreenPointToWorldPoint.
@@ -87,13 +27,6 @@ There are 4 projection matrix we can use.
  Converts a point in world-space to the camera's viewport-space non-stereoscopic.
    WorldPointToViewportPoint
 
--------------------------------------------------------------------------------
-
-Back ground Color for the camera.
-
-  Camera Render Order (Priority)
-   Camera with the higher Priority will be rendered first.
-   Camera wil the lower Priority will be rendered last.
 
 -------------------------------------------------------------------------------
 
@@ -121,3 +54,19 @@ Camera resolution
 Camera to World Matrix
 and World to Camera Matrix
 
+
+-------------------------------------------------------------------------------
+
+Back ground Color for the camera.
+
+  Camera Render Order (Priority)
+   Camera with the higher Priority will be rendered first.
+   Camera wil the lower Priority will be rendered last.
+
+Fov Scaling Algorithm
+    HorizontalPlus,
+    Anamorphic,
+    VerticalMinus,
+    Stretch,
+
+    HorizontalPlus is the default, since it is used most frequently in the game industry.
