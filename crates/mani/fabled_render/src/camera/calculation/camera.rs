@@ -162,8 +162,8 @@ impl Camera {
                 let far_min_near = clipping.far - clipping.near;
 
                 let orthographic_matrix = [
-                    0.5 * right_min_left, 0.0, 0.0, 0.0, // 0
-                    0.0, 0.5 *  top_min_bottom, 0.0, 0.0, // 1
+                    2.0 / right_min_left, 0.0, 0.0, 0.0, // 0
+                    0.0, 2.0 /  top_min_bottom, 0.0, 0.0, // 1
                     0.0, 0.0, -1.0 / far_min_near, 0.0, // 2
                     -(right_plus_left / right_min_left), -(top_plus_bottom / top_min_bottom), -(clipping.near / far_min_near), 1.0, // 3
                 ];
@@ -226,7 +226,9 @@ impl Camera {
 #[cfg(test)]
 mod camera_matrix_test {
 
-    use crate::camera::{Camera, Perspective, Projection, ViewPort};
+    use crate::camera::{
+        Camera, ClippingPlane, Oblique, Orthographic, Perspective, Projection, ViewPort,
+    };
     use fabled_transform::Orientation;
 
     fn initialize_projection_view_matrix(
@@ -466,6 +468,91 @@ mod camera_matrix_test {
         camera_matrix.calculate_inverse_projection_matrix();
 
         assert!(camera_matrix.inv_proj.eq(&inv_proj));
+    }
+
+
+    #[test]
+    fn calculate_oblique_projection_matrix() {
+        let rotation = [
+            270.0f32.to_radians(),
+            130.0f32.to_radians(),
+            185.0f32.to_radians(),
+        ];
+
+        let translation = [10.0f32, 20.0f32, 30.0f32];
+
+
+        // Create camera orientation and update translation and rotation.
+        let mut camera_orientation = Orientation::default();
+        camera_orientation.update_translation(translation);
+        camera_orientation.update_rotation(rotation);
+
+
+        // Create a camera matrix and create a view matrix and a projection matrix.
+        let mut camera = Camera::default();
+
+        let error_threshold = 0.001;
+
+        let orthographic_detail = Orthographic {
+            right: 8.8889,
+            left: -8.8889,
+            top: 5.0,
+            bottom: -5.0,
+            clipping: ClippingPlane {
+                far: 0.1,
+                near: 1000.0,
+            },
+        };
+
+        let oblique_detail = Oblique {
+            angle_rad: 64.0f32.to_radians(),
+            vertical_position: 0.055,
+            depth_offset: 8.64,
+        };
+
+        camera.calculate_oblique_projection_matrix(orthographic_detail, oblique_detail);
+
+        let proven_oblique_matrix = [
+            0.11250, 0.00000, -0.00989, 0.08542, // 0
+            0.00000, 0.20000, 0.00482,
+            -0.04166, // 1 swap -0.0482 and -0.04166 to positive since we are rhs
+            0.00000, 0.00000, 0.00200, 0.00000, 0.00000, 0.00000, 1.00000, 1.00000,
+        ];
+
+        // Angle 64
+        // Vertical 0.055
+        // Depth 8.64
+        // Lhs coordinate OpenGL
+        // 0.11250	    0.00000	    -0.00989	 0.08542
+        // 0.00000	    0.20000	    -0.00482	 0.04166
+        // 0.00000	    0.00000	    -0.00200    -1.00020
+        // 0.00000	    0.00000	     0.00000	 1.00000
+
+        // Rhs coordinate WEBGPU
+        //  0.11249986,  0.0,    -0.009886734,   0.08542138,
+        //  0.0,         0.2,     0.004822083,  -0.041662797,
+        //  0.0,         0.0,     0.0010000999,  0.0,
+        // -0.0,        -0.0,     1.0001,        1.0
+
+        assert!((proven_oblique_matrix[0] - camera.proj[0]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[1] - camera.proj[1]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[2] - camera.proj[2]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[3] - camera.proj[3]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[4] - camera.proj[4]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[5] - camera.proj[5]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[6] - camera.proj[6]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[7] - camera.proj[7]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[8] - camera.proj[8]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[9] - camera.proj[9]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[10] - camera.proj[10]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[11] - camera.proj[11]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[12] - camera.proj[12]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[13] - camera.proj[13]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[14] - camera.proj[14]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[15] - camera.proj[15]).abs() < error_threshold);
+
+
+        println!("oblique projection \n{:?}", camera.proj);
     }
 
 
