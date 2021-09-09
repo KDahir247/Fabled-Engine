@@ -83,16 +83,23 @@ pub fn begin_render_pass_system(
         */
         skybox_render.fast_iter().for_each(|render| {
 
+
+
             render_pass.set_pipeline(&render.pipeline);
 
             render_pass.set_bind_group(0, &camera.uniform.group, &[]);
 
+
+
             render_pass.draw(0..6, 0..1);
+
         });
 
         model_render.fast_iter().for_each(|render| {
             render_pass.set_pipeline(&render.pipeline);
             if render.model.is_some() {
+
+
                 for m in &render.model.as_ref().unwrap().meshes {
                     render_pass.set_bind_group(
                         0,

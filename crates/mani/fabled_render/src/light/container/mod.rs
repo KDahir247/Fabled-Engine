@@ -1,6 +1,13 @@
+pub mod directional_light;
 pub mod light;
+pub mod point_light;
+pub mod spot_light;
 
+pub use directional_light::*;
 pub use light::*;
+pub use point_light::*;
+pub use spot_light::*;
+
 
 #[cfg(test)]
 mod data_alignment_test {

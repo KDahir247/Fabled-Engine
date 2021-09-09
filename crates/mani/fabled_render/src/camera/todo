@@ -36,37 +36,34 @@ Clipping Plane.
     Near clip plane.
 
 -------------------------------------------------------------------------------
-Camera Fovy
-
- We can get the aspect ratio from doing the following formula.
-    aspect ratio = tan(horizontal_fov / 2.0) / tan(vertical_fov / 2.0)
-
--------------------------------------------------------------------------------
     FUTURE SUPPORT
 
-   CullMask Feature for Camera
+CullMask Feature for Camera
 
-  cull matrix
+cull matrix
 
 Camera resolution
 
 
 Camera to World Matrix
-and World to Camera Matrix
+World to Camera Matrix
 
-
--------------------------------------------------------------------------------
+Layer Mask
 
 Back ground Color for the camera.
 
-  Camera Render Order (Priority)
-   Camera with the higher Priority will be rendered first.
-   Camera wil the lower Priority will be rendered last.
+Camera Render Order (Priority)
+  - Camera with the higher Priority will be rendered first.
+  - Camera wil the lower Priority will be rendered last.
 
 Fov Scaling Algorithm
-    HorizontalPlus,
-    Anamorphic,
-    VerticalMinus,
-    Stretch,
+  - HorizontalPlus,
+  - Anamorphic,
+  - VerticalMinus,
+  - Stretch,
 
     HorizontalPlus is the default, since it is used most frequently in the game industry.
+
+
+
+-------------------------------------------------------------------------------
