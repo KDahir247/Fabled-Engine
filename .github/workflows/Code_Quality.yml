@@ -30,5 +30,4 @@ jobs:
         with:
           version: 'latest'
           args: '--all-targets'
-      - uses: actions-rs/grcov@v0.1.5
           
