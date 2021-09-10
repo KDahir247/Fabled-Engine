@@ -28,5 +28,6 @@ List of some distance falloff function
 3) Smoothing Attenuation function
 
 
-
+Calculate the light attenuation in the fragment shader.
+We can then get the illuminance from the
 

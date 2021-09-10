@@ -30,12 +30,15 @@ slotmap = {version = "*", features = ["serde"] }
 naga = {version = "0.5.0", features = ["wgsl-in", "wgsl-out", "glsl-in", "glsl-out", "spv-out", "spv-in", "serialize", "deserialize"]}
 ron = "0.6.0"
 
-#Mesh
+# Mesh
 # Remove later since fabled_math will have all the mathematical calculation and function.
 glam = {version = "0.18.0", features = ["bytemuck"]}
 
 # Miscellaneous
 ansi_term = {version = "0.12.1"}
+
+# EXT
+gltf = {version = "0.16.0", features = ["KHR_lights_punctual"]}
 
 # Features
 [features]
