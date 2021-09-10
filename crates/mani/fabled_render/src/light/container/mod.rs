@@ -1,8 +1,13 @@
+mod aperture_len;
 mod attenuation;
-pub mod light;
+mod light;
+mod shutter;
 
+pub use aperture_len::*;
 pub use attenuation::*;
 pub use light::*;
+pub use shutter::*;
+
 
 #[cfg(test)]
 mod data_test {
