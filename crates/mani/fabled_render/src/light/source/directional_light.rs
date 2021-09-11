@@ -10,7 +10,10 @@ pub struct DirectionalLight {
 
 impl Default for DirectionalLight {
     fn default() -> Self {
-        unimplemented!()
+        Self {
+            illuminance: 130000.0,
+            color: [1.0; 3],
+        }
     }
 }
 

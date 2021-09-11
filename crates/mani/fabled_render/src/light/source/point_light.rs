@@ -3,6 +3,7 @@ pub struct PointLight {
     pub radius: f32,
     pub range: f32,
     pub color: [f32; 3],
+    pub distance_m: f32,
 }
 
 impl Default for PointLight {
@@ -12,6 +13,7 @@ impl Default for PointLight {
             radius: 10.0,
             range: 10.0,
             color: [1.0; 3],
+            distance_m: 10.0,
         }
     }
 }

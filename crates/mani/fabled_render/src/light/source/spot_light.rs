@@ -4,6 +4,7 @@ pub struct SpotLight {
     pub inner_cone: f32,
     pub outer_cone: f32,
     pub color: [f32; 3],
+    pub distance_m: f32,
 }
 
 impl Default for SpotLight {

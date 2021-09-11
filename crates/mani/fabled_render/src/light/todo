@@ -29,5 +29,23 @@ List of some distance falloff function
 
 
 Calculate the light attenuation in the fragment shader.
-We can then get the illuminance from the
+We can then get the illuminance from the.
 
+
+Legend
+   v view vector
+   l incident light vector
+   n normal
+   h half vector
+   L lighting function
+   f BRDF
+   fd diffuse component of a BRDF
+   fr specular component of a BRDF
+   α material roughness
+   αlin perceptually linear material roughness
+   · dot product
+   h · i clamped dot product
+   | · | absolute value of the dot product
+   ρ diffuse reflectance
+   χ
+   +(a) Heaviside function: 1 if a > 0 and 0 if a <= 0

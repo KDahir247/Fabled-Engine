@@ -2,7 +2,7 @@ use crate::light::FStop;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Shutter {
-    speed: f32,
+    pub speed: f32,
 }
 
 impl Shutter {
@@ -30,13 +30,6 @@ impl Shutter {
 }
 
 
-impl Shutter {
-    pub fn get_shutter_speed(&self) -> f32 {
-        self.speed
-    }
-}
-
-
 #[cfg(test)]
 mod shutter_test {
     use crate::light::{FStop, FullStop, Shutter};
@@ -55,31 +48,31 @@ mod shutter_test {
         let f8_shutter = 1.0 / (initial_shutter / 2.0 / 2.0 / 2.0 / 2.0 / 2.0 / 2.0);
 
 
-        assert!(shutter.get_shutter_speed().eq(&f1_4_shutter));
+        assert!(shutter.speed.eq(&f1_4_shutter));
 
         let f2_aperture = FStop::FullStop(FullStop::f2_stop());
         shutter = Shutter::compute_shutter_speed(f2_aperture);
 
-        assert!(shutter.get_shutter_speed().eq(&f2_shutter));
+        assert!(shutter.speed.eq(&f2_shutter));
 
         let f2_8_aperture = FStop::FullStop(FullStop::f2_8_stop());
         shutter = Shutter::compute_shutter_speed(f2_8_aperture);
 
-        assert!(shutter.get_shutter_speed().eq(&f2_8_shutter));
+        assert!(shutter.speed.eq(&f2_8_shutter));
 
         let f4_aperture = FStop::FullStop(FullStop::f4_stop());
         shutter = Shutter::compute_shutter_speed(f4_aperture);
 
-        assert!(shutter.get_shutter_speed().eq(&f4_shutter));
+        assert!(shutter.speed.eq(&f4_shutter));
 
         let f5_6_aperture = FStop::FullStop(FullStop::f5_6_stop());
         shutter = Shutter::compute_shutter_speed(f5_6_aperture);
 
-        assert!(shutter.get_shutter_speed().eq(&f5_6_shutter));
+        assert!(shutter.speed.eq(&f5_6_shutter));
 
         let f8_aperture = FStop::FullStop(FullStop::f8_stop());
         shutter = Shutter::compute_shutter_speed(f8_aperture);
 
-        assert!(shutter.get_shutter_speed().eq(&f8_shutter));
+        assert!(shutter.speed.eq(&f8_shutter));
     }
 }
