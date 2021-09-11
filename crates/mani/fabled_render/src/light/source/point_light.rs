@@ -30,6 +30,7 @@ impl PointLight {
             radius,
             range,
             color,
+            distance_m: 1.0,
         }
     }
 

@@ -31,6 +31,23 @@ List of some distance falloff function
 Calculate the light attenuation in the fragment shader.
 We can then get the illuminance from the.
 
+punctual lights,
+1) Directional light,
+2) Spot Light
+3) Point Light,
+
+photometric lights,
+1) IES profile,
+2) EULUMDAT profile
+
+area lights,
+
+emissive surfaces,
+
+image based lights (IBLs)
+
+spectral renderer (i.e. a renderer which uses spectral values instead of a RGB triplet to represent
+color)
 
 Legend
    v view vector
