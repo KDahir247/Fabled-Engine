@@ -13,7 +13,7 @@ pub use tex_option::*;
 #[cfg(test)]
 mod data_test {
     use crate::material::{
-        IllumModel, StandardMaterial, SupportRMA, TextureBlending, TextureOptions,
+        IlluminationModel, StandardMaterial, SupportRMA, TextureBlending, TextureOptions,
     };
 
     #[test]
@@ -21,7 +21,7 @@ mod data_test {
         let blending_size = std::mem::size_of::<TextureBlending>();
         assert_eq!(blending_size & (blending_size - 1), 0);
 
-        let illum_model_size = std::mem::size_of::<IllumModel>();
+        let illum_model_size = std::mem::size_of::<IlluminationModel>();
         assert_eq!(illum_model_size & (illum_model_size - 1), 0);
 
         let rma_size = std::mem::size_of::<SupportRMA>();
@@ -39,7 +39,7 @@ mod data_test {
         let blending_alignment = std::mem::align_of::<TextureBlending>();
         assert_eq!(blending_alignment & (blending_alignment - 1), 0);
 
-        let illum_model_alignment = std::mem::align_of::<IllumModel>();
+        let illum_model_alignment = std::mem::align_of::<IlluminationModel>();
         assert_eq!(illum_model_alignment & (illum_model_alignment - 1), 0);
 
         let rma_alignment = std::mem::align_of::<SupportRMA>();

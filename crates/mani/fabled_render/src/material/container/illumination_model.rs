@@ -1,7 +1,7 @@
 // Used in Obj Wavefront file.
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum IllumModel {
+pub enum IlluminationModel {
     /// Color on and Ambient off
     Color = 0,
     /// Color on and Ambient on

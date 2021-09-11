@@ -22,6 +22,8 @@ impl From<gltf::khr_lights_punctual::Light<'_>> for LightType {
                 LightType::DirectionalLight(directional_light)
             }
             Kind::Point => {
+                // todo maybe convert intensity to illuminance in candela
+
                 // since we can use new for point and spot light, since it requires the
                 // luminance flux. to get to calculate the luminance intensity,
                 // but khr_lights_punctual already returns luminance intensity.

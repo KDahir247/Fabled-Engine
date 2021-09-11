@@ -1,14 +1,13 @@
+use crate::light::{FStop, FullStop, Shutter};
 // N is the relative aperture (f-number)
 // t is the exposure time ("shutter speed") in seconds
 // L is the average scene luminance
 // S is the ISO arithmetic speed
 // K is the reflected-light meter calibration constant
 
+
 // EV = log2 (LS / K)
 // (LS / K) is equivalent to N^2 / t, thus EV = log2 (N^2 / t)
-
-use crate::light::{FStop, FullStop, Shutter};
-
 pub fn calculate_exposure_value(f_stop: FStop) -> f32 {
     let shutter = Shutter::compute_shutter_speed(f_stop);
 
@@ -24,4 +23,32 @@ pub fn calculate_exposure_value(f_stop: FStop) -> f32 {
     let f_number = target_stop.get_f_number();
 
     f32::log2(f_number * f_number / shutter.get_shutter_speed())
+}
+
+pub fn calculate_ev_100(f_stop: FStop, iso_speed: f32) -> f32 {
+    let ev_s = calculate_exposure_value(f_stop);
+    ev_s - f32::log2(iso_speed / 100.0)
+}
+
+
+// EV100' = EV100 - EC
+pub fn ev100_compensation(ev100: f32, exposure_compensation: f32) -> f32 {
+    ev100 - exposure_compensation
+}
+
+// H is the photometric exposure, expressed in lux seconds
+// q is the lens and vignetting attenuation factor (usually 0.65^11)
+// t is the exposure time ("shutter speed") in seconds
+// L is the luminance of the scene
+// N is the relative aperture (f-number)
+// S is the ISO arithmetic speed
+
+// The SI unit for luminance is candela per square metre (cd/m2)
+// L' =L*1/Lmax
+// Lmax = (N^2/t) * (78 / q * S)
+// which is equivalent to Lmax =2^EV100 * (78 / q * S)
+pub fn calculate_exposure_normalization_factor(ev100: f32) -> f32 {
+    // todo change. currently hard coded.
+    // 1.2 is from 78 / (0.65 * 100)
+    1.0 / (2.0f32.powf(ev100) * 1.2)
 }
