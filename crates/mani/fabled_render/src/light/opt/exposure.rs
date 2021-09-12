@@ -3,8 +3,9 @@ use crate::light::{FStop, FullStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUATI
 // t is the exposure time ("shutter speed") in seconds
 // L is the average scene luminance
 // S is the ISO arithmetic speed
-// K is the reflected-light meter calibration constant
-
+// K is the reflected-light meter calibration constant ISO 2720:1974 recommended
+// value 10.6 and 13.4
+// 12.5 (Canon, Nikon, Sekonic) and 14.0 (Minolta, Kenko, Pentax)
 
 // EV = log2 (LS / K)
 // (LS / K) is equivalent to N^2 / t, thus EV = log2 (N^2 / t)

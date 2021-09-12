@@ -1,5 +1,3 @@
-mod iso_standard;
-mod len_attenuation;
+mod standard;
 
-pub use iso_standard::*;
-pub use len_attenuation::*;
+pub use standard::*;

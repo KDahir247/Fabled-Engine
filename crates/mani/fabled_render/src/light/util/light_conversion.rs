@@ -1,3 +1,5 @@
+use crate::light::{ISOSpeed, CALIBRATION_CONSTANT_PRIMARY};
+
 // Candela to lux where the distance is in meters
 // Luminous intensity in candela (cd) to illuminance in lux (lx)
 // Ev(lx) = Iv(cd) / (d(m))^2
@@ -24,10 +26,51 @@ pub fn candela_to_lumen(candela: f32, apex_angle: f32) -> f32 {
 // Opposite operation of candela to lumen
 // Luminance flux in lumen (lm) to luminance intensity in candela (cd)
 // cd = lm / ( 2π(1 - cos(º/2)) )
-pub fn lumen_to_candela(lumens: f32, apex_angle: f32) -> f32 {
+pub fn lumen_to_candela(lumen: f32, apex_angle: f32) -> f32 {
     let target_angle = apex_angle * std::f32::consts::PI / 180.0;
-    lumens / (std::f32::consts::TAU * (1.0 - (target_angle / 2.0).cos()))
+    lumen / (std::f32::consts::TAU * (1.0 - (target_angle / 2.0).cos()))
 }
+
+
+// EV100 to Luminance Chart
+// where k is 12.5 and ISO speed is 100
+//   _____________________
+//   | EV100 | Luminance |
+//   |-------|-----------|
+//   | -4    | 0.008     |
+//   | -3    | 0.016     |
+//   | -2    | 0.031     |
+//   | -1    | 0.063     |
+//   | 0     | 0.125     |
+//   | 1     | 0.25      |
+//   | 2     | 0.5       |
+//   | 3     | 1         |
+//   | 4     | 2         |
+//   | 5     | 4         |
+//   | 6     | 8         |
+//   | 7     | 16        |
+//   | 8     | 32        |
+//   | 9     | 64        |
+//   | 10    | 128       |
+//   | 11    | 256       |
+//   | 12    | 512       |
+//   | 13    | 1024      |
+//   | 14    | 2048      |
+//   | 15    | 4096      |
+//   | 16    | 8192      |
+//   ---------------------
+
+// Convert EV (exposure value) to luminance (nit)
+// where NIT is equivalent to Candela (cd/m^22), thus 1 Nit  = 1 cd/m^2
+// NIT is a metric for measuring luminance, which is how much light an object
+// emits
+// Luminance = (2^EV * reflected-light meter calibration constant) / S
+pub fn ev_to_luminance(ev: f32, iso: ISOSpeed, calibration_constant: Option<f32>) -> f32 {
+    let calibration_constant = calibration_constant.unwrap_or(CALIBRATION_CONSTANT_PRIMARY);
+
+    (2.0f32.powf(ev) * calibration_constant) / iso.arithmetic_speed
+}
+
 
 /// result have been retrieve from [light calculation](https://www.rapidtables.com/calc/light/index.html)
 #[cfg(test)]
