@@ -23,7 +23,7 @@ pub fn kelvin_to_fahrenheit(kelvin: f32) -> f32 {
 // T(K) = (T(°F) + 459.67)× 5/9
 pub fn fahrenheit_to_kelvin(fahrenheit: f32) -> f32 {
     // 0.555... == 5.0 / 9.0
-    (fahrenheit + 459.67) * 0.55555555555555555555555555555556
+    (fahrenheit + 459.67) * 0.555_555_6
 }
 
 // Convert Celsius to Fahrenheit for temperature measurement T(°)
@@ -39,7 +39,6 @@ pub fn fahrenheit_to_celsius(fahrenheit: f32) -> f32 {
     (fahrenheit - 32.0) / 1.8
 }
 
-// TODO write test to validate temperature calculation
 #[cfg(test)]
 mod temperature_test {
     use crate::light::{
