@@ -42,27 +42,18 @@ photometric lights,
 
 area lights,
 
-emissive surfaces,
+------------------------------------ Soon -----------------------------------------------
 
-image based lights (IBLs)
+Shadow
+
+
+------------------------------------ Future ----------------------------------------------
 
 spectral renderer (i.e. a renderer which uses spectral values instead of a RGB triplet to represent
 color)
 
-Legend
-   v view vector
-   l incident light vector
-   n normal
-   h half vector
-   L lighting function
-   f BRDF
-   fd diffuse component of a BRDF
-   fr specular component of a BRDF
-   α material roughness
-   αlin perceptually linear material roughness
-   · dot product
-   h · i clamped dot product
-   | · | absolute value of the dot product
-   ρ diffuse reflectance
-   χ
-   +(a) Heaviside function: 1 if a > 0 and 0 if a <= 0
+emissive surfaces,
+
+image based lights (IBLs)
+
+Volumetric light

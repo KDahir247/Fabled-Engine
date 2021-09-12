@@ -2,9 +2,11 @@
 // since calculating the illuminance (Luminance flux / spherical radius *
 // spherical radius) and the radius extent closely to infinite
 
+use crate::light::LightAppearance;
+
 pub struct DirectionalLight {
     pub illuminance: f32,
-    pub color: [f32; 3],
+    pub appearance: LightAppearance,
 }
 
 
@@ -12,17 +14,17 @@ impl Default for DirectionalLight {
     fn default() -> Self {
         Self {
             illuminance: 130000.0,
-            color: [1.0; 3],
+            appearance: LightAppearance::default(),
         }
     }
 }
 
 
 impl DirectionalLight {
-    pub fn new(lux: f32, color: [f32; 3]) -> Self {
+    pub fn new(lux: f32, appearance: LightAppearance) -> Self {
         Self {
             illuminance: lux,
-            color,
+            appearance,
         }
     }
 }

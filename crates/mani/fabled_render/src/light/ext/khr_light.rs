@@ -1,4 +1,4 @@
-use crate::light::{DirectionalLight, LightType, PointLight, SpotLight};
+use crate::light::{DirectionalLight, LightAppearance, LightType, PointLight, SpotLight};
 use gltf::khr_lights_punctual::{Kind, Light};
 
 impl From<gltf::khr_lights_punctual::Light<'_>> for LightType {
@@ -16,7 +16,10 @@ impl From<gltf::khr_lights_punctual::Light<'_>> for LightType {
             Kind::Directional => {
                 let directional_light = DirectionalLight {
                     illuminance: intensity,
-                    color,
+                    appearance: LightAppearance {
+                        color,
+                        ..Default::default()
+                    },
                 };
 
                 LightType::DirectionalLight(directional_light)
@@ -29,7 +32,10 @@ impl From<gltf::khr_lights_punctual::Light<'_>> for LightType {
                 // but khr_lights_punctual already returns luminance intensity.
                 let mut point_light = PointLight {
                     intensity,
-                    color,
+                    appearance: LightAppearance {
+                        color,
+                        ..Default::default()
+                    },
                     ..Default::default()
                 };
 
@@ -46,7 +52,10 @@ impl From<gltf::khr_lights_punctual::Light<'_>> for LightType {
                     intensity,
                     inner_cone: inner_cone_angle,
                     outer_cone: outer_cone_angle,
-                    color,
+                    appearance: LightAppearance {
+                        color,
+                        ..Default::default()
+                    },
                     ..Default::default()
                 };
 

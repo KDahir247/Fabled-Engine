@@ -1,10 +1,12 @@
 mod aperture_len;
+mod appearance;
 mod attenuation;
 mod iso_speed;
 mod light;
 mod shutter;
 
 pub use aperture_len::*;
+pub use appearance::*;
 pub use attenuation::*;
 pub use iso_speed::*;
 pub use light::*;
