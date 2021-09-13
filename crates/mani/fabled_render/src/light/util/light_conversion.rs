@@ -112,7 +112,7 @@ pub fn spot_light_candela_to_lumen(candela: f32, outer_angle_rad: f32) -> f32 {
     std::f32::consts::TAU * (1.0 - (outer_angle_rad * 0.5)) * candela
 }
 
-// Oposite operation of spot light luminance power (luminance flux) to
+// Opposite operation of spot light luminance power (luminance flux) to
 // luminance. Calculate spot light's luminance intensity from luminance power
 // (luminance flux)
 // I = φ / 2π(1.0 - cos(θ outer / 2.0))
@@ -138,12 +138,42 @@ pub fn spot_light_approx_lumen_to_candela(lumen: f32) -> f32 {
     lumen / std::f32::consts::PI
 }
 
+// Calculate frustum light's luminance power (luminance flux) from
+// luminance intensity
+// φ = I * (4 * arcsin [ sin(θa / 2) * sin(θb / 2)])
+// which is equivalent to φ = I * (4 * arcsin [ sin(θa * 0.5) * sin(θb * 0.5)])
+pub fn frustum_light_candela_to_lumen(
+    candela: f32,
+    opening_angle_a_rad: f32,
+    opening_angle_b_rad: f32,
+) -> f32 {
+    candela
+        * (4.0
+            * f32::asin(f32::sin(opening_angle_a_rad * 0.5) * f32::sin(opening_angle_b_rad * 0.5)))
+}
+
+// Opposite operation of frustum light's luminance power (luminance flux) to
+// luminance. Calculate frustum light's luminance intensity from luminance power
+// I = φ / (4 * arcsin [ sin(θa / 2) * sin(θb  / 2)] )
+// which is equivalent to I = φ / (4 * arcsin [ sin(θa * 0.5) * sin(θb * 0.5)])
+pub fn frustum_light_lumen_to_candela(
+    lumen: f32,
+    opening_angle_a_rad: f32,
+    opening_angle_b_rad: f32,
+) -> f32 {
+    lumen
+        / (4.0
+            * f32::asin(f32::sin(opening_angle_a_rad * 0.5) * f32::sin(opening_angle_b_rad * 0.5)))
+}
+
+
 /// result have been retrieve from [light calculation](https://www.rapidtables.com/calc/light/index.html)
 #[cfg(test)]
 mod unit_conversion_tests {
     use crate::light::{
-        candela_to_lumen, candela_to_lux, ev_to_luminance, lumen_to_candela, luminance_to_ev,
-        lux_to_candela, point_light_candela_to_lumen, point_light_lumen_to_candela,
+        candela_to_lumen, candela_to_lux, ev_to_luminance, frustum_light_candela_to_lumen,
+        frustum_light_lumen_to_candela, lumen_to_candela, luminance_to_ev, lux_to_candela,
+        point_light_candela_to_lumen, point_light_lumen_to_candela,
         spot_light_approx_candela_to_lumen, spot_light_approx_lumen_to_candela,
         spot_light_candela_to_lumen, spot_light_lumen_to_candela, ISOSpeed,
     };
@@ -235,6 +265,19 @@ mod unit_conversion_tests {
         println!("{}", lumen);
 
         let candela = spot_light_approx_lumen_to_candela(lumen);
+        println!("{}", candela);
+    }
+
+    #[test]
+    fn frustum_light_candela_lumen() {
+        let candela = 231.0;
+        let angle_1 = 43.3f32.to_radians();
+        let angle_2 = 15.123f32.to_radians();
+
+        let lumen = frustum_light_candela_to_lumen(candela, angle_1, angle_2);
+        println!("{}", lumen);
+
+        let candela = frustum_light_lumen_to_candela(lumen, angle_1, angle_2);
         println!("{}", candela);
     }
 }

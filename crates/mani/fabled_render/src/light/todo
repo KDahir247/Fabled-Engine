@@ -53,6 +53,20 @@ converted into luminous intensity for lighting calculations
 The luminous power can be calculated from
 luminous intensity by integrating the luminous intensity over the light solid angle
 
+Point light: light evaluation can be expressed as
+BRDF (Bidirectional reflectance distribution function)
+BRDF(view vector, incident light vector) (luminance intensity / distance^2) * clamped_dot(n . l)
+which is equalivent to
+BRDF (view vector, incident light vector) (luminance power (luminance flux) / (4π * distance^2)) * clamped_dot(normal . incident light vector)
+
+Spot light: light evaluation can be  expressed as
+BRDF (Bidirectional reflectance distribution function)
+BRDF (view vector, incident light vector) (luminance intensity / distance^2) clamped_dot(n . l)
+which is equalivent to
+BRDF (view vector, incident light vector) (luminance power (luminance flux) / (π * distance^2)) * clamped_dot(normal . incident light vector) * getAngleAttenuation()
+
+
+
 ------------------------------------ Soon -----------------------------------------------
 
 Shadow
