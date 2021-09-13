@@ -92,8 +92,8 @@ pub fn point_light_candela_to_lumen(candela: f32) -> f32 {
     2.0 * std::f32::consts::TAU * candela
 }
 
-// Opposite operation of point light luminance power (luminance flux) to the
-// luminance Calculate point light's luminance intensity from luminance power
+// Opposite operation of point light luminance power (luminance flux) to
+// luminance. Calculate point light's luminance intensity from luminance power
 // (luminance flux)
 // 	I = 4π / φ
 // which is equivalent to I = φ / 2τ
@@ -102,12 +102,40 @@ pub fn point_light_lumen_to_candela(lumen: f32) -> f32 {
     lumen / (2.0 * std::f32::consts::TAU)
 }
 
-pub fn spot_light_candela_to_lumen(candela: f32) -> f32 {
-    unimplemented!()
+
+// Calculate spot light's luminance power (luminance flux) from the luminance
+// intensity
+// φ = 2π(1.0 - cos(θ outer / 2.0)) I
+// which is equivalent to φ = τ(1.0 - cos(θ outer * 0.5)) I
+// where τ = tau == 2π
+pub fn spot_light_candela_to_lumen(candela: f32, outer_angle_rad: f32) -> f32 {
+    std::f32::consts::TAU * (1.0 - (outer_angle_rad * 0.5)) * candela
 }
 
-pub fn spot_light_lumen_to_candela(lumen: f32) -> f32 {
-    unimplemented!()
+// Oposite operation of spot light luminance power (luminance flux) to
+// luminance. Calculate spot light's luminance intensity from luminance power
+// (luminance flux)
+// I = φ / 2π(1.0 - cos(θ outer / 2.0))
+// which is equivalent to I = φ / τ(1.0 - cos(θ outer / 2.0))
+// where τ = tau == 2π
+pub fn spot_light_lumen_to_candela(lumen: f32, outer_angle_rad: f32) -> f32 {
+    lumen / (std::f32::consts::TAU * (1.0 - (outer_angle_rad * 0.5)))
+}
+
+// Calculate approximate spot light's luminance power (luminance flux) from the
+// luminance intensity (disregard outer_angle),
+// φ = πI
+pub fn spot_light_approx_candela_to_lumen(candela: f32) -> f32 {
+    std::f32::consts::PI * candela
+}
+
+
+// Oposite operation of spot light luminance power (luminance flux) to
+// luminance. Calculate approximate spot light's luminance intensity from
+// luminance power (luminance flux) (disregarding outer_angle)
+// I = φ / π
+pub fn spot_light_approx_lumen_to_candela(lumen: f32) -> f32 {
+    lumen / std::f32::consts::PI
 }
 
 /// result have been retrieve from [light calculation](https://www.rapidtables.com/calc/light/index.html)
@@ -115,7 +143,9 @@ pub fn spot_light_lumen_to_candela(lumen: f32) -> f32 {
 mod unit_conversion_tests {
     use crate::light::{
         candela_to_lumen, candela_to_lux, ev_to_luminance, lumen_to_candela, luminance_to_ev,
-        lux_to_candela, point_light_candela_to_lumen, point_light_lumen_to_candela, ISOSpeed,
+        lux_to_candela, point_light_candela_to_lumen, point_light_lumen_to_candela,
+        spot_light_approx_candela_to_lumen, spot_light_approx_lumen_to_candela,
+        spot_light_candela_to_lumen, spot_light_lumen_to_candela, ISOSpeed,
     };
 
     #[test]
@@ -169,6 +199,7 @@ mod unit_conversion_tests {
     }
 
 
+    // todo Write test
     #[test]
     fn point_light_candela_lumen() {
         let candela = 150.0;
@@ -179,5 +210,31 @@ mod unit_conversion_tests {
 
         let in_question_candela = point_light_lumen_to_candela(lumen);
         println!("{}", in_question_candela);
+    }
+
+    #[test]
+    fn spot_light_candela_lumen() {
+        let candela = 175.0;
+
+        let spot_light_angle = 45.0f32;
+
+        let lumen = spot_light_candela_to_lumen(candela, spot_light_angle.to_radians());
+        println!("{}", lumen);
+
+
+        let candela = spot_light_lumen_to_candela(lumen, spot_light_angle.to_radians());
+        println!("{}", candela)
+    }
+
+
+    #[test]
+    fn spot_light_approx_candela_lumen() {
+        let candela = 175.0;
+
+        let lumen = spot_light_approx_candela_to_lumen(candela);
+        println!("{}", lumen);
+
+        let candela = spot_light_approx_lumen_to_candela(lumen);
+        println!("{}", candela);
     }
 }
