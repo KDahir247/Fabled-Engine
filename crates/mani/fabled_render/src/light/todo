@@ -66,6 +66,36 @@ which is equalivent to
 BRDF (view vector, incident light vector) (luminance power (luminance flux) / (π * distance^2)) * clamped_dot(normal . incident light vector) * getAngleAttenuation()
 
 
+The resulting illuminance follows the inverse square law, and considering a surface normal pointing directly to the light, is thus (with Frostbite convention):
+E⊥ = φ / (π * distance^2)
+
+Attenuation: One issue with the inverse square law is that it never reaches zero. For performance
+reasons, the renderer must implement a finite light range to support light culling algorithms. At a
+certain limit, the illuminance should smoothly reach zero. One approach to solve this is to window the
+falloff in such a way that most of the function is unaffected. We can use a basic lerp (linear interpolation)
+as a remedy to this issue
+
+E = lerp(I / distance^2, 0, distance/ lightRadius)
+which is equalivent to
+E = (I / distance^2) * (1 - (distance / lightRadius))
+
+and to keep the function unaltered, we tweak the distance criteria as follows
+E_window2 = ( I / distance^2) * (1 - (distance^20 / lightRadius^20))
+
+This simple approach works, but causes a hard cutoff which looks unnatural. A second approach is to
+bias the function by a threshold and remap it to its initial range (0-1)
+
+Threshold =  1 / lightRadius^2
+E_scaleBias = (1 / (1 - threshold)) * ((I / distance^2) - threshold)
+
+Results are better, but this approach suffers from having a non-zero gradient at 0 which cause a visible
+discontinuity. A better approach is to window the function and ensuring zero gradient at lightRadius.
+This can be achieved by raising the power of the window function.
+
+E_window1 = (I / distance^2) * saturate(1 - x^n / lightRadius^n)^2
+where n is to tweak the transition smoothness by default 4
+
+
 
 ------------------------------------ Soon -----------------------------------------------
 
