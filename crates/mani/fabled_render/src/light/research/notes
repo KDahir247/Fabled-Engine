@@ -1,3 +1,5 @@
+
+
 Point light: light evaluation can be expressed as
 BRDF (Bidirectional reflectance distribution function)
 BRDF(view vector, incident light vector) (luminance intensity / distance^2) * clamped_dot(n . l)
@@ -39,4 +41,58 @@ This can be achieved by raising the power of the window function.
 
 E_window1 = (I / distance^2) * saturate(1 - x^n / lightRadius^n)^2
 where n is to tweak the transition smoothness by default 4
+
+____________________________ Photometric lights ________________________________
+
+There are two type of Photometric lights:
+
+1) IES (Illuminating Engineering Society)
+2) EULUMDAT
+
+For physically correct results, IES/EULUMDAT file should only be applied on small sphere.
+Applying an IES/EULUMDAT file onto geometry other than a small sphere can cause inaccuracies
+
+The spherical coordinate system used to describe light distribution is referred to as "the photometric web"
+There are three different types of photometric webs, called Types A, B, and C.
+
+. Type A: for automotive headlamps and signal lights,
+. Type B: for adjustable outdoor area and sports lighting luminaries,
+. Type C: for architectural and road lights.
+
+Type C is most common type used in computer graphics
+
+The IES format stores luminance intensity values in candela
+
+EULUMDAT format is a well-structured format that stores luminous intensity values in candela per total kilo-lumens
+emitted by the light.
+
+candela per total kilo-lumens (cd / klm)
+
+
+An IES file stores candela values for both relative and absolute intensities
+
+To retrieve candela values from an EULUMDAT file for both absolute and relative intensities,
+one needs to do the following conversion.
+
+Luminance intensity (cd/candela) = (candela per total kilo-lumens (cd/klm) * total luminance flux (lm)) / 1000
+
+An IES profile can be directly applied on a point or a spot light.
+The IES profile can be used to describing the light intensity and be adjusted with a multiplier.
+This is the only way to control lights with luminous intensity.
+A second option is to use an IES profile as a mask, normalized by the maximum intensity
+of the profile. To handle both cases with the luminance intensity point light equation, we
+normalize the profile by it maximum intensity and then perform the light evaluation as follow:
+
+
+L = BRDF(view vector, incident light vector) * I / d^2 * <n * l> * getIESProfileAttenuation().
+
+where I is either the maximum intensity of the profile or the user defined light intensity for the mask case.
+getIESProfileAttenuation() returns the normalized profile value.
+Note that for spot lights, the angle attenuation is applied on top of this equation.
+
+When creating a new light profile, the spherical photometric function is reconstructed and sampled
+to fill a 2D texture with a spherical parametrization (θ,cos(φ)). We store normalized values
+scaled by the inverse of the maximum intensity in order to handle both masked and unmasked usage.
+In shaders, the 2D texture is evaluated and applied as an attenuation
+
 
