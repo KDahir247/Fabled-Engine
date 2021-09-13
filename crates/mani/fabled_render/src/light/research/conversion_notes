@@ -1,0 +1,20 @@
+
+// Calculating the Light intensity for a Point light
+// Luminous Intensity is using candela for it's measurement which is equalivent to lumen per steradian
+Luminous Intensity (Intensity) = Luminous Flux  / 4 * PI
+
+
+// Illuminance is the total luminous flux incident on a surface, per unit area.
+// Illuminance is using lux for it's measuremenet.
+// Spherical surface radius is equalivent to the radius of the point light.
+Illuminance = luminous Flux / 4 * PI * spherical surface radius * spherical surface radius
+
+
+// The physically correct illuminance at the distance.
+// Where D is the distance from each point on a surface being shaded from the light position.
+D = ||light position - point position||
+Illuminance D = Luminous Intensity (Intensity) / D * D
+Which can be re-written as
+Illuminance D = (Luminous Flux / 4 * PI) / ||light position - point position|| * ||light position - point position||
+Illuminance D = (Luminous Flux / 4 * PI) / distance falloff function (D)
+
