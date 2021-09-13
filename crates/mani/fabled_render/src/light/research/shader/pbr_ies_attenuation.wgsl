@@ -21,11 +21,11 @@ fn get_ies_profile_attenuation(norm_light_vector : vec3<f32>, light : ShadowLigh
     // Cartesian to spherical space
     // Texture encoded with cos(phi), scale from -1->1 to 0->1
 
-    let fabled_two_pi : f32 = 0.15915494309189533576888376337251;
+    let fabled_inv_two_pi : f32 = 0.15915494309189533576888376337251;
 
     let phi_coord : f32 = (ies_sample_direction.z * 0.5) + 0.5;
     let theta : f32 = atan2(ies_sample_direction.y, ies_sample_direction.x);
-    let theta_coord = theta * fabled_two_pi;
+    let theta_coord = theta * fabled_inv_two_pi;
     let tex_coord : vec3<f32> = vec3<f32>(theta_coord, phi_coord, light.light_index);
 
     //should be the same as hlsl Texture.SampleLevel. We specify the mip level to 0.
