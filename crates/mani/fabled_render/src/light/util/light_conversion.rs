@@ -166,30 +166,84 @@ pub fn frustum_light_lumen_to_candela(
             * f32::asin(f32::sin(opening_angle_a_rad * 0.5) * f32::sin(opening_angle_b_rad * 0.5)))
 }
 
-// Calculate Sphere area light's luminance from luminance power (luminance flux)
-// L = φ / (4 * radius^2 * π^2)
+// Calculate Sphere area light's luminance(cd.m−2) from luminance power
+// (luminance flux) L = φ / (4 * radius^2 * π^2)
 pub fn sphere_area_light_lumen_to_luminance(lumen: f32, radius: f32) -> f32 {
     lumen / (4.0 * radius * radius * std::f32::consts::PI * std::f32::consts::PI)
 }
 
 // Opposite operation of sphere area light's luminance power (luminance flux) to
-// luminance. Calculate sphere area light's luminance power (luminance flux)
-// from luminance
+// luminance(cd.m−2). Calculate sphere area light's luminance power (luminance
+// flux) from luminance(cd.m−2)
 // φ = L * (4 * radius^2 * π^2)
 pub fn sphere_area_light_luminance_to_lumen(luminance: f32, radius: f32) -> f32 {
     luminance * (4.0 * radius * radius * std::f32::consts::PI * std::f32::consts::PI)
+}
+
+
+// Calculate disk area light's luminance (cd.m−2) from luminance power
+// (luminance flux)
+// L = φ / (radius^2 * π^2)
+pub fn disk_area_light_lumen_to_luminance(lumen: f32, radius: f32) -> f32 {
+    lumen / (radius * radius * std::f32::consts::PI * std::f32::consts::PI)
+}
+
+// Opposite operation of disk area light's luminance(cd.m−2) from luminance
+// power (luminance flux). Calculate disk area light's luminance power
+// (luminance flux) from luminance
+// φ = L * (radius^2 * π^2)
+pub fn disk_area_light_luminance_to_lumen(luminance: f32, radius: f32) -> f32 {
+    luminance * (radius * radius * std::f32::consts::PI * std::f32::consts::PI)
+}
+
+// Calculate tube area light's luminance (cd.m–2) from luminance power
+// (luminance flux)
+// L = φ / (2π * radius * width * 4π * radius^2) * π
+pub fn tube_area_light_lumen_to_luminance(lumen: f32, width: f32, radius: f32) -> f32 {
+    lumen
+        / ((2.0 * std::f32::consts::PI * width + 4.0 * std::f32::consts::PI * radius * radius)
+            * std::f32::consts::PI)
+}
+
+// Opposite operation of tube area light's luminance (cd.m–2) from luminance
+// power (luminance flux). Calculate tube area light's luminance power
+// (luminance flux) from luminance (cd.m–2)
+// φ = L * (2π * radius * width * 4π * radius^2) * π
+pub fn tube_area_light_luminance_to_lumen(luminance: f32, width: f32, radius: f32) -> f32 {
+    luminance
+        * ((2.0 * std::f32::consts::PI * width + 4.0 * std::f32::consts::PI * radius * radius)
+            * std::f32::consts::PI)
+}
+
+
+// Calculate rectangle area light luminance (cd.m–2) from luminance power
+// (luminance flux)
+// L = φ / (width * height * π)
+pub fn rectangle_area_light_lumen_to_luminance(lumen: f32, width: f32, height: f32) -> f32 {
+    lumen / (width * height * std::f32::consts::PI)
+}
+
+// Opposite of rectangle area light luminance (cd.m–2) from luminance power
+// (luminance flux) Calculate rectangle area light luminance power (luminance
+// flux) from luminance.
+// φ = L * (width * height * π)
+pub fn rectangle_area_light_luminance_to_lumen(luminance: f32, width: f32, height: f32) -> f32 {
+    luminance * (width * height * std::f32::consts::PI)
 }
 
 /// result have been retrieve from [light calculation](https://www.rapidtables.com/calc/light/index.html)
 #[cfg(test)]
 mod unit_conversion_tests {
     use crate::light::{
-        candela_to_lumen, candela_to_lux, ev_to_luminance, frustum_light_candela_to_lumen,
+        candela_to_lumen, candela_to_lux, disk_area_light_lumen_to_luminance,
+        disk_area_light_luminance_to_lumen, ev_to_luminance, frustum_light_candela_to_lumen,
         frustum_light_lumen_to_candela, lumen_to_candela, luminance_to_ev, lux_to_candela,
         point_light_candela_to_lumen, point_light_lumen_to_candela,
+        rectangle_area_light_lumen_to_luminance, rectangle_area_light_luminance_to_lumen,
         sphere_area_light_lumen_to_luminance, sphere_area_light_luminance_to_lumen,
         spot_light_approx_candela_to_lumen, spot_light_approx_lumen_to_candela,
-        spot_light_candela_to_lumen, spot_light_lumen_to_candela, ISOSpeed,
+        spot_light_candela_to_lumen, spot_light_lumen_to_candela,
+        tube_area_light_lumen_to_luminance, tube_area_light_luminance_to_lumen, ISOSpeed,
     };
 
     #[test]
@@ -253,7 +307,7 @@ mod unit_conversion_tests {
 
 
         let in_question_candela = point_light_lumen_to_candela(lumen);
-        println!("{}", in_question_candela);
+        assert!(in_question_candela.eq(&candela));
     }
 
     #[test]
@@ -266,8 +320,8 @@ mod unit_conversion_tests {
         println!("{}", lumen);
 
 
-        let candela = spot_light_lumen_to_candela(lumen, spot_light_angle.to_radians());
-        println!("{}", candela)
+        let in_question_candela = spot_light_lumen_to_candela(lumen, spot_light_angle.to_radians());
+        assert!(in_question_candela.eq(&candela));
     }
 
 
@@ -278,8 +332,8 @@ mod unit_conversion_tests {
         let lumen = spot_light_approx_candela_to_lumen(candela);
         println!("{}", lumen);
 
-        let candela = spot_light_approx_lumen_to_candela(lumen);
-        println!("{}", candela);
+        let in_question_candela = spot_light_approx_lumen_to_candela(lumen);
+        assert!(in_question_candela.eq(&candela));
     }
 
     #[test]
@@ -291,18 +345,74 @@ mod unit_conversion_tests {
         let lumen = frustum_light_candela_to_lumen(candela, angle_1, angle_2);
         println!("{}", lumen);
 
-        let candela = frustum_light_lumen_to_candela(lumen, angle_1, angle_2);
-        println!("{}", candela);
+        let in_question_candela = frustum_light_lumen_to_candela(lumen, angle_1, angle_2);
+        assert!(in_question_candela.eq(&candela));
     }
 
     #[test]
     fn sphere_area_light_lumen_luminance() {
-        let lumen = 548.777_9;
+        // a sphere area  light of radius 15 cm and emitting 1500 lm will have a
+        // luminance of 1688 cd.m−2.
 
-        let luminance = sphere_area_light_lumen_to_luminance(lumen, 5.0);
+        let lumen = 1500.0;
+        let radius_centimeter_to_meter = 15.0 / 100.0;
+
+        let luminance = sphere_area_light_lumen_to_luminance(lumen, radius_centimeter_to_meter);
+        let truncated_luminance = luminance.trunc();
+        assert!(truncated_luminance.eq(&1688.0));
+
+        let in_question_lumen =
+            sphere_area_light_luminance_to_lumen(luminance, radius_centimeter_to_meter);
+        assert!(in_question_lumen.eq(&lumen));
+    }
+
+
+    #[test]
+    fn disk_area_light_lumen_luminance() {
+        let lumen = 1500.0;
+        let radius_centimeter_to_meter = 15.0 / 100.0;
+        let luminance = disk_area_light_lumen_to_luminance(lumen, radius_centimeter_to_meter);
+        let truncated_luminance = (luminance / 4.0).trunc();
+
+        // Similar to sphere area light. so we can divide it by 4 to get the same result
+        // as sphere area light
+        println!("{}", truncated_luminance);
+        assert!(truncated_luminance.eq(&1688.0));
+
+        let in_question_lumen =
+            disk_area_light_luminance_to_lumen(luminance, radius_centimeter_to_meter);
+        println!("{}", in_question_lumen);
+
+        assert!(in_question_lumen.eq(&lumen));
+    }
+
+
+    #[test]
+    fn tube_area_light_lumen_luminance() {
+        let lumen = 15000.0;
+        let radius_centimeter_to_meter = 30.0 / 100.0;
+
+        let luminance = tube_area_light_lumen_to_luminance(lumen, 15.0, radius_centimeter_to_meter);
         println!("{}", luminance);
 
-        let lumen = sphere_area_light_luminance_to_lumen(luminance, 5.0);
-        println!("{}", lumen);
+        let in_question_lumen =
+            tube_area_light_luminance_to_lumen(luminance, 15.0, radius_centimeter_to_meter);
+        assert!(in_question_lumen.eq(&lumen));
+    }
+
+    #[test]
+    fn rectangle_area_light_lumen_luminance() {
+        let lumen = 15670.0;
+        let width = 100.0;
+        let height = 10.0;
+
+        let luminance = rectangle_area_light_lumen_to_luminance(lumen, width, height);
+        println!("{}", luminance);
+
+        let in_question_lumen = rectangle_area_light_luminance_to_lumen(luminance, width, height);
+        println!("{}", in_question_lumen);
+        let rounded_in_question_lumen = in_question_lumen.round();
+        println!("{}", rounded_in_question_lumen);
+        assert!(rounded_in_question_lumen.eq(&lumen));
     }
 }
