@@ -166,6 +166,19 @@ pub fn frustum_light_lumen_to_candela(
             * f32::asin(f32::sin(opening_angle_a_rad * 0.5) * f32::sin(opening_angle_b_rad * 0.5)))
 }
 
+// Calculate Sphere area light's luminance from luminance power (luminance flux)
+// L = φ / (4 * radius^2 * π^2)
+pub fn sphere_area_light_lumen_to_luminance(lumen: f32, radius: f32) -> f32 {
+    lumen / (4.0 * radius * radius * std::f32::consts::PI * std::f32::consts::PI)
+}
+
+// Opposite operation of sphere area light's luminance power (luminance flux) to
+// luminance. Calculate sphere area light's luminance power (luminance flux)
+// from luminance
+// φ = L * (4 * radius^2 * π^2)
+pub fn sphere_area_light_luminance_to_lumen(luminance: f32, radius: f32) -> f32 {
+    luminance * (4.0 * radius * radius * std::f32::consts::PI * std::f32::consts::PI)
+}
 
 /// result have been retrieve from [light calculation](https://www.rapidtables.com/calc/light/index.html)
 #[cfg(test)]
@@ -174,6 +187,7 @@ mod unit_conversion_tests {
         candela_to_lumen, candela_to_lux, ev_to_luminance, frustum_light_candela_to_lumen,
         frustum_light_lumen_to_candela, lumen_to_candela, luminance_to_ev, lux_to_candela,
         point_light_candela_to_lumen, point_light_lumen_to_candela,
+        sphere_area_light_lumen_to_luminance, sphere_area_light_luminance_to_lumen,
         spot_light_approx_candela_to_lumen, spot_light_approx_lumen_to_candela,
         spot_light_candela_to_lumen, spot_light_lumen_to_candela, ISOSpeed,
     };
@@ -279,5 +293,16 @@ mod unit_conversion_tests {
 
         let candela = frustum_light_lumen_to_candela(lumen, angle_1, angle_2);
         println!("{}", candela);
+    }
+
+    #[test]
+    fn sphere_area_light_lumen_luminance() {
+        let lumen = 548.777_9;
+
+        let luminance = sphere_area_light_lumen_to_luminance(lumen, 5.0);
+        println!("{}", luminance);
+
+        let lumen = sphere_area_light_luminance_to_lumen(luminance, 5.0);
+        println!("{}", lumen);
     }
 }

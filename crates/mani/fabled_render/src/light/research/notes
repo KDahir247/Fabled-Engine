@@ -106,4 +106,61 @@ The calculation is also simplified :
     L_out = BRDF(view vector, incident light vector) * illuminance * <n . l>
     where illuminance is provided by the user.
 
+The sun has an angular diameter between 0.526 and 0.545 (As the orbit of the earth vary with time), this mean
+a solid angle between 0.00066 and 0.000071 as seen from Earth. To calculate sun solid angle use cone solid
+angle formulae 2π(1 - cos(0.5 * AD * (π / 180))).
+Theoretical luminance of the sun is around 1.6 * 10^9 cd/m^2. So lux due to the Sun at Earth surface is direction
+perpendicular to the ground without considering participating mdeia should be in the range 105 000 and 114 00 lux
+Formulae is lux = luminance * solid angle.
 
+The lighting from the sky is handled with a distant light probe
+
+
+------------------------------ Area Lighting --------------------------
+Area lights are important in physically based rendering, for matching real world lighting since all real
+world sources have a physical shape. As we will see later, area lights ease the interaction with IBL
+(Image based Light) as they are conceptually closer. More importantly, area lights provide softer lighting,
+reducing specular aliasing.
+
+The outgoing luminance of a point illuminated by an area light is given by:
+    L_out= ∫ BRDF(v,l) * V(l) * L_in * <n . l> * dl = ∫ BRDF(v,l) * L_in * <n . l> dl
+            Ω+                                         Ωlight
+
+The function V is 1 if the area light is reachable from the shaded point, 0 otherwise.
+The function V allows us to take into account both the area light's shape and its shadow.
+V represents only the visibility of the light's shape and Ωlight is the solid angle subtended
+by the area light.
+This integral over the solid angle can be rewritten as an integral over the are.
+
+The diffuse lighting and specular lighting integral will be discussed separately for each of the
+area light types:
+
+   L_out = ∫    BRDF_Diffuse(v, l) * L_in * <n . l> dl = ∫ BRDF_Diffuse(v, l) * L_in * ( (<n.l> * <n_a . -l> ) / distance^2) dA
+            Ωlight                                        A
+
+   L_out = ∫    BRDF_Specular(v, l) * L_in * <n . l> dl = ∫ BRDF_Specular(v, l) * L_in * ( (<n.l> * <n_a . -l> ) / distance^2) dA
+            Ωlight                                        A
+
+
+Area light unit.
+With physical light units, the size of area lights and their intensity are connected to each other. Artists can choose between
+two intensity unit:
+
+    . Luminance Power : Luminance Power, specified in  lumens (lm), describes the total amount of visible light emitted by a light
+    in all directions. This amount is independent of the light size. Increasing the size of a light will not change the illumination level
+    of a scene. However, highlights produced by such a light will get dimmer as its are increases since the same power will be distributed
+    over a larger area.
+
+
+    . Luminance: Luminance, specified in nits (cd/m^2) or in exposure value (EV), describes the surface power of visible light.
+    When this unit is used, the total energy emitted by the light will depend on its size. The illumination level in the scene will
+    increase as the area increases, but the highlights produced by such a light will conserve their intensity.
+
+    We will use Luminance power.
+
+For convenience, we systematically convert intensity into luminance for light calculations. The luminance due to a point on
+lambertian emitter where lambertian emitter is a light source whose radiance distribution follows a cosine distribution.
+eimitted in any direction, is equal to its total luminance power φ divided by the emitter area A and the projected solid angle:
+
+    L = φ / (A * ∫ * <l . n> * dl) = φ / (A * π)
+                  Ω+
