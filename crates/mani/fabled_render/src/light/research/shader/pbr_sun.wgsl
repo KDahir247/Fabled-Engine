@@ -32,7 +32,7 @@ fn fs_main() -> [[location(0)]] vec4<f32>{
 
     if dir_dot_r < disk_distance{
 
-        L = normalize(disk_distance *)
+        L = normalize(disk_distance * D + normalize(S) * disk_radius)
 
     }else{
         L = R;

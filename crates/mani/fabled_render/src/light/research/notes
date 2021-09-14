@@ -2,15 +2,17 @@
 
 Point light: light evaluation can be expressed as
 BRDF (Bidirectional reflectance distribution function)
-BRDF(view vector, incident light vector) (luminance intensity / distance^2) * clamped_dot(n . l)
+
+    BRDF(view vector, incident light vector) (luminance intensity / distance^2) * clamped_dot(n . l)
 which is equalivent to
-BRDF (view vector, incident light vector) (luminance power (luminance flux) / (4π * distance^2)) * clamped_dot(normal . incident light vector)
+    BRDF (view vector, incident light vector) (luminance power (luminance flux) / (4π * distance^2)) * clamped_dot(normal . incident light vector)
 
 Spot light: light evaluation can be  expressed as
 BRDF (Bidirectional reflectance distribution function)
-BRDF (view vector, incident light vector) (luminance intensity / distance^2) clamped_dot(n . l)
+
+    BRDF (view vector, incident light vector) (luminance intensity / distance^2) clamped_dot(n . l)
 which is equalivent to
-BRDF (view vector, incident light vector) (luminance power (luminance flux) / (π * distance^2)) * clamped_dot(normal . incident light vector) * getAngleAttenuation()
+    BRDF (view vector, incident light vector) (luminance power (luminance flux) / (π * distance^2)) * clamped_dot(normal . incident light vector) * getAngleAttenuation()
 
 
 The resulting illuminance follows the inverse square law, and considering a surface normal pointing directly to the light, is thus (with Frostbite convention):
@@ -164,3 +166,28 @@ eimitted in any direction, is equal to its total luminance power φ divided by t
 
     L = φ / (A * ∫ * <l . n> * dl) = φ / (A * π)
                   Ω+
+
+Diffuse area light.
+Initially, we will solve area lights integration for a Lambertian diffuse BRDF  ρ/π before looking at
+Disney's diffuse BRDF case. We will also assume that area lights have a uniform and constant intensity L_in.
+Thus, the diffuse integral can be re-written as:
+
+    L_out = ρ/π ∫  L_in <n . l> = ρ/π E(n)
+                 Ωlight
+
+    Where the illuminance is E is defined as:
+
+    E(n) = ∫ L_in <n. l> dl = ∫ L_in (<n . l> * <n_a . -l> / distance ^ 2) dA
+            Ωlight              A
+
+
+   The inverse square law for computing the illuminance is not valid for area light unless this area
+   light is sufficiently far away from the receiver surface
+
+Using luminous power unit makes the illumination level independent of the sphere's surface area. It also matches the real world
+measurement. By using the formulation without horizon handling (without loss of generality), the illuminance for a sphere area light with
+luminance power φ is given by:
+
+    E = L_in π FormFactor = luminance flux / (4 * π^2 * radius^2) * π * r^2 / d^2 <n . l> = luminance flux / (4 * π * d^2) <n . l>
+
+This equation matches a point light illuminance equation. (which consider (n . l) = 1) and is independent of the sphere's surface area.
