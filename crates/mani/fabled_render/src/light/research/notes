@@ -191,3 +191,4 @@ luminance power φ is given by:
     E = L_in π FormFactor = luminance flux / (4 * π^2 * radius^2) * π * r^2 / d^2 <n . l> = luminance flux / (4 * π * d^2) <n . l>
 
 This equation matches a point light illuminance equation. (which consider (n . l) = 1) and is independent of the sphere's surface area.
+
