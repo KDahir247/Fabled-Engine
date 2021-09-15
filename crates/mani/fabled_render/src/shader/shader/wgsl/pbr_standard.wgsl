@@ -1,3 +1,6 @@
+//Constants
+let FRAC_1_PI : f32 = 0.31830987;
+
 [[block]]
 struct Uniforms{
     u_view_position : vec4<f32>;
@@ -52,6 +55,37 @@ fn vs_main(in : VertexInput) -> VertexOutput{
     out.v_position = uniform.proj * uniform.view * transform.model * vec4<f32>(in.position, 1.0);
     return out;
 }
+
+// Normal distribution function (specular D)
+fn d_ggx(n_dot_h : f32, roughness : f32) -> f32{
+
+    let sqr_roughness : f32 = roughness * roughness;
+    let f : f32 = (n_dot_h * sqr_roughness - n_dot_h) * n_dot_h + 1.0;
+
+    return (sqr_roughness / (f * f)) * FRAC_1_PI;
+}
+
+fn v_smith_ggx_correlation(n_dot_l : f32, n_dot_v : f32, roughness : f32) -> f32{
+
+    // Optimized version.
+    let sqr_roughness : f32 = roughness * roughness;
+
+    let lambda_ggxv : f32 = n_dot_l * sqrt((-n_dot_v * sqr_roughness + n_dot_v) * n_dot_v + sqr_roughness);
+    let lambda_ggxl : f32 = n_dot_v * sqrt((-n_dot_l * sqr_roughness + n_dot_l) * n_dot_l + sqr_roughness);
+
+    return 0.5 / (lambda_ggxv + lambda_ggxl);
+}
+
+fn f_schlick(u : f32, f0 : vec3<f32>, f90 : f32) -> vec3<f32>{
+    return f0 + (f90 - f0) * pow(1.0 - u, 5.0);
+}
+
+fn f_schlick(u : f32, f0 : vec3<f32>) -> vec3<f32>{
+    let f : f32 = pow(1.0 - u, 5.0);
+    return f + f0 * (1.0 - f);
+}
+
+
 
 // sRgb  to rgb
 fn accurate_to_linear(gamma_col : vec3<f32>) -> vec3<f32>{

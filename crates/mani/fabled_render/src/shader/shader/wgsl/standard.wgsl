@@ -158,7 +158,7 @@ fn calculate_diffuse_reflection(normal : vec3<f32>, light_dir : vec3<f32>, albed
   return ((ambient_color + direct_color) * diffuse_color);
 }
 
-fn calculate_specular_reflection(normal : vec3<f32>, half_way : vec3<f32>, alpha : f32, nl : f32) -> vec3<f32>{
+fn calculate_specular_reflection(normal : vec3<f32>, half_way : vec3<f32>, alpha : f32) -> vec3<f32>{
 
     let highlight = pow(min(max(dot(normalize(normal), normalize(half_way)) ,0.0) ,1.0), alpha);
 
@@ -181,11 +181,11 @@ fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
     let light_dir = in.world_position - light.position;
 
     //diffuse
-    let diffuse_reflection = calculate_diffuse_reflection(in.world_normal, light_dir, 0.5);
+    let diffuse_reflection = calculate_diffuse_reflection(in.world_normal, light_dir, 1.0);
 
     //specular
     let half_way = vec3<f32>(1.0) + in.view_dir;
-    let specular_reflection = calculate_specular_reflection(in.world_normal,half_way, 179.999996, 0.0);
+    let specular_reflection = calculate_specular_reflection(in.world_normal,half_way, 179.999996);
 
     let result = (diffuse_reflection + specular_reflection);
 

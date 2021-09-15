@@ -192,3 +192,23 @@ luminance power φ is given by:
 
 This equation matches a point light illuminance equation. (which consider (n . l) = 1) and is independent of the sphere's surface area.
 
+The illuminance for a disk area light with luminance power (luminance intensity) φ is given by
+
+    E = L π FormFactor =  φ / (π * distance^2 + π * radius^2) <n . l>
+
+A disk area light is similar to a spot light and usually supports an angular attenuation. This angular attenuation is simply
+applied on the illuminance without any realistic consideration to make the transition with the spot light smoother.
+The angular attenuation is obtained with the same equation as for spot light by faking the position of the light similar
+to the way we calculate shadow for area light.
+
+    // On the CPU
+    let virtual_pos : [f32; 3] = (light_pos + light_forward * (disc_radius / std::f32::tan(half_outer_angle))).to_array();
+
+    // On the GPU
+    // attenuate with a virtual position which is the light position shifted.
+    // in opposite light direction by an amount based on the outer angle.
+    illuminance *= getAngleAtt(normalize(virtual_pos - world_pos), light_forward, light_angle_scale, light_angle_offset);
+
+
+--- NOTE# WE WILL STOP AT PG 46 (https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf)
+    TOPIC IS RELATED TO AREA LIGHT, IBL,EMMISIVE LIGHTING, LIGHT PROBE WHICH WILL BE IMPLEMENTED IN THE FUTURE.
