@@ -19,8 +19,13 @@
 > &nbsp; **X+(a) Heaviside function:** 1 if a > 0 and 0 if a <= 0 <br/>
 2) [Radiance](https://www.radiance-online.org/community/workshops/2004-fribourg/presentations/Wandachowicz_paper.pdf)
 3) [filament](https://google.github.io/filament/documentation/)
-4) [PBRWhitePaper]("https://github.com/QianMo/PBR-White-Paper/blob/master/content/part%201/README.md")
-5) [PRB]("http://www.pbr-book.org/3ed-2018/contents.html")
+<br/>
+<br/>
+
+https://github.com/QianMo/PBR-White-Paper/blob/master/content/part%201/README.md
+<br/>
+
+https://www.pbr-book.org/3ed-2018/contents.html
 
 ## Lighting Format 
 1) [eulumdat_profile](https://docs.agi32.com/PhotometricToolbox/Content/Open_Tool/eulumdat_file_format.htm)
