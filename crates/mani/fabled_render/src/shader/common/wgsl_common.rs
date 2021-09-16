@@ -6,3 +6,5 @@ pub const PARSE_TEST_WGSL_SHADER: &str = ".\\src\\shader\\shader\\wgsl\\test\\pa
 
 //  Core Shader
 pub const LIT_SHADER: &str = ".\\src\\shader\\shader\\wgsl\\standard.wgsl";
+
+pub const PBR_LIT_SHADER: &str = ".\\src\\shader\\shader\\wgsl\\pbr_standard.wgsl";

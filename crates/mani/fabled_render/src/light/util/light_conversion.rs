@@ -1,4 +1,4 @@
-use crate::light::{ISOSpeed, CALIBRATION_CONSTANT_PRIMARY};
+use crate::camera::{ISOSpeed, CALIBRATION_CONSTANT_PRIMARY};
 
 // Candela to lux where the distance is in meters
 // Luminous intensity in candela (cd) to illuminance in lux (lx)
@@ -270,8 +270,10 @@ mod unit_conversion_tests {
         sphere_area_light_lumen_to_luminance, sphere_area_light_luminance_to_lumen,
         spot_light_approx_candela_to_lumen, spot_light_approx_lumen_to_candela,
         spot_light_candela_to_lumen, spot_light_lumen_to_candela,
-        tube_area_light_lumen_to_luminance, tube_area_light_luminance_to_lumen, ISOSpeed,
+        tube_area_light_lumen_to_luminance, tube_area_light_luminance_to_lumen,
     };
+
+    use crate::camera::ISOSpeed;
 
     #[test]
     fn candela_lux_test() {

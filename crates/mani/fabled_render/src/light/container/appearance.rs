@@ -19,6 +19,8 @@
 // -_-------------------------------------------
 
 
+use crate::light::{celsius_to_kelvin, fahrenheit_to_kelvin, TemperatureUnit};
+
 // temperature is in kelvin
 #[derive(Copy, Clone, Debug)]
 pub struct LightAppearance {
@@ -36,9 +38,22 @@ impl Default for LightAppearance {
 }
 
 impl LightAppearance {
-    pub fn new(kelvin: f32, color: [f32; 3]) -> Self {
+    pub fn new(unit: f32, unit_type: TemperatureUnit, color: [f32; 3]) -> Self {
+        let mut unit = unit;
+
+        // Convert unit type to Kelvin.
+        match unit_type {
+            TemperatureUnit::Kelvin => {} // Already in kelvin, so no conversion needed.
+            TemperatureUnit::Celsius => {
+                unit = celsius_to_kelvin(unit);
+            }
+            TemperatureUnit::Fahrenheit => {
+                unit = fahrenheit_to_kelvin(unit);
+            }
+        }
+
         Self {
-            temperature: kelvin,
+            temperature: unit,
             color,
         }
     }

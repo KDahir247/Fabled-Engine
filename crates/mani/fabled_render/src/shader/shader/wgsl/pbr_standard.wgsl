@@ -42,10 +42,10 @@ struct VertexOutput{
 fn vs_main(in : VertexInput) -> VertexOutput{
     var out : VertexOutput;
 
-    out.world_position = transform.model * vec4<f32>(in.position, 1.0);
+    out.world_position = (transform.model * vec4<f32>(in.position, 1.0)).xyz;
     out.tex_coord = in.tex_coord;
 
-    let normal : vec4<f32> = (transform.model * vec4<f32>(in.normal, 1.0));
+    let normal : vec4<f32> = transform.model * vec4<f32>(in.normal, 1.0);
     out.world_normal = normal.xyz;
 
     out.world_tangent = transform.model * in.tangent;
@@ -56,30 +56,44 @@ fn vs_main(in : VertexInput) -> VertexOutput{
     return out;
 }
 
+
+
+[[block]]
+struct DirectionalLight{
+    direction : vec4<f32>;
+
+    // The color will be already premultiplied by the DirectionalLight Illuminance with exposure
+    color : vec4<f32>;
+};
+
+[[group(2), binding(0)]]
+var<uniform> sun : DirectionalLight;
+
+
 [[block]]
 struct Material{
 
     // Diffuse albedo for non-metallic surfaces, and specular color for metallic surfaces
-    albedo : vec4<f32>,
+    albedo : vec4<f32>;
 
     // Whether a surface appears to be dielectric (0.0) or conductor (1.0). Often used as a binary value (0 or 1)
-    metallic : f32,
+    metallic : f32;
 
     // Perceived smoothness (0.0) or roughness (1.0) of a surface. Smooth surfaces exhibit sharp reflections
-    roughness : f32,
+    roughness : f32;
 
     // index of refraction
-    refraction : f32,
+    refraction : f32;
 
     // Defines how much of the ambient light is accessible to a surface point. It is a per-pixel shadowing factor between 0.0 and 1.0.
-    ambient_occlusion : f32,
+    ambient_occlusion : f32;
 
     // future implementation.
-    // emissive : f32,
+    // emissive : f32;
 };
 
 
-[[group(2), location(0)]]
+[[group(3), binding(0)]]
 var<uniform> material : Material;
 
 
@@ -103,13 +117,14 @@ fn v_smith_ggx_correlation(n_dot_l : f32, n_dot_v : f32, roughness : f32) -> f32
     return 0.5 / (lambda_ggxv + lambda_ggxl);
 }
 
-fn f_schlick(u : f32, f0 : vec3<f32>, f90 : f32) -> vec3<f32>{
-    return f0 + (f90 - f0) * pow(1.0 - u, 5.0);
-}
 
 fn f_schlick(u : f32, f0 : vec3<f32>) -> vec3<f32>{
     let f : f32 = pow(1.0 - u, 5.0);
     return f + f0 * (1.0 - f);
+}
+
+fn f_schlick(u : f32, f0 : vec3<f32>, f90 : f32) -> vec3<f32>{
+    return f0 + (f90 - f0) * pow(1.0 - u, 5.0);
 }
 
 fn specular_brdf(f0 : vec3<f32>, roughness : f32, h : vec3<f32>, n_dot_v : f32,
@@ -123,24 +138,24 @@ fn specular_brdf(f0 : vec3<f32>, roughness : f32, h : vec3<f32>, n_dot_v : f32,
             return (intensity * D * V) * F;
 }
 
+
 fn fd_burley(roughness :f32, n_dot_v : f32, n_dot_l : f32, l_dot_h : f32) -> f32{
 
     let energy_bias : f32 = mix(0.0, 0.5, roughness);
     let energy_factor : f32 = mix(1.0, 1.0 / 1.51, roughness);
     let fd90 : f32 = energy_bias + 2.0 * l_dot_h * l_dot_h * roughness;
     let f0 : vec3<f32> = vec3<f32>(1.0, 1.0, 1.0);
-    let light_scatter : f32 = f_schlick(f0, fd90, n_dot_l).r;
-    let view_scatter : f32 = f_schlick(f0, fd90, n_dot_v).r;
-    return light_scatter + view_scatter * energy_factor;
+    //let light_scatter : f32 = f_schlick(f0, fd90, n_dot_l).r;
+    //let view_scatter : f32 = f_schlick(f0, fd90, n_dot_v).r;
+    return 1.0 + 1.0 * energy_factor;
 }
 
 
-
-fn diffuse_brdf(roughness : f32, n_dot_v : f32, n_dot_l : f32, l_dot_h : f32) -> f32{
+fn diffuse_brdf(roughness : f32, n_dot_v : f32, n_dot_l : f32, l_dot_h : f32, diffuse_color : vec3<f32>) -> vec3<f32>{
 
     //add more stuff.
 
-    return fd_burley(roughness, n_dot_v, n_dot_l, l_dot_h);
+    return diffuse_color * fd_burley(roughness, n_dot_v, n_dot_l, l_dot_h);
 
 }
 
@@ -153,30 +168,35 @@ fn calculate_perceptual_roughness(roughness : f32) -> f32{
 // sRgb  to rgb
 fn accurate_to_linear(gamma_col : vec3<f32>) -> vec3<f32>{
     let linear_rgb_lo : vec3<f32> = gamma_col / 12.92;
-    let linear_rgb_hi : vec3<f32> = pow((gamma_col + 0.055) / 1.055, 2.4);
+
+    let linear_rgb_hi_x : f32 =  pow((gamma_col.x + 0.055) / 1.055, 2.4);
+    let linear_rgb_hi_y : f32 =  pow((gamma_col.y + 0.055) / 1.055, 2.4);
+    let linear_rgb_hi_z : f32 =  pow((gamma_col.z + 0.055) / 1.055, 2.4);
 
     var linear_rgb : vec3<f32>;
 
-    if (gamma_col <= 0.04045){
+    if (length(gamma_col) <= 0.04045){
         linear_rgb = linear_rgb_lo;
     }else{
-        linear_rgb = linear_rgb_hi;
+        linear_rgb = vec3<f32>(linear_rgb_hi_x,linear_rgb_hi_y,linear_rgb_hi_z );
     }
 
     return linear_rgb;
 }
 
 // rgb to sRgb
-fn accurate_to_gamma(linear_col : vec<f32>) -> vec3<f32>{
+fn accurate_to_gamma(linear_col : vec3<f32>) -> vec3<f32>{
     let s_rgb_lo : vec3<f32> = linear_col * 12.92;
-    let s_rgb_hi : vec3<f32> = (pow(abs(linear_col), 1.0 / 2.4) * 1.055) - 0.055;
+    let s_rgb_hi_x : f32 = (pow(abs(linear_col.x), 1.0 / 2.4) * 1.055) - 0.055;
+    let s_rgb_hi_y : f32 = (pow(abs(linear_col.y), 1.0 / 2.4) * 1.055) - 0.055;
+    let s_rgb_hi_z : f32 = (pow(abs(linear_col.z), 1.0 / 2.4) * 1.055) - 0.055;
 
     var s_rgb : vec3<f32>;
 
-    if (linear_col <= 0.0031308){
+    if (length(linear_col) <= 0.0031308){
         s_rgb = s_rgb_lo;
     }else{
-        s_rgb = s_rgb_hi;
+        s_rgb = vec3<f32>(s_rgb_hi_x, s_rgb_hi_y, s_rgb_hi_z);
     }
 
     return s_rgb;
@@ -184,11 +204,12 @@ fn accurate_to_gamma(linear_col : vec<f32>) -> vec3<f32>{
 
 
 [[stage(fragment)]]
-fn fs_main(in : VertexOutput) -> [[location(0)]] vec3<f32>{
+fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
 
     let output_color = material.albedo;
 
     //basic color texture map.
+
 
     let diffuse_color : vec3<f32> = (1.0 - material.metallic) * output_color.rgb;
 
@@ -203,11 +224,32 @@ fn fs_main(in : VertexOutput) -> [[location(0)]] vec3<f32>{
     // Collada support ior through either PhongEffect or LamberEffect
     // https://docs.rs/collada/0.14.0/collada/index.html?search=index
 
-    let f0 : f32 = (pow((material.refraction - 1.0), 2.0) / pow((material.refraction + 1.0), 2.0)) *
-                    (1.0 - material.metallic) + output_color.rgb * material.metallic;
+    let f0 : vec3<f32> = (pow((material.refraction - 1.0), 2.0) / pow((material.refraction + 1.0), 2.0)) *
+                   (1.0 - material.metallic) + output_color.rgb * material.metallic;
 
 
     let perceptual_roughness : f32 = calculate_perceptual_roughness(material.roughness);
+
+
+    let incident_light = sun.direction.xyz;
+
+    // We will expect the projection is perspective for test.
+    // Using orthographic projection will produce incorrect result.
+    let V : vec3<f32> = normalize(uniform.u_view_position.xyz - in.world_position);
+
+    let L : vec3<f32> = normalize(-incident_light);
+    let N : vec3<f32> = normalize(in.world_normal);
+
+    //Basic directional light.
+    let n_dot_l : f32 = clamp(dot(N,L), 0.0, 1.0);
+
+    //todo finish this. (specular + diffuse)
+    //let luminance = BSDF(...) * n_dot_l;
+
+    //todo tone mapping.
+
+
+    //todo correction if needed or vis versa.
 
     //template
     return vec4<f32>(0.0, 0.0, 0.0, 0.0);

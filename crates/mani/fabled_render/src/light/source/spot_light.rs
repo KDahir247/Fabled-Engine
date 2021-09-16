@@ -14,19 +14,26 @@ pub struct SpotLight {
 
 impl Default for SpotLight {
     fn default() -> Self {
-        unimplemented!()
+        Self {
+            intensity: 40000.0,
+            range: 10.0,
+            inner_cone: 0.0,
+            outer_cone: 45.0f32.to_radians(),
+            appearance: LightAppearance::default(),
+            distance_m: 10.0,
+        }
     }
 }
 
 impl SpotLight {
     pub fn new(
         intensity: f32,
+        unit_type: LightUnit,
         range: f32,
         inner: f32,
         outer: f32,
         appearance: LightAppearance,
         distance_m: f32, // Used for conversion between lux to candela.
-        unit_type: LightUnit,
     ) -> Self {
         // the inner angle can't be greater then the outer angle.
         let inner_safe = inner.min(outer - 0.01f32);

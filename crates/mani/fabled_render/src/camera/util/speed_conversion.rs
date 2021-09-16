@@ -4,19 +4,19 @@
 // Conversion form arithmetic speed S to logarithmic Speed so and rounding to
 // the nearest integer.
 // So = 10LogS + 1
-pub fn arithmetic_logarithmic_speed(arithmetic_speed: f32) -> f32 {
+pub fn arithmetic_to_logarithmic_speed(arithmetic_speed: f32) -> f32 {
     10.0 * arithmetic_speed.log10() + 1.0
 }
 
 // Conversion from logarithmic speed to arithmetic speed
 // S = 10^((So - 1)/ 10)
-pub fn logarithmic_arithmetic_speed(logarithmic_speed: f32) -> f32 {
+pub fn logarithmic_to_arithmetic_speed(logarithmic_speed: f32) -> f32 {
     10.0f32.powf((logarithmic_speed - 1.0) / 10.0)
 }
 
 #[cfg(test)]
 mod iso_speed_test {
-    use crate::light::{arithmetic_logarithmic_speed, logarithmic_arithmetic_speed};
+    use crate::camera::{arithmetic_to_logarithmic_speed, logarithmic_to_arithmetic_speed};
 
     #[test]
     fn arithmetic_to_logarithmic() {
@@ -33,7 +33,7 @@ mod iso_speed_test {
         ];
 
         for index in 0..arithmetics.len() {
-            let logarithmic = arithmetic_logarithmic_speed(arithmetics[index]);
+            let logarithmic = arithmetic_to_logarithmic_speed(arithmetics[index]);
             assert!(logarithmic.round().eq(&logarithmics[index]))
         }
     }
@@ -56,7 +56,7 @@ mod iso_speed_test {
         ];
 
         for index in 0..logarithmics.len() {
-            let arithmetic = logarithmic_arithmetic_speed(logarithmics[index]);
+            let arithmetic = logarithmic_to_arithmetic_speed(logarithmics[index]);
 
             println!("{} {}", arithmetic, arithmetics[index]);
             assert!((arithmetic - arithmetics[index]) < error_threshold);

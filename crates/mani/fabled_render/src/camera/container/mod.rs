@@ -1,21 +1,28 @@
-mod aspect_ratio;
-mod clipping_plane;
-mod fov;
-mod oblique;
-mod orthographic;
-mod perspective;
-mod projection;
-mod viewport;
-
-
+pub use aperture_len::*;
 pub use aspect_ratio::*;
 pub use clipping_plane::*;
 pub use fov::*;
+pub use iso_speed::*;
 pub use oblique::*;
 pub use orthographic::*;
 pub use perspective::*;
 pub use projection::*;
+pub use shutter::*;
+pub use unit_type::*;
 pub use viewport::*;
+
+mod aperture_len;
+mod aspect_ratio;
+mod clipping_plane;
+mod fov;
+mod iso_speed;
+mod oblique;
+mod orthographic;
+mod perspective;
+mod projection;
+mod shutter;
+mod unit_type;
+mod viewport;
 
 
 #[cfg(test)]

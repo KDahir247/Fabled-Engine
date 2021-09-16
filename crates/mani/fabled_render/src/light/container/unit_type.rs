@@ -1,4 +1,4 @@
-use crate::light::ISOSpeed;
+use crate::camera::ISOSpeed;
 
 #[derive(Copy, Clone, Debug)]
 pub enum LightUnit {
@@ -15,5 +15,19 @@ pub enum LightUnit {
 impl Default for LightUnit {
     fn default() -> Self {
         Self::Lumen
+    }
+}
+
+
+#[derive(Copy, Clone, Debug)]
+pub enum TemperatureUnit {
+    Kelvin,
+    Celsius,
+    Fahrenheit,
+}
+
+impl Default for TemperatureUnit {
+    fn default() -> Self {
+        Self::Kelvin
     }
 }

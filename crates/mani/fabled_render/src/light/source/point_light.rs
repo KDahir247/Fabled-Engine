@@ -14,7 +14,7 @@ pub struct PointLight {
 impl Default for PointLight {
     fn default() -> Self {
         Self {
-            intensity: 10.0,
+            intensity: 40000.0,
             radius: 10.0,
             range: 10.0,
             appearance: LightAppearance::default(),
@@ -26,13 +26,12 @@ impl Default for PointLight {
 impl PointLight {
     pub fn new(
         intensity: f32,
+        unit_type: LightUnit,
         radius: f32,
         range: f32,
         appearance: LightAppearance,
         distance_m: f32,
-        unit_type: LightUnit,
     ) -> Self {
-        // Convert it to lumen (luminance power (luminance flux))
         let mut unit_value = intensity;
 
         // Convert it to lumen (luminance power (luminance flux))

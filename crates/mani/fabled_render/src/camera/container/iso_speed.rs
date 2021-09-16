@@ -1,4 +1,4 @@
-use crate::light::ISO_ARITHMETIC_STANDARD;
+use crate::camera::{logarithmic_to_arithmetic_speed, ISOSpeedUnit, ISO_ARITHMETIC_STANDARD};
 
 #[derive(Copy, Clone, Debug)]
 pub struct ISOSpeed {
@@ -14,14 +14,25 @@ impl Default for ISOSpeed {
 }
 
 impl ISOSpeed {
-    pub fn new(iso_speed: f32) -> Self {
+    pub fn new(iso_speed: f32, unit_type: ISOSpeedUnit) -> Self {
+        let mut iso_speed = iso_speed;
+
+        if let ISOSpeedUnit::Logarithmic = unit_type {
+            iso_speed = logarithmic_to_arithmetic_speed(iso_speed);
+        };
+
         Self {
             arithmetic_speed: iso_speed,
         }
     }
 
-    pub fn new_standard(iso_speed: f32) -> Self {
+    pub fn new_standard(iso_speed: f32, unit_type: ISOSpeedUnit) -> Self {
         let mut iso_speed = iso_speed;
+
+
+        if let ISOSpeedUnit::Logarithmic = unit_type {
+            iso_speed = logarithmic_to_arithmetic_speed(iso_speed);
+        }
 
         if let false = ISO_ARITHMETIC_STANDARD.contains(&iso_speed) {
             iso_speed = 100.0

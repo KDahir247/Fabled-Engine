@@ -1,4 +1,4 @@
-use crate::light::FStop;
+use crate::camera::FStop;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Shutter {
@@ -32,7 +32,7 @@ impl Shutter {
 
 #[cfg(test)]
 mod shutter_test {
-    use crate::light::{FStop, FullStop, Shutter};
+    use crate::camera::{FStop, FullStop, Shutter};
 
     #[test]
     fn retrieve_shutter() {

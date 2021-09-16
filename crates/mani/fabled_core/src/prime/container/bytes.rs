@@ -294,6 +294,7 @@ where
         result.to_owned()
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn retrieve_self(&self) -> (Buffer4<Q, R, S, T>, Buffer3<U, V, W>) {
         (self.0, self.1)
     }
@@ -340,6 +341,7 @@ where
         result.to_owned()
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn retrieve_self(&self) -> (Buffer4<Q, R, S, T>, Buffer4<U, V, W, X>) {
         (self.0, self.1)
     }
@@ -386,6 +388,7 @@ where
         result.to_owned()
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn retrieve_self(&self) -> (Buffer5<Q, R, S, T, U>, Buffer4<V, W, X, Y>) {
         (self.0, self.1)
     }
@@ -436,6 +439,7 @@ where
         result.to_owned()
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn retrieve_self(&self) -> (Buffer5<Q, R, S, T, U>, Buffer5<V, W, X, Y, Z>) {
         (self.0, self.1)
     }
