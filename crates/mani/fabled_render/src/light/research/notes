@@ -98,6 +98,12 @@ scaled by the inverse of the maximum intensity in order to handle both masked an
 In shaders, the 2D texture is evaluated and applied as an attenuation
 
 
+Directional Light will be in Illuminance (lux or lm/m^2)
+// Point light can either be luminance intensity or luminance power, but requires formula to be re-written
+Point light will be in luminance power (lumen)
+Spot light will be in luminance power (lumen)
+
+
 -------------------------------- Sun ----------------------------
 The sun is handled as a disc area light always perpendicular to the outer hemisphere.
 

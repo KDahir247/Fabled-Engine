@@ -1,5 +1,8 @@
-use crate::light::LightAppearance;
+use crate::light::{
+    ev_to_candela, lux_to_candela, point_light_candela_to_lumen, LightAppearance, LightUnit,
+};
 
+// Intensity is Luminance Power (Luminance flux) in lumen
 pub struct PointLight {
     pub intensity: f32,
     pub radius: f32,
@@ -21,18 +24,42 @@ impl Default for PointLight {
 }
 
 impl PointLight {
-    // flux represents Luminous flux of the light.
-    // Luminous flux is how much light a light source emits.
-    pub fn new(flux: f32, radius: f32, range: f32, appearance: LightAppearance) -> Self {
-        // We need the luminous intensity to determine how light is traveling in a
-        // certain direction.
-        let luminance_intensity = flux / (4.0 * std::f32::consts::PI);
+    pub fn new(
+        intensity: f32,
+        radius: f32,
+        range: f32,
+        appearance: LightAppearance,
+        distance_m: f32,
+        unit_type: LightUnit,
+    ) -> Self {
+        // Convert it to lumen (luminance power (luminance flux))
+        let mut unit_value = intensity;
+
+        // Convert it to lumen (luminance power (luminance flux))
+        match unit_type {
+            LightUnit::Candela => {
+                unit_value = point_light_candela_to_lumen(unit_value);
+            }
+            LightUnit::Lux => {
+                let luminance_intensity = lux_to_candela(unit_value, distance_m);
+                unit_value = point_light_candela_to_lumen(luminance_intensity);
+            }
+            LightUnit::EV100 {
+                iso,
+                calibration_constant,
+            } => {
+                let luminance_intensity = ev_to_candela(unit_value, iso, calibration_constant);
+                unit_value = point_light_candela_to_lumen(luminance_intensity);
+            }
+            LightUnit::Lumen => {} // Already lumen (luminance power (luminance flux))
+        }
+
         Self {
-            intensity: luminance_intensity,
+            intensity: unit_value,
             radius,
             range,
             appearance,
-            distance_m: 1.0,
+            distance_m,
         }
     }
 

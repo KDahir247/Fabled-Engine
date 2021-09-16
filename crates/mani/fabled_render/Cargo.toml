@@ -38,7 +38,7 @@ glam = {version = "0.18.0", features = ["bytemuck"]}
 ansi_term = {version = "0.12.1"}
 
 # EXT
-gltf = {version = "0.16.0", features = ["KHR_lights_punctual"]}
+gltf = {version = "0.16.0", features = ["KHR_lights_punctual", "KHR_materials_ior"]}
 
 # Features
 [features]

@@ -81,6 +81,33 @@ pub fn luminance_to_ev(luminance: f32, iso: ISOSpeed, calibration_constant: Opti
     f32::log2((luminance * iso.arithmetic_speed) / calibration_constant)
 }
 
+// From punctual light candela and luminance are the same, so we can just call
+// ev_to_luminance
+pub fn ev_to_candela(ev: f32, iso: ISOSpeed, calibration_constant: Option<f32>) -> f32 {
+    ev_to_luminance(ev, iso, calibration_constant)
+}
+
+// Since luminance is the same as candela for punctual light, we can say that
+// candela_to_ev is the same as luminance_to_ev1
+pub fn candela_to_ev(candela: f32, iso: ISOSpeed, calibration_constant: Option<f32>) -> f32 {
+    luminance_to_ev(candela, iso, calibration_constant)
+}
+
+// Since luminance is the same as candela for punctual light, we can convert the
+// lux to candela, Then convert the candela which is equivalent to luminance for
+// punctual light to ev pseudo code Convert Lux to Candela, then Convert Candela
+// to Ev
+pub fn lux_to_ev(lux: f32, distance: f32, iso: ISOSpeed, calibration_constant: Option<f32>) -> f32 {
+    let candela = lux_to_candela(lux, distance);
+    candela_to_ev(candela, iso, calibration_constant)
+}
+
+
+pub fn ev_to_lux(ev: f32, distance: f32, iso: ISOSpeed, calibration_constant: Option<f32>) -> f32 {
+    let candela = ev_to_candela(ev, iso, calibration_constant);
+    candela_to_lux(candela, distance)
+}
+
 
 // Calculate point light's luminance power (luminance flux) from the luminance
 // intensity
@@ -253,7 +280,7 @@ mod unit_conversion_tests {
         let luminance_intensity = 1000.0;
         let distance_meter = 15.5;
 
-        let result = 4.16233053;
+        let result = 4.162_330_6;
 
         let in_question = candela_to_lux(luminance_intensity, distance_meter);
 
