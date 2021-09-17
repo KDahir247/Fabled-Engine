@@ -96,6 +96,40 @@ struct Material{
 [[group(3), binding(0)]]
 var<uniform> material : Material;
 
+fn env_dfg_polynomial(specular_color : vec3<f32>, gloss : f32, n_dot_v : f32) -> vec3<f32>{
+
+    let x : f32  = gloss;
+    let y : f32  = n_dot_v;
+
+    let b1 : f32 = -0.1688;
+    let b2 : f32 = 1.895;
+    let b3 : f32 = 0.9903;
+    let b4 : f32 = -4.853;
+    let b5 : f32 = 8.404;
+    let b6 : f32 = -5.069;
+
+    var bias : f32;
+    let un_saturated_bias : f32 = min( b1 * x + b2 * x * x, b3 + b4 * y + b5 * y * y + b6 * y * y * y );
+    bias = max(0.0, min(1.0, un_saturated_bias));
+
+    let d0 : f32 = 0.6045;
+    let d1 : f32 = 1.699;
+    let d2 : f32 = -0.5228;
+    let d3 : f32 = -3.603;
+    let d4 : f32 = 1.404;
+    let d5 : f32 = 0.1939;
+    let d6 : f32 = 2.661;
+
+    let un_saturated_delta : f32 =  d0 + d1 * x + d2 * y + d3 * x * x + d4 * x * y + d5 * y * y + d6 * x * x * x;
+    let delta : f32  = max(0.0, min(1.0, un_saturated_delta));
+
+    let scale : f32 = delta - bias;
+
+    bias = bias * max(0.0, min(1.0, 50.0 * specular_color.y));
+
+    return specular_color * scale + bias;
+}
+
 
 // Normal distribution function (specular D)
 fn d_ggx(n_dot_h : f32, roughness : f32) -> f32{
@@ -106,7 +140,7 @@ fn d_ggx(n_dot_h : f32, roughness : f32) -> f32{
     return (sqr_roughness / (f * f)) * FRAC_1_PI;
 }
 
-fn v_smith_ggx_correlation(n_dot_l : f32, n_dot_v : f32, roughness : f32) -> f32{
+fn g_smith_ggx_correlation(n_dot_l : f32, n_dot_v : f32, roughness : f32) -> f32{
 
     // Optimized version.
     let sqr_roughness : f32 = roughness * roughness;
@@ -118,13 +152,13 @@ fn v_smith_ggx_correlation(n_dot_l : f32, n_dot_v : f32, roughness : f32) -> f32
 }
 
 
-fn f_schlick(u : f32, f0 : vec3<f32>) -> vec3<f32>{
-    let f : f32 = pow(1.0 - u, 5.0);
-    return f + f0 * (1.0 - f);
-}
+//fn f_schlick(u : f32, f0 : vec3<f32>) -> vec3<f32>{
+//    let f : f32 = pow(1.0 - u, 5.0);
+//    return f + f0 * (1.0 - f);
+//}
 
-fn f_schlick(u : f32, f0 : vec3<f32>, f90 : f32) -> vec3<f32>{
-    return f0 + (f90 - f0) * pow(1.0 - u, 5.0);
+fn f_schlick(v_dot_h : f32, f0 : vec3<f32>, f90 : f32) -> vec3<f32>{
+    return f0 + (f90 - f0) * pow(1.0 - v_dot_h, 5.0);
 }
 
 fn specular_brdf(f0 : vec3<f32>, roughness : f32, h : vec3<f32>, n_dot_v : f32,
@@ -132,10 +166,11 @@ fn specular_brdf(f0 : vec3<f32>, roughness : f32, h : vec3<f32>, n_dot_v : f32,
 
             // Normal distribution function
             let D : f32 = d_ggx(n_dot_h, roughness);
-            let F : vec3<f32> = f_schlick(l_dot_h, f0);
-            let V : f32 = v_smith_ggx_correlation(n_dot_v, n_dot_l, roughness);
+            //todo temp we need f90
+            let F : vec3<f32> = f_schlick(l_dot_h, f0, 1.0);
+            let G : f32 = g_smith_ggx_correlation(n_dot_v, n_dot_l, roughness);
 
-            return (intensity * D * V) * F;
+            return (intensity * D * G) * F;
 }
 
 
@@ -208,7 +243,7 @@ fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
 
     let output_color = material.albedo;
 
-    //basic color texture map.
+    //todo basic color texture map. Make sure it is in linear space.
 
 
     let diffuse_color : vec3<f32> = (1.0 - material.metallic) * output_color.rgb;
@@ -240,16 +275,25 @@ fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
     let L : vec3<f32> = normalize(-incident_light);
     let N : vec3<f32> = normalize(in.world_normal);
 
+    let n_dot_v : f32 = max(dot(N, V), 0.0001);
+
     //Basic directional light.
     let n_dot_l : f32 = clamp(dot(N,L), 0.0, 1.0);
+
+    // remap which was used by Crytek in Ryse.
+    let gloss : f32 = pow((1.0 - perceptual_roughness * 0.7), 6.0);
+
+    let diffuse_color : vec3<f32> = env_dfg_polynomial(diffuse_color, gloss, n_dot_v);
+    let specular_color : vec3<f32> = env_dfg_polynomial(f0, gloss, n_dot_v);
 
     //todo finish this. (specular + diffuse)
     //let luminance = BSDF(...) * n_dot_l;
 
     //todo tone mapping.
 
-
     //todo correction if needed or vis versa.
+
+    //todo convert linear space to gamma space by using accurate_to_gamma to precisely convert linear space to gamma space.
 
     //template
     return vec4<f32>(0.0, 0.0, 0.0, 0.0);
