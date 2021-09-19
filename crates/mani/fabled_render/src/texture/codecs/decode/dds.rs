@@ -17,21 +17,18 @@ impl DdsTextureLoader {
         let dds_decoder =
             image::codecs::dds::DdsDecoder::new(file).map_err(CodecsError::ImageError)?;
 
-        let mut dyn_img =
+        let dyn_img =
             image::DynamicImage::from_decoder(dds_decoder).map_err(CodecsError::ImageError)?;
 
-        match texture_descriptor.flip_axis {
-            FlipAxis::FlipX => {
-                dyn_img = dyn_img.fliph();
-            }
-            FlipAxis::FlipY => {
-                dyn_img = dyn_img.flipv();
-            }
-            _ => {} // skips flipping
+
+        let data = match texture_descriptor.flip_axis {
+            FlipAxis::FlipX => dyn_img.fliph().to_bytes(),
+            FlipAxis::FlipY => dyn_img.flipv().to_bytes(),
+            _ => dyn_img.to_bytes(),
         };
 
         let dds_texture = Texture {
-            data: dyn_img.to_bytes(),
+            data,
             size: Extent3d {
                 width: dyn_img.width(),
                 height: dyn_img.height(),
@@ -42,6 +39,7 @@ impl DdsTextureLoader {
             color_type: dyn_img.color().into(),
             rows_per_image: dyn_img.width() * 4,
         };
+
         Ok(dds_texture)
     }
 }
@@ -55,15 +53,39 @@ mod dds_loader_codecs {
     #[test]
     fn load_dds() {
         let dds_loader = DdsTextureLoader::default();
-        let dds_yellow = dds_loader
-            .load(
-                DDS_TEST_TEXTURE,
-                &TextureDescriptor {
-                    flip_axis: Default::default(),
-                },
-            )
-            .unwrap();
+        let dds_yellow = dds_loader.load(
+            DDS_TEST_TEXTURE,
+            &TextureDescriptor {
+                flip_axis: Default::default(),
+            },
+        );
 
-        assert!(!dds_yellow.data.is_empty());
+        match dds_yellow {
+            Ok(result) => {
+                assert!(!result.data.is_empty());
+                println!("Pass");
+            }
+            Err(err) => {
+                panic!("{}", err)
+            }
+        }
+
+        //------------------------------------------------------------
+
+        let invalid_dds_yellow = dds_loader.load(
+            PNG_TEST_TEXTURE,
+            &TextureDescriptor {
+                flip_axis: Default::default(),
+            },
+        );
+
+        match invalid_dds_yellow {
+            Ok(_) => {
+                panic!("Should not pass")
+            }
+            Err(err) => {
+                println!("{}", err);
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@ pub enum CodecsError {
     #[error("UnSupported Flip Operation Texture can't flip {}", .0)]
     InvalidFlipOperationError(FlipType),
 
-    #[error("Image Error either from Dimension Mismatch,retrieving an unsupported file extension or missing required signature \nSpecific Error: {:?}", .0)]
+    #[error("Image Error either from dimension mismatch, a mismatch file extension or missing required signature \nSpecific Error: {:?}", .0)]
     ImageError(image::ImageError),
 
     #[error(transparent)]

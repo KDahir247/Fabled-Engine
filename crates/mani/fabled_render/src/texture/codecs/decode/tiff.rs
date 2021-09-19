@@ -1,6 +1,5 @@
 use crate::texture::codecs::TextureDescriptor;
 use crate::texture::container::{Extent3d, FlipAxis, Texture};
-
 use crate::texture::CodecsError;
 use image::GenericImageView;
 
@@ -18,21 +17,17 @@ impl TiffTextureLoader {
         let tiff_decoder =
             image::codecs::tiff::TiffDecoder::new(file).map_err(CodecsError::ImageError)?;
 
-        let mut dyn_img =
+        let dyn_img =
             image::DynamicImage::from_decoder(tiff_decoder).map_err(CodecsError::ImageError)?;
 
-        match texture_descriptor.flip_axis {
-            FlipAxis::FlipX => {
-                dyn_img = dyn_img.fliph();
-            }
-            FlipAxis::FlipY => {
-                dyn_img = dyn_img.flipv();
-            }
-            _ => {} // skips flipping
+        let data = match texture_descriptor.flip_axis {
+            FlipAxis::FlipX => dyn_img.fliph().to_bytes(),
+            FlipAxis::FlipY => dyn_img.flipv().to_bytes(),
+            _ => dyn_img.to_bytes(), // skips flipping
         };
 
         let tiff_texture = Texture {
-            data: dyn_img.to_bytes(),
+            data,
             size: Extent3d {
                 width: dyn_img.width(),
                 height: dyn_img.height(),
@@ -53,17 +48,42 @@ mod tiff_loader_codecs {
     use crate::texture::codecs::{TextureDescriptor, TiffTextureLoader};
     use crate::texture::common::*;
 
+
     #[test]
     fn load_tiff() {
         let tiff_loader = TiffTextureLoader::default();
-        let tiff_yellow = tiff_loader
-            .load(
-                TIFF_TEST_TEXTURE,
-                &TextureDescriptor {
-                    flip_axis: Default::default(),
-                },
-            )
-            .unwrap();
-        assert!(!tiff_yellow.data.is_empty());
+        let tiff_yellow = tiff_loader.load(
+            TIFF_TEST_TEXTURE,
+            &TextureDescriptor {
+                flip_axis: Default::default(),
+            },
+        );
+
+        match tiff_yellow {
+            Ok(result) => {
+                assert!(!result.data.is_empty());
+            }
+            Err(err) => {
+                panic!("{}", err)
+            }
+        }
+
+        //----------------------------------------------------
+
+        let invalid_tiff_yellow = tiff_loader.load(
+            DDS_TEST_TEXTURE,
+            &TextureDescriptor {
+                flip_axis: Default::default(),
+            },
+        );
+
+        match invalid_tiff_yellow {
+            Ok(_) => {
+                panic!("Should not pass")
+            }
+            Err(err) => {
+                println!("{}", err);
+            }
+        }
     }
 }

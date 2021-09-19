@@ -17,21 +17,17 @@ impl PngTextureLoader {
         let png_decoder =
             image::codecs::png::PngDecoder::new(file).map_err(CodecsError::ImageError)?;
 
-        let mut dyn_img =
+        let dyn_img =
             image::DynamicImage::from_decoder(png_decoder).map_err(CodecsError::ImageError)?;
 
-        match texture_descriptor.flip_axis {
-            FlipAxis::FlipX => {
-                dyn_img = dyn_img.fliph();
-            }
-            FlipAxis::FlipY => {
-                dyn_img = dyn_img.flipv();
-            }
-            _ => {} // skips flipping
+        let data = match texture_descriptor.flip_axis {
+            FlipAxis::FlipX => dyn_img.fliph().to_bytes(),
+            FlipAxis::FlipY => dyn_img.flipv().to_bytes(),
+            _ => dyn_img.to_bytes(), // skips flipping
         };
 
         let png_image = Texture {
-            data: dyn_img.to_bytes(),
+            data,
             size: Extent3d {
                 width: dyn_img.width(),
                 height: dyn_img.height(),
@@ -56,14 +52,38 @@ mod png_loader_codecs {
     #[test]
     fn load_png() {
         let png_loader = PngTextureLoader::default();
-        let png_yellow = png_loader
-            .load(
-                PNG_TEST_TEXTURE,
-                &TextureDescriptor {
-                    flip_axis: Default::default(),
-                },
-            )
-            .unwrap();
-        assert!(!png_yellow.data.is_empty());
+        let png_yellow = png_loader.load(
+            PNG_TEST_TEXTURE,
+            &TextureDescriptor {
+                flip_axis: Default::default(),
+            },
+        );
+
+        match png_yellow {
+            Ok(result) => {
+                assert!(!result.data.is_empty());
+            }
+            Err(err) => {
+                panic!("{}", err)
+            }
+        }
+
+        //-----------------------------------------------------------
+
+        let invalid_png_yellow = png_loader.load(
+            JPG_TEST_TEXTURE,
+            &TextureDescriptor {
+                flip_axis: Default::default(),
+            },
+        );
+
+        match invalid_png_yellow {
+            Ok(_) => {
+                panic!("Should not pass")
+            }
+            Err(err) => {
+                println!("{}", err);
+            }
+        }
     }
 }
