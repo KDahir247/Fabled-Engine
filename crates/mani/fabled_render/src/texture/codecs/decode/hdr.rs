@@ -1,5 +1,6 @@
 use crate::texture::codecs::TextureDescriptor;
 use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
+use crate::texture::{CodecsError, FlipType};
 
 #[derive(Default, Clone)]
 pub struct HdrTextureLoader;
@@ -9,24 +10,27 @@ impl HdrTextureLoader {
         &self,
         path: P,
         texture_descriptor: &TextureDescriptor,
-    ) -> anyhow::Result<Texture> {
+    ) -> Result<Texture, CodecsError> {
         let file = std::fs::File::open(path.as_ref())?;
+
         let buf_reader = std::io::BufReader::new(file);
-        let hdr_decoder = image::codecs::hdr::HdrDecoder::new(buf_reader)?;
+        let hdr_decoder =
+            image::codecs::hdr::HdrDecoder::new(buf_reader).map_err(CodecsError::ImageError)?;
 
         let meta_data = hdr_decoder.metadata();
-        let rgb_data = hdr_decoder.read_image_hdr()?;
+        let rgb_data = hdr_decoder
+            .read_image_hdr()
+            .map_err(CodecsError::ImageError)?;
 
         let mut hdr_data = Vec::with_capacity(rgb_data.len() * 16);
         for rgb in rgb_data {
             hdr_data.extend_from_slice(&rgb.0[0].to_ne_bytes());
             hdr_data.extend_from_slice(&rgb.0[1].to_ne_bytes());
             hdr_data.extend_from_slice(&rgb.0[2].to_ne_bytes());
-
             hdr_data.extend_from_slice(&1.0f32.to_ne_bytes());
         }
 
-        let mut hdr_texture = Texture {
+        let hdr_texture = Texture {
             data: hdr_data,
             size: Extent3d {
                 width: meta_data.width,
@@ -39,29 +43,38 @@ impl HdrTextureLoader {
             rows_per_image: meta_data.width * 16,
         };
 
-        Self::hdr_reorientation(texture_descriptor, &mut hdr_texture);
+        let hdr_texture = Self::hdr_reorientation(texture_descriptor, hdr_texture)?;
 
         Ok(hdr_texture)
     }
 
-    fn hdr_reorientation(desc: &TextureDescriptor, stream_tex: &mut Texture) {
-        let mut result = stream_tex.data.to_vec();
+    fn hdr_reorientation(
+        desc: &TextureDescriptor,
+        stream_tex: Texture,
+    ) -> Result<Texture, CodecsError> {
+        let mut result = stream_tex;
+
+        let width = result.size.width;
 
         match desc.flip_axis {
-            FlipAxis::FlipX => { /*Unimplemented*/ }
+            FlipAxis::FlipX => {
+                return Err(CodecsError::InvalidFlipOperationError(FlipType::Horizontal))
+            }
             FlipAxis::FlipY => {
-                result = stream_tex
+                let data: Vec<u8> = result
                     .data
-                    .chunks(stream_tex.size.width as usize * 4)
+                    .chunks(width as usize * 4)
                     .rev()
                     .flat_map(|row| row.iter())
                     .cloned()
-                    .collect::<_>()
+                    .collect::<_>();
+
+                result.data = data;
             }
-            FlipAxis::FlipZ => { /*Unimplemented*/ }
+            _ => {} // skips flipping
         }
 
-        stream_tex.data = result;
+        Ok(result)
     }
 }
 

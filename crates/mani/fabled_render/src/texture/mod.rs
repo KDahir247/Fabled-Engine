@@ -6,6 +6,7 @@ pub use container::*;
 pub use core::*;
 pub use ext::*;
 pub use image_processing::*;
+pub use error::*;
 
 mod codecs;
 mod color_processing;
@@ -14,3 +15,4 @@ mod compression;
 mod container;
 mod ext;
 mod image_processing;
+mod error;

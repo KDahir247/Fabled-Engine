@@ -1,5 +1,6 @@
 use crate::texture::codecs::TextureDescriptor;
 use crate::texture::container::{Extent3d, FlipAxis, Texture};
+use crate::texture::CodecsError;
 use image::GenericImageView;
 
 #[derive(Default, Clone)]
@@ -10,17 +11,23 @@ impl DdsTextureLoader {
         &self,
         path: P,
         texture_descriptor: &TextureDescriptor,
-    ) -> anyhow::Result<Texture> {
+    ) -> Result<Texture, CodecsError> {
         let file = std::fs::File::open(path.as_ref())?;
 
-        let dds_decoder = image::codecs::dds::DdsDecoder::new(file)?;
+        let dds_decoder =
+            image::codecs::dds::DdsDecoder::new(file).map_err(CodecsError::ImageError)?;
 
-        let dyn_img = image::DynamicImage::from_decoder(dds_decoder)?;
+        let mut dyn_img =
+            image::DynamicImage::from_decoder(dds_decoder).map_err(CodecsError::ImageError)?;
 
         match texture_descriptor.flip_axis {
-            FlipAxis::FlipX => dyn_img.fliph(),
-            FlipAxis::FlipY => dyn_img.flipv(),
-            FlipAxis::FlipZ => unimplemented!(),
+            FlipAxis::FlipX => {
+                dyn_img = dyn_img.fliph();
+            }
+            FlipAxis::FlipY => {
+                dyn_img = dyn_img.flipv();
+            }
+            _ => {} // skips flipping
         };
 
         let dds_texture = Texture {

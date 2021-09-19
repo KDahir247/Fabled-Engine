@@ -1,8 +1,8 @@
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum FlipAxis {
-    FlipX = 0,
-    FlipY = 1,
-    FlipZ = 2,
+    Skip = 0,
+    FlipX = 1,
+    FlipY = 2,
 }
 
 impl Default for FlipAxis {

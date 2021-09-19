@@ -15,16 +15,15 @@ basis-universal-sys = "0.1.1"
 
 # Core
 serde = "1.0.126"
+thiserror = "1.0.29"
 anyhow = {version = "1.0.42"}
 bytemuck = {version = "1.7.0", features = ["derive"]}
 bitflags = "1.2.1"
 glob = "0.3.0"
 fabled_core = {path = "../fabled_core", version = "*"}
 fabled_transform = {path = "../fabled_transform", version = "*"}
-rayon = {version = "1.5.1"}
 rustc-hash = {version = "1.0.1"}
-ulid = {version = "0.4.1", features = ["serde"] }
-slotmap = {version = "*", features = ["serde"] }
+slotmap = {version = "1.0.6", features = ["serde"] }
 
 # Shader
 naga = {version = "0.5.0", features = ["wgsl-in", "wgsl-out", "glsl-in", "glsl-out", "spv-out", "spv-in", "serialize", "deserialize"]}

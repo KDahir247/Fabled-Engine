@@ -179,7 +179,6 @@ impl KtxTextureLoader {
                         .cloned()
                         .collect::<Vec<_>>();
                 }
-                FlipAxis::FlipZ => { /*Unimplemented*/ }
             }
         }
         result
