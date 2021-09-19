@@ -179,6 +179,7 @@ impl KtxTextureLoader {
                         .cloned()
                         .collect::<Vec<_>>();
                 }
+                _ => {} // Skipped Flipping
             }
         }
         result
