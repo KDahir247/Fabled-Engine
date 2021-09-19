@@ -1,3 +1,6 @@
+// This shader assumes that the material is a conductor (metal) or semi-conductor
+// non-anisotropy
+
 //Constants
 let FRAC_1_PI : f32 = 0.31830987;
 
@@ -96,6 +99,10 @@ struct Material{
 [[group(3), binding(0)]]
 var<uniform> material : Material;
 
+fn pow_5(x : f32) -> f32{
+    return x * x * x * x * x;
+}
+
 fn env_dfg_polynomial(specular_color : vec3<f32>, gloss : f32, n_dot_v : f32) -> vec3<f32>{
 
     let x : f32  = gloss;
@@ -132,13 +139,27 @@ fn env_dfg_polynomial(specular_color : vec3<f32>, gloss : f32, n_dot_v : f32) ->
 
 
 // Normal distribution function (specular D)
-fn d_ggx(n_dot_h : f32, roughness : f32) -> f32{
 
-    let sqr_roughness : f32 = roughness * roughness;
-    let f : f32 = (n_dot_h * sqr_roughness - n_dot_h) * n_dot_h + 1.0;
+// Represents the reflection of the ClearCoat Layer on the base material
+// Generally isotropic non-metallic materials, namely ClearCoat Layer
+fn d_gtr_1(roughness : f32, n_dot_h : f32) -> f32{
+    let a2 : f32 = roughness * roughness;
+    let cos_2_th : f32 = n_dot_h * n_dot_h;
+    let den : f32 = (1.0 + (a2 - 1.0) * cos_2_th);
 
-    return (sqr_roughness / (f * f)) * FRAC_1_PI;
+    return (a2 - 1.0) / (log(a2) * den) * FRAC_1_PI;
 }
+
+// Represents the reflection of the base material (Base Material)
+// Can be anisotropic or isotropic metal or non-metal
+fn d_gtr_2(roughness : f32, n_dot_h : f32) -> f32 {
+    let a2 : f32 = roughness * roughness;
+    let cos_2_th : f32 = n_dot_h * n_dot_h;
+    let den  : f32 = (1.0 + (a2 - 1.0) * cos_2_th);
+
+    return a2 / (log(a2) * den) * FRAC_1_PI;
+}
+
 
 fn g_smith_ggx_correlation(n_dot_l : f32, n_dot_v : f32, roughness : f32) -> f32{
 
@@ -153,19 +174,19 @@ fn g_smith_ggx_correlation(n_dot_l : f32, n_dot_v : f32, roughness : f32) -> f32
 
 
 //fn f_schlick(u : f32, f0 : vec3<f32>) -> vec3<f32>{
-//    let f : f32 = pow(1.0 - u, 5.0);
+//    let f : f32 = pow((1.0 - u), 5.0);
 //    return f + f0 * (1.0 - f);
 //}
 
 fn f_schlick(v_dot_h : f32, f0 : vec3<f32>, f90 : f32) -> vec3<f32>{
-    return f0 + (f90 - f0) * pow(1.0 - v_dot_h, 5.0);
+    return f0 + (f90 - f0) * pow_5(1.0 - v_dot_h);
 }
 
 fn specular_brdf(f0 : vec3<f32>, roughness : f32, h : vec3<f32>, n_dot_v : f32,
             n_dot_l : f32, n_dot_h : f32, l_dot_h : f32, intensity : f32) -> vec3<f32>{
 
             // Normal distribution function
-            let D : f32 = d_ggx(n_dot_h, roughness);
+            let D : f32 = d_gtr_2(roughness, n_dot_h);
             //todo temp we need f90
             let F : vec3<f32> = f_schlick(l_dot_h, f0, 1.0);
             let G : f32 = g_smith_ggx_correlation(n_dot_v, n_dot_l, roughness);
@@ -248,7 +269,8 @@ fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
 
     let diffuse_color : vec3<f32> = (1.0 - material.metallic) * output_color.rgb;
 
-    // f0(n_ior) = (n_ior - 1.0)^2 / (n_ior + 1.0)^2
+    // f0(n_ior) = ((n_ior_1 - n_ior_2)^2 / (n_ior_1 + n_ior_2))^2
+    // f0(n_ior) = ((n_ior - 1.0)^2 / (n_ior + 1.0))^2
     // We can get the index of refraction from obj wave front file from Ni
     // Ni is the optical density for its surface also know as index of refraction.
     // https://en.wikipedia.org/wiki/Wavefront_.obj_file

@@ -1,10 +1,17 @@
 Illumination calculation must be done in linear space
+
 The gamma space texture input in the shader, such as diffuse texture, needs to be converted into linear space.
 The textures that describe the surface properties of objects, such as roughness, specular textures, metal textures, etc., must be guaranteed to be linear spaces.
+
+Linear space rendering provides correct mathematical operations for lighting calculations. In linear space, the way of interaction between light and matter in the real world can be restored.
 
 BSDF can be seen as a more general form of BRDF and BTDF, and BSDF = BRDF + BTDF.
 
 That is, non-metallic F0 is a float. The F0 of the metal is a float3, as shown in the figure below.
+
+The specular reflection color of metal is a three-channel color, while the specular reflection color of non-metal is a single-channel monochromatic color.
+
+The non-metallic specular reflection color is single-channel monochromatic, that is, R=G=B
 
 Point light: light evaluation can be expressed as
 BRDF (Bidirectional reflectance distribution function)
