@@ -1,4 +1,5 @@
-use crate::texture::container::{ColorTarget, ColorType, Extent3d, Texture};
+use crate::texture::container::{ColorTarget, Extent3d, Texture};
+use crate::texture::ColorProcError;
 use anyhow::Context;
 use image::GenericImageView;
 
@@ -16,22 +17,13 @@ impl ColorProcessing {
         T: image::Pixel<Subpixel = u8>, {
         let dyn_texture =
             image::ImageBuffer::from_raw(texture.size.width, texture.size.height, texture.data)
-                .context("ColorTarget matches requirement for creating ImageBuffer from texture")?;
+                .context(ColorProcError::InSufficientAllocationSize)?;
 
-        let color_target: ColorType = dyn_texture
-            .as_flat_samples()
-            .color_hint
-            .context("Texture has color channel")?
-            .into();
 
         let texture_target = color_target_predicate(dyn_texture);
 
-        assert_eq!(
-            color_target, texture.color_type,
-            "Transforming color channel to ColorTarget is not supported yet"
-        );
-
         let dyn_texture: image::DynamicImage = texture_target.into();
+
 
         Ok(Self { dyn_texture })
     }

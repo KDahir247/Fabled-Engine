@@ -6,6 +6,10 @@ use basis_universal::{TranscodeParameters, Transcoder};
 use image::GenericImageView;
 use std::io::Read;
 
+
+#[deprecated(
+    note = "Don't use this function It will cause a stack corruption some times and has been ignored for now"
+)]
 pub fn transcode(
     basis_texture: TranscodeSource,
     transcode_desc: &TranscodeDescriptor,
@@ -30,6 +34,7 @@ pub fn transcode(
     let mut transcoder = Transcoder::new();
     let mip_level_count = transcoder.image_level_count(&source, 0);
 
+    println!("{}", mip_level_count);
     transcoder.prepare_transcoding(&source).unwrap();
 
     let result = transcoder
@@ -83,8 +88,9 @@ pub fn transcode(
 mod basis_transcode_test {
     use crate::texture::compression::*;
     #[test]
+    #[ignore]
     fn transcoder_test() {
-        let path = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\file.basis".to_string();
+        let path = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\albedo\\ok.basis".to_string();
         transcode(
             TranscodeSource::BasisPath { path },
             &TranscodeDescriptor::default(),

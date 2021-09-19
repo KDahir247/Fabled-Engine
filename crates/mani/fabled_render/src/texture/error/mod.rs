@@ -1,7 +1,10 @@
 pub mod codecs_error;
+mod color_proc_error;
+mod ktx_error;
 
 pub use codecs_error::*;
-
+pub use color_proc_error::*;
+pub use ktx_error::*;
 
 #[cfg(test)]
 mod data_test {

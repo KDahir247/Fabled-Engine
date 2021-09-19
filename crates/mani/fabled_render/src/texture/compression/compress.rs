@@ -4,6 +4,10 @@ use crate::texture::container::{ColorType, Texture};
 use basis_universal::{Compressor, CompressorParams};
 use fabled_core::concurrent::container::thread_op::ThreadOperation;
 
+
+#[deprecated(
+    note = "Don't use this function It will cause a stack corruption and has been ignored for now"
+)]
 pub fn super_compress(
     texture: Texture,
     compression_desc: &CompressionDescriptor,
@@ -88,6 +92,7 @@ mod basis_compression_test {
     use fabled_core::concurrent::thread_op::ThreadOperation;
 
     #[test]
+    #[ignore]
     fn compression_test() {
         let jpg_loader = JpgTextureLoader::default();
         let jpg_yellow = jpg_loader

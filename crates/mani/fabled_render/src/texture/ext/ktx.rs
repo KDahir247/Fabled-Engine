@@ -2,6 +2,7 @@ use crate::texture::_core::convert::TryFrom;
 use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
 use crate::texture::ext::KTXDescriptor;
 
+use crate::texture::KTXError;
 use libktx_rs as ktx;
 
 #[derive(Default)]
@@ -98,17 +99,34 @@ impl KtxTextureLoader {
         }
     }
 
-    pub fn from_stream(
+    // lower is better only for ktx2
+    pub fn super_compress<'a>(
         file: std::fs::File,
-        ktx_descriptor: &KTXDescriptor,
-    ) -> anyhow::Result<Texture> {
-        let stream = ktx::RustKtxStream::new(Box::new(file)).expect("The RustKtxStream");
+        quality: u32,
+    ) -> Result<libktx_rs::Texture<'a>, KTXError> {
+        let stream = ktx::RustKtxStream::new(Box::new(file)).map_err(|err_code| {
+            KTXError::KTXError(libktx_rs::KtxError::try_from(err_code).unwrap())
+        })?;
+
         let source = ktx::sources::StreamSource::new(
             std::sync::Arc::new(std::sync::Mutex::new(stream)),
             ktx::TextureCreateFlags::LOAD_IMAGE_DATA,
         );
-        let mut stream_tex = ktx::Texture::new(source).expect("the loaded KTX");
 
+        let mut stream_tex = ktx::Texture::new(source).map_err(KTXError::KTXError)?;
+
+        if let Some(mut ktx2) = stream_tex.ktx2() {
+            ktx2.compress_basis(quality).map_err(KTXError::KTXError)?;
+        }
+
+        Ok(stream_tex)
+    }
+
+
+    pub fn from_texture(
+        mut stream_tex: libktx_rs::Texture,
+        ktx_descriptor: &KTXDescriptor,
+    ) -> Result<Texture, KTXError> {
         let format = ktx::TranscodeFormat::try_from(ktx_descriptor.transcode_format as u32)
             .unwrap_or(ktx::TranscodeFormat::Rgba32);
 
@@ -119,25 +137,24 @@ impl KtxTextureLoader {
             if ktx2.needs_transcoding() {
                 println!("This KTX2 needs transcoding");
 
+
                 ktx2.transcode_basis(format, transcode_flag)
-                    .expect("transcoding KTX2 to work");
+                    .map_err(KTXError::KTXError)?;
             }
         }
 
         let mut dimensions = Extent3d::default();
         let mut mip_level: u32 = 1;
-        // let mut faces = 0;
 
         stream_tex
             .iterate_levels(|_mip, _face, width, height, depth, _| {
-                // faces = face;
                 dimensions.width = width as u32;
                 dimensions.height = height as u32;
                 dimensions.depth_or_array_layers = depth as u32;
                 mip_level = _mip as u32;
                 Ok(())
             })
-            .expect("Iterating over the all mip level for the KTX file");
+            .map_err(KTXError::KTXError)?;
 
         let manipulated_buf =
             KtxTextureLoader::ktx_reorientation(ktx_descriptor, &stream_tex, &dimensions);
@@ -160,6 +177,22 @@ impl KtxTextureLoader {
         })
     }
 
+    pub fn from_stream(
+        file: std::fs::File,
+        ktx_descriptor: &KTXDescriptor,
+    ) -> Result<Texture, KTXError> {
+        let stream = ktx::RustKtxStream::new(Box::new(file)).expect("The RustKtxStream");
+        let source = ktx::sources::StreamSource::new(
+            std::sync::Arc::new(std::sync::Mutex::new(stream)),
+            ktx::TextureCreateFlags::LOAD_IMAGE_DATA,
+        );
+        let stream_tex = ktx::Texture::new(source).expect("the loaded KTX");
+
+
+        Self::from_texture(stream_tex, ktx_descriptor)
+    }
+
+    // todo remove
     fn ktx_reorientation(
         ktx_descriptor: &KTXDescriptor,
         stream_tex: &ktx::Texture,
@@ -193,6 +226,7 @@ mod ktx_mod_test {
     use crate::texture::ext::{
         KTXDescriptor, KtxTextureLoader, KtxTranscodeFlag, KtxTranscodeFormat,
     };
+
 
     #[test]
     fn basic_ktx1_test() {
@@ -229,6 +263,32 @@ mod ktx_mod_test {
         }
 
         assert!(container > 0);
+    }
+
+
+    #[test]
+    fn ktx_compress() {
+        let ktx_super =
+            KtxTextureLoader::super_compress(std::fs::File::open(KTX_2_TEST_TEXTURE).unwrap(), 100);
+
+        match ktx_super {
+            Ok(result) => {
+                let ktx = KtxTextureLoader::from_texture(
+                    result,
+                    &KTXDescriptor {
+                        flip_axis: None,
+                        transcode_flag: KtxTranscodeFlag::HIGHEST_QUALITY,
+                        transcode_format: KtxTranscodeFormat::ETC1RGB,
+                    },
+                )
+                .unwrap_or_else(|_| KtxTextureLoader::default_ktx2());
+
+                println!("{:?}", ktx.color_type);
+            }
+            Err(err) => {
+                println!("{}", err);
+            }
+        };
     }
 
     #[test]
