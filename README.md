@@ -17,9 +17,8 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 * Down : E
 
 # current progress:
-* Experimenting with KTX 2.0 and Dds as option for texture file, since these are the fastest texture file format to load to the gpu.
-* Experimenting support for different texture compression method
-# Grid System (Early Experimental)
+* Finalizing Render module to be merged.
+* Going to work on the obj module next when the render module is merged to main.
 <br/>
 
 ![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)
