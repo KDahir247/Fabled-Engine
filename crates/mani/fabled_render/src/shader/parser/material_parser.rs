@@ -5,6 +5,7 @@ use crate::material::*;
 use crate::shader::parser::*;
 
 #[derive(Debug, Serialize, Deserialize)]
+#[repr(align(16))]
 pub struct MaterialParser {
     material: MaterialTree,
     map: slotmap::SlotMap<MaterialKey, MaterialNode>,

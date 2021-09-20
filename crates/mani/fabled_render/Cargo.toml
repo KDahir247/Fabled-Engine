@@ -33,9 +33,6 @@ ron = "0.6.0"
 # Remove later since fabled_math will have all the mathematical calculation and function.
 glam = {version = "0.18.0", features = ["bytemuck"]}
 
-# Miscellaneous
-ansi_term = {version = "0.12.1"}
-
 # EXT
 gltf = {version = "0.16.0", features = ["KHR_lights_punctual", "KHR_materials_ior"]}
 

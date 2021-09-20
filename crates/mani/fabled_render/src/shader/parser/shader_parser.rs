@@ -1,28 +1,27 @@
-use anyhow::Context;
+use crate::shader::validation_rule::ValidationLayer;
+use crate::shader::{ParseOption, ShaderError};
 use std::io::{Read, Write};
 
-use crate::shader::validation_rule::ValidationLayer;
-use crate::shader::ParseOption;
-
-const AUTO_GEN_MESSAGE : &str = "//This is auto generated code. Do not modify code! Modification can break interpreted solution.\n//Modify shader code if you know what you're doing.\n\n";
+const AUTO_GEN_MESSAGE : &str = "//This is auto generated code. Do not modify code! Modification can break interpreted solution.\n//Modify shader code only if you know what you're doing.\n\n";
 
 pub fn parse_shader<P: AsRef<std::path::Path>>(
     source: P,
     parse_option: Option<ParseOption>,
-) -> anyhow::Result<naga::Module> {
+) -> Result<naga::Module, ShaderError> {
     let file = source.as_ref();
 
+    // return empty if file extension contains surrogates
     let file_ext = file
         .extension()
-        .context("Input has no extension? or file name?")?
+        .ok_or(ShaderError::InvalidFileExtension)?
         .to_str()
-        .unwrap();
+        .unwrap_or("");
 
     let module = match file_ext {
         "wgsl" => {
             let input = std::fs::read_to_string(file)?;
-            let result = naga::front::wgsl::parse_str(&input);
-            result?
+
+            naga::front::wgsl::parse_str(&input).map_err(ShaderError::WGSLParseError)?
         }
         "spv" => {
             // when we create filesystem module a more polished implementation will be
@@ -30,7 +29,7 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
             // TOCTTOU (Time-of-check to time-of-use) attack
             let mut render_module = env!("CARGO_MANIFEST_DIR").to_string();
             render_module.push_str("\\shader\\shader_dump");
-            std::fs::create_dir_all(render_module.clone()).unwrap();
+            std::fs::create_dir_all(render_module.clone())?;
 
             let mut options = naga::front::spv::Options {
                 flow_graph_dump_prefix: Some(std::path::PathBuf::from(render_module)),
@@ -45,10 +44,11 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
                 options.adjust_coordinate_space = adjust_coordinate_space;
                 options.strict_capabilities = strict_capabilities;
             }
-            // Some performance lose avg 20.1%
+
             let input = std::fs::read(file)?;
-            let result = naga::front::spv::parse_u8_slice(&input, &options);
-            result?
+
+            naga::front::spv::parse_u8_slice(&input, &options)
+                .map_err(ShaderError::SPVParseError)?
         }
 
         stage @ "vert" | stage @ "frag" | stage @ "comp" => {
@@ -69,20 +69,23 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
             };
 
             entry_points.insert(main_func_entry, target);
-            // most of the performance lose. 79.8%
+
             naga::front::glsl::parse_str(
                 &input,
                 &naga::front::glsl::Options {
                     entry_points,
                     defines: Default::default(),
                 },
-            )?
+            )
+            .map_err(ShaderError::GlslParserError)?
         }
         _ => naga::Module::default(),
     };
 
     // validate shader module. Specifying a harsh validation on the shader.
-    module.validate(naga::valid::ValidationFlags::all())?;
+    module
+        .validate(naga::valid::ValidationFlags::all())
+        .map_err(ShaderError::ValidationError)?;
 
     Ok(module)
 }
@@ -90,28 +93,30 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
 pub fn encode_shader<P: AsRef<std::path::Path>>(
     shader_data: String,
     target: P,
-) -> anyhow::Result<()> {
-    let file = std::fs::File::create(target).expect("Unable to create ron_material file");
-    let mut buffer_writer = std::io::BufWriter::new(file);
-    let mut auto_gen = AUTO_GEN_MESSAGE.to_string();
-    auto_gen.push_str(shader_data.as_str());
-    buffer_writer
-        .write_all(auto_gen.as_bytes())
-        .expect("Unable to write to write to target ron_material file");
-    buffer_writer.flush()?;
+) -> Result<(), ShaderError> {
+    let mut file = std::fs::File::create(target)?;
+
+    let buffer_size = AUTO_GEN_MESSAGE.len() + shader_data.len();
+    let mut buffer = vec![0; buffer_size];
+
+    let (header, data) = buffer.split_at_mut(AUTO_GEN_MESSAGE.len());
+    header.copy_from_slice(AUTO_GEN_MESSAGE.as_bytes());
+    data.copy_from_slice(shader_data.as_bytes());
+
+    file.write_all(&buffer)?;
+
     Ok(())
 }
 
-pub fn decode_shader<P: AsRef<std::path::Path>>(target: P) -> anyhow::Result<String> {
-    let mut data = String::new();
+pub fn decode_shader<P: AsRef<std::path::Path>>(target: P) -> Result<String, ShaderError> {
+    let mut file = std::fs::File::open(target)?;
 
-    {
-        let file = std::fs::File::open(target).expect("Unable to open ron_material file");
-        let mut buffer_reader = std::io::BufReader::new(file);
-        buffer_reader
-            .read_to_string(&mut data)
-            .expect("Unable to read string");
-    }
+    let length = file.metadata().unwrap().len() as usize;
+    let mut buffer = vec![0; length];
+    file.read_exact(&mut buffer)?;
+
+
+    let data = std::string::String::from_utf8(buffer).unwrap_or_default();
 
     Ok(data)
 }

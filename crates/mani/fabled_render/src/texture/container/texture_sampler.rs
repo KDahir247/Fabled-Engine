@@ -4,16 +4,16 @@ use crate::texture::container::BorderColor;
 #[repr(align(16))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TextureSampler {
+    pub mip_map_filter: i32,
+    pub lod_min_clamp: f32,
+    pub lod_max_clamp: f32,
+    pub anisotropy_clamp: Option<std::num::NonZeroU8>,
+    pub compare: Option<u8>,
     pub u_edge: u8,
     pub v_edge: u8,
     pub w_edge: u8,
     pub mag_filter: u8,
     pub min_filter: u8,
-    pub mip_map_filter: i32,
-    pub lod_min_clamp: f32,
-    pub lod_max_clamp: f32,
-    pub compare: Option<u8>,
-    pub anisotropy_clamp: Option<std::num::NonZeroU8>,
     pub border_color: Option<BorderColor>,
 }
 

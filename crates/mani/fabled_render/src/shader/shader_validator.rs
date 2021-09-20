@@ -1,33 +1,13 @@
 use super::validation_rule::*;
-
-use anyhow::Context;
+use crate::shader::ValidationError;
 use naga::valid::ValidationFlags;
-use std::error::Error;
 
+// This will be more in-depth to convert handle to specific variable type from
+// naga from error.
 impl ValidationLayer for naga::Module {
-    fn validate(&self, flag: ValidationFlags) -> anyhow::Result<naga::valid::ModuleInfo> {
-        match naga::valid::Validator::new(flag, naga::valid::Capabilities::all()).validate(self) {
-            Ok(info) => Some(info),
-            Err(err) => {
-                #[cfg(target_os = "windows")]
-                if let Err(err_code) = ansi_term::enable_ansi_support() {
-                    println!("Error has occurred when enabling ansi supported on windows\nWindows error code: {}", err_code);
-                }
-
-                eprintln!(
-                    "{}\n{:?}",
-                    ansi_term::Colour::Red.bold().paint("Validation Failed"),
-                    err
-                );
-
-                let mut e = err.source();
-
-                while let Some(source) = e {
-                    eprintln!("\t{}", source);
-                    e = source.source();
-                }
-                None
-            }
-        }.context("ModuleInfo was None when running the shader validator. Shader validation most likely failed.")
+    fn validate(&self, flag: ValidationFlags) -> Result<naga::valid::ModuleInfo, ValidationError> {
+        naga::valid::Validator::new(flag, naga::valid::Capabilities::all())
+            .validate(self)
+            .map_err(ValidationError::ValidationFailedError)
     }
 }

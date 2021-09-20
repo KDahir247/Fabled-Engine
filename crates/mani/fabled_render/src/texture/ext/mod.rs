@@ -8,9 +8,9 @@ pub use ktx::*;
 #[derive(Copy, Clone, Debug)]
 #[repr(align(8))]
 pub struct KTXDescriptor {
-    pub flip_axis: FlipAxis,
     pub transcode_flag: KtxTranscodeFlag,
     pub transcode_format: KtxTranscodeFormat,
+    pub flip_axis: FlipAxis,
 }
 
 bitflags! {

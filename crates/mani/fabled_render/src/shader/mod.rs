@@ -1,5 +1,6 @@
 mod common;
 mod converter;
+mod error;
 mod parser;
 mod shader_validator;
 mod validation_rule;
@@ -7,8 +8,10 @@ mod validation_rule;
 use crate::shader;
 
 pub use converter::*;
+pub use error::*;
 pub use parser::*;
 pub use validation_rule::*;
+
 
 pub fn init_shader_test_env() {
     std::env::set_var("WGSL_FILE", shader::common::PARSE_TEST_WGSL_SHADER);
