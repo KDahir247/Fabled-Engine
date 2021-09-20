@@ -1,8 +1,8 @@
 use crate::texture::_core::convert::TryFrom;
 use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
 use crate::texture::ext::KTXDescriptor;
-
 use crate::texture::KTXError;
+
 use libktx_rs as ktx;
 
 #[derive(Default)]
@@ -11,95 +11,48 @@ pub struct KtxTextureLoader;
 // --------------------Warning--------------------
 //  When loading a ktx file that is compressed. The ktx file must not currently
 //  have any mip level or the texture mapping for the model will be incorrect.
+
 impl KtxTextureLoader {
     pub fn default_ktx1() -> Texture {
-        let texture = ktx::Texture::new(ktx::sources::Ktx1CreateInfo::default())
-            .expect("a default KTX1 texture");
+        let texture = ktx::Texture::new(ktx::sources::Ktx1CreateInfo::default()).unwrap();
 
-        assert_eq!(texture.element_size(), 4);
-        assert_eq!(texture.row_pitch(0), 4);
-        assert_eq!(texture.data_size(), 4);
-
-        let mut _mip_level = 0;
-        let mut dimensions = Extent3d {
-            width: 0,
-            height: 0,
-            depth_or_array_layers: 0,
+        let dimensions = Extent3d {
+            width: 1,
+            height: 1,
+            depth_or_array_layers: 1,
         };
 
-        texture
-            .iterate_levels(|mip, _, width, height, depth, _| {
-                _mip_level = mip;
-                dimensions.width = width as u32;
-                dimensions.height = height as u32;
-                dimensions.depth_or_array_layers = depth as u32;
-                _mip_level = mip;
-                Ok(())
-            })
-            .expect("Retrieving KTX1 texture information");
-
-        let color_type = match texture.element_size() {
-            1 => ColorType::L8,
-            2 => ColorType::La8,
-            3 => ColorType::Rgb8,
-            4 => ColorType::Rgba8,
-            _ => panic!("Texture has more then 4 channel and is not supported"),
-        };
-
+        // gl_internal : 0x8058 == GL_RGBA8
         Texture {
             data: texture.data().to_vec(),
             size: dimensions,
             sample_count: 1,
-            mip_level: _mip_level as u32,
-            color_type,
-            rows_per_image: texture.row_pitch(0) as u32,
+            mip_level: 0,
+            color_type: ColorType::Rgba8,
+            rows_per_image: 4,
         }
     }
 
     pub fn default_ktx2() -> Texture {
-        let texture = ktx::Texture::new(ktx::sources::Ktx2CreateInfo::default())
-            .expect("a default KTX2 texture");
+        let texture = ktx::Texture::new(ktx::sources::Ktx2CreateInfo::default()).unwrap();
 
-        assert_eq!(texture.element_size(), 4);
-        assert_eq!(texture.row_pitch(0), 4);
-        assert_eq!(texture.data_size(), 4);
-
-        let mut mip_level = 0;
-        let mut dimensions = Extent3d {
-            width: 0,
-            height: 0,
-            depth_or_array_layers: 0,
+        let dimensions = Extent3d {
+            width: 1,
+            height: 1,
+            depth_or_array_layers: 1,
         };
 
-        texture
-            .iterate_levels(|mip, _, width, height, depth, _| {
-                dimensions.width = width as u32;
-                dimensions.height = height as u32;
-                dimensions.depth_or_array_layers = depth as u32;
-                mip_level = mip;
-                Ok(())
-            })
-            .expect("Retrieving KTX2 texture information");
-
-        let color_type = match texture.element_size() {
-            1 => ColorType::L8,
-            2 => ColorType::La8,
-            3 => ColorType::Rgb8,
-            4 => ColorType::Rgba8,
-            _ => panic!("Texture has more then 4 channel and is not supported"),
-        };
-
+        // vk_format 37 == VK_R8G8B8A8_UNORM
         Texture {
             data: texture.data().to_vec(),
             size: dimensions,
             sample_count: 1,
-            mip_level: mip_level as u32,
-            color_type,
-            rows_per_image: texture.row_pitch(0) as u32,
+            mip_level: 0,
+            color_type: ColorType::Rgba8,
+            rows_per_image: 4,
         }
     }
 
-    // lower is better only for ktx2
     pub fn super_compress<'a>(
         file: std::fs::File,
         quality: u32,
@@ -135,9 +88,6 @@ impl KtxTextureLoader {
 
         if let Some(mut ktx2) = stream_tex.ktx2() {
             if ktx2.needs_transcoding() {
-                println!("This KTX2 needs transcoding");
-
-
                 ktx2.transcode_basis(format, transcode_flag)
                     .map_err(KTXError::KTXError)?;
             }
@@ -146,6 +96,7 @@ impl KtxTextureLoader {
         let mut dimensions = Extent3d::default();
         let mut mip_level: u32 = 1;
 
+        // Safe error just in case data hasn't been loaded.
         stream_tex
             .iterate_levels(|_mip, _face, width, height, depth, _| {
                 dimensions.width = width as u32;
@@ -156,9 +107,20 @@ impl KtxTextureLoader {
             })
             .map_err(KTXError::KTXError)?;
 
-        let manipulated_buf =
-            KtxTextureLoader::ktx_reorientation(ktx_descriptor, &stream_tex, &dimensions);
+        let channels = stream_tex.data().chunks(dimensions.width as usize * 4);
 
+        let data = match ktx_descriptor.flip_axis {
+            FlipAxis::Skip => stream_tex.data().to_vec(),
+            FlipAxis::FlipX => stream_tex.data().to_vec(),
+            FlipAxis::FlipY => channels
+                .rev()
+                .flat_map(|buf| buf.iter())
+                .cloned()
+                .collect::<Vec<_>>(),
+        };
+
+
+        // Generic handle for ktx1 gl_format and ktx2 vk_format.
         let color_type = match stream_tex.element_size() {
             1 => ColorType::L8,
             2 => ColorType::La8,
@@ -168,7 +130,7 @@ impl KtxTextureLoader {
         };
 
         Ok(Texture {
-            data: manipulated_buf,
+            data,
             size: dimensions,
             sample_count: 1,
             mip_level,
@@ -181,41 +143,19 @@ impl KtxTextureLoader {
         file: std::fs::File,
         ktx_descriptor: &KTXDescriptor,
     ) -> Result<Texture, KTXError> {
-        let stream = ktx::RustKtxStream::new(Box::new(file)).expect("The RustKtxStream");
+        let stream = ktx::RustKtxStream::new(Box::new(file)).map_err(|err_code| {
+            KTXError::KTXError(libktx_rs::KtxError::try_from(err_code).unwrap())
+        })?;
+
         let source = ktx::sources::StreamSource::new(
             std::sync::Arc::new(std::sync::Mutex::new(stream)),
             ktx::TextureCreateFlags::LOAD_IMAGE_DATA,
         );
-        let stream_tex = ktx::Texture::new(source).expect("the loaded KTX");
+
+        let stream_tex = ktx::Texture::new(source).map_err(KTXError::KTXError)?;
 
 
         Self::from_texture(stream_tex, ktx_descriptor)
-    }
-
-    // todo remove
-    fn ktx_reorientation(
-        ktx_descriptor: &KTXDescriptor,
-        stream_tex: &ktx::Texture,
-        dimensions: &Extent3d,
-    ) -> Vec<u8> {
-        let mut result = stream_tex.data().to_vec();
-
-        if let Some(target) = ktx_descriptor.flip_axis {
-            match target {
-                FlipAxis::FlipX => { /*Unimplemented*/ }
-                FlipAxis::FlipY => {
-                    result = stream_tex
-                        .data()
-                        .chunks(dimensions.width as usize * 4)
-                        .rev()
-                        .flat_map(|row| row.iter())
-                        .cloned()
-                        .collect::<Vec<_>>();
-                }
-                _ => {} // Skipped Flipping
-            }
-        }
-        result
     }
 }
 
@@ -226,6 +166,7 @@ mod ktx_mod_test {
     use crate::texture::ext::{
         KTXDescriptor, KtxTextureLoader, KtxTranscodeFlag, KtxTranscodeFormat,
     };
+    use crate::texture::FlipAxis;
 
 
     #[test]
@@ -276,7 +217,7 @@ mod ktx_mod_test {
                 let ktx = KtxTextureLoader::from_texture(
                     result,
                     &KTXDescriptor {
-                        flip_axis: None,
+                        flip_axis: FlipAxis::Skip,
                         transcode_flag: KtxTranscodeFlag::HIGHEST_QUALITY,
                         transcode_format: KtxTranscodeFormat::ETC1RGB,
                     },
@@ -296,12 +237,12 @@ mod ktx_mod_test {
         let ktx_stream_texture = KtxTextureLoader::from_stream(
             std::fs::File::open(KTX_2_TEST_TEXTURE).unwrap(),
             &KTXDescriptor {
-                flip_axis: None,
+                flip_axis: FlipAxis::Skip,
                 transcode_flag: KtxTranscodeFlag::HIGHEST_QUALITY,
                 transcode_format: KtxTranscodeFormat::RGBA32,
             },
         )
-        .unwrap();
+        .unwrap_or_else(|_| KtxTextureLoader::default_ktx2());
 
         let mut container = 0;
         assert_eq!(ktx_stream_texture.size.width, 1024);

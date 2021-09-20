@@ -1,7 +1,5 @@
 use crate::texture::_core::fmt::Formatter;
-use libktx_rs::sys::ktx_error_code_e;
 use libktx_rs::KtxError;
-use std::convert::TryFrom;
 use std::fmt::Display;
 use thiserror::Error;
 

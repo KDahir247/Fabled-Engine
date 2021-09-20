@@ -1,16 +1,14 @@
 mod ktx;
 
-pub use ktx::*;
-
-use bitflags::*;
-
 use crate::texture::container::FlipAxis;
+use bitflags::*;
+pub use ktx::*;
 
 
 #[derive(Copy, Clone, Debug)]
-#[repr(align(16))]
+#[repr(align(8))]
 pub struct KTXDescriptor {
-    pub flip_axis: Option<FlipAxis>,
+    pub flip_axis: FlipAxis,
     pub transcode_flag: KtxTranscodeFlag,
     pub transcode_format: KtxTranscodeFormat,
 }
@@ -31,7 +29,7 @@ pub struct KtxTranscodeFlag : u32 {
 
 impl From<KtxTranscodeFlag> for libktx_rs::TranscodeFlags {
     fn from(v: KtxTranscodeFlag) -> Self {
-        libktx_rs::TranscodeFlags::from_bits(v.bits).expect("Bit to ktx transcode flag")
+        libktx_rs::TranscodeFlags::from_bits(v.bits).expect("Converted bit to ktx transcode flag")
     }
 }
 

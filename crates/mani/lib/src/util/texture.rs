@@ -96,7 +96,7 @@ fn from_image(
     let ktx = KtxTextureLoader::from_stream(
         std::fs::File::open(_test.as_str()).unwrap(),
         &KTXDescriptor {
-            flip_axis: Some(fabled_render::texture::FlipAxis::FlipY),
+            flip_axis: fabled_render::texture::FlipAxis::default(),
             transcode_flag: KtxTranscodeFlag::HIGHEST_QUALITY,
             transcode_format: KtxTranscodeFormat::RGBA32,
         },
