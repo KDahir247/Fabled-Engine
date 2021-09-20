@@ -23,15 +23,24 @@ impl From<FilterType> for image::imageops::FilterType {
 }
 
 #[cfg(test)]
-mod data_alignment_test {
+mod data_test {
     use crate::texture::image_processing::{FilterType, ImageProcessing};
 
     #[test]
-    fn data_alignment() {
-        let filter_type = std::mem::size_of::<FilterType>();
-        assert_eq!(filter_type & (filter_type - 1), 0);
+    fn data_size() {
+        let filter_type_size = std::mem::size_of::<FilterType>();
+        assert_eq!(filter_type_size & (filter_type_size - 1), 0);
 
-        let img_proc = std::mem::size_of::<ImageProcessing>();
-        assert_eq!(img_proc & (img_proc - 1), 0);
+        let img_proc_size = std::mem::size_of::<ImageProcessing>();
+        assert_eq!(img_proc_size & (img_proc_size - 1), 0);
+    }
+
+    #[test]
+    fn data_alignment() {
+        let filter_type_alignment = std::mem::align_of::<FilterType>();
+        assert_eq!(filter_type_alignment & (filter_type_alignment - 1), 0);
+
+        let img_proc_alignment = std::mem::align_of::<ImageProcessing>();
+        assert_eq!(img_proc_alignment & (img_proc_alignment - 1), 0);
     }
 }

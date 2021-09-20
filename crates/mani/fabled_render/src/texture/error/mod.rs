@@ -1,10 +1,12 @@
 pub mod codecs_error;
-mod color_proc_error;
+mod image_proc_error;
 mod ktx_error;
+mod texture_error;
 
 pub use codecs_error::*;
-pub use color_proc_error::*;
+pub use image_proc_error::*;
 pub use ktx_error::*;
+pub use texture_error::*;
 
 #[cfg(test)]
 mod data_test {

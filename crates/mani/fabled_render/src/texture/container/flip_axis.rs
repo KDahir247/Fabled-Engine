@@ -7,6 +7,6 @@ pub enum FlipAxis {
 
 impl Default for FlipAxis {
     fn default() -> Self {
-        FlipAxis::FlipY
+        FlipAxis::Skip
     }
 }

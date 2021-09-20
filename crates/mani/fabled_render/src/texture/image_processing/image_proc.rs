@@ -1,9 +1,9 @@
-use crate::texture::container::{ColorTarget, ColorType, Extent2d, Extent3d, Texture};
+use crate::texture::container::{ColorTarget, Extent2d, Extent3d, Texture};
 use crate::texture::image_processing::FilterType;
-
+use crate::texture::ImageProcError;
 use image::GenericImageView;
 
-#[repr(align(64))]
+#[repr(align(32))]
 pub struct ImageProcessing {
     dyn_texture: image::DynamicImage,
 }
@@ -12,27 +12,15 @@ impl ImageProcessing {
     pub fn new<T: 'static>(
         texture: Texture,
         color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
-    ) -> anyhow::Result<ImageProcessing>
+    ) -> Result<ImageProcessing, ImageProcError>
     where
         T: image::Pixel<Subpixel = u8>, {
         let dyn_texture =
             image::ImageBuffer::from_raw(texture.size.width, texture.size.height, texture.data)
-                .expect(
-                    "ColorTarget matches requirement for creating ImageBuffer from the Texture",
-                );
+                .ok_or(ImageProcError::InSufficientAllocationSize)?;
 
-        let color_target: ColorType = dyn_texture
-            .as_flat_samples()
-            .color_hint
-            .expect("Texture has color channel")
-            .into();
 
         let texture_target = color_target_predicate(dyn_texture);
-
-        assert_eq!(
-            color_target, texture.color_type,
-            "Transforming color channel to ColorTarget is not supported yet"
-        );
 
         let dyn_texture: image::DynamicImage = texture_target.into();
 
@@ -151,8 +139,8 @@ impl ImageProcessing {
                 height: dyn_tex.height(),
                 depth_or_array_layers: 1,
             },
-            sample_count: 0,
-            mip_level: 1,
+            sample_count: 1,
+            mip_level: 0,
             color_type: dyn_tex.color().into(),
             rows_per_image: dyn_tex.width() * dyn_tex.color().channel_count() as u32,
         }
@@ -163,7 +151,7 @@ impl ImageProcessing {
 mod image_processing_test {
     use crate::texture::codecs::*;
     use crate::texture::common::*;
-    use crate::texture::container::{ColorTarget, Extent2d, Texture};
+    use crate::texture::container::{ColorTarget, Extent2d};
     use crate::texture::image_processing::{FilterType, ImageProcessing};
 
     #[test]
@@ -287,24 +275,14 @@ mod image_processing_test {
         ImageProcessing::new(png_yellow, ColorTarget::ImageRgba8).unwrap()
     }
 
-    fn write_back(path: &str, texture: Texture) {
-        let img_buf =
-            image::ImageBuffer::from_raw(texture.size.width, texture.size.height, texture.data)
-                .expect("Created image buffer");
-
-        let dyn_img: image::DynamicImage = image::DynamicImage::ImageRgba8(img_buf);
-
-        dyn_img
-            .save_with_format(path, image::ImageFormat::Png)
-            .expect("saving transformed image");
-    }
-
     #[test]
     fn blur_test() {
         let img_proc = init_test();
         let result = img_proc.blur(10.0).build();
 
-        write_back(PNG_TEST_TEXTURE_BLUR, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_BLUR, ColorTarget::ImageRgba8)
+            .unwrap();
         // Draw the result to a file
     }
 
@@ -313,7 +291,9 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.unsharpened(20.0, 15).build();
 
-        write_back(PNG_TEST_TEXTURE_UNSHARPENED, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_UNSHARPENED, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -321,7 +301,9 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.rotate90().build();
 
-        write_back(PNG_TEST_TEXTURE_ROT_90, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_ROT_90, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -329,7 +311,9 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.rotate180().build();
 
-        write_back(PNG_TEST_TEXTURE_ROT_180, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_ROT_180, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -337,7 +321,9 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.rotate270().build();
 
-        write_back(PNG_TEST_TEXTURE_ROT_270, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_ROT_270, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -345,7 +331,9 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.flip_horizontal().build();
 
-        write_back(PNG_TEST_TEXTURE_FLIP_H, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_FLIP_H, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -353,7 +341,9 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.flip_vertical().build();
 
-        write_back(PNG_TEST_TEXTURE_FLIP_V, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_FLIP_V, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -369,7 +359,9 @@ mod image_processing_test {
             )
             .build();
 
-        write_back(PNG_TEST_TEXTURE_RESIZE, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_RESIZE, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -377,7 +369,9 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.opacity(128).build();
 
-        write_back(PNG_TEST_TEXTURE_OPACITY, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_OPACITY, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -396,7 +390,10 @@ mod image_processing_test {
             )
             .build();
 
-        write_back(PNG_TEST_TEXTURE_CROP, result);
+
+        result
+            .write_to(PNG_TEST_TEXTURE_CROP, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -418,7 +415,9 @@ mod image_processing_test {
             )
             .build();
 
-        write_back(PNG_TEST_TEXTURE_REPLACE, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_REPLACE, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 
     #[test]
@@ -440,6 +439,8 @@ mod image_processing_test {
             )
             .build();
 
-        write_back(PNG_TEST_TEXTURE_OVERLAY, result);
+        result
+            .write_to(PNG_TEST_TEXTURE_OVERLAY, ColorTarget::ImageRgba8)
+            .unwrap();
     }
 }
