@@ -7,7 +7,7 @@ const AUTO_GEN_MESSAGE : &str = "//This is auto generated code. Do not modify co
 pub fn parse_shader<P: AsRef<std::path::Path>>(
     source: P,
     parse_option: Option<ParseOption>,
-) -> Result<naga::Module, ShaderError> {
+) -> Result<(naga::Module, naga::valid::ModuleInfo), ShaderError> {
     let file = source.as_ref();
 
     // return empty if file extension contains surrogates
@@ -83,11 +83,11 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
     };
 
     // validate shader module. Specifying a harsh validation on the shader.
-    module
+    let module_info = module
         .validate(naga::valid::ValidationFlags::all())
         .map_err(ShaderError::ValidationError)?;
 
-    Ok(module)
+    Ok((module, module_info))
 }
 
 pub fn encode_shader<P: AsRef<std::path::Path>>(
@@ -134,7 +134,7 @@ mod shader_test {
         init_shader_test_env();
 
         let wgsl_shader_path = std::env::var("WGSL_FILE").unwrap();
-        let wgsl_module = parse_shader(wgsl_shader_path, None).unwrap();
+        let wgsl_module = parse_shader(wgsl_shader_path, None).unwrap().0;
 
         assert_eq!(wgsl_module.functions.len(), 4);
         assert_eq!(wgsl_module.global_variables.len(), 1);
@@ -148,7 +148,7 @@ mod shader_test {
         init_shader_test_env();
 
         let spv_shader_path = std::env::var("SPV_FILE").unwrap();
-        let spv_module = parse_shader(spv_shader_path, None).unwrap();
+        let (spv_module, _) = parse_shader(spv_shader_path, None).unwrap();
 
         assert_eq!(spv_module.functions.len(), 2);
         assert_eq!(spv_module.global_variables.len(), 7);
@@ -162,7 +162,7 @@ mod shader_test {
         init_shader_test_env();
 
         let glsl_vert_shader_path = std::env::var("VERT_FILE").unwrap();
-        let vert_module = parse_shader(glsl_vert_shader_path, None).unwrap();
+        let (vert_module, _) = parse_shader(glsl_vert_shader_path, None).unwrap();
 
         assert_eq!(vert_module.functions.len(), 1);
         assert_eq!(vert_module.global_variables.len(), 8);
@@ -171,7 +171,7 @@ mod shader_test {
         assert_eq!(vert_module.entry_points.len(), 1);
 
         let glsl_frag_shader_path = std::env::var("FRAG_FILE").unwrap();
-        let frag_module = parse_shader(glsl_frag_shader_path, None).unwrap();
+        let (frag_module, _) = parse_shader(glsl_frag_shader_path, None).unwrap();
 
         assert_eq!(frag_module.functions.len(), 1);
         assert_eq!(frag_module.global_variables.len(), 3);
@@ -180,7 +180,7 @@ mod shader_test {
         assert_eq!(frag_module.entry_points.len(), 1);
 
         let glsl_comp_shader_path = std::env::var("COMP_FILE").unwrap();
-        let comp_module = parse_shader(glsl_comp_shader_path, None).unwrap();
+        let (comp_module, _) = parse_shader(glsl_comp_shader_path, None).unwrap();
 
         assert_eq!(comp_module.functions.len(), 2);
         assert_eq!(comp_module.global_variables.len(), 2);

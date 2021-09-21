@@ -1,37 +1,31 @@
 use crate::shader::converter::*;
 use crate::shader::parser::*;
-use crate::shader::validation_rule::ValidationLayer;
 use crate::shader::ShaderError;
 
 pub fn convert_shader<P: AsRef<std::path::Path>>(
     conversion: ShaderConvertOption,
     path: P,
 ) -> Result<ShaderConvertResult, ShaderError> {
-    let module = parse_shader(path, None)?;
-
-    let shader_info = module
-        .validate(naga::valid::ValidationFlags::all())
-        .map_err(ShaderError::ValidationError)?;
+    let (module, module_info) = parse_shader(path, None)?;
 
     let conversion_res = match conversion {
         ShaderConvertOption::Wgsl => {
-            let wgsl_buffer = naga::back::wgsl::write_string(&module, &shader_info)
+            let wgsl_buffer = naga::back::wgsl::write_string(&module, &module_info)
                 .map_err(ShaderError::WGSLConvertError)?;
 
             ShaderConvertResult::Wgsl(wgsl_buffer)
         }
+
         ShaderConvertOption::Spv { option } => {
             let mut spv_option = naga::back::spv::Options::default();
 
-            if let SpvOptions::Custom {
-                maj_min, // capabilities,
-            } = option
-            {
+            // capabilities,
+            if let SpvOptions::Custom { maj_min } = option {
                 // spv_option.capabilities = capabilities;
                 spv_option.lang_version = maj_min;
             };
 
-            let spv = naga::back::spv::write_vec(&module, &shader_info, &spv_option)
+            let spv = naga::back::spv::write_vec(&module, &module_info, &spv_option)
                 .map_err(ShaderError::SPVConvertError)?;
 
             let bytes = spv
@@ -59,7 +53,7 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
                 let mut writer = naga::back::glsl::Writer::new(
                     &mut glsl_buffer,
                     &module,
-                    &shader_info,
+                    &module_info,
                     &glsl_option,
                 )
                 .map_err(ShaderError::GLSLConvertError)?;

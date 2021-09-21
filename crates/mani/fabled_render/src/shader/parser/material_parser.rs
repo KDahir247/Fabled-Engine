@@ -1,8 +1,6 @@
-use anyhow::Context;
-use std::ops::IndexMut;
-
 use crate::material::*;
 use crate::shader::parser::*;
+use std::ops::IndexMut;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[repr(align(16))]
@@ -21,8 +19,15 @@ impl Default for MaterialParser {
 }
 
 impl MaterialParser {
-    pub fn parse_material<P: AsRef<std::path::Path>>(&mut self, path: P) -> anyhow::Result<String> {
-        let module = parse_shader(path, None)?;
+    pub fn parse_material<P: AsRef<std::path::Path>>(&mut self, path: P) -> String {
+        // handle case here where it a user error (invalid path specified) and not a
+        // internal bug.
+        let (module, _) = if let Ok(val) = parse_shader(path, None) {
+            val
+        } else {
+            return String::new();
+        };
+
 
         let naga::Module {
             types,
@@ -32,12 +37,12 @@ impl MaterialParser {
 
         let globals = global_variables.into_inner();
 
-        for global in globals.iter().filter(|glob_var| glob_var.binding.is_some()) {
+        for global_with_binding in globals.iter().filter(|glob_var| glob_var.binding.is_some()) {
             let type_var = types
-                .try_get(global.ty)
-                .context("type arena len is less then the handle of type index specified")?;
+                .try_get(global_with_binding.ty)
+                .expect("type arena len is less then the handle of type index specified and is out of bounds");
 
-            let res_binding = global.binding.as_ref().context("Global Binding for variable has previous pass check of not being None and and has been evaluated as None after the check.")?;
+            let res_binding = global_with_binding.binding.as_ref().expect("Global Binding for variable has previous pass check of not being None and and has been evaluated as None after the check.");
 
             if let naga::TypeInner::Struct {
                 top_level, members, ..
@@ -67,7 +72,7 @@ impl MaterialParser {
                     let struct_name = type_var
                         .name
                         .as_ref()
-                        .context("One of the shader struct name is consider empty.")?;
+                        .expect("One of the shader struct name is consider empty.");
 
                     println!("Skipped struct name due to having nested struct types as member variable/s.\n The struct in questioning is named : {}", struct_name);
                 }
@@ -98,37 +103,23 @@ impl MaterialParser {
             .with_depth_limit(5)
             .with_enumerate_arrays(true);
 
-        let ron_material = ron::ser::to_string_pretty(&self, pretty).expect("failed to serialize shader data into a material representation.\n failed on writing out the data to ron format.");
-
-        Ok(ron_material)
+        ron::ser::to_string_pretty(&self, pretty).expect("failed to serialize shader data into a material representation.\nMaterial file should be utf-8")
     }
 
     pub fn get_group(&self, index: u32) -> Vec<(MaterialKey, MaterialNode)> {
-        let mut key_value_collection: Vec<(MaterialKey, MaterialNode)> = Vec::new();
-
-        for key_value_pair in self
-            .map
-            .iter()
+        self.map
+            .to_owned()
+            .into_iter()
             .filter(|key_value| key_value.1.value_group.eq(&index))
-        {
-            key_value_collection.push((key_value_pair.0, *key_value_pair.1));
-        }
-
-        key_value_collection
+            .collect::<Vec<_>>()
     }
 
     pub fn get_binding(&self, index: u32) -> Vec<(MaterialKey, MaterialNode)> {
-        let mut key_value_collection: Vec<(MaterialKey, MaterialNode)> = Vec::new();
-
-        for key_value_pair in self
-            .map
-            .iter()
+        self.map
+            .to_owned()
+            .into_iter()
             .filter(|key_value| key_value.1.value_binding.eq(&index))
-        {
-            key_value_collection.push((key_value_pair.0, *key_value_pair.1))
-        }
-
-        key_value_collection
+            .collect::<Vec<_>>()
     }
 }
 
@@ -149,7 +140,7 @@ mod material_test {
 
         let mut material_wgsl_parser = MaterialParser::default();
 
-        let wgsl_tree = material_wgsl_parser.parse_material(wgsl_path).unwrap();
+        let wgsl_tree = material_wgsl_parser.parse_material(wgsl_path);
 
         println!("WGSL TREE:\n{}\n\n", wgsl_tree);
 
@@ -160,7 +151,7 @@ mod material_test {
 
         let mut material_spv_parser = MaterialParser::default();
 
-        let spv_tree = material_spv_parser.parse_material(spv_path).unwrap();
+        let spv_tree = material_spv_parser.parse_material(spv_path);
         println!("SPV TREE:\n{}\n\n", spv_tree);
 
         // ----------------------- GLSL Vertex -----------------------
@@ -170,7 +161,7 @@ mod material_test {
 
         let mut material_vert_parser = MaterialParser::default();
 
-        let vertex_tree = material_vert_parser.parse_material(vertex_path).unwrap();
+        let vertex_tree = material_vert_parser.parse_material(vertex_path);
 
         println!("GLSL VERTEX TREE:\n{}\n\n", vertex_tree);
 
@@ -181,7 +172,7 @@ mod material_test {
 
         let mut material_frag_parser = MaterialParser::default();
 
-        let fragment_tree = material_frag_parser.parse_material(frag_path).unwrap();
+        let fragment_tree = material_frag_parser.parse_material(frag_path);
 
         println!("GLSL FRAGMENT TREE:\n{}\n\n", fragment_tree);
 
@@ -192,7 +183,7 @@ mod material_test {
 
         let mut material_comp_parser = MaterialParser::default();
 
-        let compute_tree = material_comp_parser.parse_material(compute_path).unwrap();
+        let compute_tree = material_comp_parser.parse_material(compute_path);
 
         println!("GLSL COMPUTE TREE:\n{}\n\n", compute_tree);
     }
@@ -206,7 +197,7 @@ mod material_test {
 
         let mut material_parser = MaterialParser::default();
 
-        let vertex_tree = material_parser.parse_material(vertex_path).unwrap();
+        let vertex_tree = material_parser.parse_material(vertex_path);
 
         println!("GLSL VERTEX TREE:\n{}\n\n", vertex_tree);
 
@@ -228,7 +219,7 @@ mod material_test {
 
         let mut material_parser = MaterialParser::default();
 
-        let vertex_tree = material_parser.parse_material(vertex_path).unwrap();
+        let vertex_tree = material_parser.parse_material(vertex_path);
 
         println!("GLSL VERTEX TREE:\n{}\n\n", vertex_tree);
 
