@@ -1,18 +1,23 @@
 use crate::shader::converter::*;
 use crate::shader::parser::*;
 use crate::shader::validation_rule::ValidationLayer;
+use crate::shader::ShaderError;
 
 pub fn convert_shader<P: AsRef<std::path::Path>>(
     conversion: ShaderConvertOption,
     path: P,
-) -> anyhow::Result<ShaderConvertResult> {
+) -> Result<ShaderConvertResult, ShaderError> {
     let module = parse_shader(path, None)?;
 
-    let shader_info = module.validate(naga::valid::ValidationFlags::all())?;
+    let shader_info = module
+        .validate(naga::valid::ValidationFlags::all())
+        .map_err(ShaderError::ValidationError)?;
 
     let conversion_res = match conversion {
         ShaderConvertOption::Wgsl => {
-            let wgsl_buffer = naga::back::wgsl::write_string(&module, &shader_info)?;
+            let wgsl_buffer = naga::back::wgsl::write_string(&module, &shader_info)
+                .map_err(ShaderError::WGSLConvertError)?;
+
             ShaderConvertResult::Wgsl(wgsl_buffer)
         }
         ShaderConvertOption::Spv { option } => {
@@ -26,7 +31,8 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
                 spv_option.lang_version = maj_min;
             };
 
-            let spv = naga::back::spv::write_vec(&module, &shader_info, &spv_option)?;
+            let spv = naga::back::spv::write_vec(&module, &shader_info, &spv_option)
+                .map_err(ShaderError::SPVConvertError)?;
 
             let bytes = spv
                 .iter()
@@ -38,21 +44,6 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
             ShaderConvertResult::Spv(bytes)
         }
         ShaderConvertOption::Glsl { version } => {
-            match version {
-                Version::Desktop(desk_prep) => {
-                    assert!(
-                        naga::back::glsl::SUPPORTED_CORE_VERSIONS.contains(&desk_prep),
-                        "Desktop preprocessor version is not supported. Supported versions are : [330, 400, 410, 420, 430, 440, 450]"
-                    );
-                }
-                Version::Embedded(embed_prep) => {
-                    assert!(
-                        naga::back::glsl::SUPPORTED_ES_VERSIONS.contains(&embed_prep),
-                        "Embedded preprocessor version is not supported. Supported versions are : [300, 310, 320]"
-                    );
-                }
-            };
-
             let mut glsl_buffer = String::new();
 
             for entry in module.entry_points.iter() {
@@ -62,14 +53,20 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
                     entry_point: entry.name.to_owned(),
                 };
 
+                // Handle invalid version for glsl shader.
+                // Desktop preprocessor version : [330, 400, 410, 420, 430, 440, 450]
+                // Embedded preprocessor version : [300, 310, 320]
                 let mut writer = naga::back::glsl::Writer::new(
                     &mut glsl_buffer,
                     &module,
                     &shader_info,
                     &glsl_option,
-                )?;
+                )
+                .map_err(ShaderError::GLSLConvertError)?;
 
-                writer.write()?;
+                // if module is invalid, which may happen if the file extension is not know it
+                // will return an empty module. This will handle hard error.
+                writer.write().map_err(ShaderError::GLSLConvertError)?;
             }
 
             ShaderConvertResult::Glsl(glsl_buffer)
@@ -312,7 +309,8 @@ mod converter_test {
 
         convert_shader(
             ShaderConvertOption::Glsl {
-                version: Version::Embedded(330), // Supported es glsl versions [300, 310, 320]
+                // Supported es glsl versions [300, 310, 320]
+                version: Version::Embedded(330),
             },
             wgsl_path,
         )
@@ -320,8 +318,9 @@ mod converter_test {
 
         convert_shader(
             ShaderConvertOption::Glsl {
-                version: Version::Desktop(460), /* Supported core glsl versions [330, 400, 410,
-                                                 * 420, 430, 440, 450] */
+                // Supported core glsl versions [330, 400, 410,
+                // 420, 430, 440, 450]
+                version: Version::Desktop(460),
             },
             wgsl_path,
         )

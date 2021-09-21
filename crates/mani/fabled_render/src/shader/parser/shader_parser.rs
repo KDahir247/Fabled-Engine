@@ -77,7 +77,7 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
                     defines: Default::default(),
                 },
             )
-            .map_err(ShaderError::GlslParserError)?
+            .map_err(ShaderError::GLSLParserError)?
         }
         _ => naga::Module::default(),
     };
