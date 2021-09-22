@@ -1,16 +1,13 @@
 # Fabled Engine
+# Current solution will might break, since KTX 2.0 and Dds texture support is Experimental
+# Also Texture Compression Method which is quite volatile due to quick testing
 Self Study on developing a game engine. Learning as I go.
-</br> Not done the core parts of the rendering. 
-</br>
-Creating core render crate. Currently the engine uses my old implementation which i need to clean and improve alot. 
-</br>
-
-## Rendering Changes will be pushed to render branch till it is verified that the whole render crate works with the core engine and is integrated with the core engine.
-</br>
-Any issues, enchancement, features, or bugs report are always welcome in Issues.
+<br/> Not done the core parts of the rendering.
 <br/>
 <br/>
-
+Any issues, enhancement, features, or bugs report are always welcome in Issues.
+<br/>
+<br/>
 ## Camera Movement
 * Forward : Up or W
 * Backward : Down or S
@@ -19,12 +16,28 @@ Any issues, enchancement, features, or bugs report are always welcome in Issues.
 * Up : Q
 * Down : E
 
-# current progress: 
-* overhaul on solution organization.
-* working on the render module located in crate/mani in the render branch.
+# current progress:
+* Finalizing Render module to be merged.
+* Going to work on the obj module next when the render module is merged to main.
+<br/>
+
+![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)
+<br/>
+
+# KTX 2.0
+
+<br/>
+BC3 Compression
+<br/>
+
+![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/BC3.png)
+<br/>
+
+RGBAUNORMSRGB
+<br/>
+
+![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/RGBAUNORMSRGB.png)
 
 <br/>
 
-[![Watch the video](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)](https://streamable.com/35lwsl)
-<br/>
-model is made by Wesai. Attribution is stated in the example folder.
+model is made by theStoff, Wesai, and xahun. Attribution is stated in the example folder.
