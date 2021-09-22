@@ -41,29 +41,6 @@ struct Light{
 var<uniform> light : Light;
 
 
-struct TangentDirection{
-    //view_tangent : vec3<f32>,
-    //light_dir_tangent : vec3<f32>
-};
-
-//calculates the tangent space for view direction and the light direction.
-//w coord of the tangent contains the handedness pho of the tangent frame.
-fn calculation_tangent_space_VL(position : vec3<f32>, normal : vec3<f32>, tangent : vec4<f32>) -> TangentDirection{
-
-    let bi_tangent = cross(normal, tangent.xyz) * tangent.w;
-    let view = uniform.u_view_position.xyz - position;
-    let light = light.position - position;
-    let vtan = vec3<f32>(dot(tangent.xyz, view), dot(bi_tangent, view), dot(normal, view));
-    let ltan = vec3<f32>(dot(tangent.xyz,light), dot(bi_tangent, light), dot(normal, light));
-    var out : TangentDirection;
-
-    //todo does not work. need fixing.
-    //out.view_tangent = vtan;
-    //out.light_dir_tangent = ltan;
-
-    return out;
-}
-
 [[stage(vertex)]]
 fn vs_main(in : VertexInput) -> VertexOutput{
 
@@ -80,7 +57,7 @@ fn vs_main(in : VertexInput) -> VertexOutput{
 
 //---------------------------- Fragment Shader ----------------------------
 
-//todo re-look at
+
 fn calculate_inverse_sqr_attenuation(frag_pos : vec3<f32>, light_pos : vec3<f32>) -> f32{
 
     let l_dir = light_pos - frag_pos;
@@ -163,14 +140,6 @@ fn calculate_specular_reflection(normal : vec3<f32>, half_way : vec3<f32>, alpha
     let highlight = pow(min(max(dot(normalize(normal), normalize(half_way)) ,0.0) ,1.0), alpha);
 
     return (light.specular_color.xyz * material_color.specular.xyz * highlight);
-}
-
-//where normal is the frag normal and v is the view vector (viewPos - FragPos).
-//todo
-fn sample_environment_map(normal : vec3<f32>, v : vec3<f32>) -> vec4<f32>{
-
-
-    return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
 
 [[stage(fragment)]]

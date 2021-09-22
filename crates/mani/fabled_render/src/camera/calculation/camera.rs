@@ -42,13 +42,8 @@ impl Camera {
         let projection_representation = glam::Mat4::from_cols_array(&self.proj);
         let view_representation = glam::Mat4::from_cols_array(&self.view);
 
-        let mut matrix =
+        let matrix =
             (projection_representation * (view_representation * model_representation)).inverse();
-
-        // handle case where matrix is not invertible. It will return a zero matrix.
-        let scalar = 0.0f32.max(1.0f32.min(matrix.determinant().abs()));
-
-        matrix *= scalar;
 
         let mut vector = glam::vec4(
             ((target[0] - viewport.x) / viewport.w) * 2.0 - 1.0,
@@ -66,8 +61,7 @@ impl Camera {
         result.to_array()
     }
 
-    // todo might remove coordinate direction to avoid branch on final check. (hot
-    // code).
+
     pub fn calculate_look_at_matrix(&mut self, orientation: Orientation) {
         let Orientation {
             transform, forward, ..
@@ -134,10 +128,7 @@ impl Camera {
 
     pub fn calculate_inverse_view_matrix(&mut self) {
         let mat4_view_representation = glam::Mat4::from_cols_array(&self.view);
-        let mut inverse_view_matrix = mat4_view_representation.inverse();
-
-        let scalar = 0.0f32.max(1.0f32.min(inverse_view_matrix.determinant().abs()));
-        inverse_view_matrix *= scalar.round();
+        let inverse_view_matrix = mat4_view_representation.inverse();
 
         self.inv_view = inverse_view_matrix.to_cols_array()
     }
@@ -214,10 +205,7 @@ impl Camera {
 
     pub fn calculate_inverse_projection_matrix(&mut self) {
         let mat4_projection_representation = glam::Mat4::from_cols_array(&self.proj);
-        let mut inverse_view_matrix = mat4_projection_representation.inverse();
-
-        let scalar = 0.0f32.max(1.0f32.min(inverse_view_matrix.determinant().abs()));
-        inverse_view_matrix *= scalar.round();
+        let inverse_view_matrix = mat4_projection_representation.inverse();
 
         self.inv_proj = inverse_view_matrix.to_cols_array()
     }
@@ -359,7 +347,7 @@ mod camera_matrix_test {
 
     #[test]
     fn calculate_arc_ball_matrix() {
-        // todo will test arc ball matrix later. since I have nothing to test it
+        // will test arc ball matrix later. since I have nothing to test it
     }
 
 

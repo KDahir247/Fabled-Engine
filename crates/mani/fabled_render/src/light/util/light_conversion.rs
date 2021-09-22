@@ -325,8 +325,6 @@ mod unit_conversion_tests {
         assert!(in_question_ev.eq(&ev));
     }
 
-
-    // todo Write test
     #[test]
     fn point_light_candela_lumen() {
         let candela = 150.0;

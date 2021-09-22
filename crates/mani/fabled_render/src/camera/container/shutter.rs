@@ -18,7 +18,6 @@ impl Shutter {
                     speed: 1.0 / shutter,
                 }
             }
-            _ => unimplemented!(),
         }
     }
 

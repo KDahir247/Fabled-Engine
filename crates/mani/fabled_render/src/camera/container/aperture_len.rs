@@ -1,10 +1,10 @@
 #[derive(Copy, Clone, Debug)]
 pub enum FStop {
     FullStop(FullStop),
-    // todo not sure if this should be implemented for precise f stop
-    HalfStop,
-    // todo not sure if this should be implemented for precise f stop
-    ThirdStop,
+    /* not sure if this should be implemented for precise f stop
+     * HalfStop,
+     * not sure if this should be implemented for precise f stop
+     * ThirdStop, */
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -76,31 +76,6 @@ impl FullStop {
             step: 6,
         }
     }
-
-
-    // // f/16 stop
-    // pub fn f16_stop() -> FullStop {
-    // Self {
-    // f_stop: 16.0,
-    // step: 6,
-    // }
-    // }
-    //
-    // f/22 stop
-    // pub fn f22_stop() -> FullStop {
-    // Self {
-    // f_stop: 22.0,
-    // step: 7,
-    // }
-    // }
-    //
-    // f/32 stop
-    // pub fn f32_stop() -> FullStop {
-    // Self {
-    // f_stop: 32.0,
-    // step: 8,
-    // }
-    // }
 }
 
 

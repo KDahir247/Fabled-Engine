@@ -172,9 +172,8 @@ impl From<IcoSphere> for Model {
         }
         
 
-        let mut vertices = Vec::new();
-        //Correct
-        //todo can optimize this.
+        let mut vertices = Vec::with_capacity(vertex_size / 3);
+
         for (vertex,i) in normalized_vertices.chunks_exact_mut(3).zip(uvs.chunks_exact(2)){
             let pos_x = vertex[0];
             let pos_y = vertex[1];

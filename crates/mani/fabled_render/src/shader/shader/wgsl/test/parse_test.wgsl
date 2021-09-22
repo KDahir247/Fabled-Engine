@@ -82,7 +82,6 @@ fn computeDepth(pos : vec3<f32>) -> f32{
 }
 
 fn computeLinearDepth(pos : vec3<f32>) -> f32{
-    // //todo don't hard code. Far and near is specified in setup.rs
     let near = 0.1;
     let far = 100.0;
 

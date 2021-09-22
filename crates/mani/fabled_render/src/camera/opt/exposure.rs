@@ -1,4 +1,4 @@
-use crate::camera::{FStop, FullStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUATION};
+use crate::camera::{FStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUATION};
 
 // N is the relative aperture (f-number)
 // t is the exposure time ("shutter speed") in seconds
@@ -14,14 +14,7 @@ use crate::camera::{FStop, FullStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUAT
 pub fn calculate_exposure_value(f_stop: FStop) -> f32 {
     let shutter = Shutter::compute_shutter_speed(f_stop);
 
-    let mut target_stop = FullStop::f4_stop();
-
-    match f_stop {
-        FStop::FullStop(full_stop) => {
-            target_stop = full_stop;
-        }
-        _ => unimplemented!(),
-    };
+    let FStop::FullStop(target_stop) = f_stop;
 
     let f_number = target_stop.get_f_number();
 
@@ -56,9 +49,6 @@ pub fn calculate_exposure_normalization_factor(
     len_attenuation: Option<f32>,
     iso_speed: ISOSpeed,
 ) -> f32 {
-    // todo change. currently hard coded.
-    // 1.2 is from 78 / (0.65 * 100)
-
     let len_attenuation = len_attenuation.unwrap_or(LENS_VIGNETTING_ATTENUATION);
     1.0 / (2.0f32.powf(ev100) * (78.0 / len_attenuation * iso_speed.arithmetic_speed))
 }

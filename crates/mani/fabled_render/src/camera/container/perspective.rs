@@ -3,9 +3,9 @@ use crate::camera::{AspectRatio, ClippingPlane, Fov};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Perspective {
-    pub fov: Fov,
     pub aspect: AspectRatio,
     pub clipping: ClippingPlane,
+    pub fov: Fov,
 }
 
 impl Default for Perspective {
