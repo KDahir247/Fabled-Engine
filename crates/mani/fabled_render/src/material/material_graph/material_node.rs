@@ -3,9 +3,9 @@ use serde::*;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct MaterialNode {
+    pub ty: MaterialTarget,
     pub value_group: u32,
     pub value_binding: u32,
-    pub ty: MaterialTarget,
 }
 
 impl From<MaterialNode> for EmptyNode {

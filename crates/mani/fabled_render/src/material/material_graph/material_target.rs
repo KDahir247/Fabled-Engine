@@ -1,12 +1,8 @@
-use crate::material::MaterialAttributes;
+use crate::material::{MaterialAttributes, TextureOptions, TextureType};
 use fabled_core::prime::container::wrapper::Wrapper;
 use naga::{ScalarKind, TypeInner, VectorSize};
 use serde::*;
 
-// todo don't like how this is implemented. Should be re looked at later
-// (MaterialTarget 80 bytes) should be 8 bytes or 24 bytes at max. The code can
-// get big very fast if adding supported for 3x2, 2x3 etc... matrix and extra
-// support for primitive.
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum EmptyTarget {
@@ -21,7 +17,7 @@ impl From<EmptyTarget> for MaterialAttributes {
 
 #[rustfmt::skip]
 //this will extend primitives to support sampler and texture.
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+#[derive(Debug, Serialize, Deserialize,  Clone, Copy)]
 pub enum MaterialTarget {
     None,
 
@@ -40,13 +36,15 @@ pub enum MaterialTarget {
     Matrix2x2Float(Wrapper<[f32; 4]>),
     Matrix4x4Float(Wrapper<[f32; 16]>),
 
-    Sampler(Wrapper<u8>), // 1 byte
+    Sampler(Wrapper<u8>),
 
-    //UnAligned
-    // Texture should store an Option of Tiling and Offset, Turbulence, and a way to reference the texture.
-    //todo replay with a POD (Plain old data type) that is aligned to the power of two. rather than a string.
-    //todo got to find a better identifier for this type.
-    //Texture(&'static [u8]), //), //24 bytes
+    
+    // Should have a reference to the texture without using a string
+    // got to find a better identifier for this type.
+    // Currently solution. Retrieve the texture is deferred and will probably have a UI that will
+    // convert the data from the texture to a POD format on a different file that will link with this file. 
+    // we will need a identifier for this type to link with the other file.
+    Texture(Wrapper<TextureOptions>, TextureType),
 }
 
 impl From<MaterialTarget> for Option<MaterialAttributes> {
@@ -66,7 +64,7 @@ impl From<MaterialTarget> for Option<MaterialAttributes> {
                 Some(MaterialAttributes::Matrix)
             }
             MaterialTarget::Sampler(_) => Some(MaterialAttributes::Sampler),
-            // MaterialTarget::Texture(_) => MaterialTargetFormat::Texture,
+            MaterialTarget::Texture(..) => Some(MaterialAttributes::Image),
         }
     }
 }
@@ -118,9 +116,21 @@ impl From<&naga::TypeInner> for MaterialTarget {
                     _ => MaterialTarget::None,
                 },
             },
-            // TypeInner::Image { .. } => MaterialTarget::Texture(&"".to_string().into_bytes()),
             TypeInner::Sampler { comparison } => {
                 MaterialTarget::Sampler(Wrapper::new(*comparison as u8))
+            }
+            TypeInner::Image {
+                dim,
+                arrayed,
+                class,
+            } => {
+                let texture_type = TextureType {
+                    ty: *class,
+                    arrayed: arrayed.to_owned() as u32,
+                    dimensions: *dim,
+                };
+
+                MaterialTarget::Texture(Wrapper::new(TextureOptions::default()), texture_type)
             }
             _ => MaterialTarget::None,
         }

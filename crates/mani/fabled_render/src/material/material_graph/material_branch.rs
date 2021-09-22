@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialBranch {
-    attribute: MaterialAttributes,
     keys: Vec<MaterialKey>,
+    attribute: MaterialAttributes,
 }
 
 impl MaterialBranch {

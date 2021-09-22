@@ -98,9 +98,9 @@ impl MaterialParser {
         }
 
         let pretty = ron::ser::PrettyConfig::new()
-            .with_separate_tuple_members(false)
+            .with_separate_tuple_members(true)
             .with_decimal_floats(true)
-            .with_depth_limit(5)
+            .with_depth_limit(7)
             .with_enumerate_arrays(true);
 
         ron::ser::to_string_pretty(&self, pretty).expect("failed to serialize shader data into a material representation.\nMaterial file should be utf-8")
