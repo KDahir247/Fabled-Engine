@@ -3,7 +3,7 @@
 // solution is only possible for windows.
 
 // Test KTX 2 Texture
-pub const KTX_2_TEST_TEXTURE : &str = "D:\\Study\\Fabled Engine\\crates\\mani\\fabled_render\\src\\texture\\texture\\test\\ktx\\ktx_document_basis.ktx2";
+pub const KTX_2_TEST_TEXTURE: &str = ".\\src\\texture\\texture\\test\\ktx\\ktx_document_basis.ktx2";
 
 // Core KTX 2 Texture
 
