@@ -93,9 +93,6 @@ fn computeLinearDepth(pos : vec3<f32>) -> f32{
 }
 
 
-[[group(0), binding(1)]] var t_diffuse : texture_2d<f32>;
-[[group(0), binding(2)]] var t_sampler : sampler;
-
 [[stage(fragment)]]
 fn fs_main( in : VertexOutput) -> FragmentOutput{
 
