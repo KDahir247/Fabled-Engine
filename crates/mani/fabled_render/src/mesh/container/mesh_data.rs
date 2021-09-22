@@ -4,6 +4,6 @@ use crate::mesh::container::Vertex;
 #[repr(C, align(16))]
 pub struct Mesh {
     pub vertices: Vec<Vertex>,
+    pub indices: Vec<usize>,
     pub material_id: u32,
-    pub indices: Vec<usize>, // todo convert this to indices
 }
