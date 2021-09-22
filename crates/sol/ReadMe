@@ -1,0 +1,8 @@
+High-Level API for the game engine can go here.
+
+
+Sol is from norse methodology. Sol is the divinity of the sun and this api reflects on it.
+API in this folder should be clear and high-level.
+Libraries in Sol will be easy and as ergonomic as possible.
+
+Of course Sol will need to communicate with Mani since the are Bother and Sister

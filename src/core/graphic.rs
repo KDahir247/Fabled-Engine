@@ -17,12 +17,12 @@ impl Graphic {
         let (mut entities, render) =
             world.borrow::<(shipyard::EntitiesViewMut, shipyard::UniqueView<RenderData>)>()?;
 
-        let lighting = DirectionalLightRaw {
-            direction: glam::vec3(0.5, 0.0, 0.0),
+        let lighting = LightRaw {
+            position: glam::vec3(0.1, 0.3, 0.1),
             __padding__: 0,
             color: LightColorRaw {
-                ambient_color: glam::vec4(1.0, 1.0, 1.0, 0.4),
-                diffuse_color: glam::vec4(1.0, 0.0, 0.0, 1.0),
+                ambient_color: glam::vec4(1.0, 1.0, 1.0, 1.0),
+                diffuse_color: glam::vec4(1.0, 1.0, 1.0, 1.0),
                 specular_color: glam::vec4(1.0, 0.0, 0.0, 1.0),
                 emissive_color: Default::default(),
             },

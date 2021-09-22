@@ -1,0 +1,31 @@
+List of some distance falloff function
+1) Inverse Square attenuation function
+2) Exponential Attenuation function
+3) Smoothing Attenuation function
+
+
+control the punctual light intensity either with luminous power units
+or luminous intensity units for the photometric profile
+
+Directional light will be controlled by Illuminance
+
+The luminous power is always
+converted into luminous intensity for lighting calculations
+
+The luminous power can be calculated from
+luminous intensity by integrating the luminous intensity over the light solid angle
+
+Disney's BSDF parameters.
+
+Subsurface,
+Metallic,
+Specular,
+Specular Tint,
+Roughness,
+Anisotropic,
+Sheen,
+Sheen tint,
+Clear coat,
+Clear coat roughness,
+Transmission,
+Transmission roughness,

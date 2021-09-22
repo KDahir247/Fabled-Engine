@@ -1,0 +1,38 @@
+Research about lighting for game engine.
+
+
+Luminous Flux is the total amout of visual power emitted by a light source.
+
+
+Calculate the light attenuation in the fragment shader.
+We can then get the illuminance from the.
+
+punctual lights,
+1) Directional light,
+2) Spot Light
+3) Point Light,
+
+photometric lights,
+1) IES profile,
+2) EULUMDAT profile
+
+area lights,
+
+
+------------------------------------ Soon -----------------------------------------------
+
+Shadow
+
+Light Cucoloris
+
+
+------------------------------------ Future ----------------------------------------------
+
+spectral renderer (i.e. a renderer which uses spectral values instead of a RGB triplet to represent
+color)
+
+emissive surfaces,
+
+image based lights (IBLs)
+
+Volumetric light

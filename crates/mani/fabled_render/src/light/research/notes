@@ -1,0 +1,233 @@
+Illumination calculation must be done in linear space
+
+The gamma space texture input in the shader, such as diffuse texture, needs to be converted into linear space.
+The textures that describe the surface properties of objects, such as roughness, specular textures, metal textures, etc., must be guaranteed to be linear spaces.
+
+Linear space rendering provides correct mathematical operations for lighting calculations. In linear space, the way of interaction between light and matter in the real world can be restored.
+
+BSDF can be seen as a more general form of BRDF and BTDF, and BSDF = BRDF + BTDF.
+
+That is, non-metallic F0 is a float. The F0 of the metal is a float3, as shown in the figure below.
+
+The specular reflection color of metal is a three-channel color, while the specular reflection color of non-metal is a single-channel monochromatic color.
+
+The non-metallic specular reflection color is single-channel monochromatic, that is, R=G=B
+
+Point light: light evaluation can be expressed as
+BRDF (Bidirectional reflectance distribution function)
+
+    BRDF(view vector, incident light vector) (luminance intensity / distance^2) * clamped_dot(n . l)
+which is equalivent to
+    BRDF (view vector, incident light vector) (luminance power (luminance flux) / (4π * distance^2)) * clamped_dot(normal . incident light vector)
+
+Spot light: light evaluation can be  expressed as
+BRDF (Bidirectional reflectance distribution function)
+
+    BRDF (view vector, incident light vector) (luminance intensity / distance^2) clamped_dot(n . l)
+which is equalivent to
+    BRDF (view vector, incident light vector) (luminance power (luminance flux) / (π * distance^2)) * clamped_dot(normal . incident light vector) * getAngleAttenuation()
+
+
+The resulting illuminance follows the inverse square law, and considering a surface normal pointing directly to the light, is thus (with Frostbite convention):
+E⊥ = φ / (π * distance^2)
+
+Attenuation: One issue with the inverse square law is that it never reaches zero. For performance
+reasons, the renderer must implement a finite light range to support light culling algorithms. At a
+certain limit, the illuminance should smoothly reach zero. One approach to solve this is to window the
+falloff in such a way that most of the function is unaffected. We can use a basic lerp (linear interpolation)
+as a remedy to this issue
+
+E = lerp(I / distance^2, 0, distance/ lightRadius)
+which is equalivent to
+E = (I / distance^2) * (1 - (distance / lightRadius))
+
+and to keep the function unaltered, we tweak the distance criteria as follows
+E_window2 = ( I / distance^2) * (1 - (distance^20 / lightRadius^20))
+
+This simple approach works, but causes a hard cutoff which looks unnatural. A second approach is to
+bias the function by a threshold and remap it to its initial range (0-1)
+
+Threshold =  1 / lightRadius^2
+E_scaleBias = (1 / (1 - threshold)) * ((I / distance^2) - threshold)
+
+Results are better, but this approach suffers from having a non-zero gradient at 0 which cause a visible
+discontinuity. A better approach is to window the function and ensuring zero gradient at lightRadius.
+This can be achieved by raising the power of the window function.
+
+E_window1 = (I / distance^2) * saturate(1 - x^n / lightRadius^n)^2
+where n is to tweak the transition smoothness by default 4
+
+____________________________ Photometric lights ________________________________
+
+There are two type of Photometric lights:
+
+1) IES (Illuminating Engineering Society)
+2) EULUMDAT
+
+For physically correct results, IES/EULUMDAT file should only be applied on small sphere.
+Applying an IES/EULUMDAT file onto geometry other than a small sphere can cause inaccuracies
+
+The spherical coordinate system used to describe light distribution is referred to as "the photometric web"
+There are three different types of photometric webs, called Types A, B, and C.
+
+. Type A: for automotive headlamps and signal lights,
+. Type B: for adjustable outdoor area and sports lighting luminaries,
+. Type C: for architectural and road lights.
+
+Type C is most common type used in computer graphics
+
+The IES format stores luminance intensity values in candela
+
+EULUMDAT format is a well-structured format that stores luminous intensity values in candela per total kilo-lumens
+emitted by the light.
+
+candela per total kilo-lumens (cd / klm)
+
+
+An IES file stores candela values for both relative and absolute intensities
+
+To retrieve candela values from an EULUMDAT file for both absolute and relative intensities,
+one needs to do the following conversion.
+
+Luminance intensity (cd/candela) = (candela per total kilo-lumens (cd/klm) * total luminance flux (lm)) / 1000
+
+An IES profile can be directly applied on a point or a spot light.
+The IES profile can be used to describing the light intensity and be adjusted with a multiplier.
+This is the only way to control lights with luminous intensity.
+A second option is to use an IES profile as a mask, normalized by the maximum intensity
+of the profile. To handle both cases with the luminance intensity point light equation, we
+normalize the profile by it maximum intensity and then perform the light evaluation as follow:
+
+
+L = BRDF(view vector, incident light vector) * I / d^2 * <n * l> * getIESProfileAttenuation().
+
+where I is either the maximum intensity of the profile or the user defined light intensity for the mask case.
+getIESProfileAttenuation() returns the normalized profile value.
+Note that for spot lights, the angle attenuation is applied on top of this equation.
+
+When creating a new light profile, the spherical photometric function is reconstructed and sampled
+to fill a 2D texture with a spherical parametrization (θ,cos(φ)). We store normalized values
+scaled by the inverse of the maximum intensity in order to handle both masked and unmasked usage.
+In shaders, the 2D texture is evaluated and applied as an attenuation
+
+
+Directional Light will be in Illuminance (lux or lm/m^2)
+// Point light can either be luminance intensity or luminance power, but requires formula to be re-written
+Point light will be in luminance power (lumen)
+Spot light will be in luminance power (lumen)
+
+
+-------------------------------- Sun ----------------------------
+The sun is handled as a disc area light always perpendicular to the outer hemisphere.
+
+User specify the sun illuminance (in lux) for a surface perpendicular to the sun direction.
+This is convenient as they can directly check values against the real world with a light meter.
+The calculation is also simplified :
+
+    L_out = BRDF(view vector, incident light vector) * illuminance * <n . l>
+    where illuminance is provided by the user.
+
+The sun has an angular diameter between 0.526 and 0.545 (As the orbit of the earth vary with time), this mean
+a solid angle between 0.00066 and 0.000071 as seen from Earth. To calculate sun solid angle use cone solid
+angle formulae 2π(1 - cos(0.5 * AD * (π / 180))).
+Theoretical luminance of the sun is around 1.6 * 10^9 cd/m^2. So lux due to the Sun at Earth surface is direction
+perpendicular to the ground without considering participating mdeia should be in the range 105 000 and 114 00 lux
+Formulae is lux = luminance * solid angle.
+
+The lighting from the sky is handled with a distant light probe
+
+
+------------------------------ Area Lighting --------------------------
+Area lights are important in physically based rendering, for matching real world lighting since all real
+world sources have a physical shape. As we will see later, area lights ease the interaction with IBL
+(Image based Light) as they are conceptually closer. More importantly, area lights provide softer lighting,
+reducing specular aliasing.
+
+The outgoing luminance of a point illuminated by an area light is given by:
+    L_out= ∫ BRDF(v,l) * V(l) * L_in * <n . l> * dl = ∫ BRDF(v,l) * L_in * <n . l> dl
+            Ω+                                         Ωlight
+
+The function V is 1 if the area light is reachable from the shaded point, 0 otherwise.
+The function V allows us to take into account both the area light's shape and its shadow.
+V represents only the visibility of the light's shape and Ωlight is the solid angle subtended
+by the area light.
+This integral over the solid angle can be rewritten as an integral over the are.
+
+The diffuse lighting and specular lighting integral will be discussed separately for each of the
+area light types:
+
+   L_out = ∫    BRDF_Diffuse(v, l) * L_in * <n . l> dl = ∫ BRDF_Diffuse(v, l) * L_in * ( (<n.l> * <n_a . -l> ) / distance^2) dA
+            Ωlight                                        A
+
+   L_out = ∫    BRDF_Specular(v, l) * L_in * <n . l> dl = ∫ BRDF_Specular(v, l) * L_in * ( (<n.l> * <n_a . -l> ) / distance^2) dA
+            Ωlight                                        A
+
+
+Area light unit.
+With physical light units, the size of area lights and their intensity are connected to each other. Artists can choose between
+two intensity unit:
+
+    . Luminance Power : Luminance Power, specified in  lumens (lm), describes the total amount of visible light emitted by a light
+    in all directions. This amount is independent of the light size. Increasing the size of a light will not change the illumination level
+    of a scene. However, highlights produced by such a light will get dimmer as its are increases since the same power will be distributed
+    over a larger area.
+
+
+    . Luminance: Luminance, specified in nits (cd/m^2) or in exposure value (EV), describes the surface power of visible light.
+    When this unit is used, the total energy emitted by the light will depend on its size. The illumination level in the scene will
+    increase as the area increases, but the highlights produced by such a light will conserve their intensity.
+
+    We will use Luminance power.
+
+For convenience, we systematically convert intensity into luminance for light calculations. The luminance due to a point on
+lambertian emitter where lambertian emitter is a light source whose radiance distribution follows a cosine distribution.
+eimitted in any direction, is equal to its total luminance power φ divided by the emitter area A and the projected solid angle:
+
+    L = φ / (A * ∫ * <l . n> * dl) = φ / (A * π)
+                  Ω+
+
+Diffuse area light.
+Initially, we will solve area lights integration for a Lambertian diffuse BRDF  ρ/π before looking at
+Disney's diffuse BRDF case. We will also assume that area lights have a uniform and constant intensity L_in.
+Thus, the diffuse integral can be re-written as:
+
+    L_out = ρ/π ∫  L_in <n . l> = ρ/π E(n)
+                 Ωlight
+
+    Where the illuminance is E is defined as:
+
+    E(n) = ∫ L_in <n. l> dl = ∫ L_in (<n . l> * <n_a . -l> / distance ^ 2) dA
+            Ωlight              A
+
+
+   The inverse square law for computing the illuminance is not valid for area light unless this area
+   light is sufficiently far away from the receiver surface
+
+Using luminous power unit makes the illumination level independent of the sphere's surface area. It also matches the real world
+measurement. By using the formulation without horizon handling (without loss of generality), the illuminance for a sphere area light with
+luminance power φ is given by:
+
+    E = L_in π FormFactor = luminance flux / (4 * π^2 * radius^2) * π * r^2 / d^2 <n . l> = luminance flux / (4 * π * d^2) <n . l>
+
+This equation matches a point light illuminance equation. (which consider (n . l) = 1) and is independent of the sphere's surface area.
+
+The illuminance for a disk area light with luminance power (luminance intensity) φ is given by
+
+    E = L π FormFactor =  φ / (π * distance^2 + π * radius^2) <n . l>
+
+A disk area light is similar to a spot light and usually supports an angular attenuation. This angular attenuation is simply
+applied on the illuminance without any realistic consideration to make the transition with the spot light smoother.
+The angular attenuation is obtained with the same equation as for spot light by faking the position of the light similar
+to the way we calculate shadow for area light.
+
+    // On the CPU
+    let virtual_pos : [f32; 3] = (light_pos + light_forward * (disc_radius / std::f32::tan(half_outer_angle))).to_array();
+
+    // On the GPU
+    // attenuate with a virtual position which is the light position shifted.
+    // in opposite light direction by an amount based on the outer angle.
+    illuminance *= getAngleAtt(normalize(virtual_pos - world_pos), light_forward, light_angle_scale, light_angle_offset);
+
+
+--- NOTE# WE WILL STOP AT PG 46 (https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf)
+    TOPIC IS RELATED TO AREA LIGHT, IBL,EMMISIVE LIGHTING, LIGHT PROBE WHICH WILL BE IMPLEMENTED IN THE FUTURE.

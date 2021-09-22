@@ -1,0 +1,133 @@
+unity 205 threads.
+unreal 157 threads.
+
+
+    //For reference to construct Rotation Matrix
+    /*let x2 = desired_rotation.x * desired_rotation.x;
+        let y2 = desired_rotation.y * desired_rotation.y;
+        let z2 = desired_rotation.z * desired_rotation.z;
+        let xy = desired_rotation.x * desired_rotation.y;
+        let xz = desired_rotation.x * desired_rotation.z;
+        let yz = desired_rotation.y * desired_rotation.z;
+        let wx = desired_rotation.w * desired_rotation.x;
+        let wy = desired_rotation.w * desired_rotation.y;
+        let wz = desired_rotation.w * desired_rotation.z;
+
+        let rotation_matrix = glam::mat3(
+            glam::vec3(1.0 - 2.0 * (y2 + z2), 2.0 * (xy + wz), 2.0 * (xz - wy)),
+            glam::vec3(2.0 * (xy - wz), 1.0 - 2.0 * (x2 + z2), 2.0 * (yz + wx)),
+            glam::vec3(2.0 * (xz + wy), 2.0 * (yz - wx), 1.0 - 2.0 * (x2 + y2)),
+        );
+    */
+
+
+    Vision for web
+    I want to use elm as the front end and rust as the back end.
+
+    let work_group_x = (size.width as f32 + (size.width as f32 % 16.0)) / 16.0;
+    let work_group_y = (size.height as f32 + (size.height as f32 % 16.0)) / 16.0;
+
+    println!("{} {}", work_group_x, work_group_y);
+
+Shader module notes
+// Feature lists for shader:
+// Maybe add a shader query system where you can pass a generic and it will return all the data for that generic from the shader.
+// Maybe add a shader cache for the shader module??, but definitely add a common with will hold all the directory path to the common shader for the game engine.
+// Maybe add benching for the shader scripts.
+// Look into rspirv crate
+
+
+Features
+*** Pass Ambient Color, Diffuse Color, Specular Color, Shininess, Dissolve(alpha channel), Optical_density????
+*** Create Mipmap System for the graphic
+
+
+Negative Y is up
+Positive Y is down
+
+Negative Z is Backward
+Positive Z is Forward
+
+Negative X is Left
+Positive X is Right
+
+//List of compression types
+/*
+    PVRTC,
+    ETC,
+    ASTC,
+    BC,
+    PVRTCII,
+    EAC,
+    BASISU ETC,
+    BASISU UASTC
+*/
+
+//List of encoding and compression codecs
+/*
+    look at smush for reference.
+
+    bincode,
+    brotli,
+    bs58,
+    flate2,
+    xz2,
+    lz4,
+    zstd
+*/
+
+// Forward Rendering refer to a rendering technique that traditional has only two passes.
+// 1) Opaque Pass
+// 2) Transparent Pass
+
+// Forward+ Rendering refer to a rendering technique that expend on the traditional technique and has three passes.
+// 1) Light Culling
+// 2) Opaque Pass
+// 3) Transparent Pass
+
+
+//killzone 2 uses the following equation to pack the specular power value
+// a' = log2 a / 10.5
+// exp2( specular.a * 10.5f );
+
+
+// if the diffuse color for the material will be multiplied by the texture sample rgb value
+// eg. if the texture r = 0.345 and the material diffuse r = 0.0 then the output will be 0.0;
+
+// Rendering
+// re-read 154 to 159 to understand and implement ScissorRect for lighting and decide which folder the method should be in.
+// re-read 160 to 162 to  understand and implement Depth Bounds for lighting and decide which folder the method should be in.
+// re-read 162 to 169 to understand and implement Oblique Depth Bounds for lighting and decide which folder the method should be in.
+
+// Clean Solution
+// Destroy buffer when done.
+
+// the model should have a render_pipeline since we want to support future shader customization for the model.
+
+// work on the texture next.
+
+// Prefer moving the loop inside run and move borrow's call outside the loop
+// Division is an expensive operation use reciprocal
+// for passes should i store the required data in a pass file and decode it when doing the render passes?
+// when releasing use cargo run --release -- -C opt-level=3 -C target-cpu=skylark -C target-feature=+sse3,+avx
+
+first scale then rotate then translate.
+
+transfromation matrix formula
+
+[scale.x * cos(angle.y) * cos(angle.z),          -sin(angle.z),          sin(angle.y),           position.x]
+[sin(angle.z),          scale.y * cos(angle.x) * cos(angle.z),          -sin(angle.x),           position.y]
+[-sin(angle.y),           sin(angle.x),          scale.z * cos(angle.x) *  cos(angle.y),         position.z]
+[0,                                                 0,                             0,                     1]
+
+cargo miri test
+cargo miri run
+
+
+Crate that will be used
+
+- Faster.
+- ThisError
+- Either Unroll or Crunchy
+
+

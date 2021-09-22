@@ -1,0 +1,23 @@
+# Maximum number of blank lines which can be put between items
+blank_lines_upper_bound = 2
+
+# Brace style for items
+brace_style = "PreferSameLine"
+
+
+# Break comments to fit on the line
+wrap_comments = true
+# Maximum length of comments.
+comment_width = 80
+# Convert /* */ comments to // comments where possible
+normalize_comments = true
+
+
+#error_on_line_overflow = true
+#error_on_unformatted = true
+
+
+# Report FIXME items in comments.
+report_fixme = "Always"
+# Report TODO items in comments.
+report_todo = "Always"

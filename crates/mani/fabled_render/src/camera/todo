@@ -1,0 +1,69 @@
+                    Support is Deferred
+-----------------------------------------------------------------------------
+
+ Converts a screen position to a position in world space.
+    ScreenPointToWorldPoint.
+
+-------------------------------------------------------------------------------
+
+ Converts a screen position to a position in view space.
+   ScreenToViewportPoint
+
+-------------------------------------------------------------------------------
+
+ Converts a viewport point to a position in world-space.
+   ViewportToScreenPoint
+-------------------------------------------------------------------------------
+
+ Converts a viewport point to a position in world-space.
+   ViewportPointToWorldPoint
+
+---------------------------------------------------------------------------------
+ Converts a point in world-space to the camera's screen-space non-stereoscopic.
+   WorldPointToScreenPoint
+
+-------------------------------------------------------------------------------
+
+ Converts a point in world-space to the camera's viewport-space non-stereoscopic.
+   WorldPointToViewportPoint
+
+
+-------------------------------------------------------------------------------
+
+Clipping Plane.
+
+    Far clip plane.
+    Near clip plane.
+
+-------------------------------------------------------------------------------
+    FUTURE SUPPORT
+
+CullMask Feature for Camera
+
+cull matrix
+
+Camera resolution
+
+
+Camera to World Matrix
+World to Camera Matrix
+
+Layer Mask
+
+Back ground Color for the camera.
+
+Camera Render Order (Priority)
+  - Camera with the higher Priority will be rendered first.
+  - Camera wil the lower Priority will be rendered last.
+
+Fov Scaling Algorithm
+  - HorizontalPlus,
+  - Anamorphic,
+  - VerticalMinus,
+  - Stretch,
+
+    HorizontalPlus is the default, since it is used most frequently in the game industry.
+
+
+
+-------------------------------------------------------------------------------

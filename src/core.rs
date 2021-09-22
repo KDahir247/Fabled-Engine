@@ -1,5 +1,4 @@
 use lib::component::prelude::*;
-
 mod graphic;
 mod setup;
 mod window;
@@ -15,6 +14,7 @@ impl State {
         let world = shipyard::World::new();
 
         world.add_unique(Window { raw: window }).unwrap();
+
         world
             .add_unique(Time {
                 application: lib::component::time_component::Application {
@@ -41,12 +41,11 @@ impl State {
 
         let window = winit::window::WindowBuilder::new()
             .with_inner_size(winit::dpi::Size::Physical(winit::dpi::PhysicalSize {
-                width: 800,
-                height: 600,
+                width: 1920,
+                height: 1080,
             }))
-            .with_title("BasicObjLoader")
+            .with_title("Fabled Engine")
             .with_decorations(true)
-            //.with_fullscreen(Some(winit::window::Fullscreen::Borderless(None)))
             .build(&event_loop)
             .unwrap();
 

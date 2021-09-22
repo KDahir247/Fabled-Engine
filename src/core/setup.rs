@@ -1,44 +1,47 @@
 use anyhow::Context;
 use lib::component::prelude::*;
-
-// This is where all the static storage is created.
 pub async fn run(world: &shipyard::World) -> anyhow::Result<()> {
     superluminal_perf::begin_event("Application_SetUp");
+
+    let back_end = wgpu::BackendBit::PRIMARY;
 
     let window = world.borrow::<shipyard::UniqueView<Window>>().unwrap();
 
     let size = window.raw.inner_size();
 
-    let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
+    let instance = wgpu::Instance::new(back_end);
+
+    let trace_path = {
+        let path = std::path::Path::new("wgpu-trace");
+        let _ = std::fs::create_dir(path);
+        Some(path)
+    };
 
     let surface = unsafe { instance.create_surface(&window.raw) };
 
     let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::HighPerformance,
-            compatible_surface: Some(&surface),
-        })
-        .await
-        .context("Failed to create graphic adapter")?;
+        .enumerate_adapters(back_end)
+        .max_by(|current, future| current.features().cmp(&future.features()))
+        .context("Failed to get an adapter from backend bit")?;
 
     let (device, queue) = adapter
         .request_device(
             &wgpu::DeviceDescriptor {
                 label: Some("Request Device"),
-                features: wgpu::Features::NON_FILL_POLYGON_MODE,
-                limits: wgpu::Limits::default(),
+                features: adapter.features(),
+                limits: adapter.limits(),
             },
-            None,
+            trace_path,
         )
         .await?;
 
     println!(
         "Starting Application\nDetail : {:?}",
         format!(
-            "CPU = {:?}, GPU-TYPE = {:?}, BACKEND = {:?},",
+            "CPU = {:?}, GPU-TYPE = {:?}, BACKEND = {:?}",
             adapter.get_info().name,
             adapter.get_info().device_type,
-            adapter.get_info().backend
+            adapter.get_info().backend,
         )
     );
 
@@ -83,9 +86,9 @@ fn setup_world_camera(
                 -90.0f32.to_radians(),
                 0.0f32.to_radians(),
             ),
-            glam::vec3(11.0, 2.0, 6.0),
+            glam::vec3(0.0, 2.0, 0.0),
         ),
-        forward: glam::Vec4::Z * -1.0,
+        forward: glam::Vec4::Z,
         right: glam::Vec4::X,
     };
 
@@ -93,7 +96,7 @@ fn setup_world_camera(
         aspect: size.width as f32 / size.height as f32,
         fovy: 60.0_f32.to_radians(),
         znear: 0.1,
-        zfar: 100.0,
+        zfar: 10000.0, // change back to 100
     };
 
     let camera_uniform: CameraUniform = CameraUniform::create(device, &orientation, &projection);
@@ -110,13 +113,9 @@ fn setup_world_camera(
     )>()?;
 
     let camera_controller = CameraController {
-        amount_matrix: glam::Mat3::from_cols(
-            glam::Vec3::Z * 40.0,
-            glam::Vec3::Z * 40.0,
-            glam::Vec3::Z * 40.0,
-        ),
-        amount_rotation: glam::Vec4::W / 40.0,
-        amount_scroll: glam::Vec2::Y * 30.0,
+        amount_translation: glam::Vec4::W * 1600.0,
+        amount_rotation: glam::Vec4::W / 30.0,
+        amount_scroll: 0.0,
     };
 
     entities.add_entity(camera_controller_storage, camera_controller);
@@ -162,13 +161,15 @@ fn setup_world_builder(world: &shipyard::World) -> anyhow::Result<()> {
         .add_to_world(world)?;
 
     shipyard::Workload::builder("load_model_system")
-        .with_system(&lib::system::model_system::create_pipeline_system)
+        .with_system(&lib::system::model_system::create_model_pipeline_system)
         .with_try_system(&lib::system::model_system::load_model_system)
         .add_to_world(world)?;
 
-    superluminal_perf::end_event();
+    shipyard::Workload::builder("load_grid_system")
+        .with_system(&lib::system::grid_system::create_grid_pipeline_system)
+        .add_to_world(world)?;
 
-    //shipyard::Workload::builder("render_input_system").with_system();
+    superluminal_perf::end_event();
 
     Ok(())
 }
