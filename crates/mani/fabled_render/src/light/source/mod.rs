@@ -21,19 +21,22 @@ mod data_test {
         println!("{}", spot_light_size);
 
         let point_light_size = std::mem::size_of::<PointLight>();
-        println!("{}", point_light_size);
+        assert_eq!(point_light_size & (point_light_size - 1), 0);
     }
 
 
     #[test]
     fn data_alignment() {
         let directional_light_alignment = std::mem::align_of::<DirectionalLight>();
-        println!("{}", directional_light_alignment);
+        assert_eq!(
+            directional_light_alignment & (directional_light_alignment - 1),
+            0
+        );
 
         let spot_light_alignment = std::mem::align_of::<SpotLight>();
-        println!("{}", spot_light_alignment);
+        assert_eq!(spot_light_alignment & (spot_light_alignment - 1), 0);
 
         let point_light_alignment = std::mem::align_of::<PointLight>();
-        println!("{}", point_light_alignment);
+        assert_eq!(point_light_alignment & (point_light_alignment - 1), 0);
     }
 }

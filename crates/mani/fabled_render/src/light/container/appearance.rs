@@ -24,8 +24,8 @@ use crate::light::{celsius_to_kelvin, fahrenheit_to_kelvin, TemperatureUnit};
 // temperature is in kelvin
 #[derive(Copy, Clone, Debug)]
 pub struct LightAppearance {
-    pub temperature: f32,
     pub color: [f32; 3],
+    pub temperature: f32,
 }
 
 impl Default for LightAppearance {

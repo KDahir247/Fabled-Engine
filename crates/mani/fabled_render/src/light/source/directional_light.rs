@@ -5,8 +5,8 @@
 use crate::light::LightAppearance;
 
 pub struct DirectionalLight {
-    pub illuminance: f32,
     pub appearance: LightAppearance,
+    pub illuminance: f32,
 }
 
 

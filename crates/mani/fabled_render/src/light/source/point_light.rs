@@ -4,10 +4,10 @@ use crate::light::{
 
 // Intensity is Luminance Power (Luminance flux) in lumen
 pub struct PointLight {
+    pub appearance: LightAppearance,
     pub intensity: f32,
     pub radius: f32,
     pub range: f32,
-    pub appearance: LightAppearance,
     pub distance_m: f32,
 }
 
