@@ -1,9 +1,9 @@
 use crate::mesh::{Mesh, Model, Vertex};
 
 pub struct UvSphere {
-    pub radius: f32,
     pub tessellation_stack: usize,
     pub tessellation_sector: usize,
+    pub radius: f32,
 }
 
 impl Default for UvSphere {

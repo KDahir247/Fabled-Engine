@@ -2,10 +2,10 @@ use crate::mesh::{Mesh, Model, Vertex};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Cone {
-    pub radius: f32,
-    pub tessellation_slice: usize,
-    pub height: f32,
     pub apex_position: [f32; 3],
+    pub tessellation_slice: usize,
+    pub radius: f32,
+    pub height: f32,
 }
 
 impl Default for Cone {
@@ -42,14 +42,11 @@ impl From<Cone> for Model {
             apex_position,
         } = cone;
 
-        let mut indices = Vec::with_capacity(tessellation_slice * 6);
+        let mut indices = vec![0_usize; tessellation_slice * 6];
         let mut vertices: Vec<Vertex> = Vec::with_capacity(tessellation_slice + 2);
 
         let apex_position = glam::const_vec3a!(apex_position);
 
-        // let base_to_apex_dir = apex_position.normalize(); // hard coded. Vec3A::Zero
-        // should be base position. (apex_position - glam::Vec3A::ZERO) //center instead
-        // of zero.
         let forward_dir = glam::Vec3A::X.cross(apex_position.normalize());
         let center = apex_position + (-apex_position.normalize() * height);
 
@@ -73,14 +70,12 @@ impl From<Cone> for Model {
             bi_tangent: [0.0, 0.0, -1.0, 1.0],
         });
 
-        // Cone vertex
-        // todo improve this.
+
         for side in 0..=tessellation_slice {
             let (rad_sin, rad_cos) = (angle_inc * side as f32).sin_cos();
 
             let vertex = center + (glam::Vec3A::X * rad_cos + forward_dir * rad_sin) * radius;
 
-            // slant_height = slant_height_vector.length();
             let slant_height_vector = glam::Vec3A::Y - vertex;
 
             let vertex_direction = vertex.normalize();
@@ -97,16 +92,13 @@ impl From<Cone> for Model {
             });
         }
 
-        // todo improve this
         // indices
         for point in 2..tessellation_slice + 2 {
-            indices.push(0); // top
-            indices.push(point + 1); // left
-            indices.push(point); // right
+            let face_indices = [0, point + 1, point, 1, point, point + 1];
 
-            indices.push(1); // bottom
-            indices.push(point); // right
-            indices.push(point + 1); // left
+            let start_index = (point - 2) * 6;
+            let end_index = (point - 2) * 6 + 6;
+            indices[start_index..end_index].copy_from_slice(&face_indices);
         }
 
         let mesh = Mesh {

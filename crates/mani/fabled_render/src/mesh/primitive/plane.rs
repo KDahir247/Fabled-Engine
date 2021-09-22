@@ -11,10 +11,10 @@ impl Default for RenderInstruction {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Plane {
-    pub width: f32,
-    pub height: f32,
     pub tessellation_width: usize,
     pub tessellation_height: usize,
+    pub width: f32,
+    pub height: f32,
     pub plane_instruction: RenderInstruction,
 }
 
@@ -82,6 +82,7 @@ impl From<Plane> for Model {
 
         let inv_tessellation_width = 1.0 / tessellation_width as f32;
         let inv_tessellation_height = 1.0 / tessellation_height as f32;
+
         let scale_x = width * inv_tessellation_width;
         let scale_y = height * inv_tessellation_height;
 
@@ -125,6 +126,7 @@ impl From<Plane> for Model {
             for x in 0..tessellation_width * plane_instruction as usize {
                 let res_0 = seg_0 + x;
                 let res_1 = seg_1 + x;
+
 
                 indices.push(res_0);
                 indices.push(res_0 + 1);

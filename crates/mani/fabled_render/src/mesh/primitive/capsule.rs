@@ -12,8 +12,8 @@ pub enum CapsuleUvProfile {
 #[repr(align(16))]
 pub struct Capsule {
     pub radius: f32,
-    pub rings: u8,
     pub depth: f32,
+    pub rings: u8,
     pub latitude: u8,
     pub longitude: u8,
     pub v_profile: CapsuleUvProfile,

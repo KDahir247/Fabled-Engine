@@ -54,7 +54,7 @@ impl Cube {
 
 impl From<Cube> for Model {
     fn from(cube: Cube) -> Self {
-        const CUBE_DATA: &CubeData = &CUBE_FACE_DATA;
+        const CUBE_DATA: CubeData = CUBE_FACE_DATA;
 
         let mut vertices = vec![Vertex::default(); 24];
         let mut indices = vec![0; 36];

@@ -3,12 +3,13 @@ use crate::mesh::{Mesh, Model, Vertex};
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(align(16))]
 pub struct Torus {
+    pub tessellation_segment: usize,
+    pub tessellation_side: usize,
+
     /// The distance from the center of the tube to the center of the torus.
     pub major_radius: f32,
     /// The radius of the tube.
     pub minor_radius: f32,
-    pub tessellation_segment: usize,
-    pub tessellation_side: usize,
 }
 
 impl Default for Torus {

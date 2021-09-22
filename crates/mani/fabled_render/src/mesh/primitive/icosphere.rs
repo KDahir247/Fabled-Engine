@@ -13,8 +13,8 @@ impl Default for IcoSphere {
 }
 
 impl IcoSphere {
-    pub fn new(radius: f32, tessellation: u32) -> IcoSphere {
-        // clamp tessellation to a value.
+    pub fn new(radius: f32, mut tessellation: u32) -> IcoSphere {
+        tessellation = tessellation.min(3);
 
         Self {
             radius,
@@ -59,7 +59,7 @@ impl IcoSphere {
     }
 }
 
-#[rustfmt::skip] //todo temporary to see indention on data for implementation
+#[rustfmt::skip] 
 impl From<IcoSphere> for Model {
     fn from(ico_sphere: IcoSphere) -> Self {
         let vertex_size = 4usize.pow(ico_sphere.tessellation) * 10 * 3 + 2;
@@ -156,7 +156,7 @@ impl From<IcoSphere> for Model {
 
             let inv_pi = 1.0 / std::f32::consts::PI;
             
-            //TODO The Last batch of triangles loop back from high uv to zero 
+            // The Last batch of triangles loop back from high uv to zero 
             // A temporary hack is for the Coordinate (U or V) is to use the absolute value of chunk[2] (z).atan2(chunk[0](x)) .
             // chunk[2].abs().atan2(chunk[0]) * (inv_pi * 0.5) + 0.5, // U
             let uv = [
