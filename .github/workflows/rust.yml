@@ -10,7 +10,7 @@
 # | \____(      )___) )___
 #  \______(_______;;; __;;;
 
-name: Fabled-Engine 
+name: Fabled-Engine
 
 on:
   push:
@@ -27,9 +27,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2.3.4
-    - name: Build
-      run: cargo build --all --verbose
-    - name: Run tests 
-      run: cargo test --all --verbose
-    - uses: actions-rs/grcov@v0.1.5
+      - uses: actions/checkout@v2.3.4
+      - name: Build
+        run: cargo build --all --verbose
+      - name: Run tests
+        run: cargo test --all --verbose
+      - uses: actions-rs/grcov@v0.1.5
