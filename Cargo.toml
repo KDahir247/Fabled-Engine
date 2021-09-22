@@ -1,5 +1,5 @@
 [package]
-name = "basic_obj_loader"
+name = "Fabled_Engine"
 version = "0.1.0"
 edition = "2018"
 
@@ -8,10 +8,16 @@ edition = "2018"
 lto = true
 debug = true
 opt-level = 3
+codegen-units = 3
+panic = "abort"
 
 [lib]
 name = "lib"
-path = "lib/src/lib.rs"
+path = "crates/mani/lib/src/lib.rs"
+
+[workspace]
+members = ["crates/mani/*"]
+
 
 #[dependencies.superluminal-perf]
 #version = "*"
@@ -30,9 +36,13 @@ optional = true
 logger = ["log" ,"env_logger"]
 
 [dependencies]
+fabled_gltf = {path = "crates/mani/fabled_gltf", version = "*"}
+fabled_render = {path = "crates/mani/fabled_render", version = "*"}
+
+# todo others remove
 image = "*"
 winit = "*"
-wgpu = "0.9"
+wgpu = "0.8"
 futures = "*"
 bytemuck = {version = "*", features = ["derive"]}
 tobj = "*"
@@ -41,4 +51,10 @@ rayon = "1.4"
 glam = {version = "*", features = ["bytemuck"]}
 shipyard = {version = "*", features = ["default", "thread_local"]}
 superluminal-perf = "*"
-naga = {version = "0.6.0", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga
+naga = {version = "0.4.2", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga
+serde = {version = "*", features = ["derive"], optional = true}
+
+[dependencies.gltf]
+version = "0.16"
+features = ["KHR_materials_unlit", "KHR_materials_pbrSpecularGlossiness", "extras", "names", "utils", "import"]
+
