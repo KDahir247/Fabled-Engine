@@ -51,9 +51,12 @@ mod tiff_loader_codecs {
 
     #[test]
     fn load_tiff() {
+        let texture = load_test_textures("tiff").pop().unwrap();
+
+
         let tiff_loader = TiffTextureLoader::default();
         let tiff_yellow = tiff_loader.load(
-            TIFF_TEST_TEXTURE,
+            texture,
             &TextureDescriptor {
                 flip_axis: Default::default(),
             },
@@ -70,8 +73,10 @@ mod tiff_loader_codecs {
 
         //----------------------------------------------------
 
+        let texture = load_test_textures("dds").pop().unwrap();
+
         let invalid_tiff_yellow = tiff_loader.load(
-            DDS_TEST_TEXTURE,
+            texture,
             &TextureDescriptor {
                 flip_axis: Default::default(),
             },

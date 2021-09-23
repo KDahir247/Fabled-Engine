@@ -1,6 +1,3 @@
-// Directory of required glsl shader for the game engine.
-// maybe use glob to get all the files that match a pattern.
-
 pub fn retrieve_test_glsl_shader() -> Vec<String> {
     let mut paths = Vec::new();
     let mut path = String::new();

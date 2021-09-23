@@ -29,21 +29,3 @@ pub fn init_shader_test_env() {
     std::env::set_var("FRAG_FILE", glsl_path[1].as_str());
     std::env::set_var("COMP_FILE", glsl_path[0].as_str());
 }
-
-
-#[cfg(test)]
-mod test {
-
-
-    #[test]
-    fn test() {
-        let mut path = String::new();
-
-        path.push_str(env!("CARGO_MANIFEST_DIR"));
-        path.push_str("/src/shader/shader/glsl/test/**/*");
-        let a = glob::glob(path.as_str()).unwrap();
-        for x in a {
-            println!("{}", x.unwrap().to_str().unwrap());
-        }
-    }
-}
