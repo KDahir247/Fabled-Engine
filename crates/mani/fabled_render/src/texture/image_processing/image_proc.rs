@@ -156,11 +156,17 @@ mod image_processing_test {
 
     #[test]
     fn creation_test() {
+        let dds_texture = load_test_textures("dds").pop().unwrap();
+        let jpg_texture = load_test_textures("jpg").pop().unwrap();
+        let png_texture = load_test_textures("png").pop().unwrap();
+        let tiff_texture = load_test_textures("tiff").pop().unwrap();
+
+
         // Png
         let png_loader = PngTextureLoader::default();
         let png_yellow = png_loader
             .load(
-                PNG_TEST_TEXTURE,
+                png_texture,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
                 },
@@ -181,11 +187,12 @@ mod image_processing_test {
             png_texture.size, png_texture.color_type
         );
 
+
         // DDS
         let dds_loader = DdsTextureLoader::default();
         let dds_yellow = dds_loader
             .load(
-                DDS_TEST_TEXTURE,
+                dds_texture,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
                 },
@@ -213,7 +220,7 @@ mod image_processing_test {
         let jpg_loader = JpgTextureLoader::default();
         let jpg_yellow = jpg_loader
             .load(
-                JPG_TEST_TEXTURE,
+                jpg_texture,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
                 },
@@ -238,7 +245,7 @@ mod image_processing_test {
         let tiff_loader = TiffTextureLoader::default();
         let tiff_yellow = tiff_loader
             .load(
-                TIFF_TEST_TEXTURE,
+                tiff_texture,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
                 },
@@ -262,10 +269,12 @@ mod image_processing_test {
 
     fn init_test() -> ImageProcessing {
         // Png
+        let texture = load_test_textures("png").pop().unwrap();
+
         let png_loader = PngTextureLoader::default();
         let png_yellow = png_loader
             .load(
-                PNG_TEST_TEXTURE,
+                texture,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
                 },
@@ -278,11 +287,11 @@ mod image_processing_test {
     #[test]
     fn blur_test() {
         let img_proc = init_test();
+        let save_dir = save_test_texture("test/albedo/image_proc/pngyellow_blur.png");
+
         let result = img_proc.blur(10.0).build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_BLUR, ColorTarget::ImageRgba8)
-            .unwrap();
+        result.write_to(save_dir, ColorTarget::ImageRgba8).unwrap();
         // Draw the result to a file
     }
 
@@ -291,9 +300,8 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.unsharpened(20.0, 15).build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_UNSHARPENED, ColorTarget::ImageRgba8)
-            .unwrap();
+        let sav_dir = save_test_texture("test/albedo/image_proc/pngyellow_unsharpen.png");
+        result.write_to(sav_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
@@ -301,54 +309,51 @@ mod image_processing_test {
         let img_proc = init_test();
         let result = img_proc.rotate90().build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_ROT_90, ColorTarget::ImageRgba8)
-            .unwrap();
+        let sav_dir = save_test_texture("test/albedo/image_proc/pngyellow_rot90.png");
+
+        result.write_to(sav_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn rotation180_test() {
         let img_proc = init_test();
         let result = img_proc.rotate180().build();
-
-        result
-            .write_to(PNG_TEST_TEXTURE_ROT_180, ColorTarget::ImageRgba8)
-            .unwrap();
+        let sav_dir = save_test_texture("test/albedo/image_proc/pngyellow_rot180.png");
+        result.write_to(sav_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn rotation270_test() {
         let img_proc = init_test();
         let result = img_proc.rotate270().build();
+        let sav_dir = save_test_texture("test/albedo/image_proc/pngyellow_rot270.png");
 
-        result
-            .write_to(PNG_TEST_TEXTURE_ROT_270, ColorTarget::ImageRgba8)
-            .unwrap();
+        result.write_to(sav_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn flip_horizontal_test() {
         let img_proc = init_test();
         let result = img_proc.flip_horizontal().build();
+        let save_dir = save_test_texture("test/albedo/image_proc/pngyellow_fliph.png");
 
-        result
-            .write_to(PNG_TEST_TEXTURE_FLIP_H, ColorTarget::ImageRgba8)
-            .unwrap();
+        result.write_to(save_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn flip_vertical_test() {
         let img_proc = init_test();
         let result = img_proc.flip_vertical().build();
+        let save_dir = save_test_texture("test/albedo/image_proc/pngyellow_flipv.png");
 
-        result
-            .write_to(PNG_TEST_TEXTURE_FLIP_V, ColorTarget::ImageRgba8)
-            .unwrap();
+        result.write_to(save_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn resize_test() {
         let img_proc = init_test();
+        let save_dir = save_test_texture("test/albedo/image_proc/pngyellow_resize.png");
+
         let result = img_proc
             .resize(
                 Extent2d {
@@ -359,24 +364,22 @@ mod image_processing_test {
             )
             .build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_RESIZE, ColorTarget::ImageRgba8)
-            .unwrap();
+        result.write_to(save_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn opacity_test() {
         let img_proc = init_test();
         let result = img_proc.opacity(128).build();
-
-        result
-            .write_to(PNG_TEST_TEXTURE_OPACITY, ColorTarget::ImageRgba8)
-            .unwrap();
+        let save_dir = save_test_texture("test/albedo/image_proc/pngyellow_opacity.png");
+        result.write_to(save_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn crop_test() {
         let img_proc = init_test();
+        let save_dir = save_test_texture("test/albedo/image_proc/pngyellow_crop.png");
+
         let result = img_proc
             .crop(
                 Extent2d {
@@ -391,16 +394,18 @@ mod image_processing_test {
             .build();
 
 
-        result
-            .write_to(PNG_TEST_TEXTURE_CROP, ColorTarget::ImageRgba8)
-            .unwrap();
+        result.write_to(save_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn replace() {
         let img_proc = init_test();
+
+        let texture = load_test_textures("png");
+        let save_dir = save_test_texture("test/albedo/image_proc/pngyellow_replace.png");
+
         let second_img = PngTextureLoader::default()
-            .load(PNG_TEST_TEXTURE1, &TextureDescriptor::default())
+            .load(&texture[1], &TextureDescriptor::default())
             .unwrap();
 
         let result1 = ImageProcessing::new(second_img, ColorTarget::ImageRgba8).unwrap();
@@ -415,16 +420,18 @@ mod image_processing_test {
             )
             .build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_REPLACE, ColorTarget::ImageRgba8)
-            .unwrap();
+        result.write_to(save_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn overlay_test() {
         let img_proc = init_test();
+
+        let texture = load_test_textures("png");
+        let save_dir = save_test_texture("test/albedo/image_proc/pngyellow_overlay.png");
+
         let second_img = PngTextureLoader::default()
-            .load(PNG_TEST_TEXTURE1, &TextureDescriptor::default())
+            .load(&texture[1], &TextureDescriptor::default())
             .unwrap();
 
         let result1 = ImageProcessing::new(second_img, ColorTarget::ImageRgba8).unwrap();
@@ -439,8 +446,6 @@ mod image_processing_test {
             )
             .build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_OVERLAY, ColorTarget::ImageRgba8)
-            .unwrap();
+        result.write_to(save_dir, ColorTarget::ImageRgba8).unwrap();
     }
 }

@@ -209,8 +209,12 @@ mod ktx_mod_test {
 
     #[test]
     fn ktx_compress() {
-        let ktx_super =
-            KtxTextureLoader::super_compress(std::fs::File::open(KTX_2_TEST_TEXTURE).unwrap(), 100);
+        let ktx_path = load_ktx_textures();
+
+        let ktx_super = KtxTextureLoader::super_compress(
+            std::fs::File::open(ktx_path[1].as_str()).unwrap(),
+            100,
+        );
 
         match ktx_super {
             Ok(result) => {
@@ -234,8 +238,10 @@ mod ktx_mod_test {
 
     #[test]
     fn ktx_stream_load() {
+        let ktx_path = load_ktx_textures();
+
         let ktx_stream_texture = KtxTextureLoader::from_stream(
-            std::fs::File::open(KTX_2_TEST_TEXTURE).unwrap(),
+            std::fs::File::open(ktx_path[1].as_str()).unwrap(),
             &KTXDescriptor {
                 flip_axis: FlipAxis::Skip,
                 transcode_flag: KtxTranscodeFlag::HIGHEST_QUALITY,

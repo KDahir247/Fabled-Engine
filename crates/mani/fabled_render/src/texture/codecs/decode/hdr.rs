@@ -71,9 +71,11 @@ mod hdr_loader_codecs {
 
     #[test]
     fn load_hdr() {
+        let texture = load_test_textures("hdr").pop().unwrap();
+
         let hdr_loader = HdrTextureLoader::default();
         let hdr_yellow = hdr_loader.load(
-            HDR_TEST_TEXTURE,
+            texture,
             &TextureDescriptor {
                 flip_axis: Default::default(),
             },
@@ -91,8 +93,10 @@ mod hdr_loader_codecs {
 
         //--------------------------------------------------------
 
+        let texture = load_test_textures("dds").pop().unwrap();
+
         let invalid_hdr_yellow = hdr_loader.load(
-            DDS_TEST_TEXTURE,
+            texture,
             &TextureDescriptor {
                 flip_axis: Default::default(),
             },

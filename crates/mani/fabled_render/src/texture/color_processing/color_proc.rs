@@ -79,10 +79,13 @@ mod tests {
     use crate::texture::container::ColorTarget;
 
     fn init_test() -> ColorProcessing {
+        let texture = load_test_textures("png").pop().unwrap();
+
+
         let png_loader = PngTextureLoader::default();
         let png_yellow = png_loader
             .load(
-                PNG_TEST_TEXTURE,
+                texture,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
                 },
@@ -96,23 +99,20 @@ mod tests {
     #[test]
     fn brighten() {
         let color_proc = init_test();
-
         let result = color_proc.brighten(50).build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_BRIGHTEN, ColorTarget::ImageRgba8)
-            .unwrap();
+        let sav_dir = save_test_texture("test/albedo/color_proc/pngyellow_brightness.png");
+        result.write_to(sav_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
     fn contrast() {
         let color_proc = init_test();
-
         let result = color_proc.contrast(30.).build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_CONTRAST, ColorTarget::ImageRgba8)
-            .unwrap();
+        let sav_dir = save_test_texture("test/albedo/color_proc/pngyellow_contrast.png");
+
+        result.write_to(sav_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
@@ -120,9 +120,9 @@ mod tests {
         let color_proc = init_test();
         let result = color_proc.grayscale().build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_GRAYSCALE, ColorTarget::ImageLuma8)
-            .unwrap();
+        let sav_dir = save_test_texture("test/albedo/color_proc/pngyellow_grayscale.png");
+
+        result.write_to(sav_dir, ColorTarget::ImageLuma8).unwrap();
     }
 
     #[test]
@@ -130,9 +130,8 @@ mod tests {
         let color_proc = init_test();
         let result = color_proc.hue_rotate(150).build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_HUE_ROT, ColorTarget::ImageRgba8)
-            .unwrap();
+        let sav_dir = save_test_texture("test/albedo/color_proc/pngyellow_huerot.png");
+        result.write_to(sav_dir, ColorTarget::ImageRgba8).unwrap();
     }
 
     #[test]
@@ -140,8 +139,8 @@ mod tests {
         let color_proc = init_test();
         let result = color_proc.invert().build();
 
-        result
-            .write_to(PNG_TEST_TEXTURE_INVERT, ColorTarget::ImageRgba8)
-            .unwrap();
+        let sav_dir = save_test_texture("test/albedo/color_proc/pngyellow_invert.png");
+
+        result.write_to(sav_dir, ColorTarget::ImageRgba8).unwrap();
     }
 }

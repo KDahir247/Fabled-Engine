@@ -86,18 +86,21 @@ pub fn super_compress(
 #[cfg(test)]
 mod basis_compression_test {
     use crate::texture::codecs::{JpgTextureLoader, TextureDescriptor};
-    use crate::texture::common::JPG_TEST_TEXTURE;
     use crate::texture::compression::*;
     use crate::texture::container::ColorSpace;
+    use crate::texture::load_test_textures;
     use fabled_core::concurrent::thread_op::ThreadOperation;
 
     #[test]
     #[ignore]
     fn compression_test() {
+        let texture = load_test_textures("jpg").pop().unwrap();
+
+
         let jpg_loader = JpgTextureLoader::default();
         let jpg_yellow = jpg_loader
             .load(
-                JPG_TEST_TEXTURE,
+                texture,
                 &TextureDescriptor {
                     flip_axis: Default::default(),
                 },

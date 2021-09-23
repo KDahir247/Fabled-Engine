@@ -52,9 +52,12 @@ mod dds_loader_codecs {
 
     #[test]
     fn load_dds() {
+        let texture = load_test_textures("dds").pop().unwrap();
+
+
         let dds_loader = DdsTextureLoader::default();
         let dds_yellow = dds_loader.load(
-            DDS_TEST_TEXTURE,
+            texture,
             &TextureDescriptor {
                 flip_axis: Default::default(),
             },
@@ -71,9 +74,10 @@ mod dds_loader_codecs {
         }
 
         //------------------------------------------------------------
+        let texture = load_test_textures("png").pop().unwrap();
 
         let invalid_dds_yellow = dds_loader.load(
-            PNG_TEST_TEXTURE,
+            texture,
             &TextureDescriptor {
                 flip_axis: Default::default(),
             },

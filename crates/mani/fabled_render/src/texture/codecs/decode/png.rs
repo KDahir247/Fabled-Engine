@@ -51,9 +51,12 @@ mod png_loader_codecs {
 
     #[test]
     fn load_png() {
+        let texture = load_test_textures("png").pop().unwrap();
+
+
         let png_loader = PngTextureLoader::default();
         let png_yellow = png_loader.load(
-            PNG_TEST_TEXTURE,
+            texture,
             &TextureDescriptor {
                 flip_axis: Default::default(),
             },
@@ -70,8 +73,11 @@ mod png_loader_codecs {
 
         //-----------------------------------------------------------
 
+        let texture = load_test_textures("jpg").pop().unwrap();
+
+
         let invalid_png_yellow = png_loader.load(
-            JPG_TEST_TEXTURE,
+            texture,
             &TextureDescriptor {
                 flip_axis: Default::default(),
             },

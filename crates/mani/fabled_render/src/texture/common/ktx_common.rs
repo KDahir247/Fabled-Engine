@@ -1,12 +1,12 @@
-// Directory of required ktx texture for the game engine.
-// maybe use glob to get all the files that match a pattern, since the current
-// solution is only possible for windows.
+pub fn load_ktx_textures() -> Vec<String> {
+    let mut paths = Vec::new();
+    let mut path = String::new();
 
-// Test KTX 2 Texture
-pub const KTX_2_TEST_TEXTURE: &str = ".\\src\\texture\\texture\\test\\ktx\\ktx_document_basis.ktx2";
-
-// Core KTX 2 Texture
-
-// Test KTX 1 Texture
-
-// Core KTX 1 Texture
+    path.push_str(env!("CARGO_MANIFEST_DIR"));
+    path.push_str("/src/texture/texture/test/ktx/**/*.ktx2");
+    let a = glob::glob(path.as_str()).unwrap();
+    for path_result in a {
+        paths.push(path_result.unwrap().to_str().unwrap().to_string());
+    }
+    paths
+}
