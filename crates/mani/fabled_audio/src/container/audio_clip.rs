@@ -1,3 +1,6 @@
+use ambisonic::rodio::buffer::SamplesBuffer;
+use ambisonic::rodio::source::SamplesConverter;
+use ambisonic::rodio::Source as AmbientSource;
 use rodio::Source;
 
 #[derive(Debug)]
@@ -42,7 +45,12 @@ impl AudioClip {
 
     pub fn to_buffer(&self) -> rodio::buffer::SamplesBuffer<i16> {
         let data = self.data.read().unwrap();
-
         rodio::buffer::SamplesBuffer::new(self.channel, self.sample, data.to_vec())
+    }
+
+    pub fn to_ambisonic_buffer(&self) -> SamplesConverter<SamplesBuffer<i16>, f32> {
+        let data = self.data.read().unwrap();
+        ambisonic::rodio::buffer::SamplesBuffer::new(self.channel, self.sample, data.to_vec())
+            .convert_samples::<f32>()
     }
 }
