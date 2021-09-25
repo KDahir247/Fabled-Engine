@@ -1,8 +1,4 @@
 # Fabled Engine
-# Current solution will might break, since KTX 2.0 and Dds texture support is Experimental
-# Also Texture Compression Method which is quite volatile due to quick testing
-Self Study on developing a game engine. Learning as I go.
-<br/> Not done the core parts of the rendering.
 <br/>
 <br/>
 Any issues, enhancement, features, or bugs report are always welcome in Issues.
@@ -17,8 +13,7 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 * Down : E
 
 # current progress:
-* Finalizing Render module to be merged.
-* Going to work on the obj module next when the render module is merged to main.
+* Working on the audio branch for creating audio clip and source
 <br/>
 
 ![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)
