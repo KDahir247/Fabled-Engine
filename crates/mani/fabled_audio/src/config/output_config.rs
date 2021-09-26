@@ -76,19 +76,3 @@ impl OutputDeviceConfig {
         devices
     }
 }
-
-
-// #[cfg(test)]
-// mod test {
-// use crate::{OutputConfig, OutputDeviceConfig};
-// use cpal::Device;
-//
-// #[test]
-// fn test() {
-// let a = OutputConfig::default();
-//
-//
-// let c = std::mem::size_of::<OutputConfig>();
-// println!("{}", c);
-// }
-// }

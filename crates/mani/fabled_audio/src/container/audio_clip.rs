@@ -52,24 +52,27 @@ impl AudioClip {
             sample,
         }
     }
-}
 
-
-impl Clip for AudioClip {
-    fn to_buffer(&self) -> rodio::buffer::SamplesBuffer<i16> {
+    pub fn to_buffer(&self) -> rodio::buffer::SamplesBuffer<i16> {
         // panic from poisoning or lock is already held by the current thread.
 
         let data = self.data.read().unwrap();
 
-        rodio::buffer::SamplesBuffer::new(self.channel, self.sample, data.to_vec())
+        let handled_channel = self.channel.max(1);
+        let handled_sample = self.sample.max(1);
+
+        rodio::buffer::SamplesBuffer::new(handled_channel, handled_sample, data.to_vec())
     }
 
-    fn to_ambisonic_buffer(&self) -> SamplesConverter<SamplesBuffer<i16>, f32> {
+    pub fn to_ambisonic_buffer(&self) -> SamplesConverter<SamplesBuffer<i16>, f32> {
         // panic from poisoning or lock is already held by the current thread.
 
         let data = self.data.read().unwrap();
 
-        ambisonic::rodio::buffer::SamplesBuffer::new(self.channel, self.sample, data.to_vec())
+        let handled_channel = self.channel.max(1);
+        let handled_sample = self.sample.max(1);
+
+        ambisonic::rodio::buffer::SamplesBuffer::new(handled_channel, handled_sample, data.to_vec())
             .convert_samples::<f32>()
     }
 }

@@ -59,10 +59,8 @@ impl AudioSpatialOutput {
 
     pub fn play_omni<T>(&self, clip: T) -> SpatialSource
     where
-        T: Clip + Send + 'static, {
-        let sound_controller = self
-            .composer
-            .play(clip.to_ambisonic_buffer(), ambisonic::BstreamConfig::new());
+        T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
+        let sound_controller = self.composer.play(clip, ambisonic::BstreamConfig::new());
 
 
         SpatialSource::new(sound_controller)
@@ -70,12 +68,12 @@ impl AudioSpatialOutput {
 
 
     // todo this should handle source, since we want the user to effect the clip
-    // such as fade_in
+    //  such as fade_in. Got to swap Clip trait for something better.
     pub fn play_at<T>(&self, clip: T, init_pos: [f32; 3]) -> SpatialSource
     where
-        T: Clip + Send + 'static, {
+        T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
         let sound_controller = self.composer.play(
-            clip.to_ambisonic_buffer(),
+            clip,
             ambisonic::BstreamConfig::new().with_position(init_pos),
         );
 

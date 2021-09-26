@@ -12,7 +12,7 @@ pub use contract::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::{AudioClip, AudioListener, AudioSpatialOutput};
+    use crate::{AudioClip, AudioListener, AudioSpatialOutput, Clip};
     use std::io::Read;
 
     #[test]
@@ -53,7 +53,7 @@ mod tests {
         // .to_ambisonic_buffer()
         // .fade_in(std::time::Duration::from_secs(5));
 
-        let source = output.play_at(audio_clip, [10.0, 0.0, 0.0]);
+        let source = output.play_at(audio_clip.to_ambisonic_buffer(), [10.0, 0.0, 0.0]);
 
 
         std::thread::sleep(std::time::Duration::from_secs(1000));
