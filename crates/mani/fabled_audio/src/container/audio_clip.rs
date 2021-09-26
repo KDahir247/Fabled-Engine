@@ -1,6 +1,4 @@
-use crate::Clip;
-use ambisonic::rodio::buffer::SamplesBuffer;
-use ambisonic::rodio::source::SamplesConverter;
+use crate::{RawAmbisonicClip, RawClip};
 use ambisonic::rodio::Source as AmbientSource;
 use rodio::Source;
 
@@ -11,6 +9,11 @@ use rodio::Source;
 // to create a separate thread for audio since I dont want RwLock to block the
 // main thread which will handle core logic for read when write is happening,
 // but a dedicated thread.
+
+pub type Standard = RawClip<rodio::buffer::SamplesBuffer<i16>>;
+pub type Ambisonic = RawAmbisonicClip<
+    ambisonic::rodio::source::SamplesConverter<ambisonic::rodio::buffer::SamplesBuffer<i16>, f32>,
+>;
 
 #[derive(Debug)]
 pub struct AudioClip {
@@ -35,13 +38,13 @@ impl AudioClip {
 
         // We should be able to guarantee that the unwrap will not be None
         let channel = decoder.channels();
-        let sample_rate = decoder.sample_rate();
+        let sample = decoder.sample_rate();
         let data = decoder.collect::<Vec<_>>();
 
         Self {
             data: std::sync::RwLock::new(data.into()),
             channel,
-            sample: sample_rate,
+            sample,
         }
     }
 
@@ -52,27 +55,39 @@ impl AudioClip {
             sample,
         }
     }
+}
 
-    pub fn to_buffer(&self) -> rodio::buffer::SamplesBuffer<i16> {
-        // panic from poisoning or lock is already held by the current thread.
+// Standard clip
+impl From<AudioClip> for Standard {
+    fn from(clip: AudioClip) -> Self {
+        let data = clip.data.read().unwrap();
 
-        let data = self.data.read().unwrap();
+        let handled_channel = clip.channel.max(1);
+        let handled_sample = clip.sample.max(1);
 
-        let handled_channel = self.channel.max(1);
-        let handled_sample = self.sample.max(1);
+        let sample_buffer =
+            rodio::buffer::SamplesBuffer::new(handled_channel, handled_sample, data.to_vec());
 
-        rodio::buffer::SamplesBuffer::new(handled_channel, handled_sample, data.to_vec())
+        RawClip::new(sample_buffer)
     }
+}
 
-    pub fn to_ambisonic_buffer(&self) -> SamplesConverter<SamplesBuffer<i16>, f32> {
-        // panic from poisoning or lock is already held by the current thread.
 
-        let data = self.data.read().unwrap();
+// Ambisonic clip
+impl From<AudioClip> for Ambisonic {
+    fn from(clip: AudioClip) -> Self {
+        let data = clip.data.read().unwrap();
 
-        let handled_channel = self.channel.max(1);
-        let handled_sample = self.sample.max(1);
+        let handled_channel = clip.channel.max(1);
+        let handled_sample = clip.sample.max(1);
 
-        ambisonic::rodio::buffer::SamplesBuffer::new(handled_channel, handled_sample, data.to_vec())
-            .convert_samples::<f32>()
+        let sample_buffer = ambisonic::rodio::buffer::SamplesBuffer::new(
+            handled_channel,
+            handled_sample,
+            data.to_vec(),
+        )
+        .convert_samples::<f32>();
+
+        RawAmbisonicClip::new(sample_buffer)
     }
 }

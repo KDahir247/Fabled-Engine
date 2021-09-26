@@ -1,8 +1,9 @@
-use crate::{AudioListener, Clip, OutputConfig, SpatialSource};
-use ambisonic::rodio::Source;
+use crate::{AudioListener, OutputConfig, RawAmbisonicClip, SpatialSource};
 use ambisonic::PlaybackConfiguration;
 
+
 pub struct AudioSpatialOutput {
+    // we need to keep the sink and output alive for playing the audio.
     #[allow(dead_code)]
     sink: Option<ambisonic::rodio::SpatialSink>,
     #[allow(dead_code)]
@@ -57,10 +58,12 @@ impl AudioSpatialOutput {
         }
     }
 
-    pub fn play_omni<T>(&self, clip: T) -> SpatialSource
+    pub fn play_omni<T>(&self, clip: RawAmbisonicClip<T>) -> SpatialSource
     where
         T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
-        let sound_controller = self.composer.play(clip, ambisonic::BstreamConfig::new());
+        let sound_controller = self
+            .composer
+            .play(clip.get(), ambisonic::BstreamConfig::new());
 
 
         SpatialSource::new(sound_controller)
@@ -69,11 +72,11 @@ impl AudioSpatialOutput {
 
     // todo this should handle source, since we want the user to effect the clip
     //  such as fade_in. Got to swap Clip trait for something better.
-    pub fn play_at<T>(&self, clip: T, init_pos: [f32; 3]) -> SpatialSource
+    pub fn play_at<T>(&self, clip: RawAmbisonicClip<T>, init_pos: [f32; 3]) -> SpatialSource
     where
         T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
         let sound_controller = self.composer.play(
-            clip,
+            clip.get(),
             ambisonic::BstreamConfig::new().with_position(init_pos),
         );
 
