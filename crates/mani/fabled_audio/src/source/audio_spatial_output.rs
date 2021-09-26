@@ -5,7 +5,7 @@ use ambisonic::PlaybackConfiguration;
 pub struct AudioSpatialOutput {
     // we need to keep the sink and output alive for playing the audio.
     #[allow(dead_code)]
-    sink: Option<ambisonic::rodio::SpatialSink>,
+    pub sink: Option<ambisonic::rodio::SpatialSink>,
     #[allow(dead_code)]
     output_stream: Option<ambisonic::rodio::OutputStream>,
     pub composer: std::sync::Arc<ambisonic::BmixerComposer>,
@@ -65,13 +65,10 @@ impl AudioSpatialOutput {
             .composer
             .play(clip.get(), ambisonic::BstreamConfig::new());
 
-
         SpatialSource::new(sound_controller)
     }
 
 
-    // todo this should handle source, since we want the user to effect the clip
-    //  such as fade_in. Got to swap Clip trait for something better.
     pub fn play_at<T>(&self, clip: RawAmbisonicClip<T>, init_pos: [f32; 3]) -> SpatialSource
     where
         T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
@@ -81,5 +78,13 @@ impl AudioSpatialOutput {
         );
 
         SpatialSource::new(sound_controller)
+    }
+
+    pub fn global_volume(&self, volume: f32) {
+        self.sink.as_ref().unwrap().set_volume(volume);
+    }
+
+    pub fn get_volume(&self) -> f32 {
+        self.sink.as_ref().unwrap().volume()
     }
 }
