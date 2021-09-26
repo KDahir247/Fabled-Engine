@@ -21,23 +21,8 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 * Going to work on the obj module next when the render module is merged to main.
 <br/>
 
-![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)
+### Click picture for video.
+[<img src="https://github.com/KDahir247/Fabled-Engine/blob/audio/sample/Audio.png">](https://streamable.com/u6y5dg)
+
+Modeled by Anex
 <br/>
-
-# KTX 2.0
-
-<br/>
-BC3 Compression
-<br/>
-
-![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/BC3.png)
-<br/>
-
-RGBAUNORMSRGB
-<br/>
-
-![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/RGBAUNORMSRGB.png)
-
-<br/>
-
-model is made by theStoff, Wesai, and xahun. Attribution is stated in the example folder.
