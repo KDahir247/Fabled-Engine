@@ -54,7 +54,7 @@ mod tests {
         let raw_clip = Standard::from(audio_clip1);
         // let sound = spatial_output.play_omni(raw_clip, 1.);
 
-        standard_output.play(raw_clip, 1.0);
+        standard_output.play(raw_clip, 0.6);
         std::thread::sleep(std::time::Duration::from_secs(100000));
     }
 }

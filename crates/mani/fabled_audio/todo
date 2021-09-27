@@ -30,5 +30,5 @@ There will be a performance expense for this operation, since the spatial output
 
 Handle case where the user switch from different output devices. Currently when the user switch from desktop to headphone it would
 still play from the desktop and vis versa. I got to create a way were i get a call-back or notification and play the audio from the
-from all the output devices.
+from correct the output devices.
 
