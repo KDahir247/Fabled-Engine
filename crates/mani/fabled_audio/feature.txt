@@ -8,4 +8,4 @@
 // is excessive and redundant operation. What we will do is create one sink and one mixer the sink will append
 // the mixer and the mixer composer will play the audio.
 
-// Note that to play audio in sequence we will need to either append to the sink or add a delay operation t
+// Note that to play audio in sequence we will need to add a delay to the next audio in sequence and so on.
