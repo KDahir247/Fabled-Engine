@@ -7,7 +7,7 @@ pub struct AudioSpatialOutput {
     sink: Option<ambisonic::rodio::SpatialSink>,
     #[allow(dead_code)]
     output_stream: Option<ambisonic::rodio::OutputStream>,
-    pub composer: std::sync::Arc<ambisonic::BmixerComposer>,
+    composer: std::sync::Arc<ambisonic::BmixerComposer>,
 }
 
 impl Default for AudioSpatialOutput {
@@ -62,8 +62,8 @@ impl AudioSpatialOutput {
     }
 
     // pick up sound equally from all directions, so we can combine input to a
-    // single mono source. one channel so what ever you hear from the left speaker
-    // you will also hear from the right equally
+    // single mono source, then plays that mono sound to each channel at the volume
+    // given for that channel
     pub fn play_omni<T>(&self, clip: RawAmbisonicClip<T>, volume: f32) -> SpatialSource
     where
         T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {

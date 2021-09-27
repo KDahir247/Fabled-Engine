@@ -36,6 +36,7 @@ impl AudioClip {
     pub fn from_file(buffer: Vec<u8>) -> Self {
         let decoder = rodio::Decoder::new(std::io::Cursor::new(buffer)).unwrap();
 
+
         // We should be able to guarantee that the unwrap will not be None
         let channel = decoder.channels();
         let sample = decoder.sample_rate();

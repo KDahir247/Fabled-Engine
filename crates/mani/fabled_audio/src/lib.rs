@@ -23,7 +23,7 @@ pub use source::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::{Ambisonic, AudioClip, AudioListener, AudioSpatialOutput};
+    use crate::{Ambisonic, AudioClip, AudioListener, AudioOutput, AudioSpatialOutput, Standard};
 
     use std::io::Read;
 
@@ -33,12 +33,10 @@ mod tests {
 
         //--------------------- Loading the File ----------------
 
-        ambisonic::AmbisonicBuilder::new();
-
         let mut dir_path = String::new();
         let cargo_dir = env!("CARGO_MANIFEST_DIR");
         dir_path.push_str(cargo_dir);
-        dir_path.push_str("/src/audio/Peractorum.mp3");
+        dir_path.push_str("/src/audio/epic.mp3");
 
         let mut file = std::fs::File::open(dir_path.as_str()).unwrap();
         let file_length = file.metadata().unwrap();
@@ -47,12 +45,16 @@ mod tests {
         file.read_to_end(&mut buffer1).unwrap();
         //---------------------- Creating the Clip ------------------
 
-        let output = AudioSpatialOutput::default();
+        let spatial_output = AudioSpatialOutput::default();
+        let standard_output = AudioOutput::default();
+
+
         let audio_clip1 = AudioClip::from_file(buffer1);
 
-        let raw_clip = Ambisonic::from(audio_clip1);
-        let sound = output.play_omni(raw_clip, 1.);
+        let raw_clip = Standard::from(audio_clip1);
+        // let sound = spatial_output.play_omni(raw_clip, 1.);
 
+        standard_output.play(raw_clip, 1.0);
         std::thread::sleep(std::time::Duration::from_secs(100000));
     }
 }
