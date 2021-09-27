@@ -3,12 +3,24 @@
 
 use crate::RawClip;
 
-pub struct AudioOutput {}
+pub struct AudioOutput {
+    
+}
+
+impl Default for AudioOutput{
+    fn default() -> Self {
+        todo!()
+    }
+}
 
 
 impl AudioOutput {
+    
+    
+    
     pub fn play<T>(&self, clip: RawClip<T>)
     where
         T: rodio::Source<Item = i16> + Send + 'static, {
+        
     }
 }

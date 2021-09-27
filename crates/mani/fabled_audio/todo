@@ -7,4 +7,25 @@ I don't want to create alot of sink at the benefit of allowing each clip to adju
 as it is expensive to create alot of sink rather than just having on sink that has a mixer append to it
 to represent the spatial position audio.
 
+
+We can also create a single sink which will hold a mixer for all the standard audio.
+If we look at unity audio system the default audio source will play on top of other audio sources in (spatial set to 2d).
+It doesn't play in sequence. If the user want to play the audio clip after the other audio is finished.
+They can specify the delay for the audio clip to wait before playing.
+
+Changing the clip using Source : Iterator function is more efficient since there is no dyn and is more primitive.
+We will change the clip using these function.
+
 Eg. Fire crackling and cricket chirping in the space spatial position.
+
+Maybe we can use amplify to fake the volume for each clip separately for the Mixer instead of creating a-lot of sinks.
+Just to hold the volume.
+
+Small Drawback is that changing the volume after calling play for the individual will not be allowed since it is passed to
+the mixer and we will not be able to retrieve it when passed to the mixer.
+We can change the global volume though, but this will change all the audio in the mixer.
+If you really want to change each clip's volume at runtime you can create multiple audio output or audio_spatial_output.
+There will be a performance expense for this operation, since the spatial output will hold the sink, output_stream and a mixer.
+
+
+

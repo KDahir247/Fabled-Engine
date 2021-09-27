@@ -60,33 +60,25 @@ impl AudioClip {
 // Standard clip
 impl From<AudioClip> for Standard {
     fn from(clip: AudioClip) -> Self {
+        // blocks
         let data = clip.data.read().unwrap();
 
-        let handled_channel = clip.channel.max(1);
-        let handled_sample = clip.sample.max(1);
-
         let sample_buffer =
-            rodio::buffer::SamplesBuffer::new(handled_channel, handled_sample, data.to_vec());
+            rodio::buffer::SamplesBuffer::new(clip.channel, clip.sample, data.to_vec());
 
         RawClip::new(sample_buffer)
     }
 }
 
-
 // Ambisonic clip
 impl From<AudioClip> for Ambisonic {
     fn from(clip: AudioClip) -> Self {
+        // blocks
         let data = clip.data.read().unwrap();
 
-        let handled_channel = clip.channel.max(1);
-        let handled_sample = clip.sample.max(1);
-
-        let sample_buffer = ambisonic::rodio::buffer::SamplesBuffer::new(
-            handled_channel,
-            handled_sample,
-            data.to_vec(),
-        )
-        .convert_samples::<f32>();
+        let sample_buffer =
+            ambisonic::rodio::buffer::SamplesBuffer::new(clip.channel, clip.sample, data.to_vec())
+                .convert_samples::<f32>();
 
         RawAmbisonicClip::new(sample_buffer)
     }
