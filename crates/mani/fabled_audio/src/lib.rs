@@ -23,7 +23,7 @@ pub use source::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::{Ambisonic, AudioClip, AudioListener, AudioOutput, AudioSpatialOutput, Standard};
+    use crate::{AudioClip, AudioOutput, AudioSpatialOutput, Standard};
 
     use std::io::Read;
 
@@ -43,18 +43,23 @@ mod tests {
 
         let mut buffer1 = Vec::with_capacity(file_length.len() as usize);
         file.read_to_end(&mut buffer1).unwrap();
+
+
         //---------------------- Creating the Clip ------------------
 
         let spatial_output = AudioSpatialOutput::default();
         let standard_output = AudioOutput::default();
 
-
         let audio_clip1 = AudioClip::from_file(buffer1);
 
         let raw_clip = Standard::from(audio_clip1);
-        // let sound = spatial_output.play_omni(raw_clip, 1.);
+
 
         standard_output.play(raw_clip, 0.6);
+
+        // let sound = spatial_output.play_omni(raw_clip, 1.);
+
+
         std::thread::sleep(std::time::Duration::from_secs(100000));
     }
 }

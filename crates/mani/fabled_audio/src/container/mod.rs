@@ -12,15 +12,12 @@ mod sample_format;
 
 #[cfg(test)]
 mod data_test {
-    use crate::{AudioClip, AudioListener, RawClip, SampleFormat};
+    use crate::{AudioClip, AudioListener, SampleFormat};
 
     #[test]
     fn data_size() {
         let audio_clip_size = std::mem::size_of::<AudioClip>();
         println!("{}", audio_clip_size);
-
-        let raw_clip_size = std::mem::size_of::<RawClip<rodio::buffer::SamplesBuffer<i16>>>();
-        println!("{}", raw_clip_size);
 
         let audio_listener_size = std::mem::size_of::<AudioListener>();
         println!("{}", audio_listener_size);

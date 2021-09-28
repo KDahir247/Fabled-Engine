@@ -4,12 +4,18 @@ pub use output_config::*;
 
 
 #[cfg(test)]
-mod test {
-
+mod data_test {
+    use crate::OutputConfig;
 
     #[test]
-    fn test() {
-        let a = std::mem::size_of::<cpal::Device>();
-        println!("{}", a);
+    fn data_size() {
+        let output_config_size = std::mem::size_of::<OutputConfig>();
+        println!("{}", output_config_size);
+    }
+
+    #[test]
+    fn data_alignment() {
+        let output_config_align = std::mem::align_of::<OutputConfig>();
+        println!("{}", output_config_align);
     }
 }

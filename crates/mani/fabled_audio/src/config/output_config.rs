@@ -4,6 +4,7 @@ use cpal::traits::{DeviceTrait, HostTrait};
 // todo handle unwrap errors.
 //  add more functionality to this struct.
 //  add ConfigInput to allow user to record audio
+// todo Requires better designing as well
 
 pub struct OutputDeviceConfig {
     pub sample_rate: u32,

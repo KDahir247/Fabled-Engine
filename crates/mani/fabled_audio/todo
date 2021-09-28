@@ -1,12 +1,6 @@
-add a way to adjust the volume for each clip.
-We can't append to the sink because the mixer is already appended to the sink and
-the mixer doesn't get complete until it is dropped, thus it will also drop the sink
-so the mixer will play until both the mixer and sink have dropped.
-
 I don't want to create alot of sink at the benefit of allowing each clip to adjust their own volume
 as it is expensive to create alot of sink rather than just having on sink that has a mixer append to it
 to represent the spatial position audio.
-
 
 We can also create a single sink which will hold a mixer for all the standard audio.
 If we look at unity audio system the default audio source will play on top of other audio sources in (spatial set to 2d).
@@ -31,4 +25,17 @@ There will be a performance expense for this operation, since the spatial output
 Handle case where the user switch from different output devices. Currently when the user switch from desktop to headphone it would
 still play from the desktop and vis versa. I got to create a way were i get a call-back or notification and play the audio from the
 from correct the output devices.
+
+Create a mixer that will allow each individual audio clip to be transformed, such as fade_in, low_pass, etc...
+We want to directly use the clip for the transformation since it is more straight forward and efficient
+
+Clean up output_config.
+
+Maybe implement Input Config and allow sound recording for flac, ogg, wav, mp3
+
+If I allow Input, Output
+
+Use Sample format to determine the sample format for the audio. Currently both spatial and standard audio is f32
+
+add pausable and stoppable to the clip to let it allow play on awake enable and disable feature.
 
