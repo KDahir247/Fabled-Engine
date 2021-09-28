@@ -38,4 +38,5 @@ If I allow Input, Output
 Use Sample format to determine the sample format for the audio. Currently both spatial and standard audio is f32
 
 add pausable and stoppable to the clip to let it allow play on awake enable and disable feature.
+Should i also add speed as a requirement or should it be optional?
 

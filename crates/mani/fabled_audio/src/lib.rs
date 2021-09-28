@@ -1,5 +1,4 @@
-// Audio Death Is Just Another Path.mp3 Made by Otto Halmén
-// https://opengameart.org/content/death-is-just-another-path
+//"The Pilgrimage" composed, performed, mixed and mastered by Viktor Kraus
 
 mod codecs;
 mod config;
@@ -23,7 +22,7 @@ pub use source::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::{AudioClip, AudioOutput, AudioSpatialOutput, Standard};
+    use crate::{AudioClip, AudioDescriptor, AudioOutput, AudioSpatialOutput, Standard};
 
     use std::io::Read;
 
@@ -36,7 +35,7 @@ mod tests {
         let mut dir_path = String::new();
         let cargo_dir = env!("CARGO_MANIFEST_DIR");
         dir_path.push_str(cargo_dir);
-        dir_path.push_str("/src/audio/epic.mp3");
+        dir_path.push_str("/src/audio/epic1.mp3");
 
         let mut file = std::fs::File::open(dir_path.as_str()).unwrap();
         let file_length = file.metadata().unwrap();
@@ -50,15 +49,19 @@ mod tests {
         let spatial_output = AudioSpatialOutput::default();
         let standard_output = AudioOutput::default();
 
-        let audio_clip1 = AudioClip::from_file(buffer1);
+        let audio_clip1 = AudioClip::from_file(
+            buffer1,
+            &AudioDescriptor {
+                play_on_awake: true,
+                speed_factor: 1.5,
+            },
+        );
 
         let raw_clip = Standard::from(audio_clip1);
 
+        standard_output.play(raw_clip, 0.4);
 
-        standard_output.play(raw_clip, 0.6);
-
-        // let sound = spatial_output.play_omni(raw_clip, 1.);
-
+        // let sound = spatial_output.play_omni(raw_clip, 0.2);
 
         std::thread::sleep(std::time::Duration::from_secs(100000));
     }

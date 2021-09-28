@@ -1,14 +1,17 @@
 pub use audio_clip::*;
+pub use audio_descriptor::*;
 pub use audio_listener::*;
 pub use audio_track::*;
 pub use raw_clip::*;
 pub use sample_format::*;
 
 mod audio_clip;
+mod audio_descriptor;
 mod audio_listener;
 mod audio_track;
 mod raw_clip;
 mod sample_format;
+
 
 #[cfg(test)]
 mod data_test {
