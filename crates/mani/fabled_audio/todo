@@ -40,3 +40,5 @@ Use Sample format to determine the sample format for the audio. Currently both s
 add pausable and stoppable to the clip to let it allow play on awake enable and disable feature.
 Should i also add speed as a requirement or should it be optional?
 
+Nice to make audio transformation extendable where it will allow user to create the own transform for the audio clip.
+This will be as a feature not a core.

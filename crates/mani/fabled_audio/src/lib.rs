@@ -1,5 +1,7 @@
-//"The Pilgrimage" composed, performed, mixed and mastered by Viktor Kraus
+// Audio Death Is Just Another Path.mp3 Made by Otto Halmén
+// https://opengameart.org/content/death-is-just-another-path
 
+//"The Pilgrimage" composed, performed, mixed and mastered by Viktor Kraus
 mod codecs;
 mod config;
 mod container;
@@ -22,8 +24,9 @@ pub use source::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::{AudioClip, AudioDescriptor, AudioOutput, AudioSpatialOutput, Standard};
+    use crate::{Ambisonic, AudioClip, AudioDescriptor, AudioOutput, AudioSpatialOutput, Standard};
 
+    use rodio::Source;
     use std::io::Read;
 
     #[test]
@@ -35,7 +38,7 @@ mod tests {
         let mut dir_path = String::new();
         let cargo_dir = env!("CARGO_MANIFEST_DIR");
         dir_path.push_str(cargo_dir);
-        dir_path.push_str("/src/audio/epic1.mp3");
+        dir_path.push_str("/src/audio/epic.mp3");
 
         let mut file = std::fs::File::open(dir_path.as_str()).unwrap();
         let file_length = file.metadata().unwrap();
@@ -53,13 +56,13 @@ mod tests {
             buffer1,
             &AudioDescriptor {
                 play_on_awake: true,
-                speed_factor: 1.5,
+                speed_factor: 1.0,
             },
         );
 
         let raw_clip = Standard::from(audio_clip1);
 
-        standard_output.play(raw_clip, 0.4);
+        standard_output.play(raw_clip, 1.0);
 
         // let sound = spatial_output.play_omni(raw_clip, 0.2);
 

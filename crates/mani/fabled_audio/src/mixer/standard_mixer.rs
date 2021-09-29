@@ -1,13 +1,109 @@
 // This design will follow the spatial mixer
 
-use crate::RawClip;
+// Looping should not be allowed here because it should be required while
+// creating the audio clip.
 
-pub struct StandardMixer<T: rodio::Source<Item = f32>>(T);
+use crate::{FadeFilter, RawClip};
 
-impl<T: rodio::Source<Item = f32>> StandardMixer<T> {
-    pub fn new(raw_clip: RawClip<T>) -> Self {
-        Self { 0: raw_clip.get() }
+use rodio::Source;
+
+type Reverb<T> = RawClip<
+    rodio::source::Mix<
+        rodio::source::Buffered<T>,
+        rodio::source::Delay<rodio::source::Amplify<rodio::source::Buffered<T>>>,
+    >,
+>;
+
+impl<T> RawClip<T>
+where
+    T: rodio::Source<Item = f32>,
+{
+    // Create the audio effect here?
+    pub fn buffered(self) -> RawClip<rodio::source::Buffered<T>> {
+        RawClip::new(self.get().buffered())
+    }
+    pub fn low_pass(self, frequency: u32) -> RawClip<rodio::source::BltFilter<T>> {
+        RawClip::new(self.get().low_pass(frequency))
     }
 
-    // create the transformation for the clip here
+    pub fn mix(self, raw_clip: RawClip<T>) -> RawClip<rodio::source::Mix<T, T>> {
+        RawClip::new(self.get().mix(raw_clip.get()))
+    }
+
+    pub fn take_duration(
+        self,
+        seconds: u64,
+        micro_seconds: u32,
+        filter: FadeFilter,
+    ) -> RawClip<rodio::source::TakeDuration<T>> {
+        let mut take = self
+            .get()
+            .take_duration(std::time::Duration::new(seconds, micro_seconds * 1000));
+
+        take.clear_filter();
+
+        if let FadeFilter::FADE = filter {
+            take.set_filter_fadeout();
+        }
+
+        RawClip::new(take)
+    }
+
+    pub fn delay(self, seconds: u64, micro_seconds: u32) -> RawClip<rodio::source::Delay<T>> {
+        let delay = self
+            .get()
+            .delay(std::time::Duration::new(seconds, micro_seconds * 1000));
+
+        RawClip::new(delay)
+    }
+
+    pub fn fade_in(self, seconds: u64, micro_seconds: u32) -> RawClip<rodio::source::FadeIn<T>> {
+        let fade = self
+            .get()
+            .fade_in(std::time::Duration::new(seconds, micro_seconds * 1000));
+
+        RawClip::new(fade)
+    }
+
+    pub fn amplify(self, factor: f32) -> RawClip<rodio::source::Amplify<T>> {
+        RawClip::new(self.get().amplify(factor))
+    }
+
+    pub fn take_crossfade_with(
+        self,
+        seconds: u64,
+        micro_seconds: u32,
+        raw_clip: RawClip<T>,
+    ) -> RawClip<rodio::source::Crossfade<T, T>> {
+        let cross_fade = self.get().take_crossfade_with(
+            raw_clip.get(),
+            std::time::Duration::new(seconds, micro_seconds * 1000),
+        );
+        RawClip::new(cross_fade)
+    }
+
+    pub fn reverb(self, seconds: u64, micro_seconds: u32, amplitude: f32) -> Reverb<T> {
+        let reverb = self.buffered().get().reverb(
+            std::time::Duration::new(seconds, micro_seconds * 1000),
+            amplitude,
+        );
+
+        RawClip::new(reverb)
+    }
+
+    pub fn periodic_access<F>(
+        self,
+        seconds: u64,
+        micro_seconds: u32,
+        access: F,
+    ) -> RawClip<rodio::source::PeriodicAccess<T, F>>
+    where
+        F: FnMut(&mut T), {
+        let access = self.get().periodic_access(
+            std::time::Duration::new(seconds, micro_seconds * 1000),
+            access,
+        );
+
+        RawClip::new(access)
+    }
 }

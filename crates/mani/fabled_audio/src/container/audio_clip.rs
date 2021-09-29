@@ -18,10 +18,10 @@ pub type Ambisonic = RawAmbisonicClip<AudioClip>;
 pub struct AudioClip {
     // std::sync::RwLock<std::sync::Arc<??>>
     pub data: std::vec::IntoIter<i16>,
-    channel: u16,
-    sample: u32,
-    duration: Option<std::time::Duration>,
-    current_frame_len: Option<usize>,
+    pub channel: u16,
+    pub sample: u32,
+    pub duration: Option<std::time::Duration>,
+    pub current_frame_len: Option<usize>,
 }
 
 impl Default for AudioClip {
@@ -45,11 +45,14 @@ impl AudioClip {
         match decoder {
             Ok(source) => {
                 // allows clip to be paused and stopped.
-                // todo should I also apply .speed(arg) or should that be optional
+                // should this be in the raw???? since we don't know if the clip is ambisonic or
+                // not. todo should I also apply .speed(arg) or should that be
+                // optional
                 let source = source
                     .pausable(!audio_desc.play_on_awake)
                     .stoppable()
                     .speed(audio_desc.speed_factor);
+
 
                 Self {
                     channel: source.channels(),

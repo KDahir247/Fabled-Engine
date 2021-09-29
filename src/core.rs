@@ -1,4 +1,5 @@
 use lib::component::prelude::*;
+use std::io::Read;
 mod graphic;
 mod setup;
 mod window;
