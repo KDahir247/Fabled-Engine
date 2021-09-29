@@ -1,40 +1,123 @@
-// Notes for implementation.
-// Should I make this a struct, impl from RawClip or just a pub function?
+use crate::{FadeFilter, RawAmbisonicClip};
+use ambisonic::rodio::Source;
 
-// Current implementation different audio transformation
-// Buffered (Stores the source in a buffer in addition to returning it. This
-// iterator can be cloned), Mix (Mixes this source with another one),
-// repeat_infinite (Repeats this source forever might be required),
-// take_duration (Takes a certain duration of this source and then stops),
-// delay (Delays the sound by a certain duration) skip_duration (Immediately
-// skips a certain duration of this source. If duration > source length then
-// goes to the end of the source), amplify (Amplifies the sound by the given
-// value.)
-// take_crossfade_with, fade_in, reverb, amplify, periodic_access
+type Reverb<T> = RawAmbisonicClip<
+    ambisonic::rodio::source::Mix<
+        ambisonic::rodio::source::Buffered<T>,
+        ambisonic::rodio::source::Delay<
+            ambisonic::rodio::source::Amplify<ambisonic::rodio::source::Buffered<T>>,
+        >,
+    >,
+>;
 
-// If i make it a struct then i can just extract in once then store it then
-// re-build the raw clip in the end and return it.
-// Got to make use of generic since modifying the audio data will return a
-// different struct with the same trait.
+impl<T> RawAmbisonicClip<T>
+where
+    T: ambisonic::rodio::Source<Item = f32>,
+{
+    pub fn buffered(self) -> RawAmbisonicClip<ambisonic::rodio::source::Buffered<T>> {
+        RawAmbisonicClip::new(self.get().buffered())
+    }
 
-// Cant derive copy, so what i might have to do is create a extension, Should
-// this be part of raw_clip and raw_ambient_clip since it is easier to use and
-// doesn't require you to create a Mixer struct without storing the data.
-// Shouldn't the transformation just be an extension to the audio clip or should
-// we hold the transformation to the audio clip? So we can copy what is already
-// there.
+    pub fn low_pass(
+        self,
+        frequency: u32,
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::BltFilter<T>> {
+        RawAmbisonicClip::new(self.get().low_pass(frequency))
+    }
 
-// I can make it into a extension and chain it with other function.
 
-use crate::{AudioClip, RawAmbisonicClip};
+    pub fn mix(
+        self,
+        raw_clip: RawAmbisonicClip<T>,
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::Mix<T, T>> {
+        RawAmbisonicClip::new(self.get().mix(raw_clip.get()))
+    }
 
-pub struct SpatialMixer<T: ambisonic::rodio::Source<Item = f32>>(RawAmbisonicClip<T>);
+    pub fn take_duration(
+        self,
+        seconds: u64,
+        micro_seconds: u32,
+        filter: FadeFilter,
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::TakeDuration<T>> {
+        let mut take = self
+            .get()
+            .take_duration(std::time::Duration::new(seconds, micro_seconds * 1000));
 
-impl<T: ambisonic::rodio::Source<Item = f32>> SpatialMixer<T> {
-    // create the transformation for the clip.
+        take.clear_filter();
+
+        if let FadeFilter::FADE = filter {
+            take.set_filter_fadeout();
+        }
+
+        RawAmbisonicClip::new(take)
+    }
+
+
+    pub fn delay(
+        self,
+        seconds: u64,
+        micro_seconds: u32,
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::Delay<T>> {
+        let delay = self
+            .get()
+            .delay(std::time::Duration::new(seconds, micro_seconds * 1000));
+
+        RawAmbisonicClip::new(delay)
+    }
+
+    pub fn fade_in(
+        self,
+        seconds: u64,
+        micro_seconds: u32,
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::FadeIn<T>> {
+        let fade = self
+            .get()
+            .fade_in(std::time::Duration::new(seconds, micro_seconds * 1000));
+
+        RawAmbisonicClip::new(fade)
+    }
+
+    pub fn amplify(self, factor: f32) -> RawAmbisonicClip<ambisonic::rodio::source::Amplify<T>> {
+        RawAmbisonicClip::new(self.get().amplify(factor))
+    }
+
+    pub fn take_crossfade_with(
+        self,
+        seconds: u64,
+        micro_seconds: u32,
+        raw_clip: RawAmbisonicClip<T>,
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::Crossfade<T, T>> {
+        let cross_fade = self.get().take_crossfade_with(
+            raw_clip.get(),
+            std::time::Duration::new(seconds, micro_seconds * 1000),
+        );
+
+        RawAmbisonicClip::new(cross_fade)
+    }
+
+
+    pub fn reverb(self, seconds: u64, micro_seconds: u32, amplitude: f32) -> Reverb<T> {
+        let reverb = self.buffered().get().reverb(
+            std::time::Duration::new(seconds, micro_seconds * 1000),
+            amplitude,
+        );
+
+        RawAmbisonicClip::new(reverb)
+    }
+
+    pub fn periodic_access<F>(
+        self,
+        seconds: u64,
+        micro_seconds: u32,
+        access: F,
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::PeriodicAccess<T, F>>
+    where
+        F: FnMut(&mut T), {
+        let access = self.get().periodic_access(
+            std::time::Duration::new(seconds, micro_seconds * 1000),
+            access,
+        );
+
+        RawAmbisonicClip::new(access)
+    }
 }
-
-
-impl AudioClip {}
-
-// or

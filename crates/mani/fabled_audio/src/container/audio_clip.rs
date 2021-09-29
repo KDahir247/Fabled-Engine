@@ -121,7 +121,7 @@ impl Iterator for AudioClip {
     }
 }
 
-// Standard support
+
 impl rodio::Source for AudioClip {
     fn current_frame_len(&self) -> Option<usize> {
         self.current_frame_len
@@ -140,7 +140,6 @@ impl rodio::Source for AudioClip {
     }
 }
 
-// Ambisonic Support
 impl ambisonic::rodio::Source for AudioClip {
     fn current_frame_len(&self) -> Option<usize> {
         self.current_frame_len

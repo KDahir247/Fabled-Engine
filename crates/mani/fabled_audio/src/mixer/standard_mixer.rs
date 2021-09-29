@@ -1,8 +1,3 @@
-// This design will follow the spatial mixer
-
-// Looping should not be allowed here because it should be required while
-// creating the audio clip.
-
 use crate::{FadeFilter, RawClip};
 
 use rodio::Source;
@@ -18,7 +13,6 @@ impl<T> RawClip<T>
 where
     T: rodio::Source<Item = f32>,
 {
-    // Create the audio effect here?
     pub fn buffered(self) -> RawClip<rodio::source::Buffered<T>> {
         RawClip::new(self.get().buffered())
     }
