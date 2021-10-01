@@ -20,7 +20,10 @@ where
         RawClip::new(self.get().low_pass(frequency))
     }
 
-    pub fn mix(self, raw_clip: RawClip<T>) -> RawClip<rodio::source::Mix<T, T>> {
+    pub fn mix<U: rodio::source::Source<Item = f32>>(
+        self,
+        raw_clip: RawClip<U>,
+    ) -> RawClip<rodio::source::Mix<T, U>> {
         RawClip::new(self.get().mix(raw_clip.get()))
     }
 
@@ -63,12 +66,12 @@ where
         RawClip::new(self.get().amplify(factor))
     }
 
-    pub fn take_crossfade_with(
+    pub fn take_crossfade_with<U: rodio::source::Source<Item = f32>>(
         self,
         seconds: u64,
         micro_seconds: u32,
-        raw_clip: RawClip<T>,
-    ) -> RawClip<rodio::source::Crossfade<T, T>> {
+        raw_clip: RawClip<U>,
+    ) -> RawClip<rodio::source::Crossfade<T, U>> {
         let cross_fade = self.get().take_crossfade_with(
             raw_clip.get(),
             std::time::Duration::new(seconds, micro_seconds * 1000),

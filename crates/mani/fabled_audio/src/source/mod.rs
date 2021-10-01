@@ -1,40 +1,41 @@
-mod audio_output;
-mod audio_spatial_output;
+mod ambisonic_output;
+mod sound_controller;
 mod spatial_source;
+mod standard_output;
 
 
-pub use audio_output::*;
-pub use audio_spatial_output::*;
+pub use ambisonic_output::*;
+pub use sound_controller::*;
 pub use spatial_source::*;
-
+pub use standard_output::*;
 
 #[cfg(test)]
 mod data_test {
-    use crate::{AudioOutput, AudioSpatialOutput, SpatialSource};
+    use crate::{AmbisonicOutput, SpatialAmbisonicSource, StandardOutput};
 
     #[test]
     fn data_size() {
-        let audio_output_size = std::mem::size_of::<AudioOutput>();
+        let audio_output_size = std::mem::size_of::<StandardOutput>();
         println!("{}", audio_output_size);
 
-        let audio_spatial_output_size = std::mem::size_of::<AudioSpatialOutput>();
+        let audio_spatial_output_size = std::mem::size_of::<AmbisonicOutput>();
         println!("{}", audio_spatial_output_size);
 
 
-        let spatial_source_size = std::mem::size_of::<SpatialSource>();
+        let spatial_source_size = std::mem::size_of::<SpatialAmbisonicSource>();
         println!("{}", spatial_source_size);
     }
 
 
     #[test]
     fn data_alignment() {
-        let audio_output_alignment = std::mem::align_of::<AudioOutput>();
+        let audio_output_alignment = std::mem::align_of::<StandardOutput>();
         println!("{}", audio_output_alignment);
 
-        let audio_spatial_output_alignment = std::mem::align_of::<AudioSpatialOutput>();
+        let audio_spatial_output_alignment = std::mem::align_of::<AmbisonicOutput>();
         println!("{}", audio_spatial_output_alignment);
 
-        let spatial_source_alignment = std::mem::align_of::<SpatialSource>();
+        let spatial_source_alignment = std::mem::align_of::<SpatialAmbisonicSource>();
         println!("{}", spatial_source_alignment);
     }
 }

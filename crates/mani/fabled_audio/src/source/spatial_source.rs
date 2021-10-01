@@ -1,10 +1,10 @@
 // Small wrapper over ambisonic::SoundController function calls
 
-pub struct SpatialSource {
+pub struct SpatialAmbisonicSource {
     source: ambisonic::SoundController,
 }
 
-impl SpatialSource {
+impl SpatialAmbisonicSource {
     pub fn new(controller: ambisonic::SoundController) -> Self {
         Self { source: controller }
     }
@@ -21,6 +21,8 @@ impl SpatialSource {
         self.source.resume();
     }
 
+    // The source transitions smoothly to the new position. Use this function to
+    // dynamically change the position of a sound source while it is playing.
     pub fn set_position(&mut self, target_position: [f32; 3]) {
         self.source.adjust_position(target_position);
     }

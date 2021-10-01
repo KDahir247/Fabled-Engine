@@ -1,6 +1,3 @@
-// You shouldn't have to directly call method from both Raw struct.
-// todo should the audio effect start here?
-
 pub struct RawClip<T>
 where
     T: rodio::Source,
