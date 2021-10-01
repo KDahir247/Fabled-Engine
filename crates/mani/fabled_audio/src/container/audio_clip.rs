@@ -1,4 +1,4 @@
-use crate::{AudioDescriptor, RawAmbisonicClip, RawClip};
+use crate::{RawAmbisonicClip, RawClip};
 use rodio::Source;
 use std::time::Duration;
 
@@ -17,7 +17,7 @@ pub type Ambisonic = RawAmbisonicClip<AudioClip>;
 #[derive(Debug, Clone)]
 pub struct AudioClip {
     // std::sync::RwLock<std::sync::Arc<??>>
-    pub data: std::vec::IntoIter<i16>,
+    pub data: std::vec::IntoIter<f32>,
     pub channel: u16,
     pub sample: u32,
     pub duration: Option<std::time::Duration>,
@@ -37,29 +37,28 @@ impl Default for AudioClip {
 }
 
 impl AudioClip {
-    // todo maybe make both play_on_awake and speed into a struct that holds both
-    //  Should a also add loopable as a requirement.
-    pub fn from_file(buffer: Vec<u8>, audio_desc: &AudioDescriptor) -> Self {
+    pub fn from_file(buffer: Vec<u8>, play_on_awake: bool) -> Self {
         let decoder = rodio::Decoder::new(std::io::Cursor::new(buffer));
 
         match decoder {
             Ok(source) => {
-                // allows clip to be paused and stopped.
-                // should this be in the raw???? since we don't know if the clip is ambisonic or
-                // not. todo should I also apply .speed(arg) or should that be
-                // optional
                 let source = source
-                    .pausable(!audio_desc.play_on_awake)
+                    .pausable(!play_on_awake)
                     .stoppable()
-                    .speed(audio_desc.speed_factor);
+                    .convert_samples::<f32>();
 
+                let channel = source.channels();
+                let sample = source.sample_rate();
+                let duration = source.total_duration();
+                let current_frame_len = source.current_frame_len();
+                let data = source.collect::<Vec<_>>().into_iter();
 
                 Self {
-                    channel: source.channels(),
-                    sample: source.sample_rate(),
-                    duration: source.total_duration(),
-                    current_frame_len: source.current_frame_len(),
-                    data: source.collect::<Vec<_>>().into_iter(),
+                    channel,
+                    sample,
+                    duration,
+                    current_frame_len,
+                    data,
                 }
             }
             Err(err) => {
@@ -71,11 +70,11 @@ impl AudioClip {
 
     // todo can refactor and optimize this function.
     pub fn create_clip(
-        data: Vec<i16>,
+        data: Vec<f32>,
         channel: u16,
         sample: u32,
         duration: Option<std::time::Duration>,
-        audio_desc: &AudioDescriptor,
+        play_on_awake: bool,
     ) -> AudioClip {
         let current = Self {
             data: data.into_iter(),
@@ -84,9 +83,8 @@ impl AudioClip {
             duration,
             current_frame_len: None,
         }
-        .pausable(!audio_desc.play_on_awake)
-        .stoppable()
-        .speed(audio_desc.speed_factor);
+        .pausable(!play_on_awake)
+        .stoppable();
 
 
         Self {
@@ -117,7 +115,7 @@ impl Iterator for AudioClip {
     type Item = f32;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.data.next().map(|data| cpal::Sample::to_f32(&data))
+        self.data.next()
     }
 }
 

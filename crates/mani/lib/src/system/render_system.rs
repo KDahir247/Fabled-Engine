@@ -3,7 +3,7 @@ use crate::component::{
     window_component,
 };
 use crate::util::{camera, constant, texture};
-use glam::Vec4Swizzles;
+
 use shipyard::*;
 
 pub fn begin_render_pass_system(

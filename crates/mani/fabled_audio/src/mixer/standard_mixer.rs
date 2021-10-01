@@ -100,4 +100,8 @@ where
 
         RawClip::new(access)
     }
+
+    pub fn repeat(self) -> RawClip<rodio::source::Repeat<T>> {
+        RawClip::new(self.get().repeat_infinite())
+    }
 }

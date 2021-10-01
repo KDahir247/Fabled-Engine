@@ -92,7 +92,7 @@ impl AudioSpatialOutput {
     where
         T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
         let sound_controller = self.composer.play(
-            clip.get().amplify(volume.max(1.0)),
+            clip.get().amplify(volume),
             ambisonic::BstreamConfig::new().with_position(init_pos),
         );
 

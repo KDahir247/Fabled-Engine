@@ -120,4 +120,8 @@ where
 
         RawAmbisonicClip::new(access)
     }
+
+    pub fn repeat(self) -> RawAmbisonicClip<ambisonic::rodio::source::Repeat<T>> {
+        RawAmbisonicClip::new(self.get().repeat_infinite())
+    }
 }
