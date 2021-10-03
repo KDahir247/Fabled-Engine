@@ -23,7 +23,7 @@ impl AmbisonicOutput {
             output_config,
         } = OutputConfig::default();
 
-        let (b_mixer, b_controller) = ambisonic::bmixer(output_config.sample_rate);
+        let (b_mixer, b_controller) = ambisonic::bmixer(output_config.unwrap().sample_rate);
 
         let mut spatial_sink = None;
         let mut out_stream = None;

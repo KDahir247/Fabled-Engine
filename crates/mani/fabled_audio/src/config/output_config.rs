@@ -1,7 +1,5 @@
 use crate::SampleFormat;
-use ambisonic::rodio::Device;
 use cpal::traits::{DeviceTrait, HostTrait};
-
 use rayon::prelude::*;
 use std::ops::DerefMut;
 
@@ -17,7 +15,7 @@ pub struct OutputDeviceConfig {
 
 pub struct OutputConfig {
     pub device: Option<cpal::Device>,
-    pub output_config: OutputDeviceConfig,
+    pub output_config: Option<OutputDeviceConfig>,
 }
 
 impl Default for OutputConfig {
@@ -29,7 +27,7 @@ impl Default for OutputConfig {
             Some(device) => {
                 let supported_configs = device.supported_output_configs().ok();
 
-                supported_configs.map_or((0, 0, SampleFormat::F32), |desired_configs| {
+                supported_configs.map(|desired_configs| {
                     // We must have a valid device that is not disconnect at this point a bug if
                     // unwrap fails.
                     let optimal_config_range = desired_configs
@@ -38,33 +36,26 @@ impl Default for OutputConfig {
 
                     let desired_config_max = optimal_config_range.with_max_sample_rate();
 
-                    (
-                        desired_config_max.sample_rate().0,
-                        desired_config_max.channels(),
-                        desired_config_max.sample_format().into(),
-                    )
+                    OutputDeviceConfig {
+                        sample_rate: desired_config_max.sample_rate().0,
+                        channel_count: desired_config_max.channels(),
+                        sample_format: desired_config_max.sample_format().into(),
+                    }
                 })
             }
-            None => (0, 0, SampleFormat::F32),
-        };
-
-
-        let output_config = OutputDeviceConfig {
-            sample_rate: desired_output_config.0,
-            channel_count: desired_output_config.1,
-            sample_format: desired_output_config.2,
+            None => None,
         };
 
 
         Self {
             device: output_device,
-            output_config,
+            output_config: desired_output_config,
         }
     }
 }
 
-impl OutputDeviceConfig {
-    pub fn retrieve_all() -> Vec<(Device, OutputDeviceConfig)> {
+impl OutputConfig {
+    pub fn retrieve_all_host() -> Vec<OutputConfig> {
         let available_hosts = cpal::available_hosts();
 
         let devices = std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(
@@ -76,42 +67,37 @@ impl OutputDeviceConfig {
 
             match host {
                 Ok(host) => {
-                    let device_out = host.default_output_device();
+                    let output_device = host.default_output_device();
 
-                    if let Some(device) = device_out {
-                        let output_value = device.supported_output_configs().map_or(
-                            (0, 0, SampleFormat::F32),
+                    if let Some(device) = output_device {
+                        let output_config = device.supported_output_configs().map_or(
+                            None,
                             |supported_out_config| {
-                                // We must have a valid device that is not disconnect at this
-                                // point a bug if unwrap
-                                // fails.
-
-                                // todo might change since it only get the first.
                                 let optimal_config_range = supported_out_config
-                                    .max_by_key(|config_pred| config_pred.max_sample_rate().0)
-                                    .unwrap();
+                                    .max_by_key(|config_pred| config_pred.max_sample_rate().0);
 
-                                let desired_config_max =
-                                    optimal_config_range.with_max_sample_rate();
+                                if let Some(desired_config) = optimal_config_range {
+                                    let desired_config_max = desired_config.with_max_sample_rate();
 
-
-                                (
-                                    desired_config_max.channels(),
-                                    desired_config_max.sample_rate().0,
-                                    desired_config_max.sample_format().into(),
-                                )
+                                    Some(OutputDeviceConfig {
+                                        sample_rate: desired_config_max.sample_rate().0,
+                                        channel_count: desired_config_max.channels(),
+                                        sample_format: desired_config_max.sample_format().into(),
+                                    })
+                                } else {
+                                    None
+                                }
                             },
                         );
 
-                        let device_output_config = OutputDeviceConfig {
-                            channel_count: output_value.0,
-                            sample_rate: output_value.1,
-                            sample_format: output_value.2,
+                        let clone = devices.clone();
+
+                        let output_device_detail = OutputConfig {
+                            device: Some(device),
+                            output_config,
                         };
 
-
-                        let clone = devices.clone();
-                        clone.lock().push((device, device_output_config));
+                        clone.lock().push(output_device_detail);
                     }
                 }
                 Err(err) => {
@@ -125,12 +111,59 @@ impl OutputDeviceConfig {
         let result = std::mem::take(lock.deref_mut());
         result
     }
+
+
+    pub fn retrieve_all_devices() -> Vec<OutputConfig> {
+        let host = cpal::default_host();
+
+        let output_devices = host.devices().unwrap();
+
+        let devices = std::sync::Arc::new(parking_lot::Mutex::new(Vec::new()));
+
+        output_devices
+            .par_bridge()
+            .into_par_iter()
+            .for_each(|device| {
+                let output_value =
+                    device
+                        .supported_output_configs()
+                        .map_or(None, |supported_out_config| {
+                            supported_out_config
+                                .max_by_key(|config_pred| config_pred.max_sample_rate().0)
+                                .map(|optimal_config_range| {
+                                    let desired_config_max =
+                                        optimal_config_range.with_max_sample_rate();
+
+                                    OutputDeviceConfig {
+                                        sample_rate: desired_config_max.sample_rate().0,
+                                        channel_count: desired_config_max.channels(),
+                                        sample_format: desired_config_max.sample_format().into(),
+                                    }
+                                })
+                        });
+
+                let clone = devices.clone();
+
+                let output_device_detail = OutputConfig {
+                    device: Some(device),
+                    output_config: output_value,
+                };
+
+                clone.lock().push(output_device_detail);
+            });
+
+
+        let mut lock = devices.lock();
+
+        let result = std::mem::take(lock.deref_mut());
+        result
+    }
 }
 
 
 #[cfg(test)]
 mod output_config_test {
-    use crate::{OutputConfig, OutputDeviceConfig};
+    use crate::OutputConfig;
     use rodio::DeviceTrait;
 
     #[test]
@@ -141,12 +174,27 @@ mod output_config_test {
     }
 
     #[test]
-    fn collection_output() {
-        let output_configs = OutputDeviceConfig::retrieve_all();
+    fn collection_output_from_host() {
+        let output_configs = OutputConfig::retrieve_all_host();
+
+        assert!(!output_configs.is_empty());
 
         for config in output_configs {
-            print!("{:?} ", config.0.name());
-            println!("{:?}", config.1);
+            print!("{:?} ", config.device.unwrap().name());
+            println!("{:?}", config.output_config);
+        }
+    }
+
+
+    #[test]
+    fn collection_output_from_devices() {
+        let output_configs = OutputConfig::retrieve_all_devices();
+
+        assert!(!output_configs.is_empty());
+
+        for config in output_configs {
+            print!("{:?} ", config.device.unwrap().name());
+            println!("{:?}", config.output_config);
         }
     }
 }

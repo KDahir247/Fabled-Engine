@@ -25,8 +25,10 @@ impl StandardOutput {
             output_config,
         } = OutputConfig::default();
 
-        let (d_controller, d_mixer) =
-            rodio::dynamic_mixer::mixer(output_config.channel_count, output_config.sample_rate);
+        let (d_controller, d_mixer) = rodio::dynamic_mixer::mixer(
+            output_config.as_ref().unwrap().channel_count,
+            output_config.unwrap().sample_rate,
+        );
 
         let mut out_sink = None;
         let mut out_stream = None;
