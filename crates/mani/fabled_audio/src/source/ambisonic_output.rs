@@ -4,7 +4,7 @@ use ambisonic::PlaybackConfiguration;
 pub struct AmbisonicOutput {
     // we need to keep the sink and output alive for playing the audio.
     #[allow(dead_code)]
-    sink: Option<ambisonic::rodio::SpatialSink>,
+    sink: Option<ambisonic::rodio::Sink>,
     #[allow(dead_code)]
     output_stream: Option<ambisonic::rodio::OutputStream>,
     composer: std::sync::Arc<ambisonic::BmixerComposer>,
@@ -29,15 +29,9 @@ impl AmbisonicOutput {
         let mut out_stream = None;
 
         if let Ok((output_stream, output_handle)) =
-            ambisonic::rodio::OutputStream::try_from_device(&device)
+            ambisonic::rodio::OutputStream::try_from_device(&device.unwrap())
         {
-            let sink = ambisonic::rodio::SpatialSink::try_new(
-                &output_handle,
-                init_pos,
-                audio_listener.stereo_left_position,
-                audio_listener.stereo_right_position,
-            )
-            .unwrap();
+            let sink = ambisonic::rodio::Sink::try_new(&output_handle).unwrap();
 
             match ambisonic::PlaybackConfiguration::default() {
                 PlaybackConfiguration::Stereo(cfg) => {
@@ -65,7 +59,7 @@ impl AmbisonicOutput {
     // single mono source, then plays that mono sound to each channel at the volume
     // given for that channel
     pub fn play_omni<T>(&self, clip: RawAmbisonicClip<T>, volume: f32) -> SpatialAmbisonicSource
-        where
+    where
         T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
         let inner = clip.get();
         let channel_count = inner.channels();
@@ -89,7 +83,7 @@ impl AmbisonicOutput {
         volume: f32,
         init_pos: [f32; 3],
     ) -> SpatialAmbisonicSource
-        where
+    where
         T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
         let sound_controller = self.composer.play(
             clip.get().amplify(volume),

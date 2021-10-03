@@ -24,6 +24,12 @@ impl SpatialAmbisonicSource {
     // The source transitions smoothly to the new position. Use this function to
     // dynamically change the position of a sound source while it is playing.
     pub fn set_position(&mut self, target_position: [f32; 3]) {
+        let target_position = [
+            target_position[0] + f32::EPSILON,
+            target_position[1] + f32::EPSILON,
+            target_position[2] + f32::EPSILON,
+        ];
+
         self.source.adjust_position(target_position);
     }
 

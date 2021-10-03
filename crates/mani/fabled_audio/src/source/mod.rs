@@ -1,11 +1,9 @@
 mod ambisonic_output;
-mod sound_controller;
 mod spatial_source;
 mod standard_output;
 
 
 pub use ambisonic_output::*;
-pub use sound_controller::*;
 pub use spatial_source::*;
 pub use standard_output::*;
 

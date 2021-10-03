@@ -1,5 +1,6 @@
 use crate::{FadeFilter, RawClip};
 
+use rodio::source::Speed;
 use rodio::Source;
 
 type Reverb<T> = RawClip<
@@ -106,5 +107,9 @@ where
 
     pub fn repeat(self) -> RawClip<rodio::source::Repeat<T>> {
         RawClip::new(self.get().repeat_infinite())
+    }
+
+    pub fn speed(self, factor: f32) -> RawClip<Speed<T>> {
+        RawClip::new(self.get().speed(factor))
     }
 }

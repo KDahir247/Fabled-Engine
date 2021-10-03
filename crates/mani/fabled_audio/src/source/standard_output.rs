@@ -31,7 +31,9 @@ impl StandardOutput {
         let mut out_sink = None;
         let mut out_stream = None;
 
-        if let Ok((output_stream, output_handle)) = rodio::OutputStream::try_from_device(&device) {
+        if let Ok((output_stream, output_handle)) =
+            rodio::OutputStream::try_from_device(&device.unwrap())
+        {
             let sink = rodio::SpatialSink::try_new(
                 &output_handle,
                 init_pos,
@@ -99,5 +101,40 @@ impl StandardOutput {
         self.sink
             .as_ref()
             .map_or(0.0, |valid_sink| valid_sink.volume())
+    }
+
+
+    // todo temp solution.
+    pub fn stop(&self) {
+        self.sink.as_ref().unwrap().stop();
+    }
+
+    pub fn pause(&self) {
+        self.sink.as_ref().unwrap().pause()
+    }
+
+    pub fn resume(&self) {
+        self.sink.as_ref().unwrap().play();
+    }
+
+    pub fn set_position(&mut self, target_position: [f32; 3]) {
+        self.sink
+            .as_ref()
+            .unwrap()
+            .set_emitter_position(target_position);
+    }
+
+    pub fn set_left_ear_position(&mut self, left_ear_position: [f32; 3]) {
+        self.sink
+            .as_ref()
+            .unwrap()
+            .set_left_ear_position(left_ear_position);
+    }
+
+    pub fn set_right_ear_position(&mut self, right_ear_position: [f32; 3]) {
+        self.sink
+            .as_ref()
+            .unwrap()
+            .set_right_ear_position(right_ear_position);
     }
 }
