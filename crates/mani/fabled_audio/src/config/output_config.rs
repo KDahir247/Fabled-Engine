@@ -3,9 +3,6 @@ use cpal::traits::{DeviceTrait, HostTrait};
 use rayon::prelude::*;
 use std::ops::DerefMut;
 
-// todo add more functionality to this struct.
-//  add ConfigInput to allow user to record audio
-
 #[derive(Clone, Debug)]
 pub struct OutputDeviceConfig {
     pub sample_rate: u32,

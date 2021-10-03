@@ -42,3 +42,6 @@ Should i also add speed as a requirement or should it be optional?
 
 Nice to make audio transformation extendable where it will allow user to create the own transform for the audio clip.
 This will be as a feature not a core.
+
+
+// add ConfigInput to allow user to record audio
