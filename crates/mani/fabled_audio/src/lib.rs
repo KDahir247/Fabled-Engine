@@ -1,3 +1,4 @@
+#![feature(thread_id_value)]
 // Audio Death Is Just Another Path.mp3 Made by Otto Halmén
 // https://opengameart.org/content/death-is-just-another-path
 
@@ -57,39 +58,14 @@ mod tests {
 
 
         //---------------------- Creating the Clip ------------------
-        let mut standard_output = StandardOutput::default();
+        let standard_output = StandardOutput::default();
 
-        let spatial_output = AmbisonicOutput::default();
+        let audio_clip: AudioClip<f32> = AudioClip::from_file(buffer, true);
 
-        let audio_clip1 = AudioClip::from_file(buffer1, true);
-        let audio_clip = AudioClip::from_file(buffer, true);
+        let raw_clip = Standard::from(audio_clip);
 
-        let raw_clip = Standard::from(audio_clip1);
+        standard_output.play_omni(raw_clip, 0.1);
 
-        standard_output.play_omni(raw_clip, 1.0);
-        // let mut a = spatial_output.play_at(raw_clip, 1.0, [10.0, 0.0, 0.0]);
-
-
-        // a.set_doppler(0.3);
-        // for _ in 0..5 {
-        // a.set_velocity([-10.0, 0.0, 0.0]);
-        // for i in 1..1001 {
-        // std::thread::sleep(std::time::Duration::from_millis(10));
-        // standard_output.set_position([50. - i as f32 / 10.0, 0.0, 0.0]);
-        // }
-        //
-        // a.set_velocity([10.0, 0.0, 0.0]);
-        // for i in 1..1001 {
-        // std::thread::sleep(std::time::Duration::from_millis(10));
-        // standard_output.set_position([-50. + i as f32 / 10.0, 0.0, 0.0]);
-        // }
-        // }
-
-        // standard_output.set_velocity([0.0; 3]);
-
-
-        // let sound = spatial_output.play_omni(raw_clip, 1.0);
-
-        std::thread::sleep(std::time::Duration::from_secs(1000));
+        std::thread::sleep(std::time::Duration::from_secs(10000));
     }
 }

@@ -1,5 +1,4 @@
 use crate::{FadeFilter, RawAmbisonicClip};
-use ambisonic::rodio::source::Speed;
 use ambisonic::rodio::Source;
 
 type Reverb<T> = RawAmbisonicClip<
@@ -126,7 +125,7 @@ where
         RawAmbisonicClip::new(self.get().repeat_infinite())
     }
 
-    pub fn speed(self, factor: f32) -> RawAmbisonicClip<Speed<T>> {
+    pub fn speed(self, factor: f32) -> RawAmbisonicClip<ambisonic::rodio::source::Speed<T>> {
         RawAmbisonicClip::new(self.get().speed(factor))
     }
 }

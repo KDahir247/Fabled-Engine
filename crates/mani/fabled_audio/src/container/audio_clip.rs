@@ -2,7 +2,6 @@ use crate::{RawAmbisonicClip, RawClip};
 use rodio::Source;
 use std::time::Duration;
 
-
 // Rodio spawns a background thread that is dedicated to reading from the
 // sources and sending the output to the device and I want user to have control
 // over customizing the audio clip data I will wrap it in a Mutex. Might have
@@ -19,19 +18,23 @@ use std::time::Duration;
 
 // A Rust object that represents a sound should implement the `Source` trait.
 
-pub type Standard = RawClip<AudioClip>;
-pub type Ambisonic = RawAmbisonicClip<AudioClip>;
+pub type Standard<D> = RawClip<AudioClip<D>>;
+pub type Ambisonic<D> = RawAmbisonicClip<AudioClip<D>>;
 
+
+// We don't know if the data is f32, i16, or u16 and want to support current
+// data types and future types deriving from rodio::Sample. Not just restrict it
+// to one type.
 #[derive(Debug)]
-pub struct AudioClip {
-    pub data: parking_lot::Mutex<std::vec::IntoIter<f32>>,
+pub struct AudioClip<D> {
+    pub data: parking_lot::Mutex<std::vec::IntoIter<D>>,
     pub channel: u16,
     pub sample: u32,
     pub duration: Option<std::time::Duration>,
     pub current_frame_len: Option<usize>,
 }
 
-impl Default for AudioClip {
+impl<D> Default for AudioClip<D> {
     fn default() -> Self {
         Self {
             data: parking_lot::Mutex::new(vec![].into_iter()),
@@ -43,8 +46,12 @@ impl Default for AudioClip {
     }
 }
 
-impl AudioClip {
+impl<D> AudioClip<D>
+where
+    D: rodio::Sample,
+{
     pub fn from_file(buffer: Vec<u8>, play_on_awake: bool) -> Self {
+        // todo better way to read file. should I pass a buffer?
         let decoder = rodio::Decoder::new(std::io::Cursor::new(buffer));
 
         match decoder {
@@ -52,37 +59,30 @@ impl AudioClip {
                 let source = source
                     .pausable(!play_on_awake)
                     .stoppable()
-                    .convert_samples::<f32>(); // todo maybe remove this and convert to float in Iterator next.
-
-                let channel = source.channels();
-                let sample = source.sample_rate();
-                let duration = source.total_duration();
-                let current_frame_len = source.current_frame_len();
-                let data = source.collect::<Vec<_>>().into_iter();
+                    .convert_samples::<D>(); // todo maybe remove this and convert to float in Iterator next.
 
                 Self {
-                    channel,
-                    sample,
-                    duration,
-                    current_frame_len,
-                    data: parking_lot::Mutex::new(data),
+                    channel: source.channels(),
+                    sample: source.sample_rate(),
+                    duration: source.total_duration(),
+                    current_frame_len: source.current_frame_len(),
+                    data: parking_lot::Mutex::new(source.collect::<Vec<_>>().into_iter()),
                 }
             }
             Err(err) => {
                 println!("Error from decoding audio file.\nMessage : {:?}", err);
-                Self::default()
+                AudioClip::default()
             }
         }
     }
 
-    // todo can refactor and optimize this function.
     pub fn create_clip(
-        data: Vec<f32>,
+        data: Vec<D>,
         channel: u16,
         sample: u32,
         duration: Option<std::time::Duration>,
         play_on_awake: bool,
-    ) -> AudioClip {
+    ) -> AudioClip<D> {
         let current = Self {
             data: parking_lot::Mutex::new(data.into_iter()),
             channel,
@@ -107,21 +107,27 @@ impl AudioClip {
 }
 
 // Standard clip
-impl From<AudioClip> for Standard {
-    fn from(clip: AudioClip) -> Self {
+impl<D> From<AudioClip<D>> for Standard<D>
+where
+    D: rodio::Sample,
+{
+    fn from(clip: AudioClip<D>) -> Self {
         RawClip::new(clip)
     }
 }
 
 // Ambisonic clip
-impl From<AudioClip> for Ambisonic {
-    fn from(clip: AudioClip) -> Self {
+impl<D> From<AudioClip<D>> for Ambisonic<D>
+where
+    D: ambisonic::rodio::Sample,
+{
+    fn from(clip: AudioClip<D>) -> Self {
         RawAmbisonicClip::new(clip)
     }
 }
 
-impl Iterator for AudioClip {
-    type Item = f32;
+impl<D> Iterator for AudioClip<D> {
+    type Item = D;
 
     fn next(&mut self) -> Option<Self::Item> {
         // if data is getting changed block the next audio till change completed.
@@ -132,7 +138,10 @@ impl Iterator for AudioClip {
 }
 
 
-impl rodio::Source for AudioClip {
+impl<D> rodio::Source for AudioClip<D>
+where
+    D: rodio::Sample,
+{
     fn current_frame_len(&self) -> Option<usize> {
         self.current_frame_len
     }
@@ -150,7 +159,11 @@ impl rodio::Source for AudioClip {
     }
 }
 
-impl ambisonic::rodio::Source for AudioClip {
+
+impl<D> ambisonic::rodio::Source for AudioClip<D>
+where
+    D: ambisonic::rodio::Sample,
+{
     fn current_frame_len(&self) -> Option<usize> {
         self.current_frame_len
     }

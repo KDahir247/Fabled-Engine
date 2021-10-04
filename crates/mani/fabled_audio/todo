@@ -45,3 +45,10 @@ This will be as a feature not a core.
 
 
 // add ConfigInput to allow user to record audio
+
+Rather than letting rodio handle loading in the audio format I want to be explicit on loading each audio format.
+
+ogg ogg crate and lewton crate
+flac claxon crate
+wav hound crate
+mp3 minimp3 crate

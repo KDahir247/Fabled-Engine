@@ -10,6 +10,7 @@ pub struct OutputDeviceConfig {
     pub sample_format: SampleFormat,
 }
 
+#[repr(align(16))]
 pub struct OutputConfig {
     pub device: Option<cpal::Device>,
     pub output_config: Option<OutputDeviceConfig>,
