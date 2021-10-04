@@ -29,20 +29,14 @@ from correct the output devices.
 Create a mixer that will allow each individual audio clip to be transformed, such as fade_in, low_pass, etc...
 We want to directly use the clip for the transformation since it is more straight forward and efficient
 
-Clean up output_config.
-
 Maybe implement Input Config and allow sound recording for flac, ogg, wav, mp3
-
 If I allow Input, Output
 
 Use Sample format to determine the sample format for the audio. Currently both spatial and standard audio is f32
-
-add pausable and stoppable to the clip to let it allow play on awake enable and disable feature.
-Should i also add speed as a requirement or should it be optional?
+Working progress set for audio clip
 
 Nice to make audio transformation extendable where it will allow user to create the own transform for the audio clip.
 This will be as a feature not a core.
-
 
 // add ConfigInput to allow user to record audio
 

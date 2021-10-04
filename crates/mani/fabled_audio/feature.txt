@@ -1,11 +1,2 @@
 // split audio clip by specifying the start duration and end duration and add mixer capability to it such as
 // looping through the sliced audio.
-
-
-
-
-// We don't want to create multiple sink for playing audio in the same position (same output) since this
-// is excessive and redundant operation. What we will do is create one sink and one mixer the sink will append
-// the mixer and the mixer composer will play the audio.
-
-// Note that to play audio in sequence we will need to add a delay to the next audio in sequence and so on.
