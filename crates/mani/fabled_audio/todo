@@ -52,3 +52,20 @@ ogg ogg crate and lewton crate
 flac claxon crate
 wav hound crate
 mp3 minimp3 crate
+
+
+
+Rodio spawns a background thread that is dedicated to reading from the
+sources and sending the output to the device and I want user to have control
+over customizing the audio clip data I will wrap it in a Mutex. Might have
+to create a separate thread for audio since I dont want Mutex to block the
+main thread which will handle core logic for read when write is happening,
+but a dedicated thread.
+
+Mutex will be faster if you mostly only ever have one reader at a time.
+There will only be on reader for this type since it is moved to a raw_clip
+type. and from there it is moved to an audio output and played.
+writing can still happen after reading though so we will lock this if it is
+reading or writing and treat reader and writer the same and lock on either
+case. Mutex also support more 3rd tier support and prevent writer starvation.
+

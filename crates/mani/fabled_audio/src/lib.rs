@@ -1,8 +1,3 @@
-#![feature(thread_id_value)]
-// Audio Death Is Just Another Path.mp3 Made by Otto Halmén
-// https://opengameart.org/content/death-is-just-another-path
-
-//"The Pilgrimage" composed, performed, mixed and mastered by Viktor Kraus
 mod codecs;
 mod config;
 mod container;
@@ -31,36 +26,15 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let mut dir_path = String::new();
-        let cargo_dir = env!("CARGO_MANIFEST_DIR");
-        dir_path.push_str(cargo_dir);
-        dir_path.push_str(
-            "/src/audio/epic\
-        .mp3",
-        );
-
-        let mut file = std::fs::File::open(dir_path.as_str()).unwrap();
-        let file_length = file.metadata().unwrap();
-
-        let mut buffer1 = Vec::with_capacity(file_length.len() as usize);
-        file.read_to_end(&mut buffer1).unwrap();
-
-        let mut dir_path = String::new();
-        let cargo_dir = env!("CARGO_MANIFEST_DIR");
-        dir_path.push_str(cargo_dir);
-        dir_path.push_str("/src/audio/epic1.mp3");
-
-        let mut file = std::fs::File::open(dir_path.as_str()).unwrap();
-        let file_length = file.metadata().unwrap();
-
-        let mut buffer = Vec::with_capacity(file_length.len() as usize);
-        file.read_to_end(&mut buffer).unwrap();
-
+        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
+        let mut file = std::fs::File::open(path).unwrap();
+        let mut audio_buffer = vec![0; file.metadata().unwrap().len() as usize];
+        file.read_exact(&mut audio_buffer).unwrap();
 
         //---------------------- Creating the Clip ------------------
         let standard_output = StandardOutput::default();
 
-        let audio_clip: AudioClip<f32> = AudioClip::from_file(buffer, true);
+        let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
 
         let raw_clip = Standard::from(audio_clip);
 
