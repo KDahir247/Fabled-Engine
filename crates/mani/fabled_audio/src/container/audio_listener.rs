@@ -1,4 +1,5 @@
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(align(16))]
 pub struct AudioListener {
     pub stereo_left_position: [f32; 3],
     pub stereo_right_position: [f32; 3],

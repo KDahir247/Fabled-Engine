@@ -100,12 +100,9 @@ where
     }
 }
 
-// Ambisonic clip
-impl<D> From<AudioClip<D>> for Ambisonic<D>
-where
-    D: ambisonic::rodio::Sample,
-{
-    fn from(clip: AudioClip<D>) -> Self {
+// Ambisonic clip only support f32
+impl From<AudioClip<f32>> for Ambisonic<f32> {
+    fn from(clip: AudioClip<f32>) -> Self {
         RawAmbisonicClip::new(clip)
     }
 }

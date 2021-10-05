@@ -32,13 +32,13 @@ mod tests {
         file.read_exact(&mut audio_buffer).unwrap();
 
         //---------------------- Creating the Clip ------------------
-        let standard_output = StandardOutput::default();
+        let standard_output = AmbisonicOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
 
-        let raw_clip = Standard::from(audio_clip);
+        let raw_clip = Ambisonic::from(audio_clip).speed(1.3);
 
-        standard_output.play_omni(raw_clip, 0.1);
+        standard_output.play_omni(raw_clip, 1.0);
 
         std::thread::sleep(std::time::Duration::from_secs(10000));
     }

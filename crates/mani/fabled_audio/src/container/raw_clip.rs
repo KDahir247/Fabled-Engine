@@ -31,15 +31,13 @@ where
 
 pub struct RawAmbisonicClip<T>
 where
-    T: ambisonic::rodio::Source,
-    T::Item: ambisonic::rodio::Sample, {
+    T: ambisonic::rodio::Source<Item = f32>, {
     data: T,
 }
 
 impl<T> AsRef<T> for RawAmbisonicClip<T>
 where
-    T: ambisonic::rodio::Source,
-    T::Item: ambisonic::rodio::Sample,
+    T: ambisonic::rodio::Source<Item = f32>,
 {
     fn as_ref(&self) -> &T {
         &self.data
@@ -48,8 +46,7 @@ where
 
 impl<T> RawAmbisonicClip<T>
 where
-    T: ambisonic::rodio::Source,
-    T::Item: ambisonic::rodio::Sample,
+    T: ambisonic::rodio::Source<Item = f32>,
 {
     pub fn new(data: T) -> Self {
         Self { data }

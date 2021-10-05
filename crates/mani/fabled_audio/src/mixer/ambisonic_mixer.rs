@@ -24,13 +24,8 @@ where
     ) -> RawAmbisonicClip<ambisonic::rodio::source::BltFilter<T>> {
         RawAmbisonicClip::new(self.get().low_pass(frequency))
     }
-}
 
-impl<T> RawAmbisonicClip<T>
-where
-    T: ambisonic::rodio::Source,
-    T::Item: ambisonic::rodio::Sample,
-{
+
     pub fn buffered(self) -> RawAmbisonicClip<ambisonic::rodio::source::Buffered<T>> {
         RawAmbisonicClip::new(self.get().buffered())
     }
@@ -40,8 +35,7 @@ where
         raw_clip: RawAmbisonicClip<U>,
     ) -> RawAmbisonicClip<ambisonic::rodio::source::Mix<T, U>>
     where
-        U: ambisonic::rodio::Source,
-        U::Item: ambisonic::rodio::Sample, {
+        U: ambisonic::rodio::Source<Item = f32>, {
         RawAmbisonicClip::new(self.get().mix(raw_clip.get()))
     }
 
@@ -99,8 +93,7 @@ where
         raw_clip: RawAmbisonicClip<U>,
     ) -> RawAmbisonicClip<ambisonic::rodio::source::Crossfade<T, U>>
     where
-        U: ambisonic::rodio::Source,
-        U::Item: ambisonic::rodio::Sample, {
+        U: ambisonic::rodio::Source<Item = f32>, {
         let cross_fade = self.get().take_crossfade_with(
             raw_clip.get(),
             std::time::Duration::new(seconds, micro_seconds * 1000),
@@ -143,6 +136,7 @@ where
         RawAmbisonicClip::new(self.get().speed(factor))
     }
 }
+
 
 #[cfg(test)]
 mod ambisonic_mixer_test {
