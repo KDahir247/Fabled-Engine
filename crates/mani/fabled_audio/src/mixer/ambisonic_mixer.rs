@@ -1,6 +1,10 @@
 use crate::{FadeFilter, RawAmbisonicClip};
 use ambisonic::rodio::Source;
 
+// Buffered mean that it is able to be cloned.
+// We Mix the current audio and a delayed audio of the current audio and amplify
+// it depending on the amplitude. We can clone the current audio because it is
+// buffered.
 type Reverb<T> = RawAmbisonicClip<
     ambisonic::rodio::source::Mix<
         ambisonic::rodio::source::Buffered<T>,
@@ -14,22 +18,30 @@ impl<T> RawAmbisonicClip<T>
 where
     T: ambisonic::rodio::Source<Item = f32>,
 {
-    pub fn buffered(self) -> RawAmbisonicClip<ambisonic::rodio::source::Buffered<T>> {
-        RawAmbisonicClip::new(self.get().buffered())
-    }
-
     pub fn low_pass(
         self,
         frequency: u32,
     ) -> RawAmbisonicClip<ambisonic::rodio::source::BltFilter<T>> {
         RawAmbisonicClip::new(self.get().low_pass(frequency))
     }
+}
 
+impl<T> RawAmbisonicClip<T>
+where
+    T: ambisonic::rodio::Source,
+    T::Item: ambisonic::rodio::Sample,
+{
+    pub fn buffered(self) -> RawAmbisonicClip<ambisonic::rodio::source::Buffered<T>> {
+        RawAmbisonicClip::new(self.get().buffered())
+    }
 
-    pub fn mix<U: ambisonic::rodio::source::Source<Item = f32>>(
+    pub fn mix<U>(
         self,
         raw_clip: RawAmbisonicClip<U>,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::Mix<T, U>> {
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::Mix<T, U>>
+    where
+        U: ambisonic::rodio::Source,
+        U::Item: ambisonic::rodio::Sample, {
         RawAmbisonicClip::new(self.get().mix(raw_clip.get()))
     }
 
@@ -51,7 +63,6 @@ where
 
         RawAmbisonicClip::new(take)
     }
-
 
     pub fn delay(
         self,
@@ -81,12 +92,15 @@ where
         RawAmbisonicClip::new(self.get().amplify(factor))
     }
 
-    pub fn take_crossfade_with<U: ambisonic::rodio::source::Source<Item = f32>>(
+    pub fn take_crossfade_with<U>(
         self,
         seconds: u64,
         micro_seconds: u32,
         raw_clip: RawAmbisonicClip<U>,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::Crossfade<T, U>> {
+    ) -> RawAmbisonicClip<ambisonic::rodio::source::Crossfade<T, U>>
+    where
+        U: ambisonic::rodio::Source,
+        U::Item: ambisonic::rodio::Sample, {
         let cross_fade = self.get().take_crossfade_with(
             raw_clip.get(),
             std::time::Duration::new(seconds, micro_seconds * 1000),
@@ -97,7 +111,7 @@ where
 
 
     pub fn reverb(self, seconds: u64, micro_seconds: u32, amplitude: f32) -> Reverb<T> {
-        let reverb = self.buffered().get().reverb(
+        let reverb = self.get().buffered().reverb(
             std::time::Duration::new(seconds, micro_seconds * 1000),
             amplitude,
         );
@@ -127,5 +141,20 @@ where
 
     pub fn speed(self, factor: f32) -> RawAmbisonicClip<ambisonic::rodio::source::Speed<T>> {
         RawAmbisonicClip::new(self.get().speed(factor))
+    }
+}
+
+#[cfg(test)]
+mod ambisonic_mixer_test {
+    use crate::{Ambisonic, AudioClip};
+
+    #[test]
+    fn ambisonic_test() {
+        let clip = AudioClip::create_clip(vec![5.0; 100], 2, 48000, None, true);
+
+        let raw_ambisonic = Ambisonic::from(clip);
+
+        // Can chain
+        let _new_ambisonic = raw_ambisonic.amplify(5.0).fade_in(20, 1).low_pass(120);
     }
 }

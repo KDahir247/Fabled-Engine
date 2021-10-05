@@ -63,3 +63,4 @@ writing can still happen after reading though so we will lock this if it is
 reading or writing and treat reader and writer the same and lock on either
 case. Mutex also support more 3rd tier support and prevent writer starvation.
 
+Clean up directory in the audio folders.
