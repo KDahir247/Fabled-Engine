@@ -21,17 +21,12 @@ impl SpatialAmbisonicSource {
         self.source.resume();
     }
 
-    // The source transitions smoothly to the new position. Use this function to
-    // dynamically change the position of a sound source while it is playing.
-
-    // todo handle case where target_position is equal to zero. It will cause a
-    //  internal error and the formula will return nan probably due to dividing by
-    //  zero.
     pub fn set_position(&mut self, target_position: [f32; 3]) {
+        // Handle getting all zero values for target position, which will result in NaN
         let target_position = [
-            target_position[0] + f32::EPSILON,
-            target_position[1] + f32::EPSILON,
-            target_position[2] + f32::EPSILON,
+            target_position[0] + target_position[0].signum() * f32::EPSILON,
+            target_position[1] + target_position[1].signum() * f32::EPSILON,
+            target_position[2] + target_position[2].signum() * f32::EPSILON,
         ];
 
         self.source.adjust_position(target_position);
