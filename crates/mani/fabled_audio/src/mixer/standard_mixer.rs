@@ -79,7 +79,7 @@ where
         RawClip::new(self.get().amplify(factor))
     }
 
-    pub fn take_crossfade_with<U>(
+    pub fn take_cross_fade_with<U>(
         self,
         seconds: u64,
         micro_seconds: u32,

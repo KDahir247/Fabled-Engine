@@ -64,10 +64,12 @@ impl AmbisonicOutput {
 
         let channels = input.channels();
 
-        let a =
+        let channel_volume =
             ambisonic::rodio::source::ChannelVolume::new(input, vec![volume; channels as usize]);
 
-        let sound_controller = self.composer.play(a, ambisonic::BstreamConfig::new());
+        let sound_controller = self
+            .composer
+            .play(channel_volume, ambisonic::BstreamConfig::new());
 
         SpatialAmbisonicSource::new(sound_controller)
     }

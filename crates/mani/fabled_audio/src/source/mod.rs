@@ -6,6 +6,7 @@ mod standard_output;
 pub use ambisonic_output::*;
 pub use spatial_source::*;
 pub use standard_output::*;
+// todo add test
 
 #[cfg(test)]
 mod data_test {
@@ -13,8 +14,16 @@ mod data_test {
 
     #[test]
     fn data_size() {
-        let audio_output_size = std::mem::size_of::<StandardOutput>();
-        println!("{}", audio_output_size);
+        let audio_output_u16_size = std::mem::size_of::<StandardOutput<u16>>();
+        println!("{}", audio_output_u16_size);
+
+        let audio_output_i16_size = std::mem::size_of::<StandardOutput<i16>>();
+        println!("{}", audio_output_i16_size);
+
+        let audio_output_f32_size = std::mem::size_of::<StandardOutput<f32>>();
+        println!("{}", audio_output_f32_size);
+
+        // -----------------------------------------------------------------
 
         let audio_spatial_output_size = std::mem::size_of::<AmbisonicOutput>();
         println!("{}", audio_spatial_output_size);
@@ -27,8 +36,16 @@ mod data_test {
 
     #[test]
     fn data_alignment() {
-        let audio_output_alignment = std::mem::align_of::<StandardOutput>();
-        println!("{}", audio_output_alignment);
+        let audio_output_u16_alignment = std::mem::align_of::<StandardOutput<u16>>();
+        println!("{}", audio_output_u16_alignment);
+
+        let audio_output_i16_alignment = std::mem::align_of::<StandardOutput<i16>>();
+        println!("{}", audio_output_i16_alignment);
+
+        let audio_output_f32_alignment = std::mem::align_of::<StandardOutput<f32>>();
+        println!("{}", audio_output_f32_alignment);
+
+        // -----------------------------------------------------------------
 
         let audio_spatial_output_alignment = std::mem::align_of::<AmbisonicOutput>();
         println!("{}", audio_spatial_output_alignment);
