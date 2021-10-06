@@ -1,5 +1,7 @@
+mod input_config;
 mod output_config;
 
+pub use input_config::*;
 pub use output_config::*;
 
 

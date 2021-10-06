@@ -168,7 +168,7 @@ mod output_config_test {
     fn single_best_output() {
         let output_config = OutputConfig::default();
         print!("{:?} ", output_config.device.unwrap().name());
-        println!("{:?}", output_config.output_config);
+        print!("{:?}", output_config.output_config);
     }
 
     #[test]
