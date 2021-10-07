@@ -16,3 +16,12 @@ impl From<cpal::SampleFormat> for SampleFormat {
         }
     }
 }
+
+impl From<SampleFormat> for hound::SampleFormat {
+    fn from(format: SampleFormat) -> Self {
+        match format {
+            SampleFormat::I16 | SampleFormat::U16 => hound::SampleFormat::Int,
+            SampleFormat::F32 => hound::SampleFormat::Float,
+        }
+    }
+}
