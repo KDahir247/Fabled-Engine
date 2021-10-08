@@ -6,7 +6,6 @@ mod standard_output;
 pub use ambisonic_output::*;
 pub use spatial_source::*;
 pub use standard_output::*;
-// todo add test
 
 #[cfg(test)]
 mod data_test {

@@ -173,6 +173,7 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-c6604968606e816b/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/cpal-9b6770e4c65da976/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/parking_lot_core-20e77ff147f8bdd1/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/tokio-89926a1edef7decc/out" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />

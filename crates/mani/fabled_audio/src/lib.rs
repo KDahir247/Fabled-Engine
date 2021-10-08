@@ -1,3 +1,4 @@
+mod clip;
 mod codecs;
 mod config;
 mod container;
@@ -7,6 +8,7 @@ mod mixer;
 mod renderer;
 mod source;
 
+pub use clip::*;
 pub use codecs::*;
 pub use config::*;
 pub use container::*;
@@ -15,6 +17,7 @@ pub use error::*;
 pub use mixer::*;
 pub use renderer::*;
 pub use source::*;
+
 
 #[cfg(test)]
 mod tests {

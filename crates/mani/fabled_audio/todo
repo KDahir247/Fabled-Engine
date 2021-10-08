@@ -1,44 +1,14 @@
-I don't want to create alot of sink at the benefit of allowing each clip to adjust their own volume
-as it is expensive to create alot of sink rather than just having on sink that has a mixer append to it
-to represent the spatial position audio.
-
-We can also create a single sink which will hold a mixer for all the standard audio.
-If we look at unity audio system the default audio source will play on top of other audio sources in (spatial set to 2d).
-It doesn't play in sequence. If the user want to play the audio clip after the other audio is finished.
-They can specify the delay for the audio clip to wait before playing.
-
-Changing the clip using Source : Iterator function is more efficient since there is no dyn and is more primitive.
-We will change the clip using these function.
-
-Eg. Fire crackling and cricket chirping in the space spatial position.
-
-Maybe we can use amplify to fake the volume for each clip separately for the Mixer instead of creating a-lot of sinks.
-Just to hold the volume.
-
-Small Drawback is that changing the volume after calling play for the individual will not be allowed since it is passed to
-the mixer and we will not be able to retrieve it when passed to the mixer.
-We can change the global volume though, but this will change all the audio in the mixer.
-If you really want to change each clip's volume at runtime you can create multiple audio output or audio_spatial_output.
-There will be a performance expense for this operation, since the spatial output will hold the sink, output_stream and a mixer.
-
-
 Handle case where the user switch from different output devices. Currently when the user switch from desktop to headphone it would
 still play from the desktop and vis versa. I got to create a way were i get a call-back or notification and play the audio from the
 from correct the output devices.
 
-Create a mixer that will allow each individual audio clip to be transformed, such as fade_in, low_pass, etc...
-We want to directly use the clip for the transformation since it is more straight forward and efficient
-
 Maybe implement Input Config and allow sound recording for flac, ogg, wav, mp3
 If I allow Input, Output
 
-Use Sample format to determine the sample format for the audio. Currently both spatial and standard audio is f32
-Working progress set for audio clip
+add ConfigInput to allow user to record audio
 
 Nice to make audio transformation extendable where it will allow user to create the own transform for the audio clip.
 This will be as a feature not a core.
-
-// add ConfigInput to allow user to record audio
 
 Rather than letting rodio handle loading in the audio format I want to be explicit on loading each audio format.
 
@@ -63,4 +33,4 @@ writing can still happen after reading though so we will lock this if it is
 reading or writing and treat reader and writer the same and lock on either
 case. Mutex also support more 3rd tier support and prevent writer starvation.
 
-Clean up directory in the audio folders.
+Clean up directory in the audio folders. Follow fabled_render folder structure.

@@ -1,9 +1,5 @@
 use crate::{AudioEncodingError, InputConfig, SampleFormat};
 use cpal::traits::{DeviceTrait, StreamTrait};
-use cpal::SupportedBufferSize;
-use std::option::Option;
-
-// Not supporting Ambisonic Sample yet.
 
 type WavWriterHandle = std::sync::Arc<
     parking_lot::lock_api::Mutex<
@@ -11,28 +7,6 @@ type WavWriterHandle = std::sync::Arc<
         Option<hound::WavWriter<std::io::BufWriter<std::fs::File>>>,
     >,
 >;
-
-
-#[repr(align(8))]
-#[derive(Copy, Clone, Debug, PartialEq, Default)]
-pub struct WavSpecification {
-    pub channels: u16,
-    pub sample_rate: u32,
-    pub bit_per_sample: u16,
-    pub sample_format: SampleFormat,
-}
-
-impl From<WavSpecification> for hound::WavSpec {
-    fn from(wav_spec: WavSpecification) -> Self {
-        hound::WavSpec {
-            channels: wav_spec.channels,
-            sample_rate: wav_spec.sample_rate,
-            bits_per_sample: wav_spec.bit_per_sample,
-            sample_format: wav_spec.sample_format.into(),
-        }
-    }
-}
-
 
 #[derive(Default)]
 pub struct WavWriter;
@@ -52,7 +26,6 @@ impl WavWriter {
         let device = device.ok_or(AudioEncodingError::NoDeviceError)?;
         let input_config = input_config.ok_or(AudioEncodingError::NoInputConfigError)?;
 
-
         let wav_spec = hound::WavSpec {
             channels: input_config.channel_count,
             sample_rate: input_config.sample_rate,
@@ -67,8 +40,8 @@ impl WavWriter {
         let writer_2 = writer.clone();
 
         let buffer_detail = match input_config.buffer_size {
-            SupportedBufferSize::Range { min, max } => cpal::BufferSize::Fixed(min),
-            SupportedBufferSize::Unknown => cpal::BufferSize::Default,
+            cpal::SupportedBufferSize::Range { min: _, max } => cpal::BufferSize::Fixed(max),
+            cpal::SupportedBufferSize::Unknown => cpal::BufferSize::Default,
         };
 
         let input_stream_config = cpal::StreamConfig {
@@ -135,7 +108,7 @@ impl WavWriter {
 #[cfg(test)]
 mod wav_test {
     use crate::{InputConfig, WavWriter};
-    use cpal::traits::DeviceTrait;
+
 
     #[test]
     fn recording_voice() {
