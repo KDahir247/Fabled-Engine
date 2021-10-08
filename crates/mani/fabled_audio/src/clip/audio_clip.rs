@@ -111,9 +111,6 @@ impl<D> Iterator for AudioClip<D> {
     type Item = D;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // if data is getting changed block the next audio till change completed.
-        // rather then returning a zero and playing no audio we block and then play the
-        // newly changed value/s when the lock is dropped.
         let mut lock = self.data.lock();
         lock.next()
     }

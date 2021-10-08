@@ -1,17 +1,19 @@
 pub use audio_listener::*;
 pub use fade_filter::*;
 pub use sample_format::*;
+pub use supported_buffer::*;
 pub use wav_spec::*;
 
 mod audio_listener;
 mod fade_filter;
 mod sample_format;
+mod supported_buffer;
 mod wav_spec;
 
 
 #[cfg(test)]
 mod data_test {
-    use crate::{AudioListener, FadeFilter, SampleFormat, WavSpecification};
+    use crate::{AudioListener, FadeFilter, SampleFormat, SupportedBufferSize, WavSpecification};
 
     #[test]
     fn data_size() {
@@ -26,6 +28,9 @@ mod data_test {
 
         let wav_spec_size = std::mem::size_of::<WavSpecification>();
         assert_eq!(wav_spec_size & (wav_spec_size - 1), 0);
+
+        let supported_buffer_size = std::mem::size_of::<SupportedBufferSize>();
+        assert_eq!(supported_buffer_size & (supported_buffer_size - 1), 0);
     }
 
 
@@ -42,5 +47,11 @@ mod data_test {
 
         let wav_spec_alignment = std::mem::align_of::<WavSpecification>();
         assert_eq!(wav_spec_alignment & (wav_spec_alignment - 1), 0);
+
+        let supported_buffer_alignment = std::mem::align_of::<SupportedBufferSize>();
+        assert_eq!(
+            supported_buffer_alignment & (supported_buffer_alignment - 1),
+            0
+        );
     }
 }

@@ -36,9 +36,10 @@ mod tests {
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
 
-        let raw_clip = Standard::from(audio_clip).speed(1.5);
+        // Put low pass so it remove background noise
+        let raw_clip = Standard::from(audio_clip).repeat();
 
-        standard_output.play_omni(raw_clip, 1.0);
+        standard_output.play_omni(raw_clip, 0.2);
 
         std::thread::sleep(std::time::Duration::from_secs(10000));
     }

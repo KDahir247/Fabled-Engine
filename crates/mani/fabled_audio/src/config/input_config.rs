@@ -1,17 +1,17 @@
-use crate::SampleFormat;
+use crate::{SampleFormat, SupportedBufferSize};
 use cpal::traits::{DeviceTrait, HostTrait};
 use rayon::prelude::*;
 use std::ops::DerefMut;
 
+// todo make a custom SupportedBufferSize,
 #[derive(Clone, Debug)]
 pub struct InputDeviceConfig {
     pub sample_rate: u32,
     pub channel_count: u16,
     pub sample_format: SampleFormat,
-    pub buffer_size: cpal::SupportedBufferSize,
+    pub buffer_size: SupportedBufferSize,
 }
 
-#[repr(align(16))]
 pub struct InputConfig {
     pub device: Option<cpal::Device>,
     pub input_config: Option<InputDeviceConfig>,
@@ -33,11 +33,12 @@ impl Default for InputConfig {
 
                     let desired_config_max = optimal_config_range.with_max_sample_rate();
 
+
                     InputDeviceConfig {
                         sample_rate: desired_config_max.sample_rate().0,
                         channel_count: desired_config_max.channels(),
                         sample_format: desired_config_max.sample_format().into(),
-                        buffer_size: desired_config_max.buffer_size().to_owned(),
+                        buffer_size: desired_config_max.buffer_size().into(),
                     }
                 })
             }
@@ -84,9 +85,7 @@ impl InputConfig {
                                             sample_format: desired_config_max
                                                 .sample_format()
                                                 .into(),
-                                            buffer_size: desired_config_max
-                                                .buffer_size()
-                                                .to_owned(),
+                                            buffer_size: desired_config_max.buffer_size().into(),
                                         })
                                     } else {
                                         None
@@ -143,7 +142,7 @@ impl InputConfig {
                                         sample_rate: desired_config_max.sample_rate().0,
                                         channel_count: desired_config_max.channels(),
                                         sample_format: desired_config_max.sample_format().into(),
-                                        buffer_size: desired_config_max.buffer_size().to_owned(),
+                                        buffer_size: desired_config_max.buffer_size().into(),
                                     }
                                 })
                         });
