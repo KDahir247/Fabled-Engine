@@ -8,6 +8,7 @@ pub struct InputDeviceConfig {
     pub sample_rate: u32,
     pub channel_count: u16,
     pub sample_format: SampleFormat,
+    pub buffer_size: cpal::SupportedBufferSize,
 }
 
 #[repr(align(16))]
@@ -36,6 +37,7 @@ impl Default for InputConfig {
                         sample_rate: desired_config_max.sample_rate().0,
                         channel_count: desired_config_max.channels(),
                         sample_format: desired_config_max.sample_format().into(),
+                        buffer_size: desired_config_max.buffer_size().to_owned(),
                     }
                 })
             }
@@ -82,6 +84,9 @@ impl InputConfig {
                                             sample_format: desired_config_max
                                                 .sample_format()
                                                 .into(),
+                                            buffer_size: desired_config_max
+                                                .buffer_size()
+                                                .to_owned(),
                                         })
                                     } else {
                                         None
@@ -138,6 +143,7 @@ impl InputConfig {
                                         sample_rate: desired_config_max.sample_rate().0,
                                         channel_count: desired_config_max.channels(),
                                         sample_format: desired_config_max.sample_format().into(),
+                                        buffer_size: desired_config_max.buffer_size().to_owned(),
                                     }
                                 })
                         });

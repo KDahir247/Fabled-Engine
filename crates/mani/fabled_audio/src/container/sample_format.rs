@@ -7,6 +7,12 @@ pub enum SampleFormat {
     F32,
 }
 
+impl Default for SampleFormat {
+    fn default() -> Self {
+        Self::I16
+    }
+}
+
 impl From<cpal::SampleFormat> for SampleFormat {
     fn from(cpal_format: cpal::SampleFormat) -> Self {
         match cpal_format {
@@ -22,6 +28,16 @@ impl From<SampleFormat> for hound::SampleFormat {
         match format {
             SampleFormat::I16 | SampleFormat::U16 => hound::SampleFormat::Int,
             SampleFormat::F32 => hound::SampleFormat::Float,
+        }
+    }
+}
+
+impl SampleFormat {
+    pub fn sample_size(&self) -> usize {
+        match self {
+            SampleFormat::I16 => std::mem::size_of::<i16>(),
+            SampleFormat::U16 => std::mem::size_of::<u16>(),
+            SampleFormat::F32 => std::mem::size_of::<f32>(),
         }
     }
 }

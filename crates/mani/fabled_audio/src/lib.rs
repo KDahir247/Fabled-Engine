@@ -23,7 +23,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic.mp3"].join("");
+        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/recorded.wav"].join("");
         let mut file = std::fs::File::open(path).unwrap();
         let mut audio_buffer = vec![0; file.metadata().unwrap().len() as usize];
         file.read_exact(&mut audio_buffer).unwrap();
