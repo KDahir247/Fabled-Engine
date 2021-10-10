@@ -1,1 +1,4 @@
-// Not implemented yet.
+#[derive(Default)]
+pub struct OggWriter;
+
+impl OggWriter {}

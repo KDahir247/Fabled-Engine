@@ -9,6 +9,8 @@ pub struct AudioSpecification {
     pub bit_per_sample: u16,
 
     pub sample_format: SampleFormat,
+
+    pub duration: u32,
 }
 
 impl Default for AudioSpecification {
@@ -18,6 +20,7 @@ impl Default for AudioSpecification {
             sample_rate: 0,
             bit_per_sample: 32,
             sample_format: Default::default(),
+            duration: 0,
         }
     }
 }

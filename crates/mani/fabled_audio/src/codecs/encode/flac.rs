@@ -1,1 +1,5 @@
-// Not implemented yet.
+#[derive(Default)]
+pub struct FlacWriter;
+
+
+impl FlacWriter {}
