@@ -1,6 +1,7 @@
 // vertical_position get the vertical position relative to angle_rad
 // depth_offset get the z position relative to angle_rad
 
+#[repr(align(8))]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Oblique {
     pub angle_rad: f32,

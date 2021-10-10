@@ -164,6 +164,7 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/serde-054e83cf8326350e/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/slotmap-75287b53bd660016/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-6a454b7001c44ade/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/parking_lot_core-20e77ff147f8bdd1/out" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />
