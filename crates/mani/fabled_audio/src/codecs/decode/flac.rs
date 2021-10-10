@@ -4,7 +4,7 @@ use crate::{AudioDecodingError, AudioSpecification, FlacReaderOptions, SampleFor
 pub struct FlacReader;
 
 impl FlacReader {
-    pub fn open_flac<P: AsRef<std::path::Path>>(
+    pub fn read_flac<P: AsRef<std::path::Path>>(
         &self,
         flac_path: P,
         option: FlacReaderOptions,
@@ -22,13 +22,11 @@ impl FlacReader {
             channel_count: stream_info.channels as _,
             sample_rate: stream_info.sample_rate,
             bit_per_sample: stream_info.bits_per_sample as _,
-            // FLAC format supports only integer samples, not floating-point regardless
+            // FLAC format supports only integer samples, not floating-point
             sample_format: SampleFormat::I16,
             duration: stream_info.samples.unwrap() as u32 / stream_info.sample_rate,
         })
     }
-
-    // Should we also get the tag?.
 }
 
 
@@ -47,7 +45,7 @@ mod flac_decoder_test {
         .join("");
 
         let audio_spec = flac_reader
-            .open_flac(flac_path, FlacReaderOptions::READ_VORBIS_COMMENT)
+            .read_flac(flac_path, FlacReaderOptions::READ_VORBIS_COMMENT)
             .unwrap();
 
         println!("{:?}", audio_spec);

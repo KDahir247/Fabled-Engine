@@ -4,14 +4,21 @@ use crate::{AudioDecodingError, AudioSpecification, SampleFormat};
 pub struct WavReader;
 
 impl WavReader {
-    pub fn open_wav<P: AsRef<std::path::Path>>(
+    pub fn read_wav<P: AsRef<std::path::Path>>(
         &self,
         wav_path: P,
     ) -> Result<AudioSpecification, AudioDecodingError> {
-        let file = std::fs::File::open(wav_path)?;
+        let path_dir = wav_path.as_ref().to_str().unwrap();
 
+        {
+            let mut file = std::fs::File::open(path_dir)?;
+
+            // Check if the file is a wav file and data is of wav format.
+            hound::read_wave_header(&mut file).map_err(AudioDecodingError::WavError)?;
+        }
+
+        let file = std::fs::File::open(path_dir)?;
         let buf_reader = std::io::BufReader::new(file);
-
         let reader = hound::WavReader::new(buf_reader).map_err(AudioDecodingError::WavError)?;
 
         let wav_spec = reader.spec();
@@ -42,12 +49,8 @@ mod wav_decoding_test {
 
         let wav_path = [env!("CARGO_MANIFEST_DIR"), "/src/audio/recorded.wav"].join("");
 
-        let wav_spec = wav_reader.open_wav(wav_path).unwrap();
+        let wav_spec = wav_reader.read_wav(wav_path).unwrap();
 
-        println!("channel count : {}", wav_spec.channel_count);
-        println!("sample rate : {}", wav_spec.sample_rate);
-        println!("bit per sample : {}", wav_spec.bit_per_sample);
-        println!("sample format : {:?}", wav_spec.sample_format);
-        println!("Duration : {}", wav_spec.duration);
+        println!("{:?}", wav_spec);
     }
 }
