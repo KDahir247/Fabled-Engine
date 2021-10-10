@@ -42,6 +42,7 @@ impl WavReader {
 #[cfg(test)]
 mod wav_decoding_test {
     use crate::WavReader;
+    use rodio::Source;
 
     #[test]
     fn decoding_file() {
@@ -52,5 +53,25 @@ mod wav_decoding_test {
         let wav_spec = wav_reader.read_wav(wav_path).unwrap();
 
         println!("{:?}", wav_spec);
+    }
+
+    #[test]
+    fn compare_with_rodio() {
+        let wav_path = [env!("CARGO_MANIFEST_DIR"), "/src/audio/recorded.wav"].join("");
+
+        let file = std::fs::File::open(wav_path.as_str()).unwrap();
+
+        let rodio_decoder = rodio::Decoder::new_wav(file).unwrap();
+
+        let wav_reader = WavReader::default();
+
+        let audio_spec = wav_reader.read_wav(wav_path.as_str()).unwrap();
+
+        assert_eq!(rodio_decoder.channels(), audio_spec.channel_count);
+        assert_eq!(rodio_decoder.sample_rate(), audio_spec.sample_rate);
+        assert_eq!(
+            rodio_decoder.total_duration().unwrap().as_secs() as u32,
+            audio_spec.duration
+        );
     }
 }

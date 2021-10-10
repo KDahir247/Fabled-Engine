@@ -10,6 +10,7 @@ pub struct AudioSpecification {
 
     pub sample_format: SampleFormat,
 
+    // todo maybe convert this to a f32
     pub duration: u32,
 }
 

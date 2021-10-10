@@ -39,6 +39,7 @@ impl Mp3Reader {
 #[cfg(test)]
 mod mp3_decoding_test {
     use crate::Mp3Reader;
+    use rodio::Source;
 
     #[test]
     fn decoding_file() {
@@ -50,5 +51,22 @@ mod mp3_decoding_test {
         let mp3_spec = mp3_reader.read_mp3(mp3_path).unwrap();
 
         println!("{:?}", mp3_spec);
+    }
+
+    #[test]
+    fn compare_with_rodio() {
+        let mp3_path = [env!("CARGO_MANIFEST_DIR"), "/src/audio/epic.mp3"].join("");
+
+        let file = std::fs::File::open(mp3_path.as_str()).unwrap();
+
+        let rodio_decoder = rodio::Decoder::new_mp3(file).unwrap();
+
+        let mp3_reader = Mp3Reader::default();
+        let audio_spec = mp3_reader.read_mp3(mp3_path.as_str()).unwrap();
+
+        assert_eq!(audio_spec.channel_count, rodio_decoder.channels());
+        assert_eq!(audio_spec.sample_rate, rodio_decoder.sample_rate());
+
+        // duration isn't calculated in rodio for mp3 and return None.
     }
 }
