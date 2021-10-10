@@ -17,7 +17,9 @@ flac claxon crate
 wav hound crate
 mp3 minimp3 crate
 
-
+Got to create a system that
+will allow the user to record as long as possible without blocking on a separate
+thread and stop it and save it to the given format
 
 Rodio spawns a background thread that is dedicated to reading from the
 sources and sending the output to the device and I want user to have control

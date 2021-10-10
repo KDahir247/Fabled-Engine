@@ -23,5 +23,7 @@ minimp3 = {version ="0.5.1", features = ["async_tokio"]}
 
 parking_lot = { version = "0.11.2" }
 rayon = {version = "1.5.1"}
+bitflags = {version = "1.2.1"}
+
 # dsp-chain > 0.12 will result in a error. Missing to_sample()
 #dsp-chain = {version = "0.12"}

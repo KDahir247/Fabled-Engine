@@ -1,11 +1,15 @@
 pub use audio_listener::*;
+pub use audio_spec::*;
 pub use fade_filter::*;
+pub use flac_reader_options::*;
 pub use sample_format::*;
 pub use supported_buffer::*;
 pub use wav_spec::*;
 
 mod audio_listener;
+mod audio_spec;
 mod fade_filter;
+mod flac_reader_options;
 mod sample_format;
 mod supported_buffer;
 mod wav_spec;
@@ -13,7 +17,10 @@ mod wav_spec;
 
 #[cfg(test)]
 mod data_test {
-    use crate::{AudioListener, FadeFilter, SampleFormat, SupportedBufferSize, WavSpecification};
+    use crate::{
+        AudioListener, AudioSpecification, FadeFilter, FlacReaderOptions, SampleFormat,
+        SupportedBufferSize, WavSpecification,
+    };
 
     #[test]
     fn data_size() {
@@ -31,6 +38,12 @@ mod data_test {
 
         let supported_buffer_size = std::mem::size_of::<SupportedBufferSize>();
         assert_eq!(supported_buffer_size & (supported_buffer_size - 1), 0);
+
+        let audio_spec_size = std::mem::size_of::<AudioSpecification>();
+        println!("{}", audio_spec_size);
+
+        let flac_option_size = std::mem::size_of::<FlacReaderOptions>();
+        assert_eq!(flac_option_size & (flac_option_size - 1), 0);
     }
 
 
@@ -53,5 +66,11 @@ mod data_test {
             supported_buffer_alignment & (supported_buffer_alignment - 1),
             0
         );
+
+        let audio_spec_alignment = std::mem::align_of::<AudioSpecification>();
+        assert_eq!(audio_spec_alignment & (audio_spec_alignment - 1), 0);
+
+        let flac_option_alignment = std::mem::align_of::<FlacReaderOptions>();
+        assert_eq!(flac_option_alignment & (flac_option_alignment - 1), 0);
     }
 }

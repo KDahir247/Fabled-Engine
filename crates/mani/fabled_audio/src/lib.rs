@@ -37,7 +37,7 @@ mod tests {
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
 
         // Put low pass so it remove background noise
-        let raw_clip = Standard::from(audio_clip).repeat();
+        let raw_clip = Standard::from(audio_clip);
 
         standard_output.play_omni(raw_clip, 0.2);
 

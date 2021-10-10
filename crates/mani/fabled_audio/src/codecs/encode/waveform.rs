@@ -1,3 +1,6 @@
+// todo WavWriter function create_wav is a bit long it handle creating the data
+//  and initializing and the executing. break it down.
+
 use crate::{AudioEncodingError, InputConfig, SampleFormat};
 use cpal::traits::{DeviceTrait, StreamTrait};
 
@@ -44,6 +47,12 @@ impl WavWriter {
 
         let error_pred = move |err| println!("an error has occurred on stream: {}", err);
 
+        let sample_format = match input_config.sample_format {
+            SampleFormat::I16 => cpal::SampleFormat::I16,
+            SampleFormat::U16 => cpal::SampleFormat::U16,
+            SampleFormat::F32 => cpal::SampleFormat::F32,
+        };
+
         let writer =
             hound::WavWriter::create(path, wav_spec).map_err(AudioEncodingError::WavError)?;
 
@@ -51,34 +60,45 @@ impl WavWriter {
 
         let writer_2 = concurrent_writer.clone();
 
-        // todo don't like how this is repeatedly calling device.build_input_stream.
-        let stream = match input_config.sample_format {
-            SampleFormat::I16 => device.build_input_stream(
-                &input_stream_config,
-                move |data: &[i16], &_| Self::write_input_data::<_, i16>(data, &writer_2),
-                error_pred,
-            ),
-            SampleFormat::U16 => device.build_input_stream(
-                &input_stream_config,
-                move |data: &[u16], &_| Self::write_input_data::<_, i16>(data, &writer_2),
-                error_pred,
-            ),
-            SampleFormat::F32 => device.build_input_stream(
-                &input_stream_config,
-                move |data: &[f32], &_| Self::write_input_data::<_, f32>(data, &writer_2),
-                error_pred,
-            ),
-        };
+        let stream = device.build_input_stream_raw(
+            &input_stream_config,
+            sample_format,
+            move |data, &_| {
+                match data.sample_format() {
+                    cpal::SampleFormat::I16 => {
+                        let data_buffer = data.as_slice().unwrap_or_default();
+
+                        Self::write_input_data::<i16, i16>(data_buffer, &writer_2)
+                    }
+                    cpal::SampleFormat::U16 => {
+                        let data_buffer = data.as_slice().unwrap_or_default();
+
+                        Self::write_input_data::<u16, i16>(data_buffer, &writer_2)
+                    }
+                    cpal::SampleFormat::F32 => {
+                        let data_buffer = data.as_slice().unwrap_or_default();
+
+                        Self::write_input_data::<f32, f32>(data_buffer, &writer_2)
+                    }
+                };
+            },
+            error_pred,
+        );
 
         let stream = stream.map_err(AudioEncodingError::BuildStreamError)?;
 
         {
-            // stream.play().unwrap();
+            stream.play().unwrap();
 
             std::thread::sleep(std::time::Duration::from_secs(5));
         }
 
-        concurrent_writer.lock().take().unwrap().finalize().unwrap();
+        concurrent_writer
+            .lock()
+            .take()
+            .unwrap()
+            .finalize()
+            .map_err(AudioEncodingError::WavError)?;
 
         println!("Saved");
 
@@ -105,7 +125,6 @@ impl WavWriter {
         }
     }
 }
-
 
 #[cfg(test)]
 mod wav_test {
