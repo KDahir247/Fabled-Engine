@@ -28,7 +28,8 @@ mod viewport;
 #[cfg(test)]
 mod data_test {
     use crate::camera::{
-        AspectRatio, ClippingPlane, Fov, FovAxis, Orthographic, Perspective, Projection, ViewPort,
+        AspectRatio, ClippingPlane, Fov, FovAxis, FullStop, ISOSpeed, Oblique, Orthographic,
+        Perspective, Projection, Shutter, ViewPort,
     };
 
     #[test]
@@ -58,6 +59,18 @@ mod data_test {
 
         let aspect_ratio_size = std::mem::size_of::<AspectRatio>();
         assert_eq!(aspect_ratio_size & (aspect_ratio_size - 1), 0);
+
+        let aperture_len_size = std::mem::size_of::<FullStop>();
+        assert_eq!(aperture_len_size & (aperture_len_size - 1), 0);
+
+        let iso_speed_size = std::mem::size_of::<ISOSpeed>();
+        assert_eq!(iso_speed_size & (iso_speed_size - 1), 0);
+
+        let oblique_size = std::mem::size_of::<Oblique>();
+        assert_eq!(oblique_size & (oblique_size - 1), 0);
+
+        let shutter_size = std::mem::size_of::<Shutter>();
+        assert_eq!(shutter_size & (shutter_size - 1), 0);
     }
 
     #[test]
@@ -87,5 +100,17 @@ mod data_test {
 
         let aspect_ratio_alignment = std::mem::align_of::<AspectRatio>();
         assert_eq!(aspect_ratio_alignment & (aspect_ratio_alignment - 1), 0);
+
+        let aperture_len_alignment = std::mem::align_of::<FullStop>();
+        assert_eq!(aperture_len_alignment & (aperture_len_alignment - 1), 0);
+
+        let iso_speed_alignment = std::mem::align_of::<ISOSpeed>();
+        assert_eq!(iso_speed_alignment & (iso_speed_alignment - 1), 0);
+
+        let oblique_alignment = std::mem::align_of::<Oblique>();
+        assert_eq!(oblique_alignment & (oblique_alignment - 1), 0);
+
+        let shutter_alignment = std::mem::align_of::<Shutter>();
+        assert_eq!(shutter_alignment & (shutter_alignment - 1), 0);
     }
 }
