@@ -4,7 +4,6 @@ pub use fade_filter::*;
 pub use flac_reader_options::*;
 pub use sample_format::*;
 pub use supported_buffer::*;
-pub use wav_spec::*;
 
 mod audio_listener;
 mod audio_spec;
@@ -12,14 +11,13 @@ mod fade_filter;
 mod flac_reader_options;
 mod sample_format;
 mod supported_buffer;
-mod wav_spec;
 
 
 #[cfg(test)]
 mod data_test {
     use crate::{
         AudioListener, AudioSpecification, FadeFilter, FlacReaderOptions, SampleFormat,
-        SupportedBufferSize, WavSpecification,
+        SupportedBufferSize,
     };
 
     #[test]
@@ -32,9 +30,6 @@ mod data_test {
 
         let sample_format_size = std::mem::size_of::<SampleFormat>();
         assert_eq!(sample_format_size & (sample_format_size - 1), 0);
-
-        let wav_spec_size = std::mem::size_of::<WavSpecification>();
-        assert_eq!(wav_spec_size & (wav_spec_size - 1), 0);
 
         let supported_buffer_size = std::mem::size_of::<SupportedBufferSize>();
         assert_eq!(supported_buffer_size & (supported_buffer_size - 1), 0);
@@ -57,9 +52,6 @@ mod data_test {
 
         let sample_format_alignment = std::mem::align_of::<SampleFormat>();
         assert_eq!(sample_format_alignment & (sample_format_alignment - 1), 0);
-
-        let wav_spec_alignment = std::mem::align_of::<WavSpecification>();
-        assert_eq!(wav_spec_alignment & (wav_spec_alignment - 1), 0);
 
         let supported_buffer_alignment = std::mem::align_of::<SupportedBufferSize>();
         assert_eq!(

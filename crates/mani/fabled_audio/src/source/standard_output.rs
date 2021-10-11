@@ -173,7 +173,6 @@ mod standard_output_test {
         let standard_output = StandardOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-
         let raw_clip = Standard::from(audio_clip);
 
         standard_output.play_omni(raw_clip, 1.0);
@@ -192,7 +191,6 @@ mod standard_output_test {
         let mut standard_output = StandardOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-
         let raw_clip = Standard::from(audio_clip).repeat();
 
         standard_output.play_at(raw_clip, 2.0, [50.0, 1.0, 0.0]);
@@ -213,7 +211,6 @@ mod standard_output_test {
         let mut standard_output = StandardOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-
         let raw_clip = Standard::from(audio_clip).repeat();
 
         standard_output.play_at(raw_clip, 2.0, [2.0, 1.0, 0.0]);
@@ -244,7 +241,6 @@ mod standard_output_test {
         let standard_output = StandardOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-
         let raw_clip = Standard::from(audio_clip).repeat();
 
         standard_output.play_omni(raw_clip, 0.3);

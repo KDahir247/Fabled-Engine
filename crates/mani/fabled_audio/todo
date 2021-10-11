@@ -39,3 +39,5 @@ Clean up directory in the audio folders. Follow fabled_render folder structure.
 
 remove decodes file (flac, mpeg, vorbis), but keep waveform file.
 decoding is only used for input audio and not converting audio format.
+
+add a play in sequence for both the standard audio and spatial audio

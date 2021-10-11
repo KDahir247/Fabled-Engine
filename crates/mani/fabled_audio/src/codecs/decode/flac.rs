@@ -10,9 +10,7 @@ impl FlacReader {
         option: FlacReaderOptions,
     ) -> Result<AudioSpecification, AudioDecodingError> {
         let file = std::fs::File::open(flac_path)?;
-
         let buf_reader = std::io::BufReader::new(file);
-
         let reader = claxon::FlacReader::new_ext(buf_reader, option.into())
             .map_err(AudioDecodingError::FlacError)?;
 

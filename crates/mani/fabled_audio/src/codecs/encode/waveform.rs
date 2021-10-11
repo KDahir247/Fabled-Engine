@@ -27,10 +27,8 @@ impl WavWriter {
             input_config,
         } = config;
 
-
         let device = device.ok_or(AudioEncodingError::NoDeviceError)?;
         let input_config = input_config.ok_or(AudioEncodingError::NoInputConfigError)?;
-
 
         let wav_spec = hound::WavSpec {
             channels: input_config.channel_count as _,

@@ -11,9 +11,7 @@ impl OggReader {
         ogg_path: P,
     ) -> Result<AudioSpecification, AudioDecodingError> {
         let file = std::fs::File::open(ogg_path)?;
-
         let packet_reader = ogg::PacketReader::new(file);
-
         let reader = lewton::inside_ogg::OggStreamReader::from_ogg_reader(packet_reader)
             .map_err(AudioDecodingError::OggError)?;
 
