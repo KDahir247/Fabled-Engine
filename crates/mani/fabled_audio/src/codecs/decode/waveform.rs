@@ -46,10 +46,9 @@ mod wav_decoding_test {
 
     #[test]
     fn decoding_file() {
-        let wav_reader = WavReader::default();
-
         let wav_path = [env!("CARGO_MANIFEST_DIR"), "/src/audio/recorded.wav"].join("");
 
+        let wav_reader = WavReader::default();
         let wav_spec = wav_reader.read_wav(wav_path).unwrap();
 
         println!("{:?}", wav_spec);
@@ -62,9 +61,7 @@ mod wav_decoding_test {
         let file = std::fs::File::open(wav_path.as_str()).unwrap();
 
         let rodio_decoder = rodio::Decoder::new_wav(file).unwrap();
-
         let wav_reader = WavReader::default();
-
         let audio_spec = wav_reader.read_wav(wav_path.as_str()).unwrap();
 
         assert_eq!(rodio_decoder.channels(), audio_spec.channel_count);

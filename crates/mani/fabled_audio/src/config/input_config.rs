@@ -3,7 +3,6 @@ use cpal::traits::{DeviceTrait, HostTrait};
 use rayon::prelude::*;
 use std::ops::DerefMut;
 
-// todo make a custom SupportedBufferSize,
 #[derive(Clone, Debug)]
 pub struct InputDeviceConfig {
     pub sample_rate: u32,

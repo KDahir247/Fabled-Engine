@@ -43,11 +43,9 @@ mod mp3_decoding_test {
 
     #[test]
     fn decoding_file() {
-        //
-        let mp3_reader = Mp3Reader::default();
-
         let mp3_path = [env!("CARGO_MANIFEST_DIR"), "/src/audio/epic.mp3"].join("");
 
+        let mp3_reader = Mp3Reader::default();
         let mp3_spec = mp3_reader.read_mp3(mp3_path).unwrap();
 
         println!("{:?}", mp3_spec);
@@ -60,7 +58,6 @@ mod mp3_decoding_test {
         let file = std::fs::File::open(mp3_path.as_str()).unwrap();
 
         let rodio_decoder = rodio::Decoder::new_mp3(file).unwrap();
-
         let mp3_reader = Mp3Reader::default();
         let audio_spec = mp3_reader.read_mp3(mp3_path.as_str()).unwrap();
 

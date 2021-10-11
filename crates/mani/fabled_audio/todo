@@ -36,3 +36,6 @@ reading or writing and treat reader and writer the same and lock on either
 case. Mutex also support more 3rd tier support and prevent writer starvation.
 
 Clean up directory in the audio folders. Follow fabled_render folder structure.
+
+remove decodes file (flac, mpeg, vorbis), but keep waveform file.
+decoding is only used for input audio and not converting audio format.

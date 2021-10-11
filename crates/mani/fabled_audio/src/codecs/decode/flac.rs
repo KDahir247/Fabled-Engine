@@ -37,14 +37,13 @@ mod flac_decoder_test {
 
     #[test]
     fn decode_file() {
-        let flac_reader = FlacReader::default();
-
         let flac_path = [
             env!("CARGO_MANIFEST_DIR"),
             "/src/audio/WolfgangAmadeusMozart-SymphonyNo.40InGMinorK.550-04-AllegroAssai.flac",
         ]
         .join("");
 
+        let flac_reader = FlacReader::default();
         let audio_spec = flac_reader
             .read_flac(flac_path, FlacReaderOptions::READ_VORBIS_COMMENT)
             .unwrap();
@@ -64,9 +63,7 @@ mod flac_decoder_test {
         let file = std::fs::File::open(flac_path.as_str()).unwrap();
 
         let rodio_decoder = rodio::Decoder::new_flac(file).unwrap();
-
         let flac_reader = FlacReader::default();
-
         let audio_spec = flac_reader
             .read_flac(flac_path.as_str(), FlacReaderOptions::READ_VORBIS_COMMENT)
             .unwrap();
