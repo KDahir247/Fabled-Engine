@@ -1,14 +1,15 @@
 mod audio_clip;
 mod raw_clip;
+mod raw_collection;
 
 
 pub use audio_clip::*;
 pub use raw_clip::*;
-
+pub use raw_collection::*;
 
 #[cfg(test)]
 mod data_test {
-    use crate::{AudioClip, RawAmbisonicClip, RawClip};
+    use crate::{AudioClip, RawAmbisonicClip, RawAmbisonicCollection, RawClip, RawCollection};
 
     #[test]
     fn data_size() {
@@ -23,19 +24,38 @@ mod data_test {
 
         //------------------------------------------------------------------------
 
-        let audio_clip_u16_size = std::mem::size_of::<RawClip<AudioClip<u16>>>();
-        println!("raw clip u16 {}", audio_clip_u16_size);
+        let raw_clip_u16_size = std::mem::size_of::<RawClip<AudioClip<u16>>>();
+        println!("raw clip u16 {}", raw_clip_u16_size);
 
-        let audio_clip_i16_size = std::mem::size_of::<RawClip<AudioClip<i16>>>();
-        println!("raw clip i16 {}", audio_clip_i16_size);
+        let raw_clip_i16_size = std::mem::size_of::<RawClip<AudioClip<i16>>>();
+        println!("raw clip i16 {}", raw_clip_i16_size);
 
         let raw_clip_f32_size = std::mem::size_of::<RawClip<AudioClip<f32>>>();
         println!("raw clip f32 {}", raw_clip_f32_size);
 
         //------------------------------------------------------------------------
 
+        let raw_collection_u16_size = std::mem::size_of::<RawCollection<u16>>();
+        println!("raw clip collection u16 {}", raw_collection_u16_size);
+
+        let raw_collection_i16_size = std::mem::size_of::<RawCollection<i16>>();
+        println!("raw clip collection i16 {}", raw_collection_i16_size);
+
+        let raw_collection_f32_size = std::mem::size_of::<RawCollection<f32>>();
+        println!("raw clip collection f32 {}", raw_collection_f32_size);
+
+        //------------------------------------------------------------------------
+
         let raw_ambisonic_clip_f32_size = std::mem::size_of::<RawAmbisonicClip<AudioClip<f32>>>();
         println!("raw ambisonic clip f32 {}", raw_ambisonic_clip_f32_size);
+
+        //------------------------------------------------------------------------
+
+        let raw_ambisonic_collection_f32_size = std::mem::size_of::<RawAmbisonicCollection>();
+        println!(
+            "raw ambisonic clip collection f32 {}",
+            raw_ambisonic_collection_f32_size
+        );
 
         //------------------------------------------------------------------------
     }
@@ -53,6 +73,7 @@ mod data_test {
         assert_eq!(audio_clip_f32_alignment & (audio_clip_f32_alignment - 1), 0);
 
         //------------------------------------------------------------------------
+
         let raw_clip_u16_alignment = std::mem::align_of::<RawClip<AudioClip<u16>>>();
         assert_eq!(raw_clip_u16_alignment & (raw_clip_u16_alignment - 1), 0);
 
@@ -64,10 +85,39 @@ mod data_test {
 
         //------------------------------------------------------------------------
 
+        let raw_collection_u16_alignment = std::mem::align_of::<RawCollection<u16>>();
+        assert_eq!(
+            raw_collection_u16_alignment & (raw_collection_u16_alignment - 1),
+            0
+        );
+
+        let raw_collection_i16_alignment = std::mem::align_of::<RawCollection<i16>>();
+        assert_eq!(
+            raw_collection_i16_alignment & (raw_collection_i16_alignment - 1),
+            0
+        );
+
+        let raw_collection_f32_alignment = std::mem::align_of::<RawCollection<f32>>();
+        assert_eq!(
+            raw_collection_f32_alignment & (raw_collection_f32_alignment - 1),
+            0
+        );
+
+        //------------------------------------------------------------------------
+
         let raw_ambisonic_clip_f32_alignment =
             std::mem::align_of::<RawAmbisonicClip<AudioClip<f32>>>();
         assert_eq!(
             raw_ambisonic_clip_f32_alignment & (raw_ambisonic_clip_f32_alignment - 1),
+            0
+        );
+
+        //------------------------------------------------------------------------
+
+        let raw_ambisonic_collection_f32_alignment = std::mem::align_of::<RawAmbisonicCollection>();
+
+        assert_eq!(
+            raw_ambisonic_collection_f32_alignment & (raw_ambisonic_collection_f32_alignment - 1),
             0
         );
 

@@ -60,7 +60,7 @@ where
 
 #[cfg(test)]
 mod raw_clip_test {
-    use crate::{AudioClip, Standard};
+    use crate::{AudioClip, RawClip, Standard};
     use ambisonic::rodio::Source;
     use std::io::Read;
 

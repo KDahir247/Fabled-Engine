@@ -21,7 +21,7 @@ pub use source::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::{AudioClip, Standard, StandardOutput};
+    use crate::{AudioClip, RawClip, RawCollection, Standard, StandardOutput};
     use std::io::Read;
 
     #[test]
@@ -42,22 +42,25 @@ mod tests {
         file.read_exact(&mut audio_buffer1).unwrap();
 
         //---------------------- Creating the Clip ------------------
-        let (_stream, handle) = rodio::OutputStream::try_default().unwrap();
-        let sink = rodio::Sink::try_new(&handle).unwrap();
+        let standard_output = StandardOutput::default();
 
-        let audio_clip: AudioClip<i16> = AudioClip::from_file(audio_buffer, true);
+        let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
         let raw_clip = Standard::from(audio_clip);
 
-        let audio_clip: AudioClip<i16> = AudioClip::from_file(audio_buffer1, true);
+        let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer1, true);
         let raw_clip1 = Standard::from(audio_clip);
 
-        let audio_queue = rodio::queue::queue::<i16>(true);
+        let raw_collection = RawCollection::new(true);
 
-        audio_queue.0.append(raw_clip.get());
-        audio_queue.0.append(raw_clip1.get());
 
-        sink.append(audio_queue.1);
-        sink.sleep_until_end();
+        raw_collection.append(raw_clip);
+        raw_collection.append(raw_clip1);
+
+        let combined_clip = raw_collection.retrieve_output();
+
+
+        standard_output.play_omni(combined_clip, 0.5);
+        std::thread::sleep(std::time::Duration::from_secs(10000));
     }
 
     #[test]
