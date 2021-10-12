@@ -10,34 +10,8 @@ add ConfigInput to allow user to record audio
 Nice to make audio transformation extendable where it will allow user to create the own transform for the audio clip.
 This will be as a feature not a core.
 
-Rather than letting rodio handle loading in the audio format I want to be explicit on loading each audio format.
-
-ogg ogg crate and lewton crate
-flac claxon crate
-wav hound crate
-mp3 minimp3 crate
-
 Got to create a system that
 will allow the user to record as long as possible without blocking on a separate
 thread and stop it and save it to the given format
 
-Rodio spawns a background thread that is dedicated to reading from the
-sources and sending the output to the device and I want user to have control
-over customizing the audio clip data I will wrap it in a Mutex. Might have
-to create a separate thread for audio since I dont want Mutex to block the
-main thread which will handle core logic for read when write is happening,
-but a dedicated thread.
-
-Mutex will be faster if you mostly only ever have one reader at a time.
-There will only be on reader for this type since it is moved to a raw_clip
-type. and from there it is moved to an audio output and played.
-writing can still happen after reading though so we will lock this if it is
-reading or writing and treat reader and writer the same and lock on either
-case. Mutex also support more 3rd tier support and prevent writer starvation.
-
 Clean up directory in the audio folders. Follow fabled_render folder structure.
-
-remove decodes file (flac, mpeg, vorbis), but keep waveform file.
-decoding is only used for input audio and not converting audio format.
-
-add a play in sequence for both the standard audio and spatial audio

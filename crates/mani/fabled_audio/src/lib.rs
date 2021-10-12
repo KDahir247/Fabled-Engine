@@ -21,14 +21,11 @@ pub use source::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::{AudioClip, RawClip, RawCollection, Standard, StandardOutput};
+    use crate::{AudioClip, AudioCollection, Standard, StandardOutput};
     use std::io::Read;
 
     #[test]
     fn sequence_player_test() {
-        // fast show it works implementation.
-        // Both audio must be the same audio sample type.
-
         // 0
         let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/test.mp3"].join("");
         let mut file = std::fs::File::open(path).unwrap();
@@ -44,22 +41,25 @@ mod tests {
         //---------------------- Creating the Clip ------------------
         let standard_output = StandardOutput::default();
 
-        let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
+        let audio_clip: AudioClip<i16> = AudioClip::from_file(audio_buffer, true);
         let raw_clip = Standard::from(audio_clip);
 
-        let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer1, true);
-        let raw_clip1 = Standard::from(audio_clip);
+        let audio_clip: AudioClip<i16> = AudioClip::from_file(audio_buffer1, true);
+        // you can transform the audio before putting them in a collection.
+        let raw_clip1 = Standard::from(audio_clip).speed(1.3);
 
-        let raw_collection = RawCollection::new(true);
+        //--------------- Creating the Clip Collection --------------
 
+        let audio_collection = AudioCollection::new(true);
 
-        raw_collection.append(raw_clip);
-        raw_collection.append(raw_clip1);
+        audio_collection.append(raw_clip);
+        audio_collection.append(raw_clip1);
 
-        let combined_clip = raw_collection.retrieve_output();
+        let combined_clip = audio_collection.retrieve_output();
 
+        //---------------------- Playing the Clip ------------------
 
-        standard_output.play_omni(combined_clip, 0.5);
+        standard_output.play_omni(combined_clip, 0.3);
         std::thread::sleep(std::time::Duration::from_secs(10000));
     }
 
