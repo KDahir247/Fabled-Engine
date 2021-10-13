@@ -9,18 +9,18 @@ pub struct StandardOutput<D> {
     composer: std::sync::Arc<rodio::dynamic_mixer::DynamicMixerController<D>>,
 }
 
-impl<D> Default for StandardOutput<D>
+impl<D: 'static> Default for StandardOutput<D>
 where
-    D: rodio::Sample + Send + 'static + std::fmt::Debug,
+    D: rodio::Sample + Send + std::fmt::Debug,
 {
     fn default() -> Self {
         Self::new([0.; 3], AudioListener::default()).unwrap()
     }
 }
 
-impl<D> StandardOutput<D>
+impl<D: 'static> StandardOutput<D>
 where
-    D: rodio::Sample + Send + 'static + std::fmt::Debug,
+    D: rodio::Sample + Send + std::fmt::Debug,
 {
     pub fn new(init_pos: [f32; 3], audio_listener: AudioListener) -> Option<Self> {
         let OutputConfig {
@@ -66,10 +66,8 @@ where
         }
     }
 
-    pub fn play_omni<T>(&self, clip: RawClip<T>, volume: f32)
-    where
-        T: rodio::Source<Item = D> + Send + 'static, {
-        let inner = clip.get();
+    pub fn play_omni(&self, clip: RawClip<D>, volume: f32) {
+        let inner = clip.data;
 
         let channels = inner.channels();
 
@@ -80,12 +78,10 @@ where
     }
 
 
-    pub fn play_at<T>(&self, clip: RawClip<T>, volume: f32, init_pos: [f32; 3])
-    where
-        T: rodio::Source<Item = D> + Send + 'static, {
+    pub fn play_at(&self, clip: RawClip<D>, volume: f32, init_pos: [f32; 3]) {
         self.sink.set_emitter_position(init_pos);
 
-        let inner = clip.get();
+        let inner = clip.data;
 
         let channel_count = inner.channels();
 
@@ -132,7 +128,7 @@ where
 
 #[cfg(test)]
 mod standard_output_test {
-    use crate::{AudioListener, StandardOutput};
+    use crate::{AudioListener, RawClip, StandardOutput};
     use std::io::Read;
 
     fn retrieve_audio_buffer() -> Vec<u8> {
@@ -166,14 +162,13 @@ mod standard_output_test {
     #[test]
     fn omni_test() {
         use crate::AudioClip;
-        use crate::Standard;
 
         let audio_buffer = retrieve_audio_buffer();
 
         let standard_output = StandardOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-        let raw_clip = Standard::from(audio_clip);
+        let raw_clip = RawClip::from(audio_clip);
 
         standard_output.play_omni(raw_clip, 1.0);
 
@@ -184,14 +179,13 @@ mod standard_output_test {
     #[test]
     fn spatial_test() {
         use crate::AudioClip;
-        use crate::Standard;
 
         let audio_buffer = retrieve_audio_buffer();
 
         let mut standard_output = StandardOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-        let raw_clip = Standard::from(audio_clip).repeat();
+        let raw_clip = RawClip::from(audio_clip).repeat();
 
         standard_output.play_at(raw_clip, 2.0, [50.0, 1.0, 0.0]);
 
@@ -204,14 +198,13 @@ mod standard_output_test {
     #[test]
     fn ear_positioning_test() {
         use crate::AudioClip;
-        use crate::Standard;
 
         let audio_buffer = retrieve_audio_buffer();
 
         let mut standard_output = StandardOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-        let raw_clip = Standard::from(audio_clip).repeat();
+        let raw_clip = RawClip::from(audio_clip).repeat();
 
         standard_output.play_at(raw_clip, 2.0, [2.0, 1.0, 0.0]);
 
@@ -234,14 +227,13 @@ mod standard_output_test {
     #[test]
     fn pause_resume_test() {
         use crate::AudioClip;
-        use crate::Standard;
 
         let audio_buffer = retrieve_audio_buffer();
 
         let standard_output = StandardOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-        let raw_clip = Standard::from(audio_clip).repeat();
+        let raw_clip = RawClip::from(audio_clip).repeat();
 
         standard_output.play_omni(raw_clip, 0.3);
 

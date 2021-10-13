@@ -1,19 +1,13 @@
-use crate::SampleFormat;
+use crate::DeviceConfig;
+
 use cpal::traits::{DeviceTrait, HostTrait};
 use rayon::prelude::*;
 use std::ops::DerefMut;
 
-#[derive(Clone, Debug)]
-pub struct OutputDeviceConfig {
-    pub sample_rate: u32,
-    pub channel_count: u16,
-    pub sample_format: SampleFormat,
-}
 
-#[repr(align(16))]
 pub struct OutputConfig {
     pub device: Option<cpal::Device>,
-    pub output_config: Option<OutputDeviceConfig>,
+    pub output_config: Option<DeviceConfig>,
 }
 
 impl Default for OutputConfig {
@@ -34,10 +28,11 @@ impl Default for OutputConfig {
 
                     let desired_config_max = optimal_config_range.with_max_sample_rate();
 
-                    OutputDeviceConfig {
+                    DeviceConfig {
                         sample_rate: desired_config_max.sample_rate().0,
                         channel_count: desired_config_max.channels(),
                         sample_format: desired_config_max.sample_format().into(),
+                        buffer_size: desired_config_max.buffer_size().into(),
                     }
                 })
             }
@@ -77,10 +72,11 @@ impl OutputConfig {
                                 if let Some(desired_config) = optimal_config_range {
                                     let desired_config_max = desired_config.with_max_sample_rate();
 
-                                    Some(OutputDeviceConfig {
+                                    Some(DeviceConfig {
                                         sample_rate: desired_config_max.sample_rate().0,
                                         channel_count: desired_config_max.channels(),
                                         sample_format: desired_config_max.sample_format().into(),
+                                        buffer_size: desired_config_max.buffer_size().into(),
                                     })
                                 } else {
                                     None
@@ -132,10 +128,11 @@ impl OutputConfig {
                                     let desired_config_max =
                                         optimal_config_range.with_max_sample_rate();
 
-                                    OutputDeviceConfig {
+                                    DeviceConfig {
                                         sample_rate: desired_config_max.sample_rate().0,
                                         channel_count: desired_config_max.channels(),
                                         sample_format: desired_config_max.sample_format().into(),
+                                        buffer_size: desired_config_max.buffer_size().into(),
                                     }
                                 })
                         });

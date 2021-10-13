@@ -1,5 +1,3 @@
-// Small wrapper over ambisonic::SoundController function calls
-
 pub struct SpatialAmbisonicSource {
     source: ambisonic::SoundController,
 }

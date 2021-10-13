@@ -14,8 +14,7 @@ impl Mp3Reader {
             .ok_or_else(|| std::io::Error::from(std::io::ErrorKind::InvalidData))?;
 
         let file = std::fs::File::open(path_dir)?;
-        let buf_reader = std::io::BufReader::new(file);
-        let mut reader = minimp3::Decoder::new(buf_reader);
+        let mut reader = minimp3::Decoder::new(file);
 
         let mp3_duration = mp3_duration::from_path(path_dir).unwrap_or_default();
 
@@ -30,7 +29,7 @@ impl Mp3Reader {
             bit_per_sample: 24,
             // since frame_detail.data is a collection of i16.
             sample_format: SampleFormat::I16,
-            duration: mp3_duration.as_secs() as u32,
+            duration: mp3_duration.as_secs() as f32,
         })
     }
 }

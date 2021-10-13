@@ -15,3 +15,13 @@ will allow the user to record as long as possible without blocking on a separate
 thread and stop it and save it to the given format
 
 Clean up directory in the audio folders. Follow fabled_render folder structure.
+
+Like the idea here.
+enum AudioType {
+    /// The Audio is packed into the binary
+    Packed(Vec<u8>),
+    /// The Audio is loose on the filesystem
+    Loose(File),
+}
+
+Look over life time and provide the correct lifetime. Is it static or living until the function call?

@@ -1,9 +1,5 @@
 use crate::{RawAmbisonicClip, RawClip};
 use rodio::Source;
-use std::time::Duration;
-
-pub type Standard<D> = RawClip<AudioClip<D>>;
-pub type Ambisonic<D> = RawAmbisonicClip<AudioClip<D>>;
 
 // A Rust object that represents a sound should implement the `Source` trait.
 
@@ -91,21 +87,21 @@ where
 }
 
 // Standard clip
-impl<D> From<AudioClip<D>> for Standard<D>
+impl<D: 'static> From<AudioClip<D>> for RawClip<D>
 where
-    D: rodio::Sample,
+    D: rodio::Sample + Send,
 {
-    fn from(clip: AudioClip<D>) -> Self {
-        RawClip::new(clip)
+    fn from(audio_clip: AudioClip<D>) -> Self {
+        RawClip::new(audio_clip)
     }
 }
 
-// Ambisonic clip only support f32
-impl From<AudioClip<f32>> for Ambisonic<f32> {
+impl From<AudioClip<f32>> for RawAmbisonicClip {
     fn from(clip: AudioClip<f32>) -> Self {
         RawAmbisonicClip::new(clip)
     }
 }
+
 
 impl<D> Iterator for AudioClip<D> {
     type Item = D;
@@ -115,7 +111,6 @@ impl<D> Iterator for AudioClip<D> {
         lock.next()
     }
 }
-
 
 impl<D> rodio::Source for AudioClip<D>
 where
@@ -133,7 +128,7 @@ where
         self.sample
     }
 
-    fn total_duration(&self) -> Option<Duration> {
+    fn total_duration(&self) -> Option<std::time::Duration> {
         self.duration
     }
 }
@@ -155,7 +150,7 @@ where
         self.sample
     }
 
-    fn total_duration(&self) -> Option<Duration> {
+    fn total_duration(&self) -> Option<std::time::Duration> {
         self.duration
     }
 }
@@ -163,7 +158,7 @@ where
 
 #[cfg(test)]
 mod audio_clip_test {
-    use crate::{Ambisonic, AudioClip, Standard};
+    use crate::{AudioClip, RawAmbisonicClip, RawClip};
     use ambisonic::rodio::Source;
     use std::io::Read;
 
@@ -219,7 +214,13 @@ mod audio_clip_test {
 
     #[test]
     fn load_clip_from_file() {
-        let audio_buffer = retrieve_audio_buffer();
+        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
+
+        let mut file = std::fs::File::open(path).unwrap();
+
+        let mut audio_buffer = vec![0; file.metadata().unwrap().len() as usize];
+        file.read_exact(&mut audio_buffer).unwrap();
+
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
 
@@ -229,28 +230,17 @@ mod audio_clip_test {
         assert!(audio_clip.current_frame_len().is_some());
     }
 
-    fn retrieve_audio_buffer() -> Vec<u8> {
-        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
-
-        let mut file = std::fs::File::open(path).unwrap();
-
-        let mut audio_buffer = vec![0; file.metadata().unwrap().len() as usize];
-        file.read_exact(&mut audio_buffer).unwrap();
-
-        audio_buffer
-    }
-
     #[test]
     fn convert_clip_to_standard_test() {
         let audio_clip: AudioClip<f32> = AudioClip::default();
 
-        let _audio = Standard::new(audio_clip);
+        let _audio = RawClip::new(audio_clip);
     }
 
     #[test]
     fn convert_clip_to_ambisonic_test() {
         let audio_clip: AudioClip<f32> = AudioClip::default();
 
-        let _ambisonic_audio = Ambisonic::new(audio_clip);
+        let _ambisonic_audio = RawAmbisonicClip::new(audio_clip);
     }
 }

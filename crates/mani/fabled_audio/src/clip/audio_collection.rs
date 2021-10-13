@@ -5,9 +5,9 @@ pub struct AudioCollection<T> {
     output: rodio::queue::SourcesQueueOutput<T>,
 }
 
-impl<T> AudioCollection<T>
+impl<T: 'static> AudioCollection<T>
 where
-    T: rodio::Sample + Send + 'static,
+    T: rodio::Sample + Send,
 {
     pub fn new(keep_alive: bool) -> Self {
         let queue = rodio::queue::queue::<T>(keep_alive);
@@ -17,22 +17,17 @@ where
         }
     }
 
-    pub fn append<S>(&self, raw_clip: RawClip<S>)
-    where
-        S: rodio::Source<Item = T> + Send + 'static, {
-        let clip = raw_clip.get();
-        self.input.append(clip);
+    pub fn append(&self, raw_clip: RawClip<T>) {
+        self.input.append(raw_clip.data);
     }
 
-    pub fn retrieve_output(self) -> RawClip<rodio::queue::SourcesQueueOutput<T>> {
+    pub fn retrieve_output(self) -> RawClip<T> {
         RawClip::new(self.output)
     }
 }
 
 pub struct AmbisonicCollection {
-    #[allow(dead_code)]
     input: std::sync::Arc<ambisonic::rodio::queue::SourcesQueueInput<f32>>,
-    #[allow(dead_code)]
     output: ambisonic::rodio::queue::SourcesQueueOutput<f32>,
 }
 
@@ -45,16 +40,11 @@ impl AmbisonicCollection {
         }
     }
 
-    pub fn append<S>(&self, raw_ambisonic_clip: RawAmbisonicClip<S>)
-    where
-        S: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
-        let clip = raw_ambisonic_clip.get();
-        self.input.append(clip);
+    pub fn append(&self, raw_ambisonic_clip: RawAmbisonicClip) {
+        self.input.append(raw_ambisonic_clip.data);
     }
 
-    pub fn retrieve_output(
-        self,
-    ) -> RawAmbisonicClip<ambisonic::rodio::queue::SourcesQueueOutput<f32>> {
+    pub fn retrieve_output(self) -> RawAmbisonicClip {
         RawAmbisonicClip::new(self.output)
     }
 }

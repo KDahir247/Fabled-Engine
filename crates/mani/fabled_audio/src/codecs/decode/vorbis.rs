@@ -17,15 +17,13 @@ impl OggReader {
 
         let indent_info = reader.ident_hdr;
 
-        println!("{:?}", indent_info.bitrate_nominal);
-
         Ok(AudioSpecification {
             channel_count: indent_info.audio_channels as u16,
             sample_rate: indent_info.audio_sample_rate,
             bit_per_sample: 24,
             // rodio current_data is of type i16
             sample_format: SampleFormat::I16,
-            duration: 0,
+            duration: 0.0,
         })
     }
 }

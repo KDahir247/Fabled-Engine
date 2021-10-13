@@ -1,19 +1,13 @@
-use crate::{SampleFormat, SupportedBufferSize};
+use crate::DeviceConfig;
+
 use cpal::traits::{DeviceTrait, HostTrait};
 use rayon::prelude::*;
 use std::ops::DerefMut;
 
-#[derive(Clone, Debug)]
-pub struct InputDeviceConfig {
-    pub sample_rate: u32,
-    pub channel_count: u16,
-    pub sample_format: SampleFormat,
-    pub buffer_size: SupportedBufferSize,
-}
 
 pub struct InputConfig {
     pub device: Option<cpal::Device>,
-    pub input_config: Option<InputDeviceConfig>,
+    pub input_config: Option<DeviceConfig>,
 }
 
 impl Default for InputConfig {
@@ -33,7 +27,7 @@ impl Default for InputConfig {
                     let desired_config_max = optimal_config_range.with_max_sample_rate();
 
 
-                    InputDeviceConfig {
+                    DeviceConfig {
                         sample_rate: desired_config_max.sample_rate().0,
                         channel_count: desired_config_max.channels(),
                         sample_format: desired_config_max.sample_format().into(),
@@ -78,7 +72,7 @@ impl InputConfig {
                                         let desired_config_max =
                                             desired_config.with_max_sample_rate();
 
-                                        Some(InputDeviceConfig {
+                                        Some(DeviceConfig {
                                             sample_rate: desired_config_max.sample_rate().0,
                                             channel_count: desired_config_max.channels(),
                                             sample_format: desired_config_max
@@ -137,7 +131,7 @@ impl InputConfig {
                                         optimal_conf_range.with_max_sample_rate();
 
 
-                                    InputDeviceConfig {
+                                    DeviceConfig {
                                         sample_rate: desired_config_max.sample_rate().0,
                                         channel_count: desired_config_max.channels(),
                                         sample_format: desired_config_max.sample_format().into(),

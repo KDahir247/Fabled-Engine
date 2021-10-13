@@ -36,20 +36,40 @@ mod data_test {
     #[test]
     fn data_alignment() {
         let audio_output_u16_alignment = std::mem::align_of::<StandardOutput<u16>>();
-        println!("{}", audio_output_u16_alignment);
+        assert_eq!(
+            audio_output_u16_alignment & (audio_output_u16_alignment - 1),
+            0
+        );
 
         let audio_output_i16_alignment = std::mem::align_of::<StandardOutput<i16>>();
-        println!("{}", audio_output_i16_alignment);
+        assert_eq!(
+            audio_output_i16_alignment & (audio_output_i16_alignment - 1),
+            0
+        );
 
         let audio_output_f32_alignment = std::mem::align_of::<StandardOutput<f32>>();
+        assert_eq!(
+            audio_output_f32_alignment & (audio_output_f32_alignment - 1),
+            0
+        );
+
         println!("{}", audio_output_f32_alignment);
 
         // -----------------------------------------------------------------
 
         let audio_spatial_output_alignment = std::mem::align_of::<AmbisonicOutput>();
+        assert_eq!(
+            audio_spatial_output_alignment & (audio_spatial_output_alignment - 1),
+            0
+        );
+
         println!("{}", audio_spatial_output_alignment);
 
+        // -----------------------------------------------------------------
+
         let spatial_source_alignment = std::mem::align_of::<SpatialAmbisonicSource>();
+        assert_eq!(spatial_source_alignment & (spatial_source_alignment - 1), 0);
+
         println!("{}", spatial_source_alignment);
     }
 }

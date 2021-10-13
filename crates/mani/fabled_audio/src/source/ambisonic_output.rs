@@ -1,5 +1,5 @@
 use crate::{OutputConfig, RawAmbisonicClip, SpatialAmbisonicSource};
-use ambisonic::PlaybackConfiguration;
+use ambisonic::rodio::Source;
 
 pub struct AmbisonicOutput {
     // we need to keep the sink and output alive for playing the audio.
@@ -33,12 +33,12 @@ impl AmbisonicOutput {
                 let sink = ambisonic::rodio::Sink::try_new(&output_handle).unwrap();
 
                 match ambisonic::PlaybackConfiguration::default() {
-                    PlaybackConfiguration::Stereo(cfg) => {
+                    ambisonic::PlaybackConfiguration::Stereo(cfg) => {
                         let output = ambisonic::BstreamStereoRenderer::new(b_mixer, cfg);
 
                         sink.append(output);
                     }
-                    PlaybackConfiguration::Hrtf(cfg) => {
+                    ambisonic::PlaybackConfiguration::Hrtf(cfg) => {
                         let output = ambisonic::BstreamHrtfRenderer::new(b_mixer, cfg);
 
                         sink.append(output);
@@ -56,11 +56,8 @@ impl AmbisonicOutput {
     }
 
 
-    // restrict sample to f32 for the BMixerComposer
-    pub fn play_omni<T>(&self, clip: RawAmbisonicClip<T>, volume: f32) -> SpatialAmbisonicSource
-    where
-        T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
-        let input = clip.get();
+    pub fn play_omni(&self, clip: RawAmbisonicClip, volume: f32) -> SpatialAmbisonicSource {
+        let input = clip.data;
 
         let channels = input.channels();
 
@@ -75,17 +72,14 @@ impl AmbisonicOutput {
     }
 
 
-    // restrict sample to f32 for the BMixerComposer
-    pub fn play_at<T>(
+    pub fn play_at(
         &self,
-        clip: RawAmbisonicClip<T>,
+        clip: RawAmbisonicClip,
         volume: f32,
         init_pos: [f32; 3],
-    ) -> SpatialAmbisonicSource
-    where
-        T: ambisonic::rodio::Source<Item = f32> + Send + 'static, {
+    ) -> SpatialAmbisonicSource {
         let sound_controller = self.composer.play(
-            clip.get().amplify(volume),
+            clip.data.amplify(volume),
             ambisonic::BstreamConfig::new().with_position(init_pos),
         );
 
@@ -104,7 +98,7 @@ impl AmbisonicOutput {
 
 #[cfg(test)]
 mod ambisonic_output_test {
-    use crate::AmbisonicOutput;
+    use crate::{AmbisonicOutput, RawAmbisonicClip};
     use std::io::Read;
 
     fn retrieve_audio_buffer() -> Vec<u8> {
@@ -137,7 +131,6 @@ mod ambisonic_output_test {
 
     #[test]
     fn omni_test() {
-        use crate::Ambisonic;
         use crate::AudioClip;
 
         let audio_buffer = retrieve_audio_buffer();
@@ -145,7 +138,7 @@ mod ambisonic_output_test {
         let standard_output = AmbisonicOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-        let raw_clip = Ambisonic::from(audio_clip);
+        let raw_clip = RawAmbisonicClip::from(audio_clip);
 
         standard_output.play_omni(raw_clip, 1.0);
 
@@ -155,7 +148,6 @@ mod ambisonic_output_test {
 
     #[test]
     fn spatial_test() {
-        use crate::Ambisonic;
         use crate::AudioClip;
 
         let audio_buffer = retrieve_audio_buffer();
@@ -163,7 +155,7 @@ mod ambisonic_output_test {
         let standard_output = AmbisonicOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
-        let raw_clip = Ambisonic::from(audio_clip).repeat();
+        let raw_clip = RawAmbisonicClip::from(audio_clip).repeat();
 
         let mut sound = standard_output.play_at(raw_clip, 2.0, [50.0, 1.0, 0.0]);
 

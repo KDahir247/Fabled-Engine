@@ -18,8 +18,7 @@ impl WavReader {
         }
 
         let file = std::fs::File::open(path_dir)?;
-        let buf_reader = std::io::BufReader::new(file);
-        let reader = hound::WavReader::new(buf_reader).map_err(AudioDecodingError::WavError)?;
+        let reader = hound::WavReader::new(file).map_err(AudioDecodingError::WavError)?;
 
         let wav_spec = reader.spec();
 
@@ -33,7 +32,7 @@ impl WavReader {
             sample_rate: wav_spec.sample_rate,
             bit_per_sample: wav_spec.bits_per_sample,
             sample_format: format_target,
-            duration: (reader.duration() / wav_spec.sample_rate),
+            duration: (reader.duration() as f32 / wav_spec.sample_rate as f32),
         })
     }
 }
@@ -56,6 +55,8 @@ mod wav_decoding_test {
 
     #[test]
     fn compare_with_rodio() {
+        let threshold = 0.00001;
+
         let wav_path = [env!("CARGO_MANIFEST_DIR"), "/src/audio/recorded.wav"].join("");
 
         let file = std::fs::File::open(wav_path.as_str()).unwrap();
@@ -66,9 +67,10 @@ mod wav_decoding_test {
 
         assert_eq!(rodio_decoder.channels(), audio_spec.channel_count);
         assert_eq!(rodio_decoder.sample_rate(), audio_spec.sample_rate);
-        assert_eq!(
-            rodio_decoder.total_duration().unwrap().as_secs() as u32,
-            audio_spec.duration
+        assert!(
+            (rodio_decoder.total_duration().unwrap().as_secs_f32() - audio_spec.duration)
+                .abs()
+                .le(&threshold)
         );
     }
 }

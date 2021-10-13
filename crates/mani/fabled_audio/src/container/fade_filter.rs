@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FadeFilter {
     // abruptly stop the clip after reaching the destination
     ABRUPT,

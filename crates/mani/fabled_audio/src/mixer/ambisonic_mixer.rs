@@ -1,42 +1,19 @@
 use crate::{FadeFilter, RawAmbisonicClip};
 use ambisonic::rodio::Source;
 
-// Buffered mean that it is able to be cloned.
-// We Mix the current audio and a delayed audio of the current audio and amplify
-// it depending on the amplitude. We can clone the current audio because it is
-// buffered.
-type Reverb<T> = RawAmbisonicClip<
-    ambisonic::rodio::source::Mix<
-        ambisonic::rodio::source::Buffered<T>,
-        ambisonic::rodio::source::Delay<
-            ambisonic::rodio::source::Amplify<ambisonic::rodio::source::Buffered<T>>,
-        >,
-    >,
->;
-
-impl<T> RawAmbisonicClip<T>
-where
-    T: ambisonic::rodio::Source<Item = f32>,
-{
-    pub fn low_pass(
-        self,
-        frequency: u32,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::BltFilter<T>> {
-        RawAmbisonicClip::new(self.get().low_pass(frequency))
+impl RawAmbisonicClip {
+    pub fn low_pass(self, frequency: u32) -> RawAmbisonicClip {
+        RawAmbisonicClip::new(self.data.low_pass(frequency))
     }
 
-
-    pub fn buffered(self) -> RawAmbisonicClip<ambisonic::rodio::source::Buffered<T>> {
-        RawAmbisonicClip::new(self.get().buffered())
+    pub fn buffered(self) -> RawAmbisonicClip {
+        RawAmbisonicClip::new(self.data.buffered())
     }
 
-    pub fn mix<U>(
-        self,
-        raw_clip: RawAmbisonicClip<U>,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::Mix<T, U>>
+    pub fn mix<U>(self, raw_clip: RawAmbisonicClip) -> RawAmbisonicClip
     where
         U: ambisonic::rodio::Source<Item = f32>, {
-        RawAmbisonicClip::new(self.get().mix(raw_clip.get()))
+        RawAmbisonicClip::new(self.data.mix(raw_clip.data))
     }
 
     pub fn take_duration(
@@ -44,9 +21,9 @@ where
         seconds: u64,
         micro_seconds: u32,
         filter: FadeFilter,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::TakeDuration<T>> {
+    ) -> RawAmbisonicClip {
         let mut take = self
-            .get()
+            .data
             .take_duration(std::time::Duration::new(seconds, micro_seconds * 1000));
 
         take.clear_filter();
@@ -58,44 +35,36 @@ where
         RawAmbisonicClip::new(take)
     }
 
-    pub fn delay(
-        self,
-        seconds: u64,
-        micro_seconds: u32,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::Delay<T>> {
+    pub fn delay(self, seconds: u64, micro_seconds: u32) -> RawAmbisonicClip {
         let delay = self
-            .get()
+            .data
             .delay(std::time::Duration::new(seconds, micro_seconds * 1000));
 
         RawAmbisonicClip::new(delay)
     }
 
-    pub fn fade_in(
-        self,
-        seconds: u64,
-        micro_seconds: u32,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::FadeIn<T>> {
+    pub fn fade_in(self, seconds: u64, micro_seconds: u32) -> RawAmbisonicClip {
         let fade = self
-            .get()
+            .data
             .fade_in(std::time::Duration::new(seconds, micro_seconds * 1000));
 
         RawAmbisonicClip::new(fade)
     }
 
-    pub fn amplify(self, factor: f32) -> RawAmbisonicClip<ambisonic::rodio::source::Amplify<T>> {
-        RawAmbisonicClip::new(self.get().amplify(factor))
+    pub fn amplify(self, factor: f32) -> RawAmbisonicClip {
+        RawAmbisonicClip::new(self.data.amplify(factor))
     }
 
     pub fn take_crossfade_with<U>(
         self,
         seconds: u64,
         micro_seconds: u32,
-        raw_clip: RawAmbisonicClip<U>,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::Crossfade<T, U>>
+        raw_clip: RawAmbisonicClip,
+    ) -> RawAmbisonicClip
     where
         U: ambisonic::rodio::Source<Item = f32>, {
-        let cross_fade = self.get().take_crossfade_with(
-            raw_clip.get(),
+        let cross_fade = self.data.take_crossfade_with(
+            raw_clip.data,
             std::time::Duration::new(seconds, micro_seconds * 1000),
         );
 
@@ -103,8 +72,8 @@ where
     }
 
 
-    pub fn reverb(self, seconds: u64, micro_seconds: u32, amplitude: f32) -> Reverb<T> {
-        let reverb = self.get().buffered().reverb(
+    pub fn reverb(self, seconds: u64, micro_seconds: u32, amplitude: f32) -> RawAmbisonicClip {
+        let reverb = self.data.buffered().reverb(
             std::time::Duration::new(seconds, micro_seconds * 1000),
             amplitude,
         );
@@ -112,15 +81,16 @@ where
         RawAmbisonicClip::new(reverb)
     }
 
-    pub fn periodic_access<F>(
+    pub fn periodic_access<T, F: 'static>(
         self,
         seconds: u64,
         micro_seconds: u32,
         access: F,
-    ) -> RawAmbisonicClip<ambisonic::rodio::source::PeriodicAccess<T, F>>
+    ) -> RawAmbisonicClip
     where
-        F: FnMut(&mut T), {
-        let access = self.get().periodic_access(
+        T: ambisonic::rodio::Source<Item = f32>,
+        F: FnMut(&mut Box<dyn ambisonic::rodio::Source<Item = f32> + Send>) + Send, {
+        let access = self.data.periodic_access(
             std::time::Duration::new(seconds, micro_seconds * 1000),
             access,
         );
@@ -128,25 +98,25 @@ where
         RawAmbisonicClip::new(access)
     }
 
-    pub fn repeat(self) -> RawAmbisonicClip<ambisonic::rodio::source::Repeat<T>> {
-        RawAmbisonicClip::new(self.get().repeat_infinite())
+    pub fn repeat(self) -> RawAmbisonicClip {
+        RawAmbisonicClip::new(self.data.repeat_infinite())
     }
 
-    pub fn speed(self, factor: f32) -> RawAmbisonicClip<ambisonic::rodio::source::Speed<T>> {
-        RawAmbisonicClip::new(self.get().speed(factor))
+    pub fn speed(self, factor: f32) -> RawAmbisonicClip {
+        RawAmbisonicClip::new(self.data.speed(factor))
     }
 }
 
 
 #[cfg(test)]
 mod ambisonic_mixer_test {
-    use crate::{Ambisonic, AudioClip};
+    use crate::{AudioClip, RawAmbisonicClip};
 
     #[test]
     fn ambisonic_test() {
         let clip = AudioClip::create_clip(vec![5.0; 100], 2, 48000, None, true);
 
-        let raw_ambisonic = Ambisonic::from(clip);
+        let raw_ambisonic = RawAmbisonicClip::from(clip);
 
         // Can chain
         let _new_ambisonic = raw_ambisonic.amplify(5.0).fade_in(20, 1).low_pass(120);

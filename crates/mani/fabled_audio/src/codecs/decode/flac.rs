@@ -10,8 +10,7 @@ impl FlacReader {
         option: FlacReaderOptions,
     ) -> Result<AudioSpecification, AudioDecodingError> {
         let file = std::fs::File::open(flac_path)?;
-        let buf_reader = std::io::BufReader::new(file);
-        let reader = claxon::FlacReader::new_ext(buf_reader, option.into())
+        let reader = claxon::FlacReader::new_ext(file, option.into())
             .map_err(AudioDecodingError::FlacError)?;
 
         let stream_info = reader.streaminfo();
@@ -22,7 +21,7 @@ impl FlacReader {
             bit_per_sample: stream_info.bits_per_sample as _,
             // FLAC format supports only integer samples, not floating-point
             sample_format: SampleFormat::I16,
-            duration: stream_info.samples.unwrap() as u32 / stream_info.sample_rate,
+            duration: stream_info.samples.unwrap() as f32 / stream_info.sample_rate as f32,
         })
     }
 }
@@ -68,9 +67,10 @@ mod flac_decoder_test {
 
         assert_eq!(rodio_decoder.channels(), audio_spec.channel_count);
         assert_eq!(rodio_decoder.sample_rate(), audio_spec.sample_rate);
-        assert_eq!(
-            rodio_decoder.total_duration().unwrap().as_secs() as u32,
-            audio_spec.duration
-        );
+        assert!(rodio_decoder
+            .total_duration()
+            .unwrap()
+            .as_secs_f32()
+            .eq(&audio_spec.duration));
     }
 }
