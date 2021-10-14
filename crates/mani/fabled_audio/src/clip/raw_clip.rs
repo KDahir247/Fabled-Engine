@@ -35,7 +35,7 @@ impl RawAmbisonicClip {
 
 #[cfg(test)]
 mod raw_test {
-    use crate::{AudioClip, RawAmbisonicClip};
+    use crate::{AudioClip, AudioType, RawAmbisonicClip};
     use ambisonic::rodio::Source;
     use std::io::Read;
 
@@ -43,12 +43,10 @@ mod raw_test {
     fn get_standard_inner() {
         let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
 
-        let mut file = std::fs::File::open(path).unwrap();
-        let mut audio_buffer = vec![0; file.metadata().unwrap().len() as usize];
-        file.read_exact(&mut audio_buffer).unwrap();
+        let file = std::fs::File::open(path).unwrap();
 
 
-        let clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
+        let clip: AudioClip<f32> = AudioClip::from_file(AudioType::Loose(file), true);
 
         let previous_channel = clip.channels();
         let previous_sample_rate = clip.sample_rate();
@@ -70,11 +68,9 @@ mod raw_test {
     fn get_ambisonic_inner() {
         let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
 
-        let mut file = std::fs::File::open(path).unwrap();
-        let mut audio_buffer = vec![0; file.metadata().unwrap().len() as usize];
-        file.read_exact(&mut audio_buffer).unwrap();
+        let file = std::fs::File::open(path).unwrap();
 
-        let clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
+        let clip: AudioClip<f32> = AudioClip::from_file(AudioType::Loose(file), true);
 
         let previous_channel = clip.channels();
         let previous_sample_rate = clip.sample_rate();

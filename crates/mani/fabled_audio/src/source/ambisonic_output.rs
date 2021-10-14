@@ -98,7 +98,7 @@ impl AmbisonicOutput {
 
 #[cfg(test)]
 mod ambisonic_output_test {
-    use crate::{AmbisonicOutput, RawAmbisonicClip};
+    use crate::{AmbisonicOutput, AudioType, RawAmbisonicClip};
     use std::io::Read;
 
     fn retrieve_audio_buffer() -> Vec<u8> {
@@ -137,7 +137,8 @@ mod ambisonic_output_test {
 
         let standard_output = AmbisonicOutput::default();
 
-        let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
+        let audio_clip: AudioClip<f32> =
+            AudioClip::from_file(AudioType::Packed(audio_buffer), true);
         let raw_clip = RawAmbisonicClip::from(audio_clip);
 
         standard_output.play_omni(raw_clip, 1.0);
@@ -154,7 +155,8 @@ mod ambisonic_output_test {
 
         let standard_output = AmbisonicOutput::default();
 
-        let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
+        let audio_clip: AudioClip<f32> =
+            AudioClip::from_file(AudioType::Packed(audio_buffer), true);
         let raw_clip = RawAmbisonicClip::from(audio_clip).repeat();
 
         let mut sound = standard_output.play_at(raw_clip, 2.0, [50.0, 1.0, 0.0]);

@@ -1,5 +1,6 @@
-use crate::{RawAmbisonicClip, RawClip};
+use crate::{AudioType, RawAmbisonicClip, RawClip};
 use rodio::Source;
+use std::io::Read;
 
 // A Rust object that represents a sound should implement the `Source` trait.
 
@@ -31,8 +32,18 @@ impl<D> AudioClip<D>
 where
     D: rodio::Sample,
 {
-    pub fn from_file(buffer: Vec<u8>, play_on_awake: bool) -> Self {
-        let decoder = rodio::Decoder::new(std::io::Cursor::new(buffer));
+    pub fn from_file(ty: AudioType, play_on_awake: bool) -> Self {
+        let audio_buffer = match ty {
+            AudioType::Packed(buffer) => buffer,
+            AudioType::Loose(mut file) => {
+                let meta_data = file.metadata().unwrap();
+                let mut buffer = vec![0; meta_data.len() as usize];
+                file.read_exact(&mut buffer).unwrap();
+                buffer
+            }
+        };
+
+        let decoder = rodio::Decoder::new(std::io::Cursor::new(audio_buffer));
 
         match decoder {
             Ok(source) => {
@@ -158,7 +169,7 @@ where
 
 #[cfg(test)]
 mod audio_clip_test {
-    use crate::{AudioClip, RawAmbisonicClip, RawClip};
+    use crate::{AudioClip, AudioType, RawAmbisonicClip, RawClip};
     use ambisonic::rodio::Source;
     use std::io::Read;
 
@@ -222,7 +233,8 @@ mod audio_clip_test {
         file.read_exact(&mut audio_buffer).unwrap();
 
 
-        let audio_clip: AudioClip<f32> = AudioClip::from_file(audio_buffer, true);
+        let audio_clip: AudioClip<f32> =
+            AudioClip::from_file(AudioType::Packed(audio_buffer), true);
 
         assert!(audio_clip.channels().gt(&0));
         assert!(audio_clip.sample_rate().gt(&0));
