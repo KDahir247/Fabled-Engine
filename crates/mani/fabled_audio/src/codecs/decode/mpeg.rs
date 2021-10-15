@@ -14,12 +14,16 @@ impl Mp3Reader {
             .ok_or_else(|| std::io::Error::from(std::io::ErrorKind::InvalidData))?;
 
         let file = std::fs::File::open(path_dir)?;
-        let mut reader = minimp3::Decoder::new(file);
 
-        let mp3_duration = mp3_duration::from_path(path_dir).unwrap_or_default();
+        let file_metadata = file.metadata()?;
 
-        // All the frame should have the same sample rate and channel
-        let frame_detail = reader.next_frame().map_err(AudioDecodingError::Mp3Error)?;
+        let frame_detail = minimp3::Decoder::new(file)
+            .next_frame()
+            .map_err(AudioDecodingError::Mp3Error)?;
+
+        let bytes_len = file_metadata.len() as f32;
+        let bps_rate = frame_detail.bitrate as f32 * 125.0;
+        let duration_sec = bytes_len / bps_rate;
 
         Ok(AudioSpecification {
             channel_count: frame_detail.channels as u16,
@@ -27,9 +31,8 @@ impl Mp3Reader {
             // Internally, MP3 uses Huffman symbols to store the processed audio data. As such,
             // there's no real "bit depth" to report.
             bit_per_sample: 24,
-            // since frame_detail.data is a collection of i16.
             sample_format: SampleFormat::I16,
-            duration: mp3_duration.as_secs() as f32,
+            duration: duration_sec,
         })
     }
 }
@@ -42,7 +45,7 @@ mod mp3_decoding_test {
 
     #[test]
     fn decoding_file() {
-        let mp3_path = [env!("CARGO_MANIFEST_DIR"), "/src/audio/epic.mp3"].join("");
+        let mp3_path = [env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
 
         let mp3_reader = Mp3Reader::default();
         let mp3_spec = mp3_reader.read_mp3(mp3_path).unwrap();

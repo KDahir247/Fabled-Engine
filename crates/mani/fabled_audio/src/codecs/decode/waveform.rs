@@ -13,11 +13,11 @@ impl WavReader {
         {
             let mut file = std::fs::File::open(path_dir)?;
 
-            // Check if the file is a wav file and data is of wav format.
             hound::read_wave_header(&mut file).map_err(AudioDecodingError::WavError)?;
         }
 
         let file = std::fs::File::open(path_dir)?;
+
         let reader = hound::WavReader::new(file).map_err(AudioDecodingError::WavError)?;
 
         let wav_spec = reader.spec();

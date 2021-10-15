@@ -20,7 +20,6 @@ lewton = {version = "0.10.2", features = ["async_ogg"]}
 claxon = {version = "0.4.3"}
 
 minimp3 = {version ="0.5.1", features = ["async_tokio"]}
-mp3-duration = {version = "0.1.10"}
 
 parking_lot = { version = "0.11.2" }
 rayon = {version = "1.5.1"}

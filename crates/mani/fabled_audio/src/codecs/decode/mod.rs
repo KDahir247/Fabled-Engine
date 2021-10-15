@@ -8,10 +8,10 @@ pub use mpeg::*;
 pub use vorbis::*;
 pub use waveform::*;
 
-use bitflags::*;
+use bitflags::bitflags;
 
 bitflags! {
-    pub struct FlacReaderOptions : u32{
+    pub struct FlacReaderOptions : u8{
 
         const METADATA_ONLY  = 2;
         const READ_VORBIS_COMMENT  = 4;
@@ -21,9 +21,15 @@ bitflags! {
 
 impl From<FlacReaderOptions> for claxon::FlacReaderOptions {
     fn from(option_bit: FlacReaderOptions) -> Self {
+        let option_bit = option_bit.bits;
+
+        let meta_data_bit = FlacReaderOptions::METADATA_ONLY.bits;
+
+        let vorbis_comment_bit = FlacReaderOptions::READ_VORBIS_COMMENT.bits;
+
         Self {
-            metadata_only: option_bit.contains(FlacReaderOptions::METADATA_ONLY),
-            read_vorbis_comment: option_bit.contains(FlacReaderOptions::READ_VORBIS_COMMENT),
+            metadata_only: (option_bit & meta_data_bit) == 2,
+            read_vorbis_comment: (option_bit & vorbis_comment_bit) == 4,
         }
     }
 }
