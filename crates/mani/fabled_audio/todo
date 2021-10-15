@@ -2,9 +2,4 @@ Handle case where the user switch from different output devices. Currently when 
 still play from the desktop and vis versa. I got to create a way were i get a call-back or notification and play the audio from the
 from correct the output devices.
 
-Nice to make audio transformation extendable where it will allow user to create the own transform for the audio clip.
-This will be as a feature not a core.
-
 Clean up directory in the audio folders. Follow fabled_render folder structure.
-
-Recording audio "WavWriter" will use concurrency when Fabled_Concurrency is complete.

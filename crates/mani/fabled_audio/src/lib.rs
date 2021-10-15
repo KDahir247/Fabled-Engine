@@ -2,20 +2,16 @@ mod clip;
 mod codecs;
 mod config;
 mod container;
-mod dsp;
 mod error;
 mod mixer;
-mod renderer;
 mod source;
 
 pub use clip::*;
 pub use codecs::*;
 pub use config::*;
 pub use container::*;
-pub use dsp::*;
 pub use error::*;
 pub use mixer::*;
-pub use renderer::*;
 pub use source::*;
 
 
@@ -26,7 +22,6 @@ mod tests {
         StandardOutput,
     };
 
-    use std::io::Read;
 
     #[test]
     fn sequence_player_test() {

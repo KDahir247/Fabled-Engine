@@ -96,7 +96,12 @@ impl WavWriter {
             // temp place holder when till fabled_concurrency module is complete.
             std::thread::sleep(std::time::Duration::from_secs(5));
 
-            concurrent_writer.lock().take().unwrap().finalize().unwrap();
+            concurrent_writer
+                .lock()
+                .take()
+                .unwrap()
+                .finalize()
+                .map_err(AudioEncodingError::WavError)?;
         }
 
         Ok(())
