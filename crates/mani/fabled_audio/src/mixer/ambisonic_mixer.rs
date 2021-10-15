@@ -3,17 +3,17 @@ use ambisonic::rodio::Source;
 
 impl RawAmbisonicClip {
     pub fn low_pass(self, frequency: u32) -> RawAmbisonicClip {
-        RawAmbisonicClip::new(self.data.low_pass(frequency))
+        RawAmbisonicClip::new(self.dyn_clip.low_pass(frequency))
     }
 
     pub fn buffered(self) -> RawAmbisonicClip {
-        RawAmbisonicClip::new(self.data.buffered())
+        RawAmbisonicClip::new(self.dyn_clip.buffered())
     }
 
     pub fn mix<U>(self, raw_clip: RawAmbisonicClip) -> RawAmbisonicClip
     where
         U: ambisonic::rodio::Source<Item = f32>, {
-        RawAmbisonicClip::new(self.data.mix(raw_clip.data))
+        RawAmbisonicClip::new(self.dyn_clip.mix(raw_clip.dyn_clip))
     }
 
     pub fn take_duration(
@@ -23,7 +23,7 @@ impl RawAmbisonicClip {
         filter: FadeFilter,
     ) -> RawAmbisonicClip {
         let mut take = self
-            .data
+            .dyn_clip
             .take_duration(std::time::Duration::new(seconds, micro_seconds * 1000));
 
         take.clear_filter();
@@ -37,7 +37,7 @@ impl RawAmbisonicClip {
 
     pub fn delay(self, seconds: u64, micro_seconds: u32) -> RawAmbisonicClip {
         let delay = self
-            .data
+            .dyn_clip
             .delay(std::time::Duration::new(seconds, micro_seconds * 1000));
 
         RawAmbisonicClip::new(delay)
@@ -45,14 +45,14 @@ impl RawAmbisonicClip {
 
     pub fn fade_in(self, seconds: u64, micro_seconds: u32) -> RawAmbisonicClip {
         let fade = self
-            .data
+            .dyn_clip
             .fade_in(std::time::Duration::new(seconds, micro_seconds * 1000));
 
         RawAmbisonicClip::new(fade)
     }
 
     pub fn amplify(self, factor: f32) -> RawAmbisonicClip {
-        RawAmbisonicClip::new(self.data.amplify(factor))
+        RawAmbisonicClip::new(self.dyn_clip.amplify(factor))
     }
 
     pub fn take_crossfade_with<U>(
@@ -63,8 +63,8 @@ impl RawAmbisonicClip {
     ) -> RawAmbisonicClip
     where
         U: ambisonic::rodio::Source<Item = f32>, {
-        let cross_fade = self.data.take_crossfade_with(
-            raw_clip.data,
+        let cross_fade = self.dyn_clip.take_crossfade_with(
+            raw_clip.dyn_clip,
             std::time::Duration::new(seconds, micro_seconds * 1000),
         );
 
@@ -73,7 +73,7 @@ impl RawAmbisonicClip {
 
 
     pub fn reverb(self, seconds: u64, micro_seconds: u32, amplitude: f32) -> RawAmbisonicClip {
-        let reverb = self.data.buffered().reverb(
+        let reverb = self.dyn_clip.buffered().reverb(
             std::time::Duration::new(seconds, micro_seconds * 1000),
             amplitude,
         );
@@ -90,7 +90,7 @@ impl RawAmbisonicClip {
     where
         T: ambisonic::rodio::Source<Item = f32>,
         F: FnMut(&mut Box<dyn ambisonic::rodio::Source<Item = f32> + Send>) + Send, {
-        let access = self.data.periodic_access(
+        let access = self.dyn_clip.periodic_access(
             std::time::Duration::new(seconds, micro_seconds * 1000),
             access,
         );
@@ -99,11 +99,11 @@ impl RawAmbisonicClip {
     }
 
     pub fn repeat(self) -> RawAmbisonicClip {
-        RawAmbisonicClip::new(self.data.repeat_infinite())
+        RawAmbisonicClip::new(self.dyn_clip.repeat_infinite())
     }
 
     pub fn speed(self, factor: f32) -> RawAmbisonicClip {
-        RawAmbisonicClip::new(self.data.speed(factor))
+        RawAmbisonicClip::new(self.dyn_clip.speed(factor))
     }
 }
 

@@ -1,6 +1,5 @@
 pub use audio_listener::*;
 pub use audio_spec::*;
-pub use audio_type::*;
 pub use device_config::*;
 pub use fade_filter::*;
 pub use sample_format::*;
@@ -8,7 +7,6 @@ pub use supported_buffer::*;
 
 mod audio_listener;
 mod audio_spec;
-mod audio_type;
 mod device_config;
 mod fade_filter;
 mod sample_format;
@@ -18,7 +16,7 @@ mod supported_buffer;
 #[cfg(test)]
 mod data_test {
     use crate::{
-        AudioListener, AudioSpecification, AudioType, DeviceConfig, FadeFilter, FlacReaderOptions,
+        AudioListener, AudioSpecification, DeviceConfig, FadeFilter, FlacReaderOptions,
         SampleFormat, SupportedBufferSize,
     };
 
@@ -44,9 +42,6 @@ mod data_test {
 
         let device_config_size = std::mem::size_of::<DeviceConfig>();
         assert_eq!(device_config_size & (device_config_size - 1), 0);
-
-        let audio_type_size = std::mem::size_of::<AudioType>();
-        assert_eq!(audio_type_size & (audio_type_size - 1), 0);
     }
 
 
@@ -75,8 +70,5 @@ mod data_test {
 
         let device_config_alignment = std::mem::align_of::<DeviceConfig>();
         assert_eq!(device_config_alignment & (device_config_alignment - 1), 0);
-
-        let audio_type_alignment = std::mem::align_of::<AudioType>();
-        assert_eq!(audio_type_alignment & (audio_type_alignment - 1), 0);
     }
 }

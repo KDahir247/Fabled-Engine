@@ -1,33 +1,33 @@
 pub struct RawClip<T>
 where
     T: rodio::Sample, {
-    pub data: Box<dyn rodio::Source<Item = T> + Send>,
+    pub dyn_clip: Box<dyn rodio::Source<Item = T> + Send>,
 }
 
 impl<T> RawClip<T>
 where
     T: rodio::Sample,
 {
-    pub fn new<U: 'static>(data: U) -> Self
+    pub fn new<U: 'static>(audio_clip: U) -> Self
     where
         U: rodio::Source<Item = T> + Send, {
         Self {
-            data: Box::new(data),
+            dyn_clip: Box::new(audio_clip),
         }
     }
 }
 
 pub struct RawAmbisonicClip {
-    pub data: Box<dyn ambisonic::rodio::Source<Item = f32> + Send>,
+    pub dyn_clip: Box<dyn ambisonic::rodio::Source<Item = f32> + Send>,
 }
 
 
 impl RawAmbisonicClip {
-    pub fn new<T: 'static>(data: T) -> Self
+    pub fn new<T: 'static>(ambisonic_audio_clip: T) -> Self
     where
         T: ambisonic::rodio::Source<Item = f32> + Send, {
         Self {
-            data: Box::new(data),
+            dyn_clip: Box::new(ambisonic_audio_clip),
         }
     }
 }
@@ -35,7 +35,7 @@ impl RawAmbisonicClip {
 
 #[cfg(test)]
 mod raw_test {
-    use crate::{AudioClip, AudioType, RawAmbisonicClip};
+    use crate::{AudioClip, RawAmbisonicClip};
     use ambisonic::rodio::Source;
 
     #[test]
@@ -45,7 +45,7 @@ mod raw_test {
         let file = std::fs::File::open(path).unwrap();
 
 
-        let clip: AudioClip<f32> = AudioClip::from_file(AudioType::Loose(file), true);
+        let clip: AudioClip<f32> = AudioClip::from_file(file, true).unwrap();
 
         let previous_channel = clip.channels();
         let previous_sample_rate = clip.sample_rate();
@@ -54,7 +54,7 @@ mod raw_test {
 
         let raw_clip = RawAmbisonicClip::from(clip);
 
-        let inner = raw_clip.data;
+        let inner = raw_clip.dyn_clip;
 
         assert!(previous_channel.eq(&inner.channels()));
         assert!(previous_sample_rate.eq(&inner.sample_rate()));
@@ -69,7 +69,7 @@ mod raw_test {
 
         let file = std::fs::File::open(path).unwrap();
 
-        let clip: AudioClip<f32> = AudioClip::from_file(AudioType::Loose(file), true);
+        let clip: AudioClip<f32> = AudioClip::from_file(file, true).unwrap();
 
         let previous_channel = clip.channels();
         let previous_sample_rate = clip.sample_rate();
@@ -78,7 +78,7 @@ mod raw_test {
 
         let raw_ambisonic = RawAmbisonicClip::from(clip);
 
-        let inner = raw_ambisonic.data;
+        let inner = raw_ambisonic.dyn_clip;
 
         assert!(inner.channels().eq(&previous_channel));
         assert!(inner.sample_rate().eq(&previous_sample_rate));

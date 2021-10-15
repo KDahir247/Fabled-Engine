@@ -67,7 +67,7 @@ where
     }
 
     pub fn play_omni(&self, clip: RawClip<D>, volume: f32) {
-        let inner = clip.data;
+        let inner = clip.dyn_clip;
 
         let channels = inner.channels();
 
@@ -81,7 +81,7 @@ where
     pub fn play_at(&self, clip: RawClip<D>, volume: f32, init_pos: [f32; 3]) {
         self.sink.set_emitter_position(init_pos);
 
-        let inner = clip.data;
+        let inner = clip.dyn_clip;
 
         let channel_count = inner.channels();
 
@@ -126,7 +126,7 @@ where
 
 #[cfg(test)]
 mod standard_output_test {
-    use crate::{AudioListener, AudioType, RawClip, StandardOutput};
+    use crate::{AudioListener, RawClip, StandardOutput};
     use std::io::Read;
 
     fn retrieve_audio_buffer() -> Vec<u8> {
@@ -165,8 +165,7 @@ mod standard_output_test {
 
         let standard_output = StandardOutput::default();
 
-        let audio_clip: AudioClip<f32> =
-            AudioClip::from_file(AudioType::Packed(audio_buffer), true);
+        let audio_clip: AudioClip<f32> = AudioClip::from_raw(audio_buffer, true).unwrap();
         let raw_clip = RawClip::from(audio_clip);
 
         standard_output.play_omni(raw_clip, 1.0);
@@ -183,8 +182,7 @@ mod standard_output_test {
 
         let mut standard_output = StandardOutput::default();
 
-        let audio_clip: AudioClip<f32> =
-            AudioClip::from_file(AudioType::Packed(audio_buffer), true);
+        let audio_clip: AudioClip<f32> = AudioClip::from_raw(audio_buffer, true).unwrap();
         let raw_clip = RawClip::from(audio_clip).repeat();
 
         standard_output.play_at(raw_clip, 2.0, [50.0, 1.0, 0.0]);
@@ -203,8 +201,7 @@ mod standard_output_test {
 
         let mut standard_output = StandardOutput::default();
 
-        let audio_clip: AudioClip<f32> =
-            AudioClip::from_file(AudioType::Packed(audio_buffer), true);
+        let audio_clip: AudioClip<f32> = AudioClip::from_raw(audio_buffer, true).unwrap();
         let raw_clip = RawClip::from(audio_clip).repeat();
 
         standard_output.play_at(raw_clip, 2.0, [2.0, 1.0, 0.0]);
@@ -233,8 +230,7 @@ mod standard_output_test {
 
         let standard_output = StandardOutput::default();
 
-        let audio_clip: AudioClip<f32> =
-            AudioClip::from_file(AudioType::Packed(audio_buffer), true);
+        let audio_clip: AudioClip<f32> = AudioClip::from_raw(audio_buffer, true).unwrap();
         let raw_clip = RawClip::from(audio_clip).repeat();
 
         standard_output.play_omni(raw_clip, 0.3);
