@@ -37,7 +37,6 @@ impl RawAmbisonicClip {
 mod raw_test {
     use crate::{AudioClip, AudioType, RawAmbisonicClip};
     use ambisonic::rodio::Source;
-    use std::io::Read;
 
     #[test]
     fn get_standard_inner() {

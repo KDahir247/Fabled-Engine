@@ -5,12 +5,6 @@ from correct the output devices.
 Nice to make audio transformation extendable where it will allow user to create the own transform for the audio clip.
 This will be as a feature not a core.
 
-Got to create a system that
-will allow the user to record as long as possible without blocking on a separate
-thread and stop it and save it to the given format
-
 Clean up directory in the audio folders. Follow fabled_render folder structure.
 
-Look over life time and provide the correct lifetime. Is it static or living until the function call?
-
-Create a function that will retrieve the RawClip data rather than exposing it as a public
+Recording audio "WavWriter" will use concurrency when Fabled_Concurrency is complete.
