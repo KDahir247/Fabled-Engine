@@ -3,8 +3,6 @@ use crate::{AudioDecodingError, AudioSpecification, SampleFormat};
 #[derive(Default)]
 pub struct OggReader;
 
-// todo not sure how to retrieve the duration.
-
 impl OggReader {
     pub fn read_ogg<P: AsRef<std::path::Path>>(
         &self,
