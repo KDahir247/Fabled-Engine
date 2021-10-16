@@ -1,6 +1,5 @@
 use crate::component::{camera_component, render_component, time_component};
 use crate::util::camera;
-use glam::Vec4Swizzles;
 use shipyard::IntoFastIter;
 
 pub fn camera_update_system(
