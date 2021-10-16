@@ -1,9 +1,7 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SampleFormat {
     I16,
-
     U16,
-
     F32,
 }
 

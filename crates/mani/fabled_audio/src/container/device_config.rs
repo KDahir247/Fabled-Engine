@@ -4,6 +4,6 @@ use crate::{SampleFormat, SupportedBufferSize};
 pub struct DeviceConfig {
     pub sample_rate: u32,
     pub channel_count: u16,
-    pub sample_format: SampleFormat,
     pub buffer_size: SupportedBufferSize,
+    pub sample_format: SampleFormat,
 }

@@ -53,8 +53,6 @@ mod data_test {
             0
         );
 
-        println!("{}", audio_output_f32_alignment);
-
         // -----------------------------------------------------------------
 
         let audio_spatial_output_alignment = std::mem::align_of::<AmbisonicOutput>();
@@ -63,13 +61,9 @@ mod data_test {
             0
         );
 
-        println!("{}", audio_spatial_output_alignment);
-
         // -----------------------------------------------------------------
 
         let spatial_source_alignment = std::mem::align_of::<SpatialAmbisonicSource>();
         assert_eq!(spatial_source_alignment & (spatial_source_alignment - 1), 0);
-
-        println!("{}", spatial_source_alignment);
     }
 }

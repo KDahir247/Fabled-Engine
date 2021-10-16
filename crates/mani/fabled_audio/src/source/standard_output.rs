@@ -1,7 +1,6 @@
 use crate::{AudioListener, OutputConfig, RawClip};
 
 pub struct StandardOutput<D> {
-    // we need to keep the sink and output alive for playing the audio.
     #[allow(dead_code)]
     sink: rodio::SpatialSink,
     #[allow(dead_code)]
@@ -24,12 +23,12 @@ where
 {
     pub fn new(init_pos: [f32; 3], audio_listener: AudioListener) -> Option<Self> {
         let OutputConfig {
-            output_device: device,
+            output_device,
             output_config,
         } = OutputConfig::default();
 
 
-        match (device, output_config) {
+        match (output_device, output_config) {
             (Some(device), Some(output)) => {
                 let (dyn_controller, dyn_mixer) =
                     rodio::dynamic_mixer::mixer(output.channel_count, output.sample_rate);
@@ -67,12 +66,12 @@ where
     }
 
     pub fn play_omni(&self, clip: RawClip<D>, volume: f32) {
-        let inner = clip.dyn_clip;
+        let dyn_clip = clip.dyn_clip;
 
-        let channels = inner.channels();
+        let channels = dyn_clip.channels();
 
         let channel_volume =
-            rodio::source::ChannelVolume::new(inner, vec![volume; channels as usize]);
+            rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channels as usize]);
 
         self.composer.add(channel_volume);
     }
@@ -81,12 +80,12 @@ where
     pub fn play_at(&self, clip: RawClip<D>, volume: f32, init_pos: [f32; 3]) {
         self.sink.set_emitter_position(init_pos);
 
-        let inner = clip.dyn_clip;
+        let dyn_clip = clip.dyn_clip;
 
-        let channel_count = inner.channels();
+        let channel_count = dyn_clip.channels();
 
         let channel_volume =
-            rodio::source::ChannelVolume::new(inner, vec![volume; channel_count as usize]);
+            rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channel_count as usize]);
 
         self.composer.add(channel_volume);
     }

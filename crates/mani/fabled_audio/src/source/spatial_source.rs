@@ -20,13 +20,14 @@ impl SpatialAmbisonicSource {
     }
 
     pub fn set_position(&mut self, mut target_position: [f32; 3]) {
-        // Handle getting all zero values for target position, which will result in NaN
-        if target_position.iter().sum::<f32>() == 0.0 {
-            target_position = [
-                target_position[0] + target_position[0].signum() * f32::EPSILON,
-                target_position[1] + target_position[1].signum() * f32::EPSILON,
-                target_position[2] + target_position[2].signum() * f32::EPSILON,
-            ];
+        let sum = target_position[0] + target_position[1] + target_position[2];
+
+        if sum == 0.0 {
+            let offset_x = target_position[0] + target_position[0].signum() * f32::EPSILON;
+            let offset_y = target_position[1] + target_position[1].signum() * f32::EPSILON;
+            let offset_z = target_position[2] + target_position[2].signum() * f32::EPSILON;
+
+            target_position = [offset_x, offset_y, offset_z];
         }
 
         self.source.adjust_position(target_position);

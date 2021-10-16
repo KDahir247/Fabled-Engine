@@ -1,9 +1,6 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FadeFilter {
-    // abruptly stop the clip after reaching the destination
     ABRUPT,
-    // softly fade out the clip till the volume reaches zero then stop the clip after reaching the
-    // destination
     FADE,
 }
 

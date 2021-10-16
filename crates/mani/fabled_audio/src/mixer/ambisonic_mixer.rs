@@ -22,9 +22,11 @@ impl RawAmbisonicClip {
         micro_seconds: u32,
         filter: FadeFilter,
     ) -> RawAmbisonicClip {
+        let micro_seconds = micro_seconds * 1000;
+
         let mut take = self
             .dyn_clip
-            .take_duration(std::time::Duration::new(seconds, micro_seconds * 1000));
+            .take_duration(std::time::Duration::new(seconds, micro_seconds));
 
         take.clear_filter();
 
@@ -36,17 +38,21 @@ impl RawAmbisonicClip {
     }
 
     pub fn delay(self, seconds: u64, micro_seconds: u32) -> RawAmbisonicClip {
+        let micro_seconds = micro_seconds * 1000;
+
         let delay = self
             .dyn_clip
-            .delay(std::time::Duration::new(seconds, micro_seconds * 1000));
+            .delay(std::time::Duration::new(seconds, micro_seconds));
 
         RawAmbisonicClip::new(delay)
     }
 
     pub fn fade_in(self, seconds: u64, micro_seconds: u32) -> RawAmbisonicClip {
+        let micro_seconds = micro_seconds * 1000;
+
         let fade = self
             .dyn_clip
-            .fade_in(std::time::Duration::new(seconds, micro_seconds * 1000));
+            .fade_in(std::time::Duration::new(seconds, micro_seconds));
 
         RawAmbisonicClip::new(fade)
     }
@@ -63,9 +69,11 @@ impl RawAmbisonicClip {
     ) -> RawAmbisonicClip
     where
         U: ambisonic::rodio::Source<Item = f32>, {
+        let micro_seconds = micro_seconds * 1000;
+
         let cross_fade = self.dyn_clip.take_crossfade_with(
             raw_clip.dyn_clip,
-            std::time::Duration::new(seconds, micro_seconds * 1000),
+            std::time::Duration::new(seconds, micro_seconds),
         );
 
         RawAmbisonicClip::new(cross_fade)
@@ -73,10 +81,12 @@ impl RawAmbisonicClip {
 
 
     pub fn reverb(self, seconds: u64, micro_seconds: u32, amplitude: f32) -> RawAmbisonicClip {
-        let reverb = self.dyn_clip.buffered().reverb(
-            std::time::Duration::new(seconds, micro_seconds * 1000),
-            amplitude,
-        );
+        let micro_seconds = micro_seconds * 1000;
+
+        let reverb = self
+            .dyn_clip
+            .buffered()
+            .reverb(std::time::Duration::new(seconds, micro_seconds), amplitude);
 
         RawAmbisonicClip::new(reverb)
     }
@@ -90,10 +100,11 @@ impl RawAmbisonicClip {
     where
         T: ambisonic::rodio::Source<Item = f32>,
         F: FnMut(&mut Box<dyn ambisonic::rodio::Source<Item = f32> + Send>) + Send, {
-        let access = self.dyn_clip.periodic_access(
-            std::time::Duration::new(seconds, micro_seconds * 1000),
-            access,
-        );
+        let micro_seconds = micro_seconds * 1000;
+
+        let access = self
+            .dyn_clip
+            .periodic_access(std::time::Duration::new(seconds, micro_seconds), access);
 
         RawAmbisonicClip::new(access)
     }

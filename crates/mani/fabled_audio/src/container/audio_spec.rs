@@ -2,15 +2,11 @@ use crate::SampleFormat;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct AudioSpecification {
-    pub channel_count: u16,
-
     pub sample_rate: u32,
-
-    pub bit_per_sample: u16,
-
-    pub sample_format: SampleFormat,
-
     pub duration: f32,
+    pub channel_count: u16,
+    pub bit_per_sample: u16,
+    pub sample_format: SampleFormat,
 }
 
 impl Default for AudioSpecification {

@@ -2,7 +2,6 @@ use crate::{OutputConfig, RawAmbisonicClip, SpatialAmbisonicSource};
 use ambisonic::rodio::Source;
 
 pub struct AmbisonicOutput {
-    // we need to keep the sink and output alive for playing the audio.
     #[allow(dead_code)]
     sink: ambisonic::rodio::Sink,
     #[allow(dead_code)]
@@ -19,13 +18,13 @@ impl Default for AmbisonicOutput {
 impl AmbisonicOutput {
     fn new() -> Option<Self> {
         let OutputConfig {
-            output_device: device,
+            output_device,
             output_config,
         } = OutputConfig::default();
 
-        match (device, output_config) {
-            (Some(device), Some(output)) => {
-                let (b_mixer, b_controller) = ambisonic::bmixer(output.sample_rate);
+        match (output_device, output_config) {
+            (Some(device), Some(config)) => {
+                let (b_mixer, b_controller) = ambisonic::bmixer(config.sample_rate);
 
                 let (output_stream, output_handle) =
                     ambisonic::rodio::OutputStream::try_from_device(&device).unwrap();
@@ -57,16 +56,16 @@ impl AmbisonicOutput {
 
 
     pub fn play_omni(&self, clip: RawAmbisonicClip, volume: f32) -> SpatialAmbisonicSource {
-        let input = clip.dyn_clip;
+        let dyn_clip = clip.dyn_clip;
 
-        let channels = input.channels();
+        let channels = dyn_clip.channels();
 
         let channel_volume =
-            ambisonic::rodio::source::ChannelVolume::new(input, vec![volume; channels as usize]);
+            ambisonic::rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channels as usize]);
 
         let sound_controller = self
             .composer
-            .play(channel_volume, ambisonic::BstreamConfig::new());
+            .play(channel_volume, ambisonic::BstreamConfig::default());
 
         SpatialAmbisonicSource::new(sound_controller)
     }
