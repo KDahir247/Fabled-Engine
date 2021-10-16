@@ -11,19 +11,19 @@ impl FlacReader {
     ) -> Result<AudioSpecification, AudioDecodingError> {
         let file = std::fs::File::open(flac_path)?;
 
-        let reader = claxon::FlacReader::new_ext(file, option.into())
+        let flac_reader = claxon::FlacReader::new_ext(file, option.into())
             .map_err(AudioDecodingError::FlacError)?;
 
-        let stream_info = reader.streaminfo();
+        let stream_info = flac_reader.streaminfo();
 
-        let samples = stream_info.samples.unwrap_or_default();
+        let audio_samples = stream_info.samples.unwrap_or_default();
 
         Ok(AudioSpecification {
             channel_count: stream_info.channels as _,
             sample_rate: stream_info.sample_rate,
             bit_per_sample: stream_info.bits_per_sample as _,
             sample_format: SampleFormat::I16,
-            duration: samples as f32 / stream_info.sample_rate as f32,
+            duration: audio_samples as f32 / stream_info.sample_rate as f32,
         })
     }
 }

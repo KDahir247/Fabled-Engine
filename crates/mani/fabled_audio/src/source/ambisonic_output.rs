@@ -19,7 +19,7 @@ impl Default for AmbisonicOutput {
 impl AmbisonicOutput {
     fn new() -> Option<Self> {
         let OutputConfig {
-            device,
+            output_device: device,
             output_config,
         } = OutputConfig::default();
 

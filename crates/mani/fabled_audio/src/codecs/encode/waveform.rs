@@ -27,7 +27,7 @@ impl Default for WavWriter {
 impl WavWriter {
     pub fn new(config: Option<InputConfig>) -> Result<Self, AudioEncodingError> {
         let InputConfig {
-            device,
+            input_device: device,
             input_config,
         } = config.unwrap_or_default();
 
@@ -69,14 +69,14 @@ impl WavWriter {
 
         let buf_writer = std::io::BufWriter::with_capacity(file_metadata.len() as usize, file);
 
-        let writer = hound::WavWriter::new(buf_writer, self.wav_spec)
+        let wav_writer = hound::WavWriter::new(buf_writer, self.wav_spec)
             .map_err(AudioEncodingError::WavError)?;
 
-        let concurrent_writer = std::sync::Arc::new(parking_lot::Mutex::new(Some(writer)));
+        let concurrent_writer = std::sync::Arc::new(parking_lot::Mutex::new(Some(wav_writer)));
 
         let writer_2 = concurrent_writer.clone();
 
-        let error_pred = move |err| println!("an error has occurred on stream: {}", err);
+        let error_predicate = move |err| println!("an error has occurred on stream: {}", err);
 
         let stream = self.device.build_input_stream_raw(
             &self.stream_config,
@@ -100,7 +100,7 @@ impl WavWriter {
                     }
                 };
             },
-            error_pred,
+            error_predicate,
         );
 
         let stream = stream.map_err(AudioEncodingError::BuildStreamError)?;

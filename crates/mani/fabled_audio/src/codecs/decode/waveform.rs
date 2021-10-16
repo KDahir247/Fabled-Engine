@@ -18,9 +18,9 @@ impl WavReader {
 
         let file = std::fs::File::open(path_dir)?;
 
-        let reader = hound::WavReader::new(file).map_err(AudioDecodingError::WavError)?;
+        let wav_reader = hound::WavReader::new(file).map_err(AudioDecodingError::WavError)?;
 
-        let wav_spec = reader.spec();
+        let wav_spec = wav_reader.spec();
 
         let format_target = match wav_spec.sample_format {
             hound::SampleFormat::Float => SampleFormat::F32,
@@ -32,7 +32,7 @@ impl WavReader {
             sample_rate: wav_spec.sample_rate,
             bit_per_sample: wav_spec.bits_per_sample,
             sample_format: format_target,
-            duration: (reader.duration() as f32 / wav_spec.sample_rate as f32),
+            duration: (wav_reader.duration() as f32 / wav_spec.sample_rate as f32),
         })
     }
 }

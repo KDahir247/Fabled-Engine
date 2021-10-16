@@ -24,7 +24,7 @@ where
 {
     pub fn new(init_pos: [f32; 3], audio_listener: AudioListener) -> Option<Self> {
         let OutputConfig {
-            device,
+            output_device: device,
             output_config,
         } = OutputConfig::default();
 

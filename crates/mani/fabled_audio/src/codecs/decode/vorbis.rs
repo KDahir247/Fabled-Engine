@@ -14,10 +14,10 @@ impl OggReader {
 
         let packet_reader = ogg::PacketReader::new(file);
 
-        let reader = lewton::inside_ogg::OggStreamReader::from_ogg_reader(packet_reader)
+        let ogg_reader = lewton::inside_ogg::OggStreamReader::from_ogg_reader(packet_reader)
             .map_err(AudioDecodingError::OggError)?;
 
-        let indent_info = reader.ident_hdr;
+        let indent_info = ogg_reader.ident_hdr;
 
         let bytes_len = file_metadata.len() as f32;
         let kbps_bitrate = indent_info.bitrate_nominal as f32 * 0.001;
