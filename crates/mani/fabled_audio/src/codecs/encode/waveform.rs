@@ -12,27 +12,27 @@ type WavWriterHandle = std::sync::Arc<
     >,
 >;
 
-pub struct WavWriter;
+pub struct WavWriter {
+    device: cpal::Device,
+    stream_config: cpal::StreamConfig,
+    wav_spec: hound::WavSpec,
+    sample_format: cpal::SampleFormat,
+}
 
 impl Default for WavWriter {
     fn default() -> Self {
-        Self {}
+        Self::new(None).unwrap()
     }
 }
 impl WavWriter {
-    pub fn create_wav<P: AsRef<std::path::Path>>(
-        &self,
-        path: P,
-        config: Option<InputConfig>,
-    ) -> Result<(), AudioEncodingError> {
-        // Creating Data.
-
+    pub fn new(config: Option<InputConfig>) -> Result<Self, AudioEncodingError> {
         let InputConfig {
             device,
             input_config,
         } = config.unwrap_or_default();
 
         let device = device.ok_or(AudioEncodingError::NoDeviceError)?;
+
         let input_config = input_config.ok_or(AudioEncodingError::NoInputConfigError)?;
 
         let wav_spec = hound::WavSpec {
@@ -42,7 +42,7 @@ impl WavWriter {
             sample_format: input_config.sample_format.into(),
         };
 
-        let input_stream_config = cpal::StreamConfig {
+        let stream_config = cpal::StreamConfig {
             channels: input_config.channel_count,
             sample_rate: cpal::SampleRate(input_config.sample_rate),
             buffer_size: input_config.buffer_size.into(),
@@ -54,8 +54,23 @@ impl WavWriter {
             SampleFormat::F32 => cpal::SampleFormat::F32,
         };
 
-        let writer =
-            hound::WavWriter::create(path, wav_spec).map_err(AudioEncodingError::WavError)?;
+        Ok(Self {
+            device,
+            wav_spec,
+            stream_config,
+            sample_format,
+        })
+    }
+
+    pub fn create_wav<P: AsRef<std::path::Path>>(&self, path: P) -> Result<(), AudioEncodingError> {
+        let file = std::fs::File::create(path)?;
+
+        let file_metadata = file.metadata()?;
+
+        let buf_writer = std::io::BufWriter::with_capacity(file_metadata.len() as usize, file);
+
+        let writer = hound::WavWriter::new(buf_writer, self.wav_spec)
+            .map_err(AudioEncodingError::WavError)?;
 
         let concurrent_writer = std::sync::Arc::new(parking_lot::Mutex::new(Some(writer)));
 
@@ -63,9 +78,9 @@ impl WavWriter {
 
         let error_pred = move |err| println!("an error has occurred on stream: {}", err);
 
-        let stream = device.build_input_stream_raw(
-            &input_stream_config,
-            sample_format,
+        let stream = self.device.build_input_stream_raw(
+            &self.stream_config,
+            self.sample_format,
             move |data, &_| {
                 match data.sample_format() {
                     cpal::SampleFormat::I16 => {
@@ -112,6 +127,9 @@ impl WavWriter {
     where
         T: cpal::Sample,
         U: cpal::Sample + hound::Sample, {
+        let writer = writer;
+        let input = input;
+
         if let Some(mut guard) = writer.try_lock() {
             if let Some(writer) = guard.as_mut() {
                 let chunk_data = input.chunks_exact(6);
@@ -150,16 +168,13 @@ impl WavWriter {
 
 #[cfg(test)]
 mod wav_test {
-    use crate::{InputConfig, WavWriter};
-
+    use crate::WavWriter;
 
     #[test]
     fn recording_voice() {
-        let input_config = InputConfig::default();
-
         const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/src/audio/recorded.wav");
         let wav_writer = WavWriter::default();
 
-        wav_writer.create_wav(PATH, Some(input_config)).unwrap();
+        wav_writer.create_wav(PATH).unwrap();
     }
 }
