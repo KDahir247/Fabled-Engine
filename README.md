@@ -46,3 +46,6 @@ RGBAUNORMSRGB
 [<img src="https://github.com/KDahir247/Fabled-Engine/blob/render/sample/RGBAUNORMSRGB.png">](https://streamable.com/3tltml)
 
 model is made by theStoff, Wesai, and xahun. Attribution is stated in the example folder.
+
+Music by Matthew Pablo
+www.matthewpablo.com
