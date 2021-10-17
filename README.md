@@ -5,7 +5,7 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 <br/>
 <br/>
 
-# The audio branch is where frequent development and up to date development will occur
+# The obj branch is where frequent development and up to date development will occur
 
 ## Camera Movement
 * Forward : Up or W
@@ -18,7 +18,7 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 <br/>
 
 # current progress:
-* Working on the audio branch for creating audio clip and source
+* Working on the obj branch for loading obj and mtl files
 <br/>
 
 ![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)
