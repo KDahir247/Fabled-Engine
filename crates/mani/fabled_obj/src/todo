@@ -1,0 +1,94 @@
+Set up folder structure
+
+obj file data to support.
+
+Create a clean way to load both obj and mtl file separately and try to
+not make either of them depend on another
+
+Create a async way to load obj and mtl file separately and try to
+not make either fo them depend on another
+
+    Basic Parameters
+-------------------------
+V = vertices data (x, y, z, [w])
+vt = texture coordinate data ( x, y, [z])
+vn = vertex normal data (x, y, z)
+vp = parameter space vertex (u , [v], [w])
+f = polygonal face element
+l = line element
+
+mtl file data to support.
+
+    Basic Parameters
+-------------------------
+Ka = ambient color (R, G, B)
+Kd = diffuse color (R, G, B)
+Ks = specular color (R, G, B)
+Ns = specular exponent (range 0 inclusive to 1000 inclusive)
+
+either support d or tr which will represent material transparency
+d = transparency (1.0 == fully opaque and 0.0 == fully transparent)
+tr = transparency (0.0 == fully opaque and 1.0 == fully transparent)
+Ni = optical density (float)
+
+illum
+0. Color on and Ambient off
+1. Color on and Ambient on
+2. Highlight on
+3. Reflection on and Ray trace on
+4. Transparency: Glass on, Reflection: Ray trace on
+5. Reflection: Fresnel on and Ray trace on
+6. Transparency: Refraction on, Reflection: Fresnel off and Ray trace on
+7. Transparency: Refraction on, Reflection: Fresnel on and Ray trace on
+8. Reflection on and Ray trace off
+9. Transparency: Glass on, Reflection: Ray trace off
+10. Casts shadows onto invisible surfaces
+
+
+    Texture maps
+-------------------------
+map_Ka = ambient texture
+map_Kd = diffuse texture
+map_Ks = specular color texture
+map_Ns = specular highlight texture
+map_d = alpha texture
+bump = bump map (uses luminance channel of the image)
+disp = displacement map
+decal = stencil decal texture
+refl = reflection map
+
+might allow texture map data to support texture option
+for example
+
+map_Ka -o 1 1 1 my_texture.png (texture origin (1,1,1))
+
+    Texture Options
+-------------------------
+- blendu on | off  = set horizontal texture blending (-blendu on)
+- blendv on | off  = set vertical texture blending (-blendv off)
+- boost float_value = boost mip-map sharpness
+- o u v w = origin offset (-o 0 0 0)
+- s u v w = scale (-s 1 1 1)
+- t u v w = turbulence (-t 0 0 0) probably not necessary
+
+// reflection options
+- type sphere = reflection map is spherical
+- type cube_top | cube_bottom | cube_front | cube_back | cube_left | cube_right = reflection map is cubic and is for the designated face
+
+
+    Physically Based Rendering
+-----------------------------------
+map_Pr = roughness texture
+map_Pm = metallic texture
+map_Ps = sheen texture
+Pc = clearcoat thickness
+Pcr = clearcoat roughness
+map_Ke = emissive texture
+aniso = anisotropy
+anisor = anisotropy rotation
+norm = normal map (RGB components represent XYZ components of the surface normal)
+
+
+    Extra
+-------------------------
+map_RMA = RMA material (R == Roughness, G == Metallic, B == Ambient Occlusion)

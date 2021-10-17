@@ -1,33 +1,28 @@
-mod blending;
-mod illumination_model;
-mod pbr_standard;
-mod rma;
-mod standard;
-mod tex_option;
-mod tex_type;
-
 pub use blending::*;
-pub use illumination_model::*;
 pub use pbr_standard::*;
 pub use rma::*;
 pub use standard::*;
 pub use tex_option::*;
 pub use tex_type::*;
 
+mod blending;
+mod pbr_standard;
+mod rma;
+mod standard;
+mod tex_option;
+mod tex_type;
+
 #[cfg(test)]
 mod data_test {
     use crate::material::{
-        IlluminationModel, PBRStandardMaterial, StandardMaterial, SupportRMA, TextureBlending,
-        TextureOptions, TextureType,
+        PBRStandardMaterial, StandardMaterial, SupportRMA, TextureBlending, TextureOptions,
+        TextureType,
     };
 
     #[test]
     fn data_size() {
         let blending_size = std::mem::size_of::<TextureBlending>();
         assert_eq!(blending_size & (blending_size - 1), 0);
-
-        let illum_model_size = std::mem::size_of::<IlluminationModel>();
-        assert_eq!(illum_model_size & (illum_model_size - 1), 0);
 
         let rma_size = std::mem::size_of::<SupportRMA>();
         assert_eq!(rma_size & (rma_size - 1), 0);
@@ -49,9 +44,6 @@ mod data_test {
     fn data_alignment() {
         let blending_alignment = std::mem::align_of::<TextureBlending>();
         assert_eq!(blending_alignment & (blending_alignment - 1), 0);
-
-        let illum_model_alignment = std::mem::align_of::<IlluminationModel>();
-        assert_eq!(illum_model_alignment & (illum_model_alignment - 1), 0);
 
         let rma_alignment = std::mem::align_of::<SupportRMA>();
         assert_eq!(rma_alignment & (rma_alignment - 1), 0);
