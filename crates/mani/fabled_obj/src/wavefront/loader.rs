@@ -38,16 +38,23 @@ impl ObjLoader {
 
         let obj_detail = load_result.unwrap();
 
+        println!("There are {} models in this obj", obj_detail.0.len());
         let chunk_model_data = obj_detail.0.par_chunks_exact(chunk_size);
         let chunk_remainder = chunk_model_data.remainder();
 
         chunk_model_data.into_par_iter().for_each(|model_chunk| {
+            println!(
+                "calculating chunk of {} on thread : {:?}",
+                chunk_size,
+                std::thread::current().id()
+            );
+
             assert!(model_chunk.len().eq(&chunk_size));
 
             let mut end_base_collection = Vec::with_capacity(chunk_size);
 
-            for chunk_index in 0..chunk_size {
-                end_base_collection.push(model_chunk[chunk_index].mesh.positions.len() / 3);
+            for model in model_chunk {
+                end_base_collection.push(model.mesh.positions.len() / 3);
             }
 
             let mut end_bases = &end_base_collection[..chunk_size];
