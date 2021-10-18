@@ -1,7 +1,6 @@
 pub use illumination_model::*;
 pub use load_flag::*;
 pub use parse_command::*;
-
 mod illumination_model;
 mod load_flag;
 mod parse_command;
