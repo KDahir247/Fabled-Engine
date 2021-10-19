@@ -1,7 +1,10 @@
 use crate::LoadFlags;
-use fabled_render::mesh::{Mesh, Model, Vertex};
+
+use fabled_render::mesh::{Indices, Mesh, Model, Vertex};
+
 use rayon::prelude::*;
 use std::ops::DerefMut;
+
 pub struct ObjLoader {
     flags: u8,
 }
@@ -22,7 +25,7 @@ impl ObjLoader {
     }
 
     pub fn load<P: AsRef<std::path::Path>>(&self, obj_path: P, chunk_size: usize) -> Model {
-        let file = std::fs::File::open(obj_path).unwrap();
+        let file = std::fs::File::open(obj_path.as_ref()).unwrap();
         let file_metadata = file.metadata().unwrap();
 
         let mut obj_file_buffer =
@@ -32,17 +35,27 @@ impl ObjLoader {
 
         let load_result =
             tobj::load_obj_buf(&mut obj_file_buffer, &load_flags.into(), |mtl_path| {
+                let full_path = if let Some(parent) = obj_path.as_ref().parent() {
+                    parent.join(mtl_path)
+                } else {
+                    mtl_path.to_owned()
+                };
+
                 // We don't want to load mtl from this script.
-                println!("{}", mtl_path.display());
+                println!("{:?}", full_path.display());
+
                 Err(tobj::LoadError::GenericFailure)
             });
 
         let obj_detail = load_result.unwrap();
 
         let chunk_model_data = obj_detail.0.par_chunks_exact(chunk_size);
+
         let chunk_remainder = chunk_model_data.remainder();
 
-        let meshes = std::sync::Arc::new(parking_lot::Mutex::new(Vec::new()));
+        let mesh_len = chunk_model_data.len() * chunk_size + chunk_remainder.len();
+
+        let meshes = std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(mesh_len)));
 
         chunk_model_data.into_par_iter().for_each(|model_chunk| {
             assert!(model_chunk.len().eq(&chunk_size));
@@ -105,10 +118,11 @@ impl ObjLoader {
                     .material_id
                     .unwrap_or_default() as u32;
 
+                let indices = model_chunk[chunk_index].mesh.indices.to_owned();
 
                 let mesh = Mesh {
                     vertices,
-                    indices: vec![], // todo
+                    indices: Indices::U32(indices),
                     material_id,
                 };
 
@@ -123,7 +137,6 @@ impl ObjLoader {
                 chunk_index += 1;
             }
         });
-
 
         // remaining_chunk calculated in the main thread.
         for (index, remaining_model) in chunk_remainder.iter().enumerate() {
@@ -161,9 +174,11 @@ impl ObjLoader {
                 ..Default::default()
             };
 
+            let remaining_indices = remaining_model.mesh.indices.to_owned();
+
             let remaining_mesh = Mesh {
                 vertices: vec![remaining_vertex],
-                indices: vec![], // todo
+                indices: Indices::U32(remaining_indices),
                 material_id,
             };
 

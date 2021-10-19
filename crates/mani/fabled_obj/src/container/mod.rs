@@ -1,9 +1,12 @@
 pub use illumination_model::*;
 pub use load_flag::*;
 pub use parse_command::*;
+pub use meta_data::*;
+
 mod illumination_model;
 mod load_flag;
 mod parse_command;
+mod meta_data;
 
 #[cfg(test)]
 mod data_test {
