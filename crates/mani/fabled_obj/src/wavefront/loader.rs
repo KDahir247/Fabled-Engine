@@ -1,6 +1,7 @@
 use crate::LoadFlags;
 use fabled_render::mesh::{Mesh, Model, Vertex};
 use rayon::prelude::*;
+use std::ops::DerefMut;
 pub struct ObjLoader {
     flags: u8,
 }
@@ -20,7 +21,7 @@ impl ObjLoader {
         }
     }
 
-    pub fn load<P: AsRef<std::path::Path>>(&self, obj_path: P, chunk_size: usize) {
+    pub fn load<P: AsRef<std::path::Path>>(&self, obj_path: P, chunk_size: usize) -> Model {
         let file = std::fs::File::open(obj_path).unwrap();
         let file_metadata = file.metadata().unwrap();
 
@@ -38,17 +39,12 @@ impl ObjLoader {
 
         let obj_detail = load_result.unwrap();
 
-        println!("There are {} models in this obj", obj_detail.0.len());
         let chunk_model_data = obj_detail.0.par_chunks_exact(chunk_size);
         let chunk_remainder = chunk_model_data.remainder();
 
-        chunk_model_data.into_par_iter().for_each(|model_chunk| {
-            println!(
-                "calculating chunk of {} on thread : {:?}",
-                chunk_size,
-                std::thread::current().id()
-            );
+        let meshes = std::sync::Arc::new(parking_lot::Mutex::new(Vec::new()));
 
+        chunk_model_data.into_par_iter().for_each(|model_chunk| {
             assert!(model_chunk.len().eq(&chunk_size));
 
             let mut end_base_collection = Vec::with_capacity(chunk_size);
@@ -58,12 +54,13 @@ impl ObjLoader {
             }
 
             let mut end_bases = &end_base_collection[..chunk_size];
+
             let mut chunk_index = 0;
 
             while !end_bases.is_empty() {
                 let range_bases = 0..end_bases[0];
 
-                let vertex: Vec<Vertex> = range_bases
+                let vertices: Vec<Vertex> = range_bases
                     .into_iter()
                     .map(|index| {
                         let model = &model_chunk[chunk_index];
@@ -93,31 +90,95 @@ impl ObjLoader {
                             ]
                         };
 
-
                         Vertex {
-                            tangent: [0.0; 4],
-                            bi_tangent: [0.0; 4],
                             position: vertex,
                             tex_coord,
                             normal,
+                            ..Default::default()
                         }
                     })
                     .collect();
 
 
+                let material_id = model_chunk[chunk_index]
+                    .mesh
+                    .material_id
+                    .unwrap_or_default() as u32;
+
+
+                let mesh = Mesh {
+                    vertices,
+                    indices: vec![], // todo
+                    material_id,
+                };
+
+                let mut mesh_guard = meshes.lock();
+
+                mesh_guard.push(mesh);
+
                 println!("chunk calculated");
+
                 end_bases = &end_bases[1..];
+
                 chunk_index += 1;
             }
-
-            println!("chunks finished calculating");
         });
 
 
-        // chunk remainder here.
-        for remaining_model in chunk_remainder {
-            println!("remain data that need to be calculated");
+        // remaining_chunk calculated in the main thread.
+        for (index, remaining_model) in chunk_remainder.iter().enumerate() {
+            let vertex = [
+                remaining_model.mesh.positions[index * 3],
+                remaining_model.mesh.positions[index * 3 + 1],
+                remaining_model.mesh.positions[index * 3 + 2],
+            ];
+
+            let normal = if remaining_model.mesh.normals.is_empty() {
+                [0.0, 0.0, 0.0]
+            } else {
+                [
+                    remaining_model.mesh.normals[index * 3],
+                    remaining_model.mesh.normals[index * 3 + 1],
+                    remaining_model.mesh.normals[index * 3 + 2],
+                ]
+            };
+
+            let tex_coord = if remaining_model.mesh.texcoords.is_empty() {
+                [0.0, 0.0]
+            } else {
+                [
+                    remaining_model.mesh.texcoords[index * 2],
+                    remaining_model.mesh.texcoords[index * 2 + 1],
+                ]
+            };
+
+            let material_id = remaining_model.mesh.material_id.unwrap_or_default() as u32;
+
+            let remaining_vertex = Vertex {
+                position: vertex,
+                tex_coord,
+                normal,
+                ..Default::default()
+            };
+
+            let remaining_mesh = Mesh {
+                vertices: vec![remaining_vertex],
+                indices: vec![], // todo
+                material_id,
+            };
+
+            let mut mesh_guard = meshes.lock();
+
+            println!("remaining chunk calculated");
+
+            mesh_guard.push(remaining_mesh);
         }
+
+        let mut mesh_guard = meshes.lock();
+
+        let meshes = std::mem::take(mesh_guard.deref_mut());
+
+        Model { meshes }
     }
 }
 
@@ -131,7 +192,7 @@ mod obj_loader_test {
         let obj = ObjLoader::default();
         obj.load(
             "D:/Study//Fabled Engine/example/just_a_girl/untitled.obj",
-            2,
+            3,
         );
     }
 }
