@@ -30,6 +30,7 @@ impl ObjLoader {
         chunk_size: usize,
     ) -> Result<Model, ObjError> {
         let file = std::fs::File::open(obj_path.as_ref())?;
+
         let mut obj_file_buffer = std::io::BufReader::new(file);
 
         let load_flags = LoadFlags::from_bits(self.flags).unwrap_or_default();
@@ -41,56 +42,44 @@ impl ObjLoader {
             .map_err(ObjError::ObjError)?;
 
         let models = obj_detail.0;
+
         let chunk_size = chunk_size.min(models.len());
+
         let chunk_model_data = models.par_chunks_exact(chunk_size);
+
         let chunk_remainder = chunk_model_data.remainder();
 
         let mesh_len = chunk_model_data.len() * chunk_size + chunk_remainder.len();
+
         let meshes = std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(mesh_len)));
 
         chunk_model_data.into_par_iter().for_each(|model_chunk| {
             for model in model_chunk {
-                let vertices: Vec<Vertex> = self.calculate_obj_internal(model);
-
-                let indices = model.mesh.indices.to_owned();
-                let material_id = model.mesh.material_id.unwrap_or_default() as u32;
-
-                let mesh = Mesh {
-                    vertices,
-                    indices: Indices::U32(indices),
-                    material_id,
-                };
+                let mesh = self.calculate_obj_internal(model);
 
                 let mut mesh_guard = meshes.lock();
+
                 mesh_guard.push(mesh);
             }
         });
 
         for remaining_model in chunk_remainder {
-            let vertices: Vec<Vertex> = self.calculate_obj_internal(remaining_model);
-
-            let indices = remaining_model.mesh.indices.to_owned();
-            let material_id = remaining_model.mesh.material_id.unwrap_or_default() as u32;
-
-            let remaining_mesh = Mesh {
-                vertices,
-                indices: Indices::U32(indices),
-                material_id,
-            };
+            let mesh = self.calculate_obj_internal(remaining_model);
 
             let mut mesh_guard = meshes.lock();
-            mesh_guard.push(remaining_mesh);
+
+            mesh_guard.push(mesh);
         }
 
         let mut mesh_guard = meshes.lock();
+
         let meshes = std::mem::take(mesh_guard.deref_mut());
 
         Ok(Model { meshes })
     }
 
-
-    fn calculate_obj_internal(&self, model: &tobj::Model) -> Vec<Vertex> {
-        (0..model.mesh.positions.len() / 3)
+    fn calculate_obj_internal(&self, model: &tobj::Model) -> Mesh {
+        let vertices = (0..model.mesh.positions.len() / 3)
             .into_iter()
             .map(|index| {
                 let vertex = [
@@ -126,7 +115,17 @@ impl ObjLoader {
                     ..Default::default()
                 }
             })
-            .collect()
+            .collect::<Vec<Vertex>>();
+
+        let indices = model.mesh.indices.to_owned();
+
+        let material_id = model.mesh.material_id.unwrap_or_default() as u32;
+
+        Mesh {
+            vertices,
+            indices: Indices::U32(indices),
+            material_id,
+        }
     }
 }
 

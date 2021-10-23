@@ -1,7 +1,7 @@
 use fabled_render::material::StandardMaterial;
 use rayon::prelude::*;
 
-const UNKNOWN_PARAM_SUPPORT: [&str; 4] = ["map_Ns", "disp", "decal", "refl"];
+const UNKNOWN_PARAM_SUPPORT: [&str; 3] = ["disp", "decal", "refl"];
 
 #[derive(Default)]
 pub struct MtlLoader;
@@ -18,14 +18,16 @@ impl MtlLoader {
 
         let obj_mtl = mtl_detail.0;
 
-        let a = obj_mtl
+        let model_materials = obj_mtl
             .par_iter()
             .map(|material: &tobj::Material| {
-                // material.unknown_param.
+                for a in UNKNOWN_PARAM_SUPPORT {
+                    let result = material.unknown_param.get(a);
 
-
-                println!("{:?}", material.name);
-                material.unknown_param.get("");
+                    if let Some(result) = result {
+                        println!("{}", result);
+                    }
+                }
 
                 StandardMaterial {
                     ambient_color: material.ambient,
@@ -39,9 +41,9 @@ impl MtlLoader {
                     ],
                 }
             })
-            .collect::<Vec<_>>();
+            .collect::<Vec<StandardMaterial>>();
 
-        println!("{:#?}", a);
+        println!("{:#?}", model_materials);
     }
 }
 
