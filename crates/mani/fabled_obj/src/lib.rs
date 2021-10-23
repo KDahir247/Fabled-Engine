@@ -1,7 +1,9 @@
 mod container;
-mod wavefront;
+mod error;
 mod mtl;
+mod wavefront;
 
 pub use container::*;
-pub use wavefront::*;
+pub use error::*;
 pub use mtl::*;
+pub use wavefront::*;

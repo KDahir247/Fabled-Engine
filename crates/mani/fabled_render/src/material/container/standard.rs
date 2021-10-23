@@ -3,12 +3,10 @@
 #[derive(Copy, Clone, Debug, bytemuck::Zeroable, bytemuck::Pod)]
 #[repr(C)]
 pub struct StandardMaterial {
-    ambient_color: [f32; 3],
-    emissive_color: [f32; 3],
-    diffuse_color: [f32; 3],
-    specular_color: [f32; 3],
-    shininess: f32,
-    index_of_refraction: f32,
-    alpha_threshold: f32,
-    unknown_param: f32,
+    pub ambient_color: [f32; 3],
+    pub diffuse_color: [f32; 3],
+    pub specular_color: [f32; 3],
+
+    // Shininess, Index of Refraction, Alpha, Illum.
+    pub factor: [f32; 4],
 }

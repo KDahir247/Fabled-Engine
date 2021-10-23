@@ -112,7 +112,7 @@ impl From<Torus> for Model {
         let mesh = Mesh {
             vertices: vertex_buffer,
             material_id: 0,
-            indices : indices.into(),
+            indices: indices.into(),
         };
 
         Model { meshes: vec![mesh] }

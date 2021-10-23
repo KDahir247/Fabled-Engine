@@ -50,12 +50,12 @@ illum
 map_Ka = ambient texture
 map_Kd = diffuse texture
 map_Ks = specular color texture
-map_Ns = specular highlight texture
+map_Ns = specular highlight texture - todo
 map_d = alpha texture
 bump = bump map (uses luminance channel of the image)
-disp = displacement map
-decal = stencil decal texture
-refl = reflection map
+disp = displacement map - todo
+decal = stencil decal texture - todo
+refl = reflection map - todo
 
 might allow texture map data to support texture option
 for example
@@ -92,3 +92,8 @@ norm = normal map (RGB components represent XYZ components of the surface normal
     Extra
 -------------------------
 map_RMA = RMA material (R == Roughness, G == Metallic, B == Ambient Occlusion)
+
+
+
+Re-look at Standard in the material module.
+should i make the material color a [f32; 4] or should it be a [f32; 3]
