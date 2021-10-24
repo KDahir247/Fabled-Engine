@@ -1,4 +1,4 @@
-use crate::texture::container::{ColorTarget, Extent3d, Texture};
+use crate::texture::container::{ColorTarget, Extent3d, TextureData};
 use crate::texture::ImageProcError;
 use image::GenericImageView;
 
@@ -9,7 +9,7 @@ pub struct ColorProcessing {
 
 impl ColorProcessing {
     pub fn new<T: 'static>(
-        texture: Texture,
+        texture: TextureData,
         color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
     ) -> Result<ColorProcessing, ImageProcError>
     where
@@ -52,10 +52,10 @@ impl ColorProcessing {
         self
     }
 
-    pub fn build(self) -> Texture {
+    pub fn build(self) -> TextureData {
         let dyn_texture = self.dyn_texture;
 
-        Texture {
+        TextureData {
             data: dyn_texture.to_bytes(),
             size: Extent3d {
                 width: dyn_texture.width(),

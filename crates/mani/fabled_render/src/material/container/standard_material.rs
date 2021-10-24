@@ -6,7 +6,8 @@ pub struct StandardMaterial {
     pub ambient_color: [f32; 3],
     pub diffuse_color: [f32; 3],
     pub specular_color: [f32; 3],
+    pub unknown_param: [f32; 3],
 
-    // Shininess, Index of Refraction, Alpha, Illum.
-    pub factor: [f32; 4],
+    // Shininess, Index of Refraction, Alpha,
+    pub factor: [f32; 3],
 }

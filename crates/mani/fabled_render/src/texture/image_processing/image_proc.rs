@@ -1,4 +1,4 @@
-use crate::texture::container::{ColorTarget, Extent2d, Extent3d, Texture};
+use crate::texture::container::{ColorTarget, Extent2d, Extent3d, TextureData};
 use crate::texture::image_processing::FilterType;
 use crate::texture::ImageProcError;
 use image::GenericImageView;
@@ -10,7 +10,7 @@ pub struct ImageProcessing {
 
 impl ImageProcessing {
     pub fn new<T: 'static>(
-        texture: Texture,
+        texture: TextureData,
         color_target_predicate: fn(image::ImageBuffer<T, Vec<u8>>) -> ColorTarget,
     ) -> Result<ImageProcessing, ImageProcError>
     where
@@ -129,10 +129,10 @@ impl ImageProcessing {
         self
     }
 
-    pub fn build(self) -> Texture {
+    pub fn build(self) -> TextureData {
         let dyn_tex = self.dyn_texture;
 
-        Texture {
+        TextureData {
             data: dyn_tex.to_bytes(),
             size: Extent3d {
                 width: dyn_tex.width(),

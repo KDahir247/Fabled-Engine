@@ -1,22 +1,24 @@
 pub use blending::*;
-pub use pbr_standard::*;
+pub use material_type::*;
+pub use pbr_material::*;
 pub use rma::*;
-pub use standard::*;
+pub use standard_material::*;
 pub use tex_option::*;
 pub use tex_type::*;
 
 mod blending;
-mod pbr_standard;
+mod material_type;
+mod pbr_material;
 mod rma;
-mod standard;
+mod standard_material;
 mod tex_option;
 mod tex_type;
 
 #[cfg(test)]
 mod data_test {
     use crate::material::{
-        PBRStandardMaterial, StandardMaterial, SupportRMA, TextureBlending, TextureOptions,
-        TextureType,
+        MaterialType, PBRStandardMaterial, StandardMaterial, SupportRMA, TextureBlending,
+        TextureOptions, TextureType,
     };
 
     #[test]
@@ -28,7 +30,7 @@ mod data_test {
         assert_eq!(rma_size & (rma_size - 1), 0);
 
         let standard_mat_size = std::mem::size_of::<StandardMaterial>();
-        assert_eq!(standard_mat_size & (standard_mat_size - 1), 0);
+        println!("{}", standard_mat_size);
 
         let pbr_standard_mat_size = std::mem::size_of::<PBRStandardMaterial>();
         assert_eq!(pbr_standard_mat_size & (pbr_standard_mat_size - 1), 0);
@@ -38,6 +40,9 @@ mod data_test {
 
         let texture_ty_size = std::mem::size_of::<TextureType>();
         assert_eq!(texture_ty_size & (texture_ty_size - 1), 0);
+
+        let material_type_size = std::mem::size_of::<MaterialType>();
+        assert_eq!(material_type_size & (material_type_size - 1), 0);
     }
 
     #[test]
@@ -65,5 +70,8 @@ mod data_test {
 
         let texture_ty_alignment = std::mem::align_of::<TextureType>();
         assert_eq!(texture_ty_alignment & (texture_ty_alignment - 1), 0);
+
+        let material_type_alignment = std::mem::align_of::<MaterialType>();
+        assert_eq!(material_type_alignment & (material_type_alignment - 1), 0);
     }
 }

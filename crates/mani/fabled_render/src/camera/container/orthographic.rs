@@ -1,6 +1,7 @@
 use crate::camera::ClippingPlane;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(align(16))]
 pub struct Orthographic {
     pub clipping: ClippingPlane,
     pub right: f32,

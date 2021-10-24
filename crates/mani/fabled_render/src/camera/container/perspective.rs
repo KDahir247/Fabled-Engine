@@ -1,7 +1,7 @@
 use crate::camera::{AspectRatio, ClippingPlane, Fov};
 
-
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(align(16))]
 pub struct Perspective {
     pub aspect: AspectRatio,
     pub clipping: ClippingPlane,

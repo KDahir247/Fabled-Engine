@@ -1,16 +1,18 @@
 pub use illumination_model::*;
+pub use imfchan::*;
 pub use load_flag::*;
-pub use parse_command::*;
-pub use meta_data::*;
+pub use material_metadata::*;
+pub use model_metadata::*;
 
 mod illumination_model;
+mod imfchan;
 mod load_flag;
-mod parse_command;
-mod meta_data;
+mod material_metadata;
+mod model_metadata;
 
 #[cfg(test)]
 mod data_test {
-    use crate::{IlluminationModel, LoadFlags};
+    use crate::{IlluminationModel, LoadFlags, MaterialMetadata, ModelMetadata, IMFCHAN};
 
     #[test]
     fn data_size() {
@@ -19,6 +21,15 @@ mod data_test {
 
         let illum_model_size = std::mem::size_of::<IlluminationModel>();
         assert_eq!(illum_model_size & (illum_model_size - 1), 0);
+
+        let model_metadata = std::mem::size_of::<ModelMetadata>();
+        assert_eq!(model_metadata & (model_metadata - 1), 0);
+
+        let material_metadata_size = std::mem::size_of::<MaterialMetadata>();
+        assert_eq!(material_metadata_size & (material_metadata_size - 1), 0);
+
+        let imfchan_size = std::mem::size_of::<IMFCHAN>();
+        assert_eq!(imfchan_size & (imfchan_size - 1), 0);
     }
 
     #[test]
@@ -28,5 +39,17 @@ mod data_test {
 
         let illum_model_alignment = std::mem::align_of::<IlluminationModel>();
         assert_eq!(illum_model_alignment & (illum_model_alignment - 1), 0);
+
+        let model_metadata_alignment = std::mem::align_of::<ModelMetadata>();
+        assert_eq!(model_metadata_alignment & (model_metadata_alignment - 1), 0);
+
+        let material_metadata_alignment = std::mem::align_of::<MaterialMetadata>();
+        assert_eq!(
+            material_metadata_alignment & (material_metadata_alignment - 1),
+            0
+        );
+
+        let imfchan_alignment = std::mem::align_of::<IMFCHAN>();
+        assert_eq!(imfchan_alignment & (imfchan_alignment - 1), 0);
     }
 }

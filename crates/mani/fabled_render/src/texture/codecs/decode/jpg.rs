@@ -1,5 +1,5 @@
 use crate::texture::codecs::TextureDescriptor;
-use crate::texture::container::{Extent3d, FlipAxis, Texture};
+use crate::texture::container::{Extent3d, FlipAxis, TextureData};
 use crate::texture::CodecsError;
 use image::GenericImageView;
 
@@ -11,7 +11,7 @@ impl JpgTextureLoader {
         &self,
         path: P,
         texture_descriptor: &TextureDescriptor,
-    ) -> Result<Texture, CodecsError> {
+    ) -> Result<TextureData, CodecsError> {
         let file = std::fs::File::open(path.as_ref())?;
 
         let jpg_decoder =
@@ -26,7 +26,7 @@ impl JpgTextureLoader {
             _ => dyn_img.to_bytes(), // skips flipping
         };
 
-        let jpg_texture = Texture {
+        let jpg_texture = TextureData {
             data,
             size: Extent3d {
                 width: dyn_img.width(),

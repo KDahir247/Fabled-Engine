@@ -19,32 +19,6 @@ l = line element
 
 mtl file data to support.
 
-    Basic Parameters
--------------------------
-Ka = ambient color (R, G, B)
-Kd = diffuse color (R, G, B)
-Ks = specular color (R, G, B)
-Ns = specular exponent (range 0 inclusive to 1000 inclusive)
-
-either support d or tr which will represent material transparency
-d = transparency (1.0 == fully opaque and 0.0 == fully transparent)
-tr = transparency (0.0 == fully opaque and 1.0 == fully transparent)
-Ni = optical density (float)
-
-illum
-0. Color on and Ambient off
-1. Color on and Ambient on
-2. Highlight on
-3. Reflection on and Ray trace on
-4. Transparency: Glass on, Reflection: Ray trace on
-5. Reflection: Fresnel on and Ray trace on
-6. Transparency: Refraction on, Reflection: Fresnel off and Ray trace on
-7. Transparency: Refraction on, Reflection: Fresnel on and Ray trace on
-8. Reflection on and Ray trace off
-9. Transparency: Glass on, Reflection: Ray trace off
-10. Casts shadows onto invisible surfaces
-
-
     Texture maps
 -------------------------
 map_Ka = ambient texture

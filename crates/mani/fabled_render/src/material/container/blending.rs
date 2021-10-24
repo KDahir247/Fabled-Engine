@@ -1,5 +1,6 @@
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum TextureBlending {
+    None,
     /// Set horizontal (U) texture blending to true. Set vertical (V) texture
     /// blending to false
     BlendU,
@@ -8,4 +9,10 @@ pub enum TextureBlending {
     BlendV,
     // Set both horizontal and vertical (UV) texture blending to true.
     BlendUV,
+}
+
+impl Default for TextureBlending {
+    fn default() -> Self {
+        Self::None
+    }
 }

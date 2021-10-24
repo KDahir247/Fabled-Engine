@@ -1,13 +1,17 @@
-use fabled_render::material::StandardMaterial;
-use rayon::prelude::*;
+use fabled_render::material::{MaterialType, StandardMaterial};
+use fabled_render::texture::Texture;
 
-const UNKNOWN_PARAM_SUPPORT: [&str; 3] = ["disp", "decal", "refl"];
+use crate::MaterialMetadata;
+use rayon::prelude::*;
 
 #[derive(Default)]
 pub struct MtlLoader;
 
 impl MtlLoader {
-    pub fn load<P: AsRef<std::path::Path>>(&self, mtl_path: P) {
+    pub fn load<P: AsRef<std::path::Path>>(
+        &self,
+        mtl_path: P,
+    ) -> Result<Vec<MaterialMetadata>, std::io::Error> {
         let file = std::fs::File::open(mtl_path).unwrap();
 
         let mut mtl_file_buffer = std::io::BufReader::new(file);
@@ -18,32 +22,39 @@ impl MtlLoader {
 
         let obj_mtl = mtl_detail.0;
 
-        let model_materials = obj_mtl
+        let material_detail = obj_mtl
             .par_iter()
             .map(|material: &tobj::Material| {
-                for a in UNKNOWN_PARAM_SUPPORT {
-                    let result = material.unknown_param.get(a);
+                // todo we need a clear separation between pbr material and standard material.
 
-                    if let Some(result) = result {
-                        println!("{}", result);
-                    }
-                }
+                // todo need to find a way to store strings to hold the texture path.
 
-                StandardMaterial {
-                    ambient_color: material.ambient,
+                let texture = Texture {
+                    texture: std::borrow::Cow::from(material.diffuse_texture.to_owned()),
+                    texture_option: Default::default(),
+                    texture_blending: Default::default(),
+                };
+
+                let material = MaterialType::Standard(StandardMaterial {
                     diffuse_color: material.diffuse,
+                    ambient_color: material.ambient,
                     specular_color: material.specular,
+                    unknown_param: [0.0; 3],
                     factor: [
                         material.shininess,
                         material.optical_density,
                         material.dissolve,
-                        material.illumination_model.unwrap_or_default() as f32,
                     ],
-                }
-            })
-            .collect::<Vec<StandardMaterial>>();
+                });
 
-        println!("{:#?}", model_materials);
+                MaterialMetadata { texture, material }
+            })
+            .collect::<Vec<MaterialMetadata>>();
+
+
+        // todo change material detail not to be a collection of type, but have a
+        // collection internally that contains the material datas.
+        Ok(material_detail)
     }
 }
 

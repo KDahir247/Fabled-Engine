@@ -1,4 +1,4 @@
-use crate::{LoadFlags, ObjError};
+use crate::{LoadFlags, ModelMetadata, ObjError};
 
 use fabled_render::mesh::{Indices, Mesh, Model, Vertex};
 
@@ -28,7 +28,7 @@ impl ObjLoader {
         &self,
         obj_path: P,
         chunk_size: usize,
-    ) -> Result<Model, ObjError> {
+    ) -> Result<ModelMetadata, ObjError> {
         let file = std::fs::File::open(obj_path.as_ref())?;
 
         let mut obj_file_buffer = std::io::BufReader::new(file);
@@ -75,7 +75,10 @@ impl ObjLoader {
 
         let meshes = std::mem::take(mesh_guard.deref_mut());
 
-        Ok(Model { meshes })
+        Ok(ModelMetadata {
+            mtl_path: std::path::PathBuf::from(obj_path.as_ref().parent().unwrap()), /* todo I want to retrieve the mtl directory not just the parent directory. */
+            model: Model { meshes },
+        })
     }
 
     fn calculate_obj_internal(&self, model: &tobj::Model) -> Mesh {
