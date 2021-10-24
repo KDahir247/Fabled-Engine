@@ -1,7 +1,9 @@
-use fabled_render::material::{MaterialType, StandardMaterial};
+use fabled_render::material::MaterialParameter;
 use fabled_render::texture::Texture;
 
-use crate::MaterialMetadata;
+use std::ops::DerefMut;
+
+use crate::{MaterialMetadata, ObjError};
 use rayon::prelude::*;
 
 #[derive(Default)]
@@ -11,7 +13,7 @@ impl MtlLoader {
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
         mtl_path: P,
-    ) -> Result<Vec<MaterialMetadata>, std::io::Error> {
+    ) -> Result<MaterialMetadata, ObjError> {
         let file = std::fs::File::open(mtl_path).unwrap();
 
         let mut mtl_file_buffer = std::io::BufReader::new(file);
@@ -22,39 +24,63 @@ impl MtlLoader {
 
         let obj_mtl = mtl_detail.0;
 
-        let material_detail = obj_mtl
-            .par_iter()
-            .map(|material: &tobj::Material| {
-                // todo we need a clear separation between pbr material and standard material.
+        let mtl_collection = std::sync::Arc::new(parking_lot::Mutex::new(MaterialMetadata {
+            materials: Vec::new(),
+        }));
 
-                // todo need to find a way to store strings to hold the texture path.
+        let material_collection = mtl_collection.clone();
+
+        obj_mtl.par_iter().for_each(|material: &tobj::Material| {
+            // todo we need a clear separation between pbr material and standard material.
+
+            // todo need to find a way to store strings to hold the texture path.
+
+            let mut mtl_guard = material_collection.lock();
+
+            let texture_maps = [
+                Some(&material.diffuse_texture),
+                Some(&material.ambient_texture),
+                Some(&material.specular_texture),
+                Some(&material.normal_texture),
+                Some(&material.shininess_texture),
+                Some(&material.dissolve_texture),
+                None,
+                None,
+            ];
+
+            let texture_params = [
+                MaterialParameter::Color(material.diffuse),
+                MaterialParameter::Color(material.ambient),
+                MaterialParameter::Color(material.specular),
+                MaterialParameter::None,
+                MaterialParameter::Scalar(material.shininess),
+                MaterialParameter::Scalar(material.dissolve),
+                MaterialParameter::Scalar(material.optical_density),
+                MaterialParameter::Scalar(material.illumination_model.unwrap_or_default() as f32),
+            ];
+
+
+            for (&texture_dir, factor) in texture_maps.iter().zip(texture_params) {
+                let texture_dir = texture_dir.map(|str| std::borrow::Cow::from(str.to_owned()));
 
                 let texture = Texture {
-                    texture: std::borrow::Cow::from(material.diffuse_texture.to_owned()),
+                    texture: texture_dir,
                     texture_option: Default::default(),
                     texture_blending: Default::default(),
                 };
 
-                let material = MaterialType::Standard(StandardMaterial {
-                    diffuse_color: material.diffuse,
-                    ambient_color: material.ambient,
-                    specular_color: material.specular,
-                    unknown_param: [0.0; 3],
-                    factor: [
-                        material.shininess,
-                        material.optical_density,
-                        material.dissolve,
-                    ],
-                });
+                println!("{:?} {:?}", texture.texture, factor);
 
-                MaterialMetadata { texture, material }
-            })
-            .collect::<Vec<MaterialMetadata>>();
+                mtl_guard.materials.push((texture, factor));
+            }
+            println!("\n");
+        });
 
+        let mut material_guard = mtl_collection.lock();
 
-        // todo change material detail not to be a collection of type, but have a
-        // collection internally that contains the material datas.
-        Ok(material_detail)
+        let materials = std::mem::take(material_guard.deref_mut());
+
+        Ok(materials)
     }
 }
 
@@ -66,6 +92,8 @@ mod mtl_loader_test {
     #[test]
     fn load_mtl() {
         let mtl = MtlLoader::default();
-        mtl.load("D:/Study//Fabled Engine/example/just_a_girl/untitled.mtl");
+        let materials = mtl
+            .load("D:/Study//Fabled Engine/example/just_a_girl/untitled.mtl")
+            .unwrap();
     }
 }

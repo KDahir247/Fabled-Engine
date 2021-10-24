@@ -1,7 +1,8 @@
 use crate::material::{TextureBlending, TextureOptions};
 
+#[derive(Debug, PartialEq, Clone)]
 pub struct Texture<'a> {
-    pub texture: std::borrow::Cow<'a, str>,
+    pub texture: Option<std::borrow::Cow<'a, str>>,
     pub texture_option: TextureOptions,
     pub texture_blending: TextureBlending,
 }

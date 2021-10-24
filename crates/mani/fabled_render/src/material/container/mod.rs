@@ -1,4 +1,5 @@
 pub use blending::*;
+pub use material_param::*;
 pub use material_type::*;
 pub use pbr_material::*;
 pub use rma::*;
@@ -7,6 +8,7 @@ pub use tex_option::*;
 pub use tex_type::*;
 
 mod blending;
+mod material_param;
 mod material_type;
 mod pbr_material;
 mod rma;
@@ -17,8 +19,8 @@ mod tex_type;
 #[cfg(test)]
 mod data_test {
     use crate::material::{
-        MaterialType, PBRStandardMaterial, StandardMaterial, SupportRMA, TextureBlending,
-        TextureOptions, TextureType,
+        MaterialParameter, MaterialType, PBRStandardMaterial, StandardMaterial, SupportRMA,
+        TextureBlending, TextureOptions, TextureType,
     };
 
     #[test]
@@ -43,6 +45,9 @@ mod data_test {
 
         let material_type_size = std::mem::size_of::<MaterialType>();
         assert_eq!(material_type_size & (material_type_size - 1), 0);
+
+        let material_param_size = std::mem::size_of::<MaterialParameter>();
+        assert_eq!(material_param_size & (material_param_size - 1), 0);
     }
 
     #[test]
@@ -73,5 +78,8 @@ mod data_test {
 
         let material_type_alignment = std::mem::align_of::<MaterialType>();
         assert_eq!(material_type_alignment & (material_type_alignment - 1), 0);
+
+        let material_param_alignment = std::mem::align_of::<MaterialParameter>();
+        assert_eq!(material_param_alignment & (material_param_alignment - 1), 0);
     }
 }
