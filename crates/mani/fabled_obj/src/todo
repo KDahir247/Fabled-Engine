@@ -19,6 +19,12 @@ l = line element
 
 mtl file data to support.
 
+    Basic Parameter
+-------------------------
+Ka = ambient color
+kd = diffuse color
+
+
     Texture maps
 -------------------------
 map_Ka = ambient texture
@@ -52,21 +58,23 @@ map_Ka -o 1 1 1 my_texture.png (texture origin (1,1,1))
 
     Physically Based Rendering
 -----------------------------------
-map_Pr = roughness texture
-map_Pm = metallic texture
-map_Ps = sheen texture
-Pc = clearcoat thickness
-Pcr = clearcoat roughness
-map_Ke = emissive texture
-aniso = anisotropy
-anisor = anisotropy rotation
-norm = normal map (RGB components represent XYZ components of the surface normal)
-
+albedo = diffuse // ok
+map_Pr = roughness texture //ok
+map_Pm = metallic texture //ok
+map_Ps = sheen texture //ok will be an option.
+Pc = clearcoat thickness //ok
+Pcr = clearcoat roughness //ok
+map_Ke = emissive texture // ok
+aniso = anisotropy //ok
+anisor = anisotropy rotation // ok
+norm = normal map (RGB components represent XYZ components of the surface normal) // ok
+ior // ok
+cut-out texture // ok
+occlusion map  == ambient occlusion map // ok
 
     Extra
 -------------------------
 map_RMA = RMA material (R == Roughness, G == Metallic, B == Ambient Occlusion)
-
 
 
 Re-look at Standard in the material module.
