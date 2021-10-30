@@ -54,6 +54,8 @@ impl ObjLoader {
         let meshes = std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(mesh_len)));
 
         chunk_model_data.into_par_iter().for_each(|model_chunk| {
+            let meshes = meshes.clone();
+
             for model in model_chunk {
                 let mesh = self.calculate_obj_internal(model);
 
@@ -140,10 +142,13 @@ mod obj_loader_test {
     #[test]
     fn load_obj() {
         let obj = ObjLoader::default();
-        obj.load(
-            "D:/Study//Fabled Engine/example/just_a_girl/untitled.obj",
-            3,
-        )
-        .unwrap();
+        let model = obj
+            .load(
+                "D:/Study//Fabled Engine/example/just_a_girl/untitled.obj",
+                3,
+            )
+            .unwrap();
+
+        println!("{}", model.model.meshes.len());
     }
 }
