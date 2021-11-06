@@ -58,7 +58,6 @@ map_Ka -o 1 1 1 my_texture.png (texture origin (1,1,1))
 
     Physically Based Rendering
 -----------------------------------
-albedo = diffuse // ok
 map_Pr = roughness texture //ok
 map_Pm = metallic texture //ok
 map_Ps = sheen texture //ok will be an option.

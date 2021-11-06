@@ -65,15 +65,12 @@ impl ObjLoader {
             }
         });
 
+        let mut mesh_guard = meshes.lock();
+
         for remaining_model in chunk_remainder {
             let mesh = self.calculate_obj_internal(remaining_model);
-
-            let mut mesh_guard = meshes.lock();
-
             mesh_guard.push(mesh);
         }
-
-        let mut mesh_guard = meshes.lock();
 
         let meshes = std::mem::take(mesh_guard.deref_mut());
 
@@ -111,7 +108,6 @@ impl ObjLoader {
                         model.mesh.texcoords[index * 2 + 1],
                     ]
                 };
-
 
                 Vertex {
                     position: vertex,

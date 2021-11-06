@@ -3,7 +3,10 @@ use fabled_render::texture::Texture;
 
 use std::ops::DerefMut;
 
-use crate::{MaterialMetadata, ObjError, TextureTarget};
+use crate::{
+    parse_floatn, MaterialMetadata, ObjError, TextureTarget, UNKNOWN_PARAM_PBR_SUPPORT,
+    UNKNOWN_PARAM_SUPPORT,
+};
 use rayon::prelude::*;
 
 const STANDARD_MATERIAL_COUNT: usize = 8;
@@ -48,22 +51,23 @@ impl MtlLoader {
             let mtl_collection = mtl_collection.clone();
 
             for mtl in mtl_chunk {
-                let mut mtl = Self::calculate_mtl_internal(parent_dir, mtl);
+                let mut mtl = Self::calculate_mtl_internal(parent_dir, mtl, target);
+
                 let mut mtl_guard = mtl_collection.lock();
 
                 mtl_guard.materials.append(&mut mtl);
             }
         });
 
+        let mut mtl_guard = mtl_collection.lock();
+
         for remaining_mtl in chunk_remainder {
-            let mut mtl = Self::calculate_mtl_internal(parent_dir, remaining_mtl);
-            let mut mtl_guard = mtl_collection.lock();
+            let mut mtl = Self::calculate_mtl_internal(parent_dir, remaining_mtl, target);
+
             mtl_guard.materials.append(&mut mtl);
         }
 
-        let mut material_guard = mtl_collection.lock();
-
-        let materials = std::mem::take(material_guard.deref_mut());
+        let materials = std::mem::take(mtl_guard.deref_mut());
 
         Ok(materials)
     }
@@ -71,87 +75,142 @@ impl MtlLoader {
     fn calculate_mtl_internal(
         parent_dir: &std::path::Path,
         mtl: &tobj::Material,
+        target: TextureTarget,
     ) -> Vec<(Texture<'static>, MaterialParameter)> {
-        let (tex_dir, mtl_param) = Self::retrieve_standard_materials(mtl);
+        let (mut tex_dir, mut mtl_param) = Self::retrieve_standard_materials(mtl);
+
+        if target == TextureTarget::PBR {
+            let (mut pbr_tex_dir, mut pbr_mtl_param) = Self::retrieve_pbr_materials(mtl);
+
+            tex_dir.append(&mut pbr_tex_dir);
+
+            mtl_param.append(&mut pbr_mtl_param);
+        }
 
         let len = std::cmp::min(tex_dir.len(), mtl_param.len());
 
         let mut mtl_container = Vec::with_capacity(len);
 
-        let (mut textures, mut params) = (&tex_dir[..len], &mtl_param[..len]);
+        let (mut tex_chunk, tex_remainder) = tex_dir.split_at(len);
 
-        while textures.len() >= 4 {
+        let (mut param_chunk, param_remainder) = mtl_param.split_at(len);
+
+        while tex_chunk.len() >= 4 {
             for index in 0..4 {
-                let full_tex_dir = textures[index].map(|tex_path| {
-                    let full_tex_dir = parent_dir.join(tex_path).to_str().unwrap().to_string();
-                    std::borrow::Cow::from(full_tex_dir)
-                });
+                let texture = tex_chunk[index];
 
-                let target_texture = Texture {
-                    texture: full_tex_dir,
-                    texture_option: Default::default(),
-                    texture_blending: Default::default(),
-                };
+                let param = param_chunk[index];
 
-                let target_param = params[index];
+                let texture = Self::create_texture(parent_dir, texture);
 
-
-                mtl_container.push((target_texture, target_param));
+                mtl_container.push((texture, param));
             }
 
-            textures = &textures[4..];
-            params = &params[4..];
+            tex_chunk = &tex_chunk[4..];
+            param_chunk = &param_chunk[4..];
         }
 
-        for (texture, param) in textures.iter().zip(params) {
-            let full_tex_dir = texture.map(|tex_path| {
-                let full_tex_dir = parent_dir.join(tex_path).to_str().unwrap().to_string();
-                std::borrow::Cow::from(full_tex_dir)
-            });
-
-            let texture = Texture {
-                texture: full_tex_dir,
-                texture_option: Default::default(),
-                texture_blending: Default::default(),
-            };
+        for (&texture, param) in tex_chunk.iter().zip(param_chunk) {
+            let texture = Self::create_texture(parent_dir, texture);
 
             mtl_container.push((texture, *param));
+        }
+
+        for &tex_dir in tex_remainder {
+            let texture = Self::create_texture(parent_dir, tex_dir);
+
+            mtl_container.push((texture, MaterialParameter::None));
+        }
+
+        for &mtl_param in param_remainder {
+            mtl_container.push((Texture::default(), mtl_param));
         }
 
         mtl_container
     }
 
-    // todo can I simplify this? and clean up the code (2 array) this will be a part
-    // of pbr as well.
+    fn create_texture<'a, P: AsRef<std::path::Path>>(parent_dir: P, tex_dir: &str) -> Texture<'a> {
+        let parent = parent_dir.as_ref();
+        let valid_dir = (!tex_dir.is_empty()).then(|| {
+            let full_tex_dir = parent.join(tex_dir).to_str().unwrap().to_string();
+
+            std::borrow::Cow::from(full_tex_dir)
+        });
+
+        Texture {
+            texture: valid_dir,
+            texture_option: Default::default(),
+            texture_blending: Default::default(),
+        }
+    }
+
     fn retrieve_standard_materials(
         material: &tobj::Material,
-    ) -> (Vec<Option<&String>>, Vec<MaterialParameter>) {
-        let texture_maps = vec![
-            Some(&material.diffuse_texture),
-            Some(&material.ambient_texture),
-            Some(&material.specular_texture),
-            Some(&material.normal_texture),
-            Some(&material.shininess_texture),
-            Some(&material.dissolve_texture),
-            None,
-            None,
+    ) -> (Vec<&String>, Vec<MaterialParameter>) {
+        let mut texture_maps = vec![
+            &material.diffuse_texture,
+            &material.ambient_texture,
+            &material.specular_texture,
+            &material.normal_texture,
+            &material.shininess_texture,
+            &material.dissolve_texture,
         ];
 
-        let texture_params = vec![
+        let mut texture_params = vec![
             MaterialParameter::Color(material.diffuse),
             MaterialParameter::Color(material.ambient),
             MaterialParameter::Color(material.specular),
-            MaterialParameter::None,
+            MaterialParameter::Scalar(1.0), // normal factor
             MaterialParameter::Scalar(material.shininess),
             MaterialParameter::Scalar(material.dissolve),
-            MaterialParameter::Scalar(material.optical_density),
-            MaterialParameter::Scalar(material.illumination_model.unwrap_or_default() as f32),
         ];
+
+        for param in UNKNOWN_PARAM_SUPPORT {
+            if let Some(valid_tex_path) = material.unknown_param.get(param) {
+                texture_maps.push(valid_tex_path);
+
+                texture_params.push(MaterialParameter::None);
+            }
+        }
 
         (texture_maps, texture_params)
     }
-}
 
+    fn retrieve_pbr_materials(material: &tobj::Material) -> (Vec<&String>, Vec<MaterialParameter>) {
+        let mut pbr_texture_maps = Vec::new();
+
+        let mut pbr_texture_params = Vec::new();
+
+        let mut val = Vec::new();
+
+        for pbr_param in UNKNOWN_PARAM_PBR_SUPPORT {
+            if let Some(valid_pbr_param) = material.unknown_param.get(pbr_param) {
+                let mut words = valid_pbr_param[..].split_whitespace();
+
+                let count = words.clone().count();
+                if parse_floatn(&mut words, &mut val, count) {
+                    match count {
+                        1 => pbr_texture_params.push(MaterialParameter::Scalar(val.pop().unwrap())),
+                        3 => {
+                            let z = val.pop().unwrap();
+
+                            let y = val.pop().unwrap();
+
+                            let x = val.pop().unwrap();
+
+                            pbr_texture_params.push(MaterialParameter::Color([x, y, z]))
+                        }
+                        _ => {}
+                    }
+                } else {
+                    pbr_texture_maps.push(valid_pbr_param);
+                }
+            }
+        }
+
+        (pbr_texture_maps, pbr_texture_params)
+    }
+}
 
 #[cfg(test)]
 mod mtl_loader_test {
@@ -164,7 +223,7 @@ mod mtl_loader_test {
         let materials = mtl_loader
             .load(
                 "D://Study//Fabled Engine//example//just_a_girl//untitled.mtl",
-                TextureTarget::Standard,
+                TextureTarget::PBR,
                 3,
             )
             .unwrap();

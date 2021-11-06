@@ -4,14 +4,13 @@ pub use loader::*;
 // Texture String, Texture String, Texture String,
 pub const UNKNOWN_PARAM_SUPPORT: [&str; 3] = ["disp", "decal", "refl"];
 
-
-// Texture String, Texture String, Texture String, Scalar, Scalar, Scalar,
-// Scalar, Texture String,
+// roughness map, metallic map, sheen map, clear coat thickness, clear coat
+// roughness, emissive texture, anisotropy, anisotropy rotation, normal map
 pub const UNKNOWN_PARAM_PBR_SUPPORT: [&str; 9] = [
-    "map_Pr", "map_Pm", "map_Ps", "map_Ke", "norm", "Pc", "Pcr", "aniso", "anisor",
+    "map_Pr", "map_Pm", "map_Ps", "Pc", "Pcr", "map_Ke", "aniso", "anisor", "norm",
 ];
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum TextureTarget {
     Standard,
     PBR,
