@@ -1,8 +1,8 @@
 mod loader;
 pub use loader::*;
 
-// Texture String, Texture String, Texture String,
-pub const UNKNOWN_PARAM_SUPPORT: [&str; 3] = ["disp", "decal", "refl"];
+// Displacement Texture, Decal Texture, Reflective Texture,
+pub const UNKNOWN_PARAM_SUPPORT: [&str; 4] = ["disp", "decal", "refl", "bump"];
 
 // roughness map, metallic map, sheen map, clear coat thickness, clear coat
 // roughness, emissive texture, anisotropy, anisotropy rotation, normal map

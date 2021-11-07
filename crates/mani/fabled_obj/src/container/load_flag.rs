@@ -40,7 +40,13 @@ mod load_flag_test {
     #[test]
     fn creation_test() {
         let load_flag = LoadFlags::default();
-        println!("{:?}", load_flag);
+        assert_eq!(
+            load_flag,
+            LoadFlags::SINGLE_INDEX
+                | LoadFlags::TRIANGULATE
+                | LoadFlags::IGNORE_POINTS
+                | LoadFlags::IGNORE_LINES
+        );
     }
 
 

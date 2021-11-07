@@ -1,8 +1,4 @@
-use std::convert::TryFrom;
-// Used in Obj Wavefront file.
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-#[repr(u8)]
 pub enum IlluminationModel {
     None = 0,
     /// Color on and Ambient off
@@ -31,10 +27,21 @@ pub enum IlluminationModel {
 
 impl From<Option<u8>> for IlluminationModel {
     fn from(value: Option<u8>) -> Self {
-        // todo if statement to check if value is some or less than or equal to 11 if so
-        // transmute otherwise error
-        let z: IlluminationModel = unsafe { std::mem::transmute(value.unwrap()) };
-        z
+        match value.unwrap_or_default() {
+            0 => Self::None,
+            1 => Self::Color,
+            2 => Self::ColorAmbient,
+            3 => Self::Highlight,
+            4 => Self::ReflectionRayTrace,
+            5 => Self::TransparencyGlassReflectionRayTrace,
+            6 => Self::ReflectionFresnelRayTrace,
+            7 => Self::TransparencyRefractionRayTrace,
+            8 => Self::TransparencyRefractionReflectionFresnelRayTrace,
+            9 => Self::Reflection,
+            10 => Self::TransparencyGlass,
+            11 => Self::ShadowInvisible,
+            _ => Self::None,
+        }
     }
 }
 
@@ -45,10 +52,23 @@ mod illumination_model_test {
 
     #[test]
     fn illumination_from() {
-        let var_a: Option<u8> = Some(11);
+        let illum_val: Option<u8> = Some(11);
 
-        let illumination: IlluminationModel = var_a.into();
+        let illumination: IlluminationModel = illum_val.into();
+        assert_eq!(illumination, IlluminationModel::ShadowInvisible);
+    }
 
-        println!("{:?}", illumination);
+
+    #[test]
+    fn illumination_invalid() {
+        let illum_val: Option<u8> = None;
+
+        let illumination: IlluminationModel = illum_val.into();
+        assert_eq!(illumination, IlluminationModel::None);
+
+        let invalid_illum_val = Some(17);
+
+        let illumination: IlluminationModel = invalid_illum_val.into();
+        assert_eq!(illumination, IlluminationModel::None);
     }
 }

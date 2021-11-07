@@ -69,13 +69,14 @@ impl ObjLoader {
 
         for remaining_model in chunk_remainder {
             let mesh = self.calculate_obj_internal(remaining_model);
+
             mesh_guard.push(mesh);
         }
 
         let meshes = std::mem::take(mesh_guard.deref_mut());
 
         Ok(ModelMetadata {
-            mtl_path: std::path::PathBuf::from(obj_path.as_ref().parent().unwrap()), /* todo I want to retrieve the mtl directory not just the parent directory. */
+            mtl_path: std::path::PathBuf::from(obj_path.as_ref().parent().unwrap()),
             model: Model { meshes },
         })
     }
@@ -90,29 +91,23 @@ impl ObjLoader {
                     model.mesh.positions[index * 3 + 2],
                 ];
 
-                let normal = if model.mesh.normals.is_empty() {
-                    [0.0, 0.0, 0.0]
-                } else {
-                    [
-                        model.mesh.normals[index * 3],
-                        model.mesh.normals[index * 3 + 1],
-                        model.mesh.normals[index * 3 + 2],
-                    ]
-                };
+                let normal = model
+                    .mesh
+                    .normals
+                    .get((index * 3)..(index * 3 + 3))
+                    .unwrap_or(&[0.0; 3]);
 
-                let tex_coord = if model.mesh.texcoords.is_empty() {
-                    [0.0, 0.0]
-                } else {
-                    [
-                        model.mesh.texcoords[index * 2],
-                        model.mesh.texcoords[index * 2 + 1],
-                    ]
-                };
+
+                let tex_coord = model
+                    .mesh
+                    .texcoords
+                    .get((index * 2)..(index * 2 + 2))
+                    .unwrap_or(&[0.0; 2]);
 
                 Vertex {
                     position: vertex,
-                    tex_coord,
-                    normal,
+                    tex_coord: [tex_coord[0], tex_coord[1]],
+                    normal: [normal[0], normal[1], normal[2]],
                     ..Default::default()
                 }
             })

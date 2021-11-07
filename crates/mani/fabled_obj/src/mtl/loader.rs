@@ -4,23 +4,34 @@ use fabled_render::texture::Texture;
 use std::ops::DerefMut;
 
 use crate::{
-    parse_floatn, MaterialMetadata, ObjError, TextureTarget, UNKNOWN_PARAM_PBR_SUPPORT,
-    UNKNOWN_PARAM_SUPPORT,
+    parse_floatn, IlluminationModel, Material, MaterialMetadata, ObjError, TextureTarget,
+    UNKNOWN_PARAM_PBR_SUPPORT, UNKNOWN_PARAM_SUPPORT,
 };
 use rayon::prelude::*;
 
-const STANDARD_MATERIAL_COUNT: usize = 8;
+pub struct MtlLoader {
+    target: TextureTarget,
+}
 
-#[derive(Default)]
-pub struct MtlLoader;
+impl Default for MtlLoader {
+    fn default() -> Self {
+        Self {
+            target: TextureTarget::Standard,
+        }
+    }
+}
 
 impl MtlLoader {
+    pub fn new(target: TextureTarget) -> Self {
+        Self { target }
+    }
+
+
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
         mtl_path: P,
-        target: TextureTarget,
         chunk_size: usize,
-    ) -> Result<MaterialMetadata, ObjError> {
+    ) -> Result<Vec<MaterialMetadata>, ObjError> {
         let parent_dir = mtl_path.as_ref().parent().ok_or_else(|| {
             std::io::Error::new(
                 std::io::ErrorKind::PermissionDenied,
@@ -41,30 +52,36 @@ impl MtlLoader {
 
         let chunk_remainder = material_chunk.remainder();
 
-        let mtl_len = chunk_size * STANDARD_MATERIAL_COUNT + chunk_size;
-
-        let mtl_collection = std::sync::Arc::new(parking_lot::Mutex::new(MaterialMetadata {
-            materials: Vec::with_capacity(mtl_len),
-        }));
+        let mtl_collection = std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(
+            mtl_detail.len(),
+        )));
 
         material_chunk.into_par_iter().for_each(|mtl_chunk| {
             let mtl_collection = mtl_collection.clone();
 
+            let mut mtl_guard = mtl_collection.lock();
+
             for mtl in mtl_chunk {
-                let mut mtl = Self::calculate_mtl_internal(parent_dir, mtl, target);
+                let (illum_model, materials) =
+                    Self::calculate_mtl_internal(parent_dir, mtl, self.target);
 
-                let mut mtl_guard = mtl_collection.lock();
-
-                mtl_guard.materials.append(&mut mtl);
+                mtl_guard.push(MaterialMetadata {
+                    illum_model,
+                    materials,
+                });
             }
         });
 
         let mut mtl_guard = mtl_collection.lock();
 
         for remaining_mtl in chunk_remainder {
-            let mut mtl = Self::calculate_mtl_internal(parent_dir, remaining_mtl, target);
+            let (illum_model, materials) =
+                Self::calculate_mtl_internal(parent_dir, remaining_mtl, self.target);
 
-            mtl_guard.materials.append(&mut mtl);
+            mtl_guard.push(MaterialMetadata {
+                illum_model,
+                materials,
+            });
         }
 
         let materials = std::mem::take(mtl_guard.deref_mut());
@@ -76,7 +93,7 @@ impl MtlLoader {
         parent_dir: &std::path::Path,
         mtl: &tobj::Material,
         target: TextureTarget,
-    ) -> Vec<(Texture<'static>, MaterialParameter)> {
+    ) -> (IlluminationModel, Vec<Material<'static>>) {
         let (mut tex_dir, mut mtl_param) = Self::retrieve_standard_materials(mtl);
 
         if target == TextureTarget::PBR {
@@ -99,34 +116,43 @@ impl MtlLoader {
             for index in 0..4 {
                 let texture = tex_chunk[index];
 
-                let param = param_chunk[index];
+                let mtl_param = param_chunk[index];
 
                 let texture = Self::create_texture(parent_dir, texture);
 
-                mtl_container.push((texture, param));
+                mtl_container.push(Material { texture, mtl_param });
             }
 
             tex_chunk = &tex_chunk[4..];
             param_chunk = &param_chunk[4..];
         }
 
-        for (&texture, param) in tex_chunk.iter().zip(param_chunk) {
+        for (&texture, mtl_param) in tex_chunk.iter().zip(param_chunk) {
             let texture = Self::create_texture(parent_dir, texture);
 
-            mtl_container.push((texture, *param));
+            mtl_container.push(Material {
+                texture,
+                mtl_param: *mtl_param,
+            });
         }
 
         for &tex_dir in tex_remainder {
             let texture = Self::create_texture(parent_dir, tex_dir);
 
-            mtl_container.push((texture, MaterialParameter::None));
+            mtl_container.push(Material {
+                texture,
+                mtl_param: Default::default(),
+            });
         }
 
         for &mtl_param in param_remainder {
-            mtl_container.push((Texture::default(), mtl_param));
+            mtl_container.push(Material {
+                texture: Default::default(),
+                mtl_param,
+            });
         }
 
-        mtl_container
+        (mtl.illumination_model.into(), mtl_container)
     }
 
     fn create_texture<'a, P: AsRef<std::path::Path>>(parent_dir: P, tex_dir: &str) -> Texture<'a> {
@@ -214,7 +240,7 @@ impl MtlLoader {
 
 #[cfg(test)]
 mod mtl_loader_test {
-    use crate::{MtlLoader, TextureTarget};
+    use crate::MtlLoader;
 
     #[test]
     fn load_mtl() {
@@ -223,11 +249,13 @@ mod mtl_loader_test {
         let materials = mtl_loader
             .load(
                 "D://Study//Fabled Engine//example//just_a_girl//untitled.mtl",
-                TextureTarget::PBR,
                 3,
             )
             .unwrap();
 
-        println!("{:#?}", materials.materials);
+
+        assert_eq!(materials.len(), 3);
+
+        println!("{:#?}", materials);
     }
 }
