@@ -3,18 +3,16 @@ use bitflags::bitflags;
 bitflags! {
     pub struct LoadFlags : u8{
 
-        const MERGE_IDENTICAL_POINTS = 2;
-        const REORDER_DATA = 4;
-        const SINGLE_INDEX = 8;
-        const TRIANGULATE = 16;
-        const IGNORE_POINTS = 32;
-        const IGNORE_LINES = 64;
+        const SINGLE_INDEX = 2;
+        const TRIANGULATE = 4;
+        const IGNORE_POINTS = 8;
+        const IGNORE_LINES = 16;
     }
 }
 
 impl Default for LoadFlags {
     fn default() -> Self {
-        Self::from_bits(120).unwrap_or_default()
+        Self::from_bits(30).unwrap_or_default()
     }
 }
 
@@ -23,12 +21,10 @@ impl From<LoadFlags> for tobj::LoadOptions {
         let flag_bit = flags.bits;
 
         Self {
-            merge_identical_points: (flag_bit & 2) == 2,
-            reorder_data: (flag_bit & 4) == 4,
-            single_index: (flag_bit & 8) == 8,
-            triangulate: (flag_bit & 16) == 16,
-            ignore_points: (flag_bit & 32) == 32,
-            ignore_lines: (flag_bit & 64) == 64,
+            single_index: (flag_bit & 2) == 2,
+            triangulate: (flag_bit & 4) == 4,
+            ignore_points: (flag_bit & 8) == 8,
+            ignore_lines: (flag_bit & 16) == 16,
         }
     }
 }
@@ -52,16 +48,14 @@ mod load_flag_test {
 
     #[test]
     fn from_test() {
-        let load_flag = LoadFlags::from_bits(106).unwrap();
+        let load_flag = LoadFlags::from_bits(26).unwrap();
         // MERGE_IDENTICAL_POINTS | SINGLE_INDEX | IGNORE_POINTS | IGNORE_LINES
         let load_option: tobj::LoadOptions = load_flag.into();
 
-        assert!(load_option.merge_identical_points);
         assert!(load_option.ignore_lines);
         assert!(load_option.ignore_points);
         assert!(load_option.single_index);
 
-        assert!(!load_option.reorder_data);
         assert!(!load_option.triangulate);
     }
 }
