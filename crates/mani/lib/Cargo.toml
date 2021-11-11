@@ -13,7 +13,7 @@ anyhow = "*"
 shipyard = "*"
 image = "*"
 bytemuck = {version = "*", features = ["derive"]}
-tobj = "*"
+tobj = {version ="3.2.0", features = ["merging", "reordering"]}
 rayon = "*"
 ddsfile = "*"
 fabled_render = {path = "./../fabled_render", version = "*"}
