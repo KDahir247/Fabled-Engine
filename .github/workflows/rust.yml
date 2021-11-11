@@ -2,9 +2,9 @@ name: Rust
 
 on:
   push:
-    branches: [ main ]
+    branches: [ KDahir247-experimental-devops ]
   pull_request:
-    branches: [ main ]
+    branches: [ KDahir247-experimental-devops ]
 
 env:
   CARGO_TERM_COLOR: always
