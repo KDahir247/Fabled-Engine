@@ -3,7 +3,6 @@ use crate::{LoadFlags, ModelMetadata, ObjError};
 use fabled_render::mesh::{Indices, Mesh, Model, Vertex};
 
 use rayon::prelude::*;
-use std::ops::DerefMut;
 
 pub struct ObjLoader {
     flags: u8,
@@ -29,61 +28,56 @@ impl ObjLoader {
         obj_path: P,
         chunk_size: usize,
     ) -> Result<ModelMetadata, ObjError> {
-        let file = std::fs::File::open(obj_path.as_ref())?;
+        let obj_path = obj_path.as_ref();
+
+        let file = std::fs::File::open(obj_path)?;
 
         let mut obj_file_buffer = std::io::BufReader::new(file);
 
         let load_flags = LoadFlags::from_bits(self.flags).unwrap_or_default();
 
-        let obj_detail =
+        let (models, _) =
             tobj::load_obj_buf(&mut obj_file_buffer, &load_flags.into(), |_mtl_path| {
                 Err(tobj::LoadError::GenericFailure)
             })
             .map_err(ObjError::ObjError)?;
 
-        let models = obj_detail.0;
-
         let chunk_size = chunk_size.min(models.len());
 
-        let chunk_model_data = models.par_chunks_exact(chunk_size);
+        let chunk_model_data = models.chunks_exact(chunk_size);
+
+        let chunk_model_size = chunk_model_data.len();
 
         let chunk_remainder = chunk_model_data.remainder();
 
-        let mesh_len = chunk_model_data.len() * chunk_size + chunk_remainder.len();
+        let mesh_len =
+            chunk_model_size * chunk_size + chunk_remainder.len() + (chunk_model_size >> 1);
 
-        let meshes = std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(mesh_len)));
+        let mut meshes = Vec::with_capacity(mesh_len);
 
-        chunk_model_data.into_par_iter().for_each(|model_chunk| {
-            let meshes = meshes.clone();
-
+        for model_chunk in chunk_model_data {
             for model in model_chunk {
                 let mesh = self.calculate_obj_internal(model);
 
-                let mut mesh_guard = meshes.lock();
-
-                mesh_guard.push(mesh);
+                meshes.push(mesh);
             }
-        });
-
-        let mut mesh_guard = meshes.lock();
+        }
 
         for remaining_model in chunk_remainder {
             let mesh = self.calculate_obj_internal(remaining_model);
 
-            mesh_guard.push(mesh);
+            meshes.push(mesh);
         }
 
-        let meshes = std::mem::take(mesh_guard.deref_mut());
-
         Ok(ModelMetadata {
-            mtl_path: std::path::PathBuf::from(obj_path.as_ref().parent().unwrap()),
+            mtl_path: std::path::PathBuf::from(obj_path.parent().unwrap()),
             model: Model { meshes },
         })
     }
 
     fn calculate_obj_internal(&self, model: &tobj::Model) -> Mesh {
         let vertices = (0..model.mesh.positions.len() / 3)
-            .into_iter()
+            .into_par_iter()
             .map(|index| {
                 let vertex = [
                     model.mesh.positions[index * 3],
@@ -91,18 +85,17 @@ impl ObjLoader {
                     model.mesh.positions[index * 3 + 2],
                 ];
 
-                let normal = model
+                let normal: &[f32] = model
                     .mesh
                     .normals
                     .get((index * 3)..(index * 3 + 3))
                     .unwrap_or(&[0.0; 3]);
 
-
-                let tex_coord = model
+                let tex_coord: &[f32] = model
                     .mesh
                     .texcoords
                     .get((index * 2)..(index * 2 + 2))
-                    .unwrap_or(&[0.0; 2]);
+                    .unwrap_or(&[0.0; 3]);
 
                 Vertex {
                     position: vertex,
@@ -125,21 +118,49 @@ impl ObjLoader {
     }
 }
 
-
 #[cfg(test)]
 mod obj_loader_test {
+    use crate::common::obj_common::load_test_obj;
     use crate::ObjLoader;
+
+    #[test]
+    fn construction() {
+        let obj = ObjLoader::default();
+
+        let mut obj_dir = load_test_obj("obj");
+
+        if let Some(path) = obj_dir.pop() {
+            let model = obj.load(path, 3);
+            assert!(model.is_ok());
+        } else {
+            panic!("Could not find obj file in obj/test");
+        }
+    }
 
     #[test]
     fn load_obj() {
         let obj = ObjLoader::default();
-        let model = obj
-            .load(
-                "D:/Study//Fabled Engine/example/just_a_girl/untitled.obj",
-                3,
+
+        let mut obj_dir = load_test_obj("obj");
+
+        if let Some(path) = obj_dir.pop() {
+            let girl = obj.load(path.clone(), 3).unwrap();
+
+            let file = std::fs::File::open(path).unwrap();
+
+            let mut obj_file_buffer = std::io::BufReader::new(file);
+
+
+            let (models, _) = tobj::load_obj_buf(
+                &mut obj_file_buffer,
+                &tobj::LoadOptions::default(),
+                |_mtl_path| Err(tobj::LoadError::GenericFailure),
             )
             .unwrap();
 
-        println!("{}", model.model.meshes.len());
+            assert_eq!(models.len(), girl.model.meshes.len());
+        } else {
+            panic!("Could not find obj file in obj/test");
+        }
     }
 }

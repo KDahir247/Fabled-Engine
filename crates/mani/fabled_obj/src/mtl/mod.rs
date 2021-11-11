@@ -1,6 +1,8 @@
+mod async_loader;
 mod loader;
-pub use loader::*;
 
+pub use async_loader::*;
+pub use loader::*;
 // Displacement Texture, Decal Texture, Reflective Texture,
 pub const UNKNOWN_PARAM_SUPPORT: [&str; 4] = ["disp", "decal", "refl", "bump"];
 

@@ -3,6 +3,7 @@ mod error;
 mod mtl;
 mod util;
 mod wavefront;
+mod common;
 
 pub use container::*;
 pub use error::*;

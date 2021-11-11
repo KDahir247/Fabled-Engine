@@ -4,7 +4,7 @@ use fabled_render::texture::Texture;
 use std::ops::DerefMut;
 
 use crate::{
-    parse_floatn, IlluminationModel, Material, MaterialMetadata, ObjError, TextureTarget,
+    parse_float_n, IlluminationModel, Material, MaterialMetadata, ObjError, TextureTarget,
     UNKNOWN_PARAM_PBR_SUPPORT, UNKNOWN_PARAM_SUPPORT,
 };
 use rayon::prelude::*;
@@ -32,36 +32,40 @@ impl MtlLoader {
         mtl_path: P,
         chunk_size: usize,
     ) -> Result<Vec<MaterialMetadata>, ObjError> {
-        let parent_dir = mtl_path.as_ref().parent().ok_or_else(|| {
+        let mtl_path = mtl_path.as_ref();
+
+        let parent_dir = mtl_path.parent().ok_or_else(|| {
             std::io::Error::new(
                 std::io::ErrorKind::PermissionDenied,
                 "Parent path is not a valid directory",
             )
         })?;
 
-        let file = std::fs::File::open(mtl_path.as_ref())?;
+        let file = std::fs::File::open(mtl_path)?;
 
         let mut mtl_file_buffer = std::io::BufReader::new(file);
 
         let (mtl_detail, _) =
             tobj::load_mtl_buf(&mut mtl_file_buffer).map_err(ObjError::ObjError)?;
 
-        let chunk_size = chunk_size.min(mtl_detail.len());
+        let mtl_size = mtl_detail.len();
+
+        let chunk_size = chunk_size.min(mtl_size);
 
         let material_chunk = mtl_detail.par_chunks_exact(chunk_size);
 
         let chunk_remainder = material_chunk.remainder();
 
-        let mtl_collection = std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(
-            mtl_detail.len(),
-        )));
+        let len = mtl_size + (mtl_size >> 1);
+
+        let mtl_collection = std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(len)));
 
         material_chunk.into_par_iter().for_each(|mtl_chunk| {
             let mtl_collection = mtl_collection.clone();
 
-            let mut mtl_guard = mtl_collection.lock();
-
             for mtl in mtl_chunk {
+                let mut mtl_guard = mtl_collection.lock();
+
                 let (illum_model, materials) =
                     Self::calculate_mtl_internal(parent_dir, mtl, self.target);
 
@@ -89,14 +93,14 @@ impl MtlLoader {
         Ok(materials)
     }
 
-    fn calculate_mtl_internal(
-        parent_dir: &std::path::Path,
+    fn calculate_mtl_internal<P: AsRef<std::path::Path>>(
+        parent_dir: P,
         mtl: &tobj::Material,
         target: TextureTarget,
     ) -> (IlluminationModel, Vec<Material<'static>>) {
         let (mut tex_dir, mut mtl_param) = Self::retrieve_standard_materials(mtl);
 
-        if target == TextureTarget::PBR {
+        if target.eq(&TextureTarget::PBR) {
             let (mut pbr_tex_dir, mut pbr_mtl_param) = Self::retrieve_pbr_materials(mtl);
 
             tex_dir.append(&mut pbr_tex_dir);
@@ -106,38 +110,31 @@ impl MtlLoader {
 
         let len = std::cmp::min(tex_dir.len(), mtl_param.len());
 
-        let mut mtl_container = Vec::with_capacity(len);
+        let len_offset = len >> 1;
+
+        let mut mtl_container = Vec::with_capacity(len + len_offset);
 
         let (mut tex_chunk, tex_remainder) = tex_dir.split_at(len);
 
         let (mut param_chunk, param_remainder) = mtl_param.split_at(len);
 
-        while tex_chunk.len() >= 4 {
-            for index in 0..4 {
+        while tex_chunk.len() >= len_offset {
+            for index in 0..len_offset {
                 let texture = tex_chunk[index];
 
                 let mtl_param = param_chunk[index];
 
-                let texture = Self::create_texture(parent_dir, texture);
+                let texture = Self::create_texture(parent_dir.as_ref(), texture);
 
                 mtl_container.push(Material { texture, mtl_param });
             }
 
-            tex_chunk = &tex_chunk[4..];
-            param_chunk = &param_chunk[4..];
-        }
-
-        for (&texture, mtl_param) in tex_chunk.iter().zip(param_chunk) {
-            let texture = Self::create_texture(parent_dir, texture);
-
-            mtl_container.push(Material {
-                texture,
-                mtl_param: *mtl_param,
-            });
+            tex_chunk = &tex_chunk[len_offset..];
+            param_chunk = &param_chunk[len_offset..];
         }
 
         for &tex_dir in tex_remainder {
-            let texture = Self::create_texture(parent_dir, tex_dir);
+            let texture = Self::create_texture(parent_dir.as_ref(), tex_dir);
 
             mtl_container.push(Material {
                 texture,
@@ -157,6 +154,7 @@ impl MtlLoader {
 
     fn create_texture<'a, P: AsRef<std::path::Path>>(parent_dir: P, tex_dir: &str) -> Texture<'a> {
         let parent = parent_dir.as_ref();
+
         let valid_dir = (!tex_dir.is_empty()).then(|| {
             let full_tex_dir = parent.join(tex_dir).to_str().unwrap().to_string();
 
@@ -186,7 +184,7 @@ impl MtlLoader {
             MaterialParameter::Color(material.diffuse),
             MaterialParameter::Color(material.ambient),
             MaterialParameter::Color(material.specular),
-            MaterialParameter::Scalar(1.0), // normal factor
+            MaterialParameter::Scalar(1.0),
             MaterialParameter::Scalar(material.shininess),
             MaterialParameter::Scalar(material.dissolve),
         ];
@@ -203,18 +201,20 @@ impl MtlLoader {
     }
 
     fn retrieve_pbr_materials(material: &tobj::Material) -> (Vec<&String>, Vec<MaterialParameter>) {
-        let mut pbr_texture_maps = Vec::new();
+        let len = UNKNOWN_PARAM_SUPPORT.len() + (UNKNOWN_PARAM_SUPPORT.len() >> 1);
 
-        let mut pbr_texture_params = Vec::new();
+        let mut pbr_texture_maps = Vec::with_capacity(len);
 
-        let mut val = Vec::new();
+        let mut pbr_texture_params = Vec::with_capacity(len);
+
+        let mut val = Vec::with_capacity(4);
 
         for pbr_param in UNKNOWN_PARAM_PBR_SUPPORT {
             if let Some(valid_pbr_param) = material.unknown_param.get(pbr_param) {
                 let mut words = valid_pbr_param[..].split_whitespace();
 
                 let count = words.clone().count();
-                if parse_floatn(&mut words, &mut val, count) {
+                if parse_float_n(&mut words, &mut val, count) {
                     match count {
                         1 => pbr_texture_params.push(MaterialParameter::Scalar(val.pop().unwrap())),
                         3 => {
@@ -238,24 +238,41 @@ impl MtlLoader {
     }
 }
 
+
 #[cfg(test)]
 mod mtl_loader_test {
+    use crate::common::obj_common::load_test_obj;
     use crate::MtlLoader;
+
+    #[test]
+    fn construction() {
+        let mtl_loader = MtlLoader::default();
+
+        let mut mtl_dir = load_test_obj("mtl");
+
+        if let Some(path) = mtl_dir.pop() {
+            let materials = mtl_loader.load(path, 3);
+
+            assert!(materials.is_ok());
+        } else {
+            panic!("Could not find material file in  obj/test");
+        }
+    }
 
     #[test]
     fn load_mtl() {
         let mtl_loader = MtlLoader::default();
 
-        let materials = mtl_loader
-            .load(
-                "D://Study//Fabled Engine//example//just_a_girl//untitled.mtl",
-                3,
-            )
-            .unwrap();
+        let mut mtl_dir = load_test_obj("mtl");
 
+        if let Some(path) = mtl_dir.pop() {
+            let materials = mtl_loader.load(path, 3).unwrap();
 
-        assert_eq!(materials.len(), 3);
+            assert_eq!(materials.len(), 3);
 
-        println!("{:#?}", materials);
+            println!("{:#?}", materials);
+        } else {
+            panic!("Could not find material file in  obj/test");
+        }
     }
 }

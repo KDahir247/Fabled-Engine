@@ -1,0 +1,37 @@
+# Blender MTL File: 'None'
+# Material Count: 3
+
+newmtl lambert5SG
+Ns 323.999994
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+Pc 5.000000
+illum 2
+map_Kd textures//lambert5SG_baseColor.ktx2
+norm 0.000000 0.000000 0.000000
+
+newmtl lambert6SG
+Ns 323.999994
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures//lambert6SG_baseColor.ktx2
+
+newmtl lambert7SG
+Ns 323.999994
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures//lambert7SG_baseColor.ktx2
