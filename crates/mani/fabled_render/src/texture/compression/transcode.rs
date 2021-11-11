@@ -1,5 +1,5 @@
 use crate::texture::compression::{TranscodeDescriptor, TranscodeSource};
-use crate::texture::container::{ColorType, Extent3d, Texture};
+use crate::texture::container::{ColorType, Extent3d, TextureData};
 
 use anyhow::Context;
 use basis_universal::{TranscodeParameters, Transcoder};
@@ -13,7 +13,7 @@ use std::io::Read;
 pub fn transcode(
     basis_texture: TranscodeSource,
     transcode_desc: &TranscodeDescriptor,
-) -> anyhow::Result<Texture> {
+) -> anyhow::Result<TextureData> {
     let source = match basis_texture {
         TranscodeSource::BasisTexture { basis } => basis.data,
         TranscodeSource::BasisPath { path: file_path } => {
@@ -68,7 +68,7 @@ pub fn transcode(
 
     let dyn_img: image::DynamicImage = image::DynamicImage::ImageRgb8(img_buf);
 
-    Ok(Texture {
+    Ok(TextureData {
         data: dyn_img.to_bytes(),
         size: Extent3d {
             width: dyn_img.width(),

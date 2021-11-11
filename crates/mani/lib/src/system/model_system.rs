@@ -127,6 +127,8 @@ pub fn load_model_system(
             }
 
             let (obj_model, obj_material) = tobj::load_obj(&model.path, &tobj::LoadOptions{
+                merge_identical_points: false,
+                reorder_data: false,
                 single_index: true,
                 triangulate: true,
                 ignore_points: true,

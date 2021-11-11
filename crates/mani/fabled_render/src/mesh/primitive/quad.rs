@@ -58,7 +58,7 @@ impl From<Quad> for Model {
         let mesh = Mesh {
             vertices: vertices.to_vec(),
             material_id: 0,
-            indices,
+            indices : indices.into(),
         };
 
         Model { meshes: vec![mesh] }

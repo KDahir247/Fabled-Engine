@@ -1,0 +1,11 @@
+create a way to load mtl and obj file asynchronously.
+This will be deferred until the fabled_async module is complete.
+
+Create a async way to load obj and mtl file separately and try to
+not make either fo them depend on another
+
+map_RMA = RMA material (R == Roughness, G == Metallic, B == Ambient Occlusion)
+
+IMFCHAN for specfying the channel to read for bump map.
+
+Add support for obj loader mesh type such as vertex_color, face-arities, vertex_color_indices, texcoord_indices, normal_indices

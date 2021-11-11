@@ -9,7 +9,6 @@ mod color_proc_tests {
     #[test]
     fn data_size() {
         let color_proc_size = std::mem::size_of::<ColorProcessing>();
-        println!("{}", color_proc_size);
         assert_eq!(color_proc_size & (color_proc_size - 1), 0);
     }
 

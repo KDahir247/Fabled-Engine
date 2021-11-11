@@ -54,7 +54,7 @@ mod tests {
         //---------------------- Playing the Clip ------------------
 
         standard_output.play_omni(combined_clip, 0.3);
-        std::thread::sleep(std::time::Duration::from_secs(10000));
+        std::thread::sleep(std::time::Duration::from_secs(5));
     }
 
     #[test]
@@ -70,6 +70,6 @@ mod tests {
 
         standard_output.play_omni(raw_clip, 0.2);
 
-        std::thread::sleep(std::time::Duration::from_secs(10000));
+        std::thread::sleep(std::time::Duration::from_secs(5));
     }
 }

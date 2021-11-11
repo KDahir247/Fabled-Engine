@@ -104,7 +104,7 @@ impl From<Cone> for Model {
         let mesh = Mesh {
             vertices,
             material_id: 0,
-            indices,
+            indices: indices.into(),
         };
 
         Model { meshes: vec![mesh] }

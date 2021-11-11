@@ -9,3 +9,9 @@ impl Default for Indices {
         Indices::U16(Vec::new())
     }
 }
+
+impl From<Vec<usize>> for Indices {
+    fn from(primitive: Vec<usize>) -> Self {
+        Self::U32(primitive.iter().map(|&x| x as u32).collect())
+    }
+}

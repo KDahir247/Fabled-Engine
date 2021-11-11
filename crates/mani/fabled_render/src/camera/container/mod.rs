@@ -35,21 +35,19 @@ mod data_test {
     #[test]
     fn data_size() {
         let orthographic_size = std::mem::size_of::<Orthographic>();
-        println!("Orthographic {}", orthographic_size);
+        assert_eq!(orthographic_size & (orthographic_size - 1), 0);
 
         let perspective_size = std::mem::size_of::<Perspective>();
-        println!("Perspective {}", perspective_size);
+        assert_eq!(perspective_size & (perspective_size - 1), 0);
 
         let projection_size = std::mem::size_of::<Projection>();
         println!("Projection size {}", projection_size);
 
-
         let viewport_rect_size = std::mem::size_of::<ViewPort>();
-        println!("Viewport {}", viewport_rect_size);
+        assert_eq!(viewport_rect_size & (viewport_rect_size - 1), 0);
 
         let fov_axis_size = std::mem::size_of::<FovAxis>();
         assert_eq!(fov_axis_size & (fov_axis_size - 1), 0);
-
 
         let fov_size = std::mem::size_of::<Fov>();
         assert_eq!(fov_size & (fov_size - 1), 0);

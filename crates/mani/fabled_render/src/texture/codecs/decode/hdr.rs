@@ -1,5 +1,5 @@
 use crate::texture::codecs::TextureDescriptor;
-use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
+use crate::texture::container::{ColorType, Extent3d, FlipAxis, TextureData};
 use crate::texture::CodecsError;
 
 #[derive(Default, Clone)]
@@ -10,7 +10,7 @@ impl HdrTextureLoader {
         &self,
         path: P,
         texture_descriptor: &TextureDescriptor,
-    ) -> Result<Texture, CodecsError> {
+    ) -> Result<TextureData, CodecsError> {
         let file = std::fs::File::open(path.as_ref())?;
 
         let buf_reader = std::io::BufReader::new(file);
@@ -46,7 +46,7 @@ impl HdrTextureLoader {
         };
 
 
-        let hdr_texture = Texture {
+        let hdr_texture = TextureData {
             data,
             size: Extent3d {
                 width: meta_data.width,

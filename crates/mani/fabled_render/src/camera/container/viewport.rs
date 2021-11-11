@@ -1,5 +1,6 @@
 // Will be convert to a Rect when implemented in the math module
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[repr(align(16))]
 pub struct ViewPort {
     pub x: f32,
     pub y: f32,
