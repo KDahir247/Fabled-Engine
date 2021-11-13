@@ -19,6 +19,12 @@ impl Default for Transform {
 
 impl Transform {
     pub fn new(position: [f32; 3], rotation: [f32; 4], scale: [f32; 3]) -> Self {
+        let scale = [
+            scale[0].max(0.00001),
+            scale[1].max(0.00001),
+            scale[2].max(0.00001),
+        ];
+
         Self {
             position,
             rotation,
@@ -51,21 +57,19 @@ impl Transform {
         ]
     }
 
+    // todo scale is not implemented yet in the equation.
+    #[rustfmt::skip]
     pub fn get_transformation_matrix(&self) -> [f32; 16] {
-        let rotation = glam::Quat::from_array(self.rotation).normalize();
-        let scale = glam::Vec3::from(self.scale);
-        let translation = glam::Vec3::from(self.position);
+        let rotation_matrix = Self::get_rotation_matrix(self);
 
-        let transformation_matrix =
-            glam::Mat4::from_scale_rotation_translation(scale, rotation, translation);
+        [
+            rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], 0.0, // col 0
+            rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], 0.0, // col 1
+            rotation_matrix[6], rotation_matrix[7], rotation_matrix[8], 0.0, // col 2
+            self.position[0], self.position[1], self.position[2], 1.0 // col 3
+        ]
 
-        transformation_matrix.to_cols_array()
     }
-
-    // todo will return a tuple containing the axis and the angle
-    // angle = 2 * acos(qw)
-    // x = qx / sqrt(1-qw * qw)
-    // y = qy / sqrt(1-qw * qw)
 
     pub fn get_axis_angle(&self) -> ([f32; 3], f32) {
         const SQR_EPSILON: f32 = f32::EPSILON * f32::EPSILON;
@@ -100,7 +104,7 @@ impl Transform {
 #[cfg(test)]
 mod transform_test {
     use crate::transform::transform::Transform;
-    use crate::util::acos;
+
 
     #[test]
     fn transformation_matrix() {
@@ -164,6 +168,7 @@ mod transform_test {
         );
 
         let rotation_matrix = transform.get_rotation_matrix();
+
         let transformation_matrix = transform.get_transformation_matrix();
 
         // transformation matrix on the 3x3 on the top left should be the rotation
@@ -190,11 +195,89 @@ mod transform_test {
 
     #[test]
     fn angle_axis() {
+        const THRESHOLD: f32 = 0.0001;
+
         let quaternion: [f32; 4] = [0.3441577, 0.9188383, 0.1917763, 0.0226621];
 
         let transform = Transform::new([0.0; 3], quaternion, [1.0; 3]);
         let (axis, angle) = transform.get_axis_angle();
 
-        println!("{:?} {:?}", axis, angle);
+        assert!(axis[0] < axis[1]);
+        assert!(axis[2] < axis[1]);
+
+        let glm_quaternion = glam::quat(0.3441577, 0.9188383, 0.1917763, 0.0226621);
+
+        let (glm_axis, glm_angle) = glm_quaternion.to_axis_angle();
+
+        let (proven_axis, proven_angle) =
+            ([0.3442461_f32, 0.9190743_f32, 0.1918255_f32], 3.0962646);
+
+
+        let difference = [
+            (axis[0] - glm_axis.x).abs(),
+            (axis[1] - glm_axis.y).abs(),
+            (axis[2] - glm_axis.z).abs(),
+            (angle - glm_angle).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
+        assert!(difference[3] <= THRESHOLD);
+
+        let difference = [
+            (axis[0] - proven_axis[0]).abs(),
+            (axis[1] - proven_axis[1]).abs(),
+            (axis[2] - proven_axis[2]).abs(),
+            (angle - proven_angle).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
+        assert!(difference[3] <= THRESHOLD);
+    }
+
+    #[test]
+    fn angle_axis_magnitude() {
+        const THRESHOLD: f32 = 0.0001;
+
+        // XYZ Euler angle (degree) of 20,170,39.3;
+        let quaternion = [0.3441577_f32, 0.9188383, 0.1917763, 0.0226621];
+        let euler_quaternion = glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            20_f32.to_radians(),
+            170_f32.to_radians(),
+            39.3_f32.to_radians(),
+        );
+
+        let difference = [
+            (quaternion[0] - euler_quaternion.x).abs(),
+            (quaternion[1] - euler_quaternion.y).abs(),
+            (quaternion[2] - euler_quaternion.z).abs(),
+            (quaternion[3] - euler_quaternion.w).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
+
+        let transform_component = Transform::new([0.0; 3], quaternion, [1.0; 3]);
+        // return in radians;
+        let angle_axis_mag = transform_component.get_angle_axis_magnitude();
+
+        // https://www.andre-gaschler.com/rotationconverter/
+        // proven quaternion rotation calculator.
+        let result_angle_axis_mag = [1.065877, 2.8456972, 0.5939426];
+
+        let difference = [
+            (angle_axis_mag[0] - result_angle_axis_mag[0]).abs(),
+            (angle_axis_mag[1] - result_angle_axis_mag[1]).abs(),
+            (angle_axis_mag[2] - result_angle_axis_mag[2]).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
     }
 }
