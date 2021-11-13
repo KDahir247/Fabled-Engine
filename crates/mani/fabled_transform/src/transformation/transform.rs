@@ -99,11 +99,30 @@ impl Transform {
 
         [axis[0] * angle, axis[1] * angle, axis[2] * angle]
     }
+
+
+    // FIXME
+    pub fn get_euler_angle(&self) -> [f32; 3] {
+        // x = atan2(2(qw * qx + qy * qz), 1.0 - 2.0 * (qx * qx + qy * qy));
+
+        let (qx, qy, qz, qw) = (
+            self.rotation[0],
+            self.rotation[1],
+            self.rotation[2],
+            self.rotation[3],
+        );
+
+        let a = 2.0 * (qw * qx + qy * qz);
+        let b = 1.0 - 2.0 * (qx * qx + qy * qy);
+        let x = a.atan2(b);
+
+        todo!()
+    }
 }
 
 #[cfg(test)]
 mod transform_test {
-    use crate::transform::transform::Transform;
+    use crate::transformation::transform::Transform;
 
 
     #[test]
@@ -279,5 +298,18 @@ mod transform_test {
         assert!(difference[0] <= THRESHOLD);
         assert!(difference[1] <= THRESHOLD);
         assert!(difference[2] <= THRESHOLD);
+    }
+
+    #[test]
+    fn euler_angle() {
+        let quaternion: [f32; 4] = [0.3441577, 0.9188383, 0.1917763, 0.0226621];
+
+        let transform = Transform::new([0.0; 3], quaternion, [1.0; 3]);
+
+        let g = glam::Quat::from_array(quaternion);
+        let b = g.to_euler(glam::EulerRot::XYZ);
+
+        println!("{:?}", b.0.to_degrees());
+        transform.get_euler_angle();
     }
 }

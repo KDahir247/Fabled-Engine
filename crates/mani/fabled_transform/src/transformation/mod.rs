@@ -7,7 +7,7 @@ pub use transform::*;
 
 #[cfg(test)]
 mod data_test {
-    use crate::transform::transform::Transform;
+    use crate::transformation::transform::Transform;
     use crate::Orientation;
 
     #[test]
