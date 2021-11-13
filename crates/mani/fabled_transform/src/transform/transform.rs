@@ -1,3 +1,5 @@
+use crate::util::acos;
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Transform {
     pub position: [f32; 3],
@@ -59,11 +61,46 @@ impl Transform {
 
         transformation_matrix.to_cols_array()
     }
+
+    // todo will return a tuple containing the axis and the angle
+    // angle = 2 * acos(qw)
+    // x = qx / sqrt(1-qw * qw)
+    // y = qy / sqrt(1-qw * qw)
+
+    pub fn get_axis_angle(&self) -> ([f32; 3], f32) {
+        const SQR_EPSILON: f32 = f32::EPSILON * f32::EPSILON;
+
+        let x = self.rotation[0];
+        let y = self.rotation[1];
+        let z = self.rotation[2];
+        let w = self.rotation[3];
+
+        let scale_sq = (1.0 - w * w).max(0.0);
+
+        let angle = 2.0 * acos(w);
+
+        if scale_sq < SQR_EPSILON {
+            ([1.0, 0.0, 0.0], angle)
+        } else {
+            let inv_sqrt_scale = scale_sq.sqrt().recip();
+            (
+                [x * inv_sqrt_scale, y * inv_sqrt_scale, z * inv_sqrt_scale],
+                angle,
+            )
+        }
+    }
+
+    pub fn get_angle_axis_magnitude(&self) -> [f32; 3] {
+        let (axis, angle) = Self::get_axis_angle(self);
+
+        [axis[0] * angle, axis[1] * angle, axis[2] * angle]
+    }
 }
 
 #[cfg(test)]
 mod transform_test {
     use crate::transform::transform::Transform;
+    use crate::util::acos;
 
     #[test]
     fn transformation_matrix() {
@@ -149,5 +186,15 @@ mod transform_test {
         assert!((quaternion.y - transform.rotation[1]).abs() < threshold);
         assert!((quaternion.z - transform.rotation[2]).abs() < threshold);
         assert!((quaternion.w - transform.rotation[3]).abs() < threshold);
+    }
+
+    #[test]
+    fn angle_axis() {
+        let quaternion: [f32; 4] = [0.3441577, 0.9188383, 0.1917763, 0.0226621];
+
+        let transform = Transform::new([0.0; 3], quaternion, [1.0; 3]);
+        let (axis, angle) = transform.get_axis_angle();
+
+        println!("{:?} {:?}", axis, angle);
     }
 }

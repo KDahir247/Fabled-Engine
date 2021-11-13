@@ -28,6 +28,8 @@ impl Orientation {
 
         let target_rotation = x_rotation * y_rotation * z_rotation;
 
+        // world rotation will be target_rotation * current_rotation
+        // local rotation will be current_rotation * target_rotation.
         let mut desired_rotation = current_rotation * target_rotation;
 
         desired_rotation = desired_rotation.normalize();
@@ -69,11 +71,22 @@ impl Orientation {
         target_translation[1] += up[1] * translation[1];
         target_translation[2] += up[2] * translation[1];
 
+
         self.transform.position = [
             target_translation[0],
             target_translation[1],
             target_translation[2],
         ];
+    }
+
+    // todo this will have a enum to specify if it is uniform or not. and it will
+    //  have the constraint eg. uniform(f32) and nonuniform([f32;3])
+    pub fn update_scale(&mut self, scale: [f32; 3]) {
+        let x = scale[0].max(0.00001);
+        let y = scale[1].max(0.00001);
+        let z = scale[2].max(0.000001);
+
+        self.transform.scale = [x, y, z];
     }
 }
 
@@ -134,6 +147,7 @@ mod orientation_test {
 
         orientation.update_rotation(rotation_target);
 
+        println!("{:?}", orientation.transform.rotation);
 
         // Value have been extracted from popular developed game engines
         // Forward (0.9, -0.1, 0.5)
