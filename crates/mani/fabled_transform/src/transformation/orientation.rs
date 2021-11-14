@@ -147,8 +147,6 @@ mod orientation_test {
 
         orientation.update_rotation(rotation_target);
 
-        println!("{:?}", orientation.transform.rotation);
-
         // Value have been extracted from popular developed game engines
         // Forward (0.9, -0.1, 0.5)
         // Right (-0.5, -0.2, 0.8)

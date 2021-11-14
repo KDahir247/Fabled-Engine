@@ -1,0 +1,84 @@
+// This will not be a part of transform.
+convert rotation matrix to quaternion.
+convert axis angle (radian) to quaternion.
+convert axis with magnitude (radian) to quaternion.
+convert euler angle (radian) to quaternion.
+
+// This will be a part of transform.
+convert quaternion to rotation matrix.
+convert quaternion to axis angle (radian).
+convert quaternion to axis with magnitude (radian).
+convert quaternion to euler angle (radian).
+
+
+Create a parenting component
+
+Clear separation between local and world coordinate
+
+Is translation happening in local space to the model or in world space?
+Is translation happening in local space to the model or in world space?
+
+Should we have a enum inside the transform or orientation component to specify if it is local or world?
+or since this is a ecs should we have a single struct with a enum to specify if it is local or world and
+transform or orientation depend on the meta-data component to determine if it is in local or world.
+
+We should create a struct for LocalToWorld and WorldToLocal.
+are we going to add both of LocalToWorld and WorldToLocal matrix to entities that contain
+orientation
+
+eg.
+Entity1:
+Orientation -> Transform -> Space -> WorldToLocal -> LocalToWorld
+
+Is model getting scaled uniformly or not?
+
+translation will be calculated by space.
+
+parent struct will have a Orientation, since all entity with translation, rotation and scale will have a Orientation.
+so the structure will be;
+
+(Orientation -> Transform -> Space -> WorldToLocal -> LocalToWorld) -> (Parent -> Orientation -> Transform -> Space -> WorldToLocal -> LocalToWorld) -> ....
+
+Will the parent struct have a Orientation or Transform? Do we need the right and forward direction from orientation.
+The parent struct will have a entity id for it's parent entity.
+
+The pseudo code below are my hypotheses. It might be incorrect, but it will go through testing.
+
+To modify translation from local to world.
+    pseudo code
+
+    let local_translation = transform.position;
+    let world_translation = LocalTowWorld * [local_translation[0], local_translation[1], local_translation[2], 1.0]
+
+To modify rotation from local to world.
+    pseudo code
+
+    // if the entity doesn't have a parent component then the local and world rotation should be the same.
+    let local_rotation = transform.rotation;
+    let mut world_rotation = transform.rotation;
+
+    if(has_parent){
+        world_rotation = parent.local_rotation * local_rotation; //(root_parent.local_rotation * next_parent.local_rotation * next_parent.local_rotation * ... * child.local_rotation)
+    }
+
+To modify scale from local to world.
+    pseudo code
+
+
+    // Get the next parent eg.
+    // ParentEntity2 <- ParentEntity1 <- ... <- Entity1
+
+    let mut mtx = parent.local_matrix * transform.local_matrix;
+    let (world_scale, _, _) = mtx.decompose();
+
+    world_scale
+
+So if the entity doesn't have a parent component then the rotation and scale will be the same.
+
+
+convert back from world to local for translation, rotation and scale.
+
+Might require both LocalToWorld component and WorldToLocal component so i don't have to recalculate everytime
+the user want to switch space, since it will already be calculated. The LocalToWorld and WorldToLocal will
+be recalculated if the translation, rotation, and scale changes, but other than that it will not be re-calculated.
+
