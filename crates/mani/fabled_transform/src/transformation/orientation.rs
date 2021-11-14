@@ -1,4 +1,5 @@
 use crate::transformation::transform::Transform;
+use crate::Scale;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Orientation {
@@ -79,12 +80,15 @@ impl Orientation {
         ];
     }
 
-    // todo this will have a enum to specify if it is uniform or not. and it will
-    //  have the constraint eg. uniform(f32) and nonuniform([f32;3])
-    pub fn update_scale(&mut self, scale: [f32; 3]) {
+    pub fn update_scale(&mut self, scale: Scale) {
+        let scale = match scale {
+            Scale::Uniform(uni) => [uni, uni, uni],
+            Scale::NonUniform(non_uni) => [non_uni[0], non_uni[1], non_uni[2]],
+        };
+
         let x = scale[0].max(0.00001);
         let y = scale[1].max(0.00001);
-        let z = scale[2].max(0.000001);
+        let z = scale[2].max(0.00001);
 
         self.transform.scale = [x, y, z];
     }
@@ -92,7 +96,7 @@ impl Orientation {
 
 #[cfg(test)]
 mod orientation_test {
-    use crate::Orientation;
+    use crate::{Orientation, Scale};
 
     #[test]
     fn update_translation() {
@@ -161,5 +165,22 @@ mod orientation_test {
         assert!(((orientation.right[0] * 10.0).round() / 10.0).eq(&proven_right[0]));
         assert!(((orientation.right[1] * 10.0).round() / 10.0).eq(&proven_right[1]));
         assert!(((orientation.right[2] * 10.0).round() / 10.0).eq(&proven_right[2]));
+    }
+
+    #[test]
+    pub fn recalculate_scale() {
+        let uniform_scale = Scale::Uniform(5.0);
+
+        let mut orientation = Orientation::default();
+
+        orientation.update_scale(uniform_scale);
+
+        assert!(orientation.transform.scale.eq(&[5.0, 5.0, 5.0]));
+
+        let non_uniform_scale = Scale::NonUniform([2.23, 12.5, 5.5]);
+
+        orientation.update_scale(non_uniform_scale);
+
+        assert!(orientation.transform.scale.eq(&[2.23, 12.5, 5.5]));
     }
 }
