@@ -34,21 +34,22 @@ impl Transform {
 
     #[rustfmt::skip]
     pub fn get_rotation_matrix(&self) -> [f32; 9] {
+        let (qx, qy, qz, qw) = (
+            self.rotation[0],
+            self.rotation[1],
+            self.rotation[2],
+            self.rotation[3],
+        );
 
-        let x = self.rotation[0];
-        let y = self.rotation[1];
-        let z = self.rotation[2];
-        let w = self.rotation[3];
-
-        let x2 = x * x;
-        let y2 = y * y;
-        let z2 = z * z;
-        let xy = x * y;
-        let xz = x * z;
-        let yz = y * z;
-        let wx = w * x;
-        let wy = w * y;
-        let wz = w * z;
+        let x2 = qx * qx;
+        let y2 = qy * qy;
+        let z2 = qz * qz;
+        let xy = qx * qy;
+        let xz = qx * qz;
+        let yz = qy * qz;
+        let wx = qw * qx;
+        let wy = qw * qy;
+        let wz = qw * qz;
 
         [
             1.0 - 2.0 * (y2 + z2), 2.0 * (xy + wz), 2.0 * (xz - wy),//col 0
@@ -61,7 +62,6 @@ impl Transform {
     #[rustfmt::skip]
     pub fn get_transformation_matrix(&self) -> [f32; 16] {
         let rotation_matrix = Self::get_rotation_matrix(self);
-
         [
             rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], 0.0, // col 0
             rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], 0.0, // col 1
@@ -74,21 +74,27 @@ impl Transform {
     pub fn get_axis_angle(&self) -> ([f32; 3], f32) {
         const SQR_EPSILON: f32 = f32::EPSILON * f32::EPSILON;
 
-        let x = self.rotation[0];
-        let y = self.rotation[1];
-        let z = self.rotation[2];
-        let w = self.rotation[3];
+        let (qx, qy, qz, qw) = (
+            self.rotation[0],
+            self.rotation[1],
+            self.rotation[2],
+            self.rotation[3],
+        );
 
-        let scale_sq = (1.0 - w * w).max(0.0);
+        let scale_sq = (1.0 - qw * qw).max(0.0);
 
-        let angle = 2.0 * acos(w);
+        let angle = 2.0 * acos(qw);
 
         if scale_sq < SQR_EPSILON {
             ([1.0, 0.0, 0.0], angle)
         } else {
             let inv_sqrt_scale = scale_sq.sqrt().recip();
             (
-                [x * inv_sqrt_scale, y * inv_sqrt_scale, z * inv_sqrt_scale],
+                [
+                    qx * inv_sqrt_scale,
+                    qy * inv_sqrt_scale,
+                    qz * inv_sqrt_scale,
+                ],
                 angle,
             )
         }
@@ -100,11 +106,7 @@ impl Transform {
         [axis[0] * angle, axis[1] * angle, axis[2] * angle]
     }
 
-
-    // FIXME
     pub fn get_euler_angle(&self) -> [f32; 3] {
-        // x = atan2(2(qw * qx + qy * qz), 1.0 - 2.0 * (qx * qx + qy * qy));
-
         let (qx, qy, qz, qw) = (
             self.rotation[0],
             self.rotation[1],
@@ -112,11 +114,29 @@ impl Transform {
             self.rotation[3],
         );
 
-        let a = 2.0 * (qw * qx + qy * qz);
-        let b = 1.0 - 2.0 * (qx * qx + qy * qy);
-        let x = a.atan2(b);
+        let xx = qx * qx;
+        let xy = qx * qy;
+        let xz = qx * qz;
+        let xw = qx * qw;
 
-        todo!()
+        let yy = qy * qy;
+        let yz = qy * qz;
+        let yw = qy * qw;
+
+        let zz = qz * qz;
+        let zw = qz * qw;
+
+        let ww = qw * qw;
+
+        let x = (-2.0 * (yz - xw)).atan2(ww - xx - yy + zz);
+
+        let unsafe_y = 2.0 * (xz + yw);
+
+        let y = unsafe_y.clamp(-1.0, 1.0).asin();
+
+        let z = (-2.0 * (xy - zw)).atan2(ww + xx - yy - zz);
+
+        [x, y, z]
     }
 }
 
@@ -302,14 +322,34 @@ mod transform_test {
 
     #[test]
     fn euler_angle() {
-        let quaternion: [f32; 4] = [0.3441577, 0.9188383, 0.1917763, 0.0226621];
+        const THRESHOLD: f32 = 0.0000001;
+
+        let quaternion: [f32; 4] = [0.2284545, 0.255438, 0.1609776, 0.9255518];
 
         let transform = Transform::new([0.0; 3], quaternion, [1.0; 3]);
 
-        let g = glam::Quat::from_array(quaternion);
-        let b = g.to_euler(glam::EulerRot::XYZ);
+        let euler_0 = transform.get_euler_angle();
 
-        println!("{:?}", b.0.to_degrees());
-        transform.get_euler_angle();
+        let glm_quaternion = glam::Quat::from_array(quaternion);
+
+        let euler_1 = glm_quaternion.to_euler(glam::EulerRot::XYZ);
+
+        assert!(euler_0[0].eq(&euler_1.0));
+        assert!(euler_0[1].eq(&euler_1.1));
+        assert!(euler_0[2].eq(&euler_1.2));
+
+
+        let proven_euler_radian = [0.418879, 0.578053, 0.2181662];
+
+
+        let difference = [
+            (euler_0[0] - proven_euler_radian[0]).abs(),
+            (euler_0[1] - proven_euler_radian[1]).abs(),
+            (euler_0[2] - proven_euler_radian[2]).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
     }
 }
