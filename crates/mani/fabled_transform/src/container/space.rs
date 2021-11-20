@@ -1,11 +1,6 @@
-#[derive(Copy, Clone, Debug)]
-pub enum Space {
-    Local,
-    World,
-}
+use crate::SpaceType;
 
-impl Default for Space {
-    fn default() -> Self {
-        Self::Local
-    }
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Space {
+    pub value: SpaceType,
 }

@@ -1,149 +1,119 @@
 use crate::util::acos;
+use crate::{Position, Rotation, Scale};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Transform {
-    pub position: [f32; 3],
-    pub rotation: [f32; 4],
-    pub scale: [f32; 3],
+#[rustfmt::skip]
+pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
+    let (qx, qy, qz, qw) = (
+        rotation.value[0],
+        rotation.value[1],
+        rotation.value[2],
+        rotation.value[3],
+    );
+
+    let x2 = qx * qx;
+    let y2 = qy * qy;
+    let z2 = qz * qz;
+    let xy = qx * qy;
+    let xz = qx * qz;
+    let yz = qy * qz;
+    let wx = qw * qx;
+    let wy = qw * qy;
+    let wz = qw * qz;
+
+    [
+        1.0 - 2.0 * (y2 + z2), 2.0 * (xy + wz), 2.0 * (xz - wy),//col 0
+        2.0 * (xy - wz), 1.0 - 2.0 * (x2 + z2), 2.0 * (yz + wx),//col 1
+        2.0 * (xz + wy), 2.0 * (yz - wx), 1.0 - 2.0 * (x2 + y2) //col 2
+    ]
 }
 
-impl Default for Transform {
-    fn default() -> Self {
-        Self {
-            position: [0.0; 3], // Origin
-            rotation: [0.0, 0.0, 0.0, 1.0],
-            scale: [1.0; 3],
-        }
+// todo scale is not implemented yet in the equation.
+#[rustfmt::skip]
+pub fn get_transformation_matrix(position : Position, rotation : Rotation, scale : Scale) -> [f32; 16] {
+    let rotation_matrix = get_rotation_matrix(rotation);
+    [
+        rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], 0.0, // col 0
+        rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], 0.0, // col 1
+        rotation_matrix[6], rotation_matrix[7], rotation_matrix[8], 0.0, // col 2
+        position.value[0], position.value[1],  position.value[2], 1.0 // col 3
+    ]
+
+}
+
+pub fn get_axis_angle(rotation: Rotation) -> ([f32; 3], f32) {
+    const SQR_EPSILON: f32 = f32::EPSILON * f32::EPSILON;
+
+    let (qx, qy, qz, qw) = (
+        rotation.value[0],
+        rotation.value[1],
+        rotation.value[2],
+        rotation.value[3],
+    );
+
+    let scale_sq = (1.0 - qw * qw).max(0.0);
+
+    let angle = 2.0 * acos(qw);
+
+    if scale_sq < SQR_EPSILON {
+        ([1.0, 0.0, 0.0], angle)
+    } else {
+        let inv_sqrt_scale = scale_sq.sqrt().recip();
+        (
+            [
+                qx * inv_sqrt_scale,
+                qy * inv_sqrt_scale,
+                qz * inv_sqrt_scale,
+            ],
+            angle,
+        )
     }
 }
 
-impl Transform {
-    pub fn new(position: [f32; 3], rotation: [f32; 4], scale: [f32; 3]) -> Self {
-        let scale = [
-            scale[0].max(0.00001),
-            scale[1].max(0.00001),
-            scale[2].max(0.00001),
-        ];
+pub fn get_angle_axis_magnitude(rotation: Rotation) -> [f32; 3] {
+    let (axis, angle) = get_axis_angle(rotation);
 
-        Self {
-            position,
-            rotation,
-            scale,
-        }
-    }
+    [axis[0] * angle, axis[1] * angle, axis[2] * angle]
+}
 
-    #[rustfmt::skip]
-    pub fn get_rotation_matrix(&self) -> [f32; 9] {
-        let (qx, qy, qz, qw) = (
-            self.rotation[0],
-            self.rotation[1],
-            self.rotation[2],
-            self.rotation[3],
-        );
+pub fn get_euler_angle(rotation: Rotation) -> [f32; 3] {
+    let (qx, qy, qz, qw) = (
+        rotation.value[0],
+        rotation.value[1],
+        rotation.value[2],
+        rotation.value[3],
+    );
 
-        let x2 = qx * qx;
-        let y2 = qy * qy;
-        let z2 = qz * qz;
-        let xy = qx * qy;
-        let xz = qx * qz;
-        let yz = qy * qz;
-        let wx = qw * qx;
-        let wy = qw * qy;
-        let wz = qw * qz;
+    let xx = qx * qx;
+    let xy = qx * qy;
+    let xz = qx * qz;
+    let xw = qx * qw;
 
-        [
-            1.0 - 2.0 * (y2 + z2), 2.0 * (xy + wz), 2.0 * (xz - wy),//col 0
-            2.0 * (xy - wz), 1.0 - 2.0 * (x2 + z2), 2.0 * (yz + wx),//col 1
-            2.0 * (xz + wy), 2.0 * (yz - wx), 1.0 - 2.0 * (x2 + y2) //col 2
-        ]
-    }
+    let yy = qy * qy;
+    let yz = qy * qz;
+    let yw = qy * qw;
 
-    // todo scale is not implemented yet in the equation.
-    #[rustfmt::skip]
-    pub fn get_transformation_matrix(&self) -> [f32; 16] {
-        let rotation_matrix = Self::get_rotation_matrix(self);
-        [
-            rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], 0.0, // col 0
-            rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], 0.0, // col 1
-            rotation_matrix[6], rotation_matrix[7], rotation_matrix[8], 0.0, // col 2
-            self.position[0], self.position[1], self.position[2], 1.0 // col 3
-        ]
+    let zz = qz * qz;
+    let zw = qz * qw;
 
-    }
+    let ww = qw * qw;
 
-    pub fn get_axis_angle(&self) -> ([f32; 3], f32) {
-        const SQR_EPSILON: f32 = f32::EPSILON * f32::EPSILON;
+    let x = (-2.0 * (yz - xw)).atan2(ww - xx - yy + zz);
 
-        let (qx, qy, qz, qw) = (
-            self.rotation[0],
-            self.rotation[1],
-            self.rotation[2],
-            self.rotation[3],
-        );
+    let unsafe_y = 2.0 * (xz + yw);
 
-        let scale_sq = (1.0 - qw * qw).max(0.0);
+    let y = unsafe_y.clamp(-1.0, 1.0).asin();
 
-        let angle = 2.0 * acos(qw);
+    let z = (-2.0 * (xy - zw)).atan2(ww + xx - yy - zz);
 
-        if scale_sq < SQR_EPSILON {
-            ([1.0, 0.0, 0.0], angle)
-        } else {
-            let inv_sqrt_scale = scale_sq.sqrt().recip();
-            (
-                [
-                    qx * inv_sqrt_scale,
-                    qy * inv_sqrt_scale,
-                    qz * inv_sqrt_scale,
-                ],
-                angle,
-            )
-        }
-    }
-
-    pub fn get_angle_axis_magnitude(&self) -> [f32; 3] {
-        let (axis, angle) = Self::get_axis_angle(self);
-
-        [axis[0] * angle, axis[1] * angle, axis[2] * angle]
-    }
-
-    pub fn get_euler_angle(&self) -> [f32; 3] {
-        let (qx, qy, qz, qw) = (
-            self.rotation[0],
-            self.rotation[1],
-            self.rotation[2],
-            self.rotation[3],
-        );
-
-        let xx = qx * qx;
-        let xy = qx * qy;
-        let xz = qx * qz;
-        let xw = qx * qw;
-
-        let yy = qy * qy;
-        let yz = qy * qz;
-        let yw = qy * qw;
-
-        let zz = qz * qz;
-        let zw = qz * qw;
-
-        let ww = qw * qw;
-
-        let x = (-2.0 * (yz - xw)).atan2(ww - xx - yy + zz);
-
-        let unsafe_y = 2.0 * (xz + yw);
-
-        let y = unsafe_y.clamp(-1.0, 1.0).asin();
-
-        let z = (-2.0 * (xy - zw)).atan2(ww + xx - yy - zz);
-
-        [x, y, z]
-    }
+    [x, y, z]
 }
 
 #[cfg(test)]
 mod transform_test {
-    use crate::transformation::transform::Transform;
-
+    use crate::{
+        get_angle_axis_magnitude, get_axis_angle, get_euler_angle, get_rotation_matrix,
+        get_transformation_matrix, Position, Rotation,
+    };
 
     #[test]
     fn transformation_matrix() {
@@ -156,21 +126,28 @@ mod transform_test {
             90.4f32.to_radians(),
         );
 
-        let position = [3.153, 100.1, 1.5];
 
-        let transform = Transform::new(
-            position,
-            [quaternion.x, quaternion.y, quaternion.z, quaternion.w],
-            [1.0, 1.0, 1.0],
-        );
+        let position = Position {
+            value: [3.153, 100.1, 1.5, 1.0],
+        };
 
-        let transformation_matrix = transform.get_transformation_matrix();
+        let rotation = Rotation {
+            value: [quaternion.x, quaternion.y, quaternion.z, quaternion.w],
+        };
+
+        let transformation_matrix =
+            get_transformation_matrix(position, rotation, Default::default());
 
         let m4_transformation_representation = glam::Mat4::from_cols_array(&transformation_matrix);
 
         let decomposed_translation = m4_transformation_representation.w_axis.truncate();
 
-        assert!(position.eq(&decomposed_translation.to_array()));
+        println!("{:?}", position);
+        println!("{:?}", decomposed_translation);
+
+        assert!(position
+            .value
+            .eq(&decomposed_translation.extend(1.0).to_array()));
 
         // let c1 = m4_transformation_representation.x_axis.truncate();
         // let c2 = m4_transformation_representation.y_axis.truncate();
@@ -200,15 +177,19 @@ mod transform_test {
             190.4f32.to_radians(),
         );
 
-        let transform = Transform::new(
-            [3.0, 2.0, 1.5],
-            [quaternion.x, quaternion.y, quaternion.z, quaternion.w],
-            [1.0, 1.0, 1.0],
-        );
+        let position = Position {
+            value: [3.0, 2.0, 1.5, 1.0],
+        };
 
-        let rotation_matrix = transform.get_rotation_matrix();
+        let rotation = Rotation {
+            value: [quaternion.x, quaternion.y, quaternion.z, quaternion.w],
+        };
 
-        let transformation_matrix = transform.get_transformation_matrix();
+
+        let rotation_matrix = get_rotation_matrix(rotation);
+
+        let transformation_matrix =
+            get_transformation_matrix(position, rotation, Default::default());
 
         // transformation matrix on the 3x3 on the top left should be the rotation
         // matrix if there is no scaling.
@@ -226,10 +207,10 @@ mod transform_test {
         let rotation_matrix = glam::Mat3::from_cols_array(&rotation_matrix);
         let quaternion = glam::Quat::from_mat3(&rotation_matrix);
 
-        assert!((quaternion.x - transform.rotation[0]).abs() < threshold);
-        assert!((quaternion.y - transform.rotation[1]).abs() < threshold);
-        assert!((quaternion.z - transform.rotation[2]).abs() < threshold);
-        assert!((quaternion.w - transform.rotation[3]).abs() < threshold);
+        assert!((quaternion.x - rotation.value[0]).abs() < threshold);
+        assert!((quaternion.y - rotation.value[1]).abs() < threshold);
+        assert!((quaternion.z - rotation.value[2]).abs() < threshold);
+        assert!((quaternion.w - rotation.value[3]).abs() < threshold);
     }
 
     #[test]
@@ -238,8 +219,8 @@ mod transform_test {
 
         let quaternion: [f32; 4] = [0.3441577, 0.9188383, 0.1917763, 0.0226621];
 
-        let transform = Transform::new([0.0; 3], quaternion, [1.0; 3]);
-        let (axis, angle) = transform.get_axis_angle();
+        let rotation = Rotation { value: quaternion };
+        let (axis, angle) = get_axis_angle(rotation);
 
         assert!(axis[0] < axis[1]);
         assert!(axis[2] < axis[1]);
@@ -301,9 +282,10 @@ mod transform_test {
         assert!(difference[1] <= THRESHOLD);
         assert!(difference[2] <= THRESHOLD);
 
-        let transform_component = Transform::new([0.0; 3], quaternion, [1.0; 3]);
+        let rotation = Rotation { value: quaternion };
+
         // return in radians;
-        let angle_axis_mag = transform_component.get_angle_axis_magnitude();
+        let angle_axis_mag = get_angle_axis_magnitude(rotation);
 
         // https://www.andre-gaschler.com/rotationconverter/
         // proven quaternion rotation calculator.
@@ -326,9 +308,9 @@ mod transform_test {
 
         let quaternion: [f32; 4] = [0.2284545, 0.255438, 0.1609776, 0.9255518];
 
-        let transform = Transform::new([0.0; 3], quaternion, [1.0; 3]);
+        let rotation = Rotation { value: quaternion };
 
-        let euler_0 = transform.get_euler_angle();
+        let euler_0 = get_euler_angle(rotation);
 
         let glm_quaternion = glam::Quat::from_array(quaternion);
 
