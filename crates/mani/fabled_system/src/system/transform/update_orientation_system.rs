@@ -2,18 +2,17 @@ use fabled_transform::{Frozen, Orientation, Rotation};
 
 use rayon::iter::ParallelIterator;
 
-use shipyard::IntoFastIter;
+use shipyard::{IntoFastIter, IntoIter};
 
 pub fn re_orientate_entity(
     mut orientation: shipyard::ViewMut<Orientation>,
     rotation: shipyard::View<Rotation>,
     frozen: shipyard::View<Frozen>,
 ) {
-    // todo Handle tracking modification.
-
-    (&mut orientation, &rotation, !&frozen)
-        .fast_par_iter()
-        .for_each(|(orientation, quaternion, _)| {
+    // rotation is getting tracked by the local_to_world system and the
+    // world_to_local system.
+    (&mut orientation, &rotation, !&frozen).par_iter().for_each(
+        |(mut orientation, quaternion, _)| {
             let forward_dot_quat = quaternion.value[2];
 
             let quat_dot = quaternion.value[0] * quaternion.value[0]
@@ -72,7 +71,8 @@ pub fn re_orientate_entity(
             ];
 
             orientation.right = result;
-        });
+        },
+    );
 }
 
 
@@ -125,11 +125,9 @@ mod mutate_orientation_test {
 
         let entity = world.add_entity((
             fabled_transform::Orientation::default(),
-            fabled_transform::Transform::new(
-                [0.0; 3],
-                [0.49759552, -0.10885537, 0.85859334, -0.058024056],
-                [1.0; 3],
-            ),
+            fabled_transform::Rotation {
+                value: [0.49759552, -0.10885537, 0.85859334, -0.058024056],
+            },
             fabled_transform::Frozen::default(),
         ));
 

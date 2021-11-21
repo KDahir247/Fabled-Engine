@@ -1,23 +1,35 @@
-use fabled_transform::{Position, Rotation, Scale};
+use fabled_transform::{Position, Rotation, Scale, Space, SpaceType};
 use shipyard::*;
+
 pub fn transform_validation_system(
-    mut entity: shipyard::EntitiesViewMut,
-    position: shipyard::View<Position>,
-    rotation: shipyard::View<Rotation>,
-    scale: shipyard::View<Scale>,
+    entity: shipyard::EntitiesViewMut,
+    position: shipyard::ViewMut<Position>,
+    rotation: shipyard::ViewMut<Rotation>,
+    scale: shipyard::ViewMut<Scale>,
+    mut space: shipyard::ViewMut<Space>,
 ) {
+    // We will be tracking position, rotation and scale for updating LocalToWorld
+    // matrix and WorldToLocal matrix in the designated system.
+
+
     (!&position, !&rotation, !&scale)
-        .fast_iter()
+        .to_owned()
+        .iter()
         .with_id()
         .for_each(|(entity_id, _)| {
             if entity.is_alive(entity_id) {
-                entity.clear();
+                // todo 1. add position
+                //  2. add rotation
+                //  3. add scale.
 
-                // We need to add local to world.
-                // We need to add world to local.
-                // Both local and world will be the same, since
-                // we are clearing the entity. Entity will not have a parent.
+                space.add_component_unchecked(
+                    entity_id,
+                    Space {
+                        value: SpaceType::World,
+                    },
+                )
                 // Add transform.
+                // I need the world
             }
         });
 }
