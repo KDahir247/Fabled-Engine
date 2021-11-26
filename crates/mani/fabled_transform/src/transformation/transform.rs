@@ -1,5 +1,5 @@
 use crate::util::acos;
-use crate::{Position, Rotation, Scale};
+use crate::{Rotation, Scale, Translation};
 
 #[rustfmt::skip]
 pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
@@ -29,7 +29,7 @@ pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
 
 // todo scale is not implemented yet in the equation.
 #[rustfmt::skip]
-pub fn get_transformation_matrix(position : Position, rotation : Rotation, scale : Scale) -> [f32; 16] {
+pub fn get_transformation_matrix(position : Translation, rotation : Rotation, scale : Scale) -> [f32; 16] {
     let rotation_matrix = get_rotation_matrix(rotation);
     [
         rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], 0.0, // col 0
@@ -112,7 +112,7 @@ pub fn get_euler_angle(rotation: Rotation) -> [f32; 3] {
 mod transform_test {
     use crate::{
         get_angle_axis_magnitude, get_axis_angle, get_euler_angle, get_rotation_matrix,
-        get_transformation_matrix, Position, Rotation,
+        get_transformation_matrix, Rotation, Translation,
     };
 
     #[test]
@@ -127,7 +127,7 @@ mod transform_test {
         );
 
 
-        let position = Position {
+        let position = Translation {
             value: [3.153, 100.1, 1.5, 1.0],
         };
 
@@ -177,7 +177,7 @@ mod transform_test {
             190.4f32.to_radians(),
         );
 
-        let position = Position {
+        let position = Translation {
             value: [3.0, 2.0, 1.5, 1.0],
         };
 

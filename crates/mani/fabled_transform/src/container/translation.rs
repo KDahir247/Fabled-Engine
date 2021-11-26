@@ -1,4 +1,4 @@
 #[derive(Copy, Clone, Debug, Default)]
-pub struct Position {
+pub struct Translation {
     pub value: [f32; 4],
 }

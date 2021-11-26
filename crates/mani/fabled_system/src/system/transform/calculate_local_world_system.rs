@@ -1,16 +1,22 @@
-use fabled_transform::{get_rotation_matrix, LocalToWorld, Position, Rotation, Scale};
+use fabled_transform::{get_rotation_matrix, LocalToWorld, Rotation, Scale, Translation};
 use shipyard::*;
 
 #[rustfmt::skip]
 pub fn local_world_system(
-    mut position: shipyard::ViewMut<Position>,
+    mut position: shipyard::ViewMut<Translation>,
     mut rotation: shipyard::ViewMut<Rotation>,
     mut scale: shipyard::ViewMut<Scale>,
     mut local_to_world: shipyard::ViewMut<LocalToWorld>,
 ) {
     let mut modified_inserted_entities = Vec::new();
     
-    if position.is_tracking_modification() && position.is_tracking_insertion() {
+    //component tracking.
+    // todo delegate the tracking responsibility to some other system.
+    position.track_insertion().track_modification();
+    rotation.track_insertion().track_modification();
+    scale.track_insertion().track_modification();
+    
+    
         let modified_inserted_position = position.inserted_or_modified();
         
         (modified_inserted_position, &mut local_to_world)
@@ -47,15 +53,8 @@ pub fn local_world_system(
                 local_world.value = modified_matrix;
             });
         
-        for entity_id in  &modified_inserted_entities{
-            position.clear_inserted_and_modified(*entity_id);
-        }
-        
-        modified_inserted_entities.clear();
-    }
 
     
-    if rotation.is_tracking_modification() && rotation.is_tracking_insertion(){
         let modified_rotation = rotation.inserted_or_modified();
 
         (modified_rotation, &mut local_to_world)
@@ -64,7 +63,7 @@ pub fn local_world_system(
             .for_each(|(entity_id,(modified_rotation, mut local_world))|{
                 
                 modified_inserted_entities.push(entity_id);
-                
+
                 let matrix4x4 = local_world.value;
                 let translation = [matrix4x4[12], matrix4x4[13], matrix4x4[14], 1.0];
                 
@@ -80,19 +79,8 @@ pub fn local_world_system(
                 
                 local_world.value = modified_matrix;
             });
-
-        for entity_id in  &modified_inserted_entities{
-            rotation.clear_inserted_and_modified(*entity_id);
-        }
-
-        modified_inserted_entities.clear();        
-    }
     
-    if scale.is_tracking_modification() && scale.is_tracking_insertion(){
-        
-        // we want to make modifed_scale mut to correct x= 0, y = 0, z = 0 scaling.
-        // Which will cause problems for the engine and matrix calculation (determinant zero)
-        let modified_scale = scale.inserted_or_modified_mut();
+        let modified_scale = scale.inserted_or_modified();
 
         (modified_scale, &mut local_to_world)
             .iter()
@@ -104,17 +92,7 @@ pub fn local_world_system(
                 let matrix4x4 = local_world.value;
                 
                 let scale = match modified_scale.scale{
-                    fabled_transform::ScaleType::Uniform(uniform) => {
-
-                    let restricted_scale =   if core::num::FpCategory::Zero ==  uniform.classify(){
-                           uniform + 0.0001
-                       }else{
-                        uniform
-                    };
-
-                        [restricted_scale, restricted_scale, restricted_scale]
-
-                    },
+                    fabled_transform::ScaleType::Uniform(uniform) => [uniform, uniform, uniform],
                     fabled_transform::ScaleType::NonUniform(non_uniform) => non_uniform,
                 };
                 
@@ -135,18 +113,19 @@ pub fn local_world_system(
                 
             });
 
-        for entity_id in  &modified_inserted_entities{
-            rotation.clear_inserted_and_modified(*entity_id);
-        }
-
-        modified_inserted_entities.clear();
+    for entity_id in  &modified_inserted_entities{
+        position.clear_inserted_and_modified(*entity_id);
+        rotation.clear_inserted_and_modified(*entity_id);
+        scale.clear_inserted_and_modified(*entity_id);
     }
+
+    modified_inserted_entities.clear();
 }
 
 #[cfg(test)]
 mod local_world_test {
     use crate::system::transform::calculate_local_world_system::local_world_system;
-    use fabled_transform::{LocalToWorld, Position, Rotation};
+    use fabled_transform::{Rotation, Translation};
     use shipyard::Get;
 
     #[test]
@@ -155,7 +134,7 @@ mod local_world_test {
 
         let entity = world.add_entity((
             fabled_transform::Orientation::default(),
-            fabled_transform::Position::default(),
+            fabled_transform::Translation::default(),
             fabled_transform::Scale::default(),
             fabled_transform::Rotation {
                 value: [0.49759552, -0.10885537, 0.85859334, -0.058024056],
@@ -169,8 +148,6 @@ mod local_world_test {
             .unwrap();
 
         let mut view_mut_pos = world.borrow::<shipyard::ViewMut<Rotation>>().unwrap();
-        view_mut_pos.track_modification();
-        view_mut_pos.track_insertion();
 
         *(&mut view_mut_pos).get(entity).unwrap() = Rotation {
             value: [0.0, 0.8378122, 0.0, -0.5459588],

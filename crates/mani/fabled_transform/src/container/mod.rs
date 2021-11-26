@@ -3,12 +3,12 @@ pub use frozen::*;
 pub use local_world::*;
 pub use orientation::*;
 pub use parent::*;
-pub use position::*;
 pub use rotation::*;
 pub use scale::*;
 pub use scale_ty::*;
 pub use space::*;
 pub use space_ty::*;
+pub use translation::*;
 pub use world_local::*;
 
 mod direction;
@@ -16,19 +16,19 @@ mod frozen;
 mod local_world;
 mod orientation;
 mod parent;
-mod position;
 mod rotation;
 mod scale;
 mod scale_ty;
 mod space;
 mod space_ty;
+mod translation;
 mod world_local;
 
 
 #[cfg(test)]
 mod data_test {
     use crate::container::rotation::Rotation;
-    use crate::{AxisDirection, Frozen, Orientation, Parent, Position, Scale, Space};
+    use crate::{AxisDirection, Frozen, Orientation, Parent, Scale, Space, Translation};
 
     #[test]
     fn data_size() {
@@ -44,7 +44,7 @@ mod data_test {
         let space_size = std::mem::size_of::<Space>();
         assert_eq!(space_size & (space_size - 1), 0);
 
-        let position_size = std::mem::size_of::<Position>();
+        let position_size = std::mem::size_of::<Translation>();
         assert_eq!(position_size & (position_size - 1), 0);
 
         let rotation_size = std::mem::size_of::<Rotation>();
@@ -72,7 +72,7 @@ mod data_test {
         let space_alignment = std::mem::align_of::<Space>();
         assert_eq!(space_alignment & (space_alignment - 1), 0);
 
-        let position_alignment = std::mem::align_of::<Position>();
+        let position_alignment = std::mem::align_of::<Translation>();
         assert_eq!(position_alignment & (position_alignment - 1), 0);
 
         let rotation_alignment = std::mem::align_of::<Rotation>();
