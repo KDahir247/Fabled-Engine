@@ -1,6 +1,48 @@
 use crate::util::acos;
 use crate::{Rotation, Scale, Translation};
 
+pub fn forward(rotation: Rotation) -> [f32; 3] {
+    let forward_translation = Translation {
+        value: [0.0, 0.0, 1.0, 1.0],
+    };
+
+    vec_mul_qut(rotation, forward_translation)
+}
+
+pub fn right(rotation: Rotation) -> [f32; 3] {
+    let right_translation = Translation {
+        value: [1.0, 0.0, 0.0, 1.0],
+    };
+
+    vec_mul_qut(rotation, right_translation)
+}
+
+pub fn up(rotation: Rotation) -> [f32; 3] {
+    let up_translation = Translation {
+        value: [0.0, 1.0, 0.0, 1.0],
+    };
+
+    vec_mul_qut(rotation, up_translation)
+}
+
+
+pub fn vec_mul_qut(rotation: Rotation, translation: Translation) -> [f32; 3] {
+    let rotation_matrix = get_rotation_matrix(rotation);
+
+    let direction_vector = translation.value;
+
+    let x = direction_vector[0];
+    let y = direction_vector[1];
+    let z = direction_vector[2];
+
+    [
+        rotation_matrix[0] * x + rotation_matrix[3] * y + rotation_matrix[6] * z,
+        rotation_matrix[1] * x + rotation_matrix[4] * y + rotation_matrix[7] * z,
+        rotation_matrix[2] * x + rotation_matrix[6] * y + rotation_matrix[8] * z,
+    ]
+}
+
+
 #[rustfmt::skip]
 pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
     let (qx, qy, qz, qw) = (
@@ -10,9 +52,9 @@ pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
         rotation.value[3],
     );
 
-    let x2 = qx * qx;
-    let y2 = qy * qy;
-    let z2 = qz * qz;
+    let xx = qx * qx;
+    let yy = qy * qy;
+    let zz = qz * qz;
     let xy = qx * qy;
     let xz = qx * qz;
     let yz = qy * qz;
@@ -21,9 +63,9 @@ pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
     let wz = qw * qz;
 
     [
-        1.0 - 2.0 * (y2 + z2), 2.0 * (xy + wz), 2.0 * (xz - wy),//col 0
-        2.0 * (xy - wz), 1.0 - 2.0 * (x2 + z2), 2.0 * (yz + wx),//col 1
-        2.0 * (xz + wy), 2.0 * (yz - wx), 1.0 - 2.0 * (x2 + y2) //col 2
+        1.0 - 2.0 * (yy + zz), 2.0 * (xy + wz), 2.0 * (xz - wy),//col 0
+        2.0 * (xy - wz), 1.0 - 2.0 * (xx + zz), 2.0 * (yz + wx),//col 1
+        2.0 * (xz + wy), 2.0 * (yz - wx), 1.0 - 2.0 * (xx + yy) //col 2
     ]
 }
 
@@ -111,8 +153,8 @@ pub fn get_euler_angle(rotation: Rotation) -> [f32; 3] {
 #[cfg(test)]
 mod transform_test {
     use crate::{
-        get_angle_axis_magnitude, get_axis_angle, get_euler_angle, get_rotation_matrix,
-        get_transformation_matrix, Rotation, Translation,
+        forward, get_angle_axis_magnitude, get_axis_angle, get_euler_angle, get_rotation_matrix,
+        get_transformation_matrix, right, up, Rotation, Translation,
     };
 
     #[test]
@@ -333,5 +375,54 @@ mod transform_test {
         assert!(difference[0] <= THRESHOLD);
         assert!(difference[1] <= THRESHOLD);
         assert!(difference[2] <= THRESHOLD);
+    }
+
+    #[test]
+    fn update_vector() {
+        const THRESHOLD: f32 = 0.1;
+
+        let rotation = Rotation {
+            value: [0.2284545, 0.255438, 0.1609776, 0.9255518],
+        };
+
+        let forward_direction = forward(rotation);
+        let right_direction = right(rotation);
+        let up_direction = up(rotation);
+
+        // retrieved from a proven game engine. Editor rounds to integer, so there will
+        // be an error_threshold, sine we don't round our calculation to integer
+        let proven_forward_direction = [0.5, -0.3, 0.8];
+        let proven_right_direction = [0.8, 0.4, -0.4];
+        let proven_up_direction = [-0.2, 0.8, 0.5];
+
+        let forward_difference = [
+            (forward_direction[0] - proven_forward_direction[0]).abs(),
+            (forward_direction[1] - proven_forward_direction[1]).abs(),
+            (forward_direction[2] - proven_forward_direction[2]).abs(),
+        ];
+
+        let right_difference = [
+            (right_direction[0] - proven_right_direction[0]).abs(),
+            (right_direction[1] - proven_right_direction[1]).abs(),
+            (right_direction[2] - proven_right_direction[2]).abs(),
+        ];
+
+        let up_difference = [
+            (up_direction[0] - proven_up_direction[0]).abs(),
+            (up_direction[1] - proven_up_direction[1]).abs(),
+            (up_direction[2] - proven_up_direction[2]).abs(),
+        ];
+
+        assert!(forward_difference[0] <= THRESHOLD);
+        assert!(forward_difference[1] <= THRESHOLD);
+        assert!(forward_difference[2] <= THRESHOLD);
+
+        assert!(right_difference[0] <= THRESHOLD);
+        assert!(right_difference[1] <= THRESHOLD);
+        assert!(right_difference[2] <= THRESHOLD);
+
+        assert!(up_difference[0] <= THRESHOLD);
+        assert!(up_difference[1] <= THRESHOLD);
+        assert!(up_difference[2] <= THRESHOLD);
     }
 }

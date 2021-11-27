@@ -1,5 +1,8 @@
 mod affine_3d;
+mod mat4;
+
 pub use affine_3d::*;
+pub use mat4::*;
 
 
 #[cfg(test)]

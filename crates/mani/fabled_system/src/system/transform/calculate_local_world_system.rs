@@ -1,143 +1,108 @@
-use fabled_transform::{get_rotation_matrix, LocalToWorld, Rotation, Scale, Translation};
+use fabled_transform::{
+    get_rotation_matrix, LocalToWorld, Parent, Rotation, Scale, ScaleType, Translation,
+};
+use rayon::iter::ParallelIterator;
 use shipyard::*;
 
-#[rustfmt::skip]
 pub fn local_world_system(
-    mut position: shipyard::ViewMut<Translation>,
-    mut rotation: shipyard::ViewMut<Rotation>,
-    mut scale: shipyard::ViewMut<Scale>,
-    mut local_to_world: shipyard::ViewMut<LocalToWorld>,
+    translation: View<Translation>,
+    rotation: View<Rotation>,
+    scale: View<Scale>,
+    parent: View<Parent>,
+    mut local_to_world: ViewMut<LocalToWorld>,
 ) {
-    let mut modified_inserted_entities = Vec::new();
-    
-    //component tracking.
-    // todo delegate the tracking responsibility to some other system.
-    position.track_insertion().track_modification();
-    rotation.track_insertion().track_modification();
-    scale.track_insertion().track_modification();
-    
-    
-        let modified_inserted_position = position.inserted_or_modified();
-        
-        (modified_inserted_position, &mut local_to_world)
-            .iter()
-            .with_id()
-            .for_each(|(entity_id,(modified_position, mut local_world))| {
-                modified_inserted_entities.push(entity_id);
-                
+    (
+        &translation,
+        &rotation,
+        &scale,
+        !&parent,
+        &mut local_to_world,
+    )
+        .fast_iter()
+        .for_each(
+            |(translation, rotation, scale, _, mut local_to_world_matrix)| {
                 // column array matrix
                 // [0   4    8   12]
                 // [1   5    9   13]
                 // [2   6   10   14]
                 // [3   7   11   15]
-                let matrix4x4 = local_world.value;
 
-                let position = modified_position.value;
+                let translation_vector = translation.value;
 
-                let scalar = position[3];
+                assert!(translation_vector[3].ne(&0.0));
 
-                let translation = [
-                    position[0] * scalar,
-                    position[1] * scalar,
-                    position[2] * scalar,
+                let mut matrix4x4 = LocalToWorld::default().value;
+
+                let inv_scalar = 1.0 / translation_vector[3];
+
+                let norm_translation_vec = [
+                    translation_vector[0] * inv_scalar,
+                    translation_vector[1] * inv_scalar,
+                    translation_vector[2] * inv_scalar,
+                    1.0, // translation[3] / translation[3] should be 1.0 after passing assertion
                 ];
 
-                let modified_matrix =
-                    [
-                        matrix4x4[0], matrix4x4[1], matrix4x4[ 2], 0.0, // col 0
-                        matrix4x4[4], matrix4x4[5], matrix4x4[ 6], 0.0, // col 1
-                        matrix4x4[8], matrix4x4[9], matrix4x4[10], 0.0, // col 2
-                        translation[0], translation[1], translation[2], 1.0 // col 3
-                    ];
-                
-                local_world.value = modified_matrix;
-            });
-        
+                let rotation_matrix = get_rotation_matrix(*rotation);
 
-    
-        let modified_rotation = rotation.inserted_or_modified();
-
-        (modified_rotation, &mut local_to_world)
-            .iter()
-            .with_id()
-            .for_each(|(entity_id,(modified_rotation, mut local_world))|{
-                
-                modified_inserted_entities.push(entity_id);
-
-                let matrix4x4 = local_world.value;
-                let translation = [matrix4x4[12], matrix4x4[13], matrix4x4[14], 1.0];
-                
-                let rotation_matrix = get_rotation_matrix(*modified_rotation);
-
-                let modified_matrix =
-                    [
-                        rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], 0.0,
-                        rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], 0.0,
-                        rotation_matrix[6], rotation_matrix[7], rotation_matrix[8], 0.0,
-                        translation[0], translation[1], translation[2], translation[3]
-                    ];
-                
-                local_world.value = modified_matrix;
-            });
-    
-        let modified_scale = scale.inserted_or_modified();
-
-        (modified_scale, &mut local_to_world)
-            .iter()
-            .with_id()
-            .for_each(|(entity_id,(modified_scale, mut local_world))|{
-                
-                modified_inserted_entities.push(entity_id);
-                
-                let matrix4x4 = local_world.value;
-                
-                let scale = match modified_scale.scale{
-                    fabled_transform::ScaleType::Uniform(uniform) => [uniform, uniform, uniform],
-                    fabled_transform::ScaleType::NonUniform(non_uniform) => non_uniform,
+                let scale = match scale.value {
+                    ScaleType::Uniform(uniform) => [uniform; 3],
+                    ScaleType::NonUniform(non_uniform) => non_uniform,
                 };
-                
-                let translation = 
-                    [
-                        matrix4x4[12], matrix4x4[13], matrix4x4[14]
-                    ];
-                
-                let modified_matrix = 
-                    [
-                        matrix4x4[0] * scale[0], matrix4x4[1] * scale[0], matrix4x4[ 2] * scale[0], 0.0, // col 0
-                        matrix4x4[4] * scale[1], matrix4x4[5] * scale[1], matrix4x4[ 6] * scale[1], 0.0, // col 1
-                        matrix4x4[8] * scale[2], matrix4x4[9] * scale[2], matrix4x4[10] * scale[2], 0.0, // col 2
-                        translation[0], translation[1], translation[2], 1.0 // col 3
-                    ];
 
-                local_world.value = modified_matrix;
-                
-            });
+                matrix4x4 = [
+                    rotation_matrix[0] * scale[0],
+                    rotation_matrix[1] * scale[0],
+                    rotation_matrix[2] * scale[0],
+                    matrix4x4[3], // col 0
+                    rotation_matrix[3] * scale[1],
+                    rotation_matrix[4] * scale[1],
+                    rotation_matrix[5] * scale[1],
+                    matrix4x4[7], // col 1
+                    rotation_matrix[6] * scale[2],
+                    rotation_matrix[7] * scale[2],
+                    rotation_matrix[8] * scale[2],
+                    matrix4x4[11], // col 2
+                    norm_translation_vec[0],
+                    norm_translation_vec[1],
+                    norm_translation_vec[2],
+                    norm_translation_vec[3],
+                ];
 
-    for entity_id in  &modified_inserted_entities{
-        position.clear_inserted_and_modified(*entity_id);
-        rotation.clear_inserted_and_modified(*entity_id);
-        scale.clear_inserted_and_modified(*entity_id);
-    }
+                local_to_world_matrix.value = matrix4x4;
+            },
+        );
 
-    modified_inserted_entities.clear();
+
+    (
+        &translation,
+        &rotation,
+        &scale,
+        &parent,
+        &mut local_to_world,
+    )
+        .iter()
+        .for_each(|_| {
+            // todo entity with parent.
+        });
 }
 
 #[cfg(test)]
 mod local_world_test {
     use crate::system::transform::calculate_local_world_system::local_world_system;
-    use fabled_transform::{Rotation, Translation};
-    use shipyard::Get;
+    use fabled_transform::{LocalToWorld, Parent, ScaleType};
+    use shipyard::{Get, ViewMut};
 
     #[test]
-    fn modfied_transforms() {
+    fn retrieve_modified_world_matrix() {
         let mut world = shipyard::World::new();
 
         let entity = world.add_entity((
-            fabled_transform::Orientation::default(),
             fabled_transform::Translation::default(),
-            fabled_transform::Scale::default(),
+            fabled_transform::Scale {
+                value: ScaleType::Uniform(1.0),
+            },
             fabled_transform::Rotation {
-                value: [0.49759552, -0.10885537, 0.85859334, -0.058024056],
+                value: [0.3097265, 0.2101103, 0.5141426, 0.7717387],
             },
             fabled_transform::LocalToWorld::default(),
         ));
@@ -147,15 +112,19 @@ mod local_world_test {
             .add_to_world(&world)
             .unwrap();
 
-        let mut view_mut_pos = world.borrow::<shipyard::ViewMut<Rotation>>().unwrap();
-
-        *(&mut view_mut_pos).get(entity).unwrap() = Rotation {
-            value: [0.0, 0.8378122, 0.0, -0.5459588],
-        };
-
-        println!("{:?}", *(&mut view_mut_pos).get(entity).unwrap());
-        drop(view_mut_pos);
-
         world.run_workload("run_test").unwrap();
+
+        let (parent_storage, local_to_world_storage) = world
+            .borrow::<(ViewMut<Parent>, ViewMut<LocalToWorld>)>()
+            .unwrap();
+
+
+        if let Ok(parent_component) = (&parent_storage).get(entity) {
+            // test the result with the entity having a parent in mind.
+        } else {
+            let world_local_matrix = (&local_to_world_storage).get(entity).unwrap();
+
+            println!("{:?}", world_local_matrix);
+        }
     }
 }

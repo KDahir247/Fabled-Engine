@@ -166,8 +166,8 @@ pub fn missing_core_transform_system(
 
 #[cfg(test)]
 mod transform_validation_test {
-    use crate::{Missing, MissingTy};
-    use shipyard::{EntityId, World};
+
+    use shipyard::World;
 
     #[test]
     fn transform_validation() {

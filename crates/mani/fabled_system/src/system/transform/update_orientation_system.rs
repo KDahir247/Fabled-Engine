@@ -2,75 +2,56 @@ use fabled_transform::{Frozen, Orientation, Rotation};
 
 use rayon::iter::ParallelIterator;
 
-use shipyard::{IntoFastIter, IntoIter};
+use shipyard::IntoIter;
 
 pub fn re_orientate_entity(
     mut orientation: shipyard::ViewMut<Orientation>,
     rotation: shipyard::View<Rotation>,
     frozen: shipyard::View<Frozen>,
 ) {
-    // rotation is getting tracked by the local_to_world system and the
-    // world_to_local system.
     (&mut orientation, &rotation, !&frozen).par_iter().for_each(
         |(mut orientation, quaternion, _)| {
-            let forward_dot_quat = quaternion.value[2];
+            let (i, j, k, w) = (
+                quaternion.value[0],
+                quaternion.value[1],
+                quaternion.value[2],
+                quaternion.value[3],
+            );
 
-            let quat_dot = quaternion.value[0] * quaternion.value[0]
-                + quaternion.value[1] * quaternion.value[1]
-                + quaternion.value[2] * quaternion.value[2];
+            let quat_dot = i * i + j * j + k * k;
 
-            let forward_cross_quat = [quaternion.value[1] - 0.0, 0.0 - quaternion.value[0], 0.0];
+            let k2 = k * 2.0;
+            let w2 = w * 2.0;
 
-            let result_upper = [
-                2.0 * forward_dot_quat * quaternion.value[0],
-                2.0 * forward_dot_quat * quaternion.value[1],
-                2.0 * forward_dot_quat * quaternion.value[2],
-            ];
+            let result_upper = [k2 * i, k2 * j, k2 * k];
 
-            let sq_sclr_min_sq_forw = quaternion.value[3] * quaternion.value[3] - quat_dot;
+            let sq_sclr_min_sq_forw = w * w - quat_dot;
 
             let result_middle = [0.0, 0.0, sq_sclr_min_sq_forw];
 
-            let result_bottom = [
-                2.0 * quaternion.value[3] * forward_cross_quat[0],
-                2.0 * quaternion.value[3] * forward_cross_quat[1],
-                2.0 * quaternion.value[3] * forward_cross_quat[2],
-            ];
+            let result_bottom = [w2 * j, w2 * -i, 0.0];
 
-            let result = [
+            let forward = [
                 result_upper[0] + result_middle[0] + result_bottom[0],
                 result_upper[1] + result_middle[1] + result_bottom[1],
                 result_upper[2] + result_middle[2] + result_bottom[2],
             ];
 
-            orientation.forward = result;
+            orientation.forward = forward;
 
-            let right_dot_quat = quaternion.value[0];
-
-            let right_cross_quat = [0.0, quaternion.value[2] - 0.0, 0.0 - quaternion.value[1]];
-
-            let result_upper = [
-                2.0 * right_dot_quat * quaternion.value[0],
-                2.0 * right_dot_quat * quaternion.value[1],
-                2.0 * right_dot_quat * quaternion.value[2],
-            ];
-
+            let result_upper = [2.0 * i * i, 2.0 * i * j, 2.0 * i * k];
 
             let result_middle = [sq_sclr_min_sq_forw, 0.0, 0.0];
 
-            let result_bottom = [
-                2.0 * quaternion.value[3] * right_cross_quat[0],
-                2.0 * quaternion.value[3] * right_cross_quat[1],
-                2.0 * quaternion.value[3] * right_cross_quat[2],
-            ];
+            let result_bottom = [0.0, w2 * k, w2 * -j];
 
-            let result = [
+            let right = [
                 result_upper[0] + result_middle[0] + result_bottom[0],
                 result_upper[1] + result_middle[1] + result_bottom[1],
                 result_upper[2] + result_middle[2] + result_bottom[2],
             ];
 
-            orientation.right = result;
+            orientation.right = right;
         },
     );
 }
