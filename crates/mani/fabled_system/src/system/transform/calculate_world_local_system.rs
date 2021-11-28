@@ -1,14 +1,16 @@
 use fabled_transform::{
-    get_rotation_matrix, Parent, Rotation, Scale, ScaleType, Translation, WorldToLocal,
+    get_rotation_matrix, Frozen, Parent, Rotation, Scale, ScaleType, Translation, WorldToLocal,
 };
 
 use shipyard::*;
 
+// todo add frozen component to signify static.
 #[rustfmt::skip]
 pub fn world_local_system(
     translation: shipyard::View<Translation>,
     rotation: View<Rotation>,
     scale: View<Scale>,
+    frozen : View<Frozen>,
     parent: View<Parent>,
     mut world_to_local: ViewMut<WorldToLocal>,
 ) {
@@ -16,11 +18,12 @@ pub fn world_local_system(
         &translation,
         &rotation,
         &scale,
-        !&parent,
         &mut world_to_local,
+        !&parent,
+        !&frozen
     )
         .fast_iter()
-        .for_each(|(translation, rotation, scale, _, world_to_local_matrix)| {
+        .for_each(|(translation, rotation, scale, world_to_local_matrix,..)| {
             // column array matrix
             // [0   4    8   12]
             // [1   5    9   13]
@@ -30,8 +33,6 @@ pub fn world_local_system(
             let translation_vector = translation.value;
 
             assert!(translation_vector[3].ne(&0.0));
-
-            let mut matrix4x4 = WorldToLocal::default().value;
 
             let inv_scalar = 1.0 / translation_vector[3];
 
@@ -102,7 +103,7 @@ pub fn world_local_system(
                     + inv_rotation_matrix[8] * norm_translation_vec[2],
             ];
 
-            matrix4x4 = [
+            let matrix4x4 = [
                 inv_rotation_matrix[0], inv_rotation_matrix[1], inv_rotation_matrix[2], 0.0, // col 0
                 inv_rotation_matrix[3], inv_rotation_matrix[4], inv_rotation_matrix[5], 0.0, // col 1
                 inv_rotation_matrix[6], inv_rotation_matrix[7], inv_rotation_matrix[8], 0.0, // col 2
@@ -118,6 +119,7 @@ pub fn world_local_system(
         &rotation,
         &scale,
         &parent,
+        !&frozen,
         &mut world_to_local,
     )
         .fast_iter()

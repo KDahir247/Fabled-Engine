@@ -1,13 +1,14 @@
 use fabled_transform::{
-    get_rotation_matrix, LocalToWorld, Parent, Rotation, Scale, ScaleType, Translation,
+    get_rotation_matrix, Frozen, LocalToWorld, Parent, Rotation, Scale, ScaleType, Translation,
 };
-use rayon::iter::ParallelIterator;
 use shipyard::*;
+
 
 pub fn local_world_system(
     translation: View<Translation>,
     rotation: View<Rotation>,
     scale: View<Scale>,
+    frozen: View<Frozen>,
     parent: View<Parent>,
     mut local_to_world: ViewMut<LocalToWorld>,
 ) {
@@ -15,12 +16,13 @@ pub fn local_world_system(
         &translation,
         &rotation,
         &scale,
-        !&parent,
         &mut local_to_world,
+        !&parent,
+        !&frozen,
     )
         .fast_iter()
         .for_each(
-            |(translation, rotation, scale, _, mut local_to_world_matrix)| {
+            |(translation, rotation, scale, mut local_to_world_matrix, ..)| {
                 // column array matrix
                 // [0   4    8   12]
                 // [1   5    9   13]
@@ -30,8 +32,6 @@ pub fn local_world_system(
                 let translation_vector = translation.value;
 
                 assert!(translation_vector[3].ne(&0.0));
-
-                let mut matrix4x4 = LocalToWorld::default().value;
 
                 let inv_scalar = 1.0 / translation_vector[3];
 
@@ -49,23 +49,23 @@ pub fn local_world_system(
                     ScaleType::NonUniform(non_uniform) => non_uniform,
                 };
 
-                matrix4x4 = [
+                let matrix4x4 = [
                     rotation_matrix[0] * scale[0],
                     rotation_matrix[1] * scale[0],
                     rotation_matrix[2] * scale[0],
-                    matrix4x4[3], // col 0
+                    0.0, // col 0
                     rotation_matrix[3] * scale[1],
                     rotation_matrix[4] * scale[1],
                     rotation_matrix[5] * scale[1],
-                    matrix4x4[7], // col 1
+                    0.0, // col 1
                     rotation_matrix[6] * scale[2],
                     rotation_matrix[7] * scale[2],
                     rotation_matrix[8] * scale[2],
-                    matrix4x4[11], // col 2
+                    0.0, // col 2
                     norm_translation_vec[0],
                     norm_translation_vec[1],
                     norm_translation_vec[2],
-                    norm_translation_vec[3],
+                    1.0,
                 ];
 
                 local_to_world_matrix.value = matrix4x4;
@@ -79,6 +79,7 @@ pub fn local_world_system(
         &scale,
         &parent,
         &mut local_to_world,
+        !&frozen,
     )
         .iter()
         .for_each(|_| {
