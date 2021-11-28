@@ -122,9 +122,9 @@ mod local_world_test {
         if let Ok(parent_component) = (&parent_storage).get(entity) {
             // test the result with the entity having a parent in mind.
         } else {
-            let world_local_matrix = (&local_to_world_storage).get(entity).unwrap();
+            let local_world_matrix = (&local_to_world_storage).get(entity).unwrap();
 
-            println!("{:?}", world_local_matrix);
+            println!("{:?}", local_world_matrix);
         }
     }
 }

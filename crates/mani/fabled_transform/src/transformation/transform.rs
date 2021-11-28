@@ -85,27 +85,23 @@ pub fn get_transformation_matrix(position : Translation, rotation : Rotation, sc
 pub fn get_axis_angle(rotation: Rotation) -> ([f32; 3], f32) {
     const SQR_EPSILON: f32 = f32::EPSILON * f32::EPSILON;
 
-    let (qx, qy, qz, qw) = (
+    let (i, j, k, w) = (
         rotation.value[0],
         rotation.value[1],
         rotation.value[2],
         rotation.value[3],
     );
 
-    let scale_sq = (1.0 - qw * qw).max(0.0);
+    let scale_sq = (1.0 - w * w).max(0.0);
 
-    let angle = 2.0 * acos(qw);
+    let angle = 2.0 * acos(w);
 
     if scale_sq < SQR_EPSILON {
         ([1.0, 0.0, 0.0], angle)
     } else {
         let inv_sqrt_scale = scale_sq.sqrt().recip();
         (
-            [
-                qx * inv_sqrt_scale,
-                qy * inv_sqrt_scale,
-                qz * inv_sqrt_scale,
-            ],
+            [i * inv_sqrt_scale, j * inv_sqrt_scale, k * inv_sqrt_scale],
             angle,
         )
     }
@@ -118,26 +114,26 @@ pub fn get_angle_axis_magnitude(rotation: Rotation) -> [f32; 3] {
 }
 
 pub fn get_euler_angle(rotation: Rotation) -> [f32; 3] {
-    let (qx, qy, qz, qw) = (
+    let (i, j, k, w) = (
         rotation.value[0],
         rotation.value[1],
         rotation.value[2],
         rotation.value[3],
     );
 
-    let xx = qx * qx;
-    let xy = qx * qy;
-    let xz = qx * qz;
-    let xw = qx * qw;
+    let xx = i * i;
+    let xy = i * j;
+    let xz = i * k;
+    let xw = i * w;
 
-    let yy = qy * qy;
-    let yz = qy * qz;
-    let yw = qy * qw;
+    let yy = j * j;
+    let yz = j * k;
+    let yw = j * w;
 
-    let zz = qz * qz;
-    let zw = qz * qw;
+    let zz = k * k;
+    let zw = k * w;
 
-    let ww = qw * qw;
+    let ww = w * w;
 
     let x = (-2.0 * (yz - xw)).atan2(ww - xx - yy + zz);
 
