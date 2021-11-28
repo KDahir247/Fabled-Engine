@@ -1,5 +1,5 @@
 use crate::camera::{Oblique, Orthographic, Projection, ViewPort};
-use fabled_transform::Orientation;
+use fabled_transform::{get_transformation_matrix, Orientation, Rotation, Scale, Translation};
 
 use glam::Vec4Swizzles;
 
@@ -62,12 +62,15 @@ impl Camera {
     }
 
 
-    pub fn calculate_look_at_matrix(&mut self, orientation: Orientation) {
-        let Orientation {
-            transform, forward, ..
-        } = orientation;
+    pub fn calculate_look_at_matrix(
+        &mut self,
+        translation: Translation,
+        rotation: Rotation,
+        scale: Scale,
+    ) {
+        let forward = fabled_transform::forward(rotation);
 
-        let transformation_matrix = transform.get_transformation_matrix();
+        let transformation_matrix = get_transformation_matrix(translation, rotation, scale);
 
         let position = [
             transformation_matrix[12],
@@ -102,10 +105,12 @@ impl Camera {
     #[deprecated(note = "Calculate arc ball matrix has not been tested.")]
     pub fn calculate_arc_ball_matrix(
         &mut self,
-        orientation: Orientation,
+        translation: Translation,
+        rotation: Rotation,
+        scale: Scale,
         center: Option<[f32; 3]>,
     ) {
-        let transformation_matrix = orientation.transform.get_transformation_matrix();
+        let transformation_matrix = get_transformation_matrix(translation, rotation, scale);
 
         let mat4_transformation_representation =
             glam::Mat4::from_cols_array(&transformation_matrix);
@@ -217,22 +222,46 @@ mod camera_matrix_test {
     use crate::camera::{
         Camera, ClippingPlane, Oblique, Orthographic, Perspective, Projection, ViewPort,
     };
-    use fabled_transform::Orientation;
+    use crate::shader::SpvOptions::Default;
+    use fabled_transform::{Orientation, Rotation, Scale, Translation};
 
     fn initialize_projection_view_matrix(
         translation_target: [f32; 3],
         rotation_target: [f32; 3],
     ) -> Camera {
         // Create camera orientation and update translation and rotation.
-        let mut camera_orientation = Orientation::default();
-        camera_orientation.update_translation(translation_target);
-        camera_orientation.update_rotation(rotation_target);
 
+        let translation = Translation {
+            value: [
+                translation_target[0],
+                translation_target[1],
+                translation_target[2],
+                1.0,
+            ],
+        };
+
+        let euler_to_quaternion = glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            rotation_target[0],
+            rotation_target[1],
+            rotation_target[2],
+        );
+
+        let rotation = Rotation {
+            value: [
+                euler_to_quaternion.x,
+                euler_to_quaternion.y,
+                euler_to_quaternion.z,
+                euler_to_quaternion.w,
+            ],
+        };
+
+        let uniform_scale = Scale::default();
 
         // Create a camera matrix and create a view matrix and a projection matrix.
         let mut camera_matrix = Camera::default();
 
-        camera_matrix.calculate_look_at_matrix(camera_orientation);
+        camera_matrix.calculate_look_at_matrix(translation, rotation, uniform_scale);
 
         let perspective = Perspective::default();
         let projection = Projection::Perspective(perspective);
@@ -329,17 +358,30 @@ mod camera_matrix_test {
             130.0f32.to_radians(),
         ];
 
-        let translation = [10.0f32, 20.0f32, 30.0f32];
 
-        let mut camera_orientation = Orientation::default();
-        camera_orientation.update_translation(translation);
+        let translation = Translation {
+            value: [10.0f32, 2.0f32, 30.0f32, 1.0f32],
+        };
 
-        camera_orientation.update_rotation(rotation);
+
+        let glm_quaternion =
+            glam::Quat::from_euler(glam::EulerRot::XYZ, rotation[0], rotation[1], rotation[2]);
+
+        let rotation = Rotation {
+            value: [
+                glm_quaternion.x,
+                glm_quaternion.y,
+                glm_quaternion.z,
+                glm_quaternion.w,
+            ],
+        };
+
+        let scale = Scale::default();
 
         // Create a camera matrix and create a view matrix and a projection matrix.
         let mut camera_matrix = Camera::default();
 
-        camera_matrix.calculate_look_at_matrix(camera_orientation);
+        camera_matrix.calculate_look_at_matrix(translation, rotation, scale);
 
 
         println!("view matrix {:?}", camera_matrix.view);
@@ -468,12 +510,6 @@ mod camera_matrix_test {
         ];
 
         let translation = [10.0f32, 20.0f32, 30.0f32];
-
-
-        // Create camera orientation and update translation and rotation.
-        let mut camera_orientation = Orientation::default();
-        camera_orientation.update_translation(translation);
-        camera_orientation.update_rotation(rotation);
 
 
         // Create a camera matrix and create a view matrix and a projection matrix.

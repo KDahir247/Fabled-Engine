@@ -1,5 +1,5 @@
 use crate::util::acos;
-use crate::{Rotation, Scale, Translation};
+use crate::{Rotation, Scale, ScaleType, Translation};
 
 pub fn forward(rotation: Rotation) -> [f32; 3] {
     let forward_translation = Translation {
@@ -69,14 +69,19 @@ pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
     ]
 }
 
-// todo scale is not implemented yet in the equation.
 #[rustfmt::skip]
 pub fn get_transformation_matrix(position : Translation, rotation : Rotation, scale : Scale) -> [f32; 16] {
     let rotation_matrix = get_rotation_matrix(rotation);
+    
+    let scalar = match scale.value{
+        ScaleType::Uniform(uniform) => [uniform; 3],
+        ScaleType::NonUniform(non_uniform) => non_uniform
+    };
+    
     [
-        rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], 0.0, // col 0
-        rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], 0.0, // col 1
-        rotation_matrix[6], rotation_matrix[7], rotation_matrix[8], 0.0, // col 2
+        rotation_matrix[0] * scalar[0], rotation_matrix[1] * scalar[0], rotation_matrix[2] * scalar[0], 0.0, // col 0
+        rotation_matrix[3] * scalar[1], rotation_matrix[4] * scalar[1], rotation_matrix[5] * scalar[1], 0.0, // col 1
+        rotation_matrix[6] * scalar[2], rotation_matrix[7] * scalar[2], rotation_matrix[8] * scalar[2], 0.0, // col 2
         position.value[0], position.value[1],  position.value[2], 1.0 // col 3
     ]
 
