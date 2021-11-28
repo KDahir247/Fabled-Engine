@@ -1,9 +1,10 @@
 mod affine_3d;
+mod mat3;
 mod mat4;
 
 pub use affine_3d::*;
+pub use mat3::*;
 pub use mat4::*;
-
 
 #[cfg(test)]
 mod data_test {

@@ -409,6 +409,7 @@ mod transform_test {
             (up_direction[2] - proven_up_direction[2]).abs(),
         ];
 
+
         assert!(forward_difference[0] <= THRESHOLD);
         assert!(forward_difference[1] <= THRESHOLD);
         assert!(forward_difference[2] <= THRESHOLD);

@@ -123,7 +123,6 @@ mod local_world_test {
             // test the result with the entity having a parent in mind.
         } else {
             let local_world_matrix = (&local_to_world_storage).get(entity).unwrap();
-
             println!("{:?}", local_world_matrix);
         }
     }
