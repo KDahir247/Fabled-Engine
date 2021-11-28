@@ -5,3 +5,7 @@
 // EaseOutExpo, EaseInOutExpo, EaseInCirc, EaseOutCirc, EaseInOutCirc,
 // EaseInBack, EaseOutBack, EaseInOutBack, EaseInElastic, EaseOutElastic,
 // EaseInOutElastic, EaseInBounce, EaseOutBounce, EaseInOutBounce
+
+
+// linear interpolation, spherical interpolation, normalized linear
+// interpolation
