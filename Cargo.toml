@@ -43,7 +43,7 @@ fabled_audio = {path = "crates/mani/fabled_audio", version = "*"}
 # todo others remove
 image = "*"
 winit = "*"
-wgpu = "0.8"
+wgpu = "0.11"
 futures = "*"
 bytemuck = {version = "*", features = ["derive"]}
 tobj = "*"
