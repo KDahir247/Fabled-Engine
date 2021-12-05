@@ -7,6 +7,9 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 
 # The transform branch is where frequent development and up to date development will occur
 
+Going to change my development pipeline. I will use github for public changes, while also using jetbrain source for interal team project management and
+forward detail github.
+
 ## Camera Movement
 * Forward : Up or W
 * Backward : Down or S
