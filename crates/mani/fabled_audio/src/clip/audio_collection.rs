@@ -34,7 +34,9 @@ pub struct AmbisonicCollection {
 
 impl AmbisonicCollection {
     pub fn new(keep_alive: bool) -> Self {
-        let (queue_input, queue_output) = ambisonic::rodio::queue::queue::<f32>(keep_alive);
+        let (queue_input, queue_output) =
+            ambisonic::rodio::queue::queue::<f32>(keep_alive);
+
         Self {
             input: queue_input,
             output: queue_output,
@@ -54,22 +56,19 @@ impl AmbisonicCollection {
 #[cfg(test)]
 mod audio_collection_test {
     use crate::{
-        AmbisonicCollection, AmbisonicOutput, AudioCollection, FadeFilter, RawAmbisonicClip,
-        RawClip, StandardOutput,
+        AmbisonicCollection, AmbisonicOutput, AudioCollection, FadeFilter,
+        RawAmbisonicClip, RawClip, StandardOutput,
     };
 
     #[test]
     fn audio_collection() {
         let audio_collection = AudioCollection::new(true);
 
-        let first_clip =
-            RawClip::new(rodio::source::SineWave::new(28000)).take_duration(5, 0, FadeFilter::FADE);
+        let first_clip = RawClip::new(rodio::source::SineWave::new(28000))
+            .take_duration(5, 0, FadeFilter::FADE);
 
-        let second_clip = RawClip::new(rodio::source::SineWave::new(1100)).take_duration(
-            4,
-            0,
-            FadeFilter::ABRUPT,
-        );
+        let second_clip = RawClip::new(rodio::source::SineWave::new(1100))
+            .take_duration(4, 0, FadeFilter::ABRUPT);
 
         audio_collection.append(first_clip);
         audio_collection.append(second_clip);
@@ -87,11 +86,13 @@ mod audio_collection_test {
     fn ambisonic_collection() {
         let ambisonic_collection = AmbisonicCollection::new(true);
 
-        let first_clip = RawAmbisonicClip::new(ambisonic::sources::Noise::new(10000))
-            .take_duration(5, 0, FadeFilter::FADE);
+        let first_clip =
+            RawAmbisonicClip::new(ambisonic::sources::Noise::new(10000))
+                .take_duration(5, 0, FadeFilter::FADE);
 
-        let second_clip = RawAmbisonicClip::new(ambisonic::sources::Noise::new(48000))
-            .take_duration(5, 0, FadeFilter::ABRUPT);
+        let second_clip =
+            RawAmbisonicClip::new(ambisonic::sources::Noise::new(48000))
+                .take_duration(5, 0, FadeFilter::ABRUPT);
 
         ambisonic_collection.append(first_clip);
         ambisonic_collection.append(second_clip);

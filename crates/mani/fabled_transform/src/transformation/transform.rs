@@ -31,44 +31,45 @@ pub fn vec_mul_qut(rotation: Rotation, translation: Translation) -> [f32; 3] {
 
     let direction_vector = translation.value;
 
-    let x = direction_vector[0];
-    let y = direction_vector[1];
-    let z = direction_vector[2];
+    let dir_x = direction_vector[0];
+    let dir_y = direction_vector[1];
+    let dir_z = direction_vector[2];
 
     [
-        rotation_matrix[0] * x + rotation_matrix[3] * y + rotation_matrix[6] * z,
-        rotation_matrix[1] * x + rotation_matrix[4] * y + rotation_matrix[7] * z,
-        rotation_matrix[2] * x + rotation_matrix[6] * y + rotation_matrix[8] * z,
+        rotation_matrix[0] * dir_x + rotation_matrix[3] * dir_y + rotation_matrix[6] * dir_z,
+        rotation_matrix[1] * dir_x + rotation_matrix[4] * dir_y + rotation_matrix[7] * dir_z,
+        rotation_matrix[2] * dir_x + rotation_matrix[6] * dir_y + rotation_matrix[8] * dir_z,
     ]
 }
 
 
 #[rustfmt::skip]
 pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
-    let (qx, qy, qz, qw) = (
+    let (quat_i, quat_j, quat_k, quat_w) = (
         rotation.value[0],
         rotation.value[1],
         rotation.value[2],
         rotation.value[3],
     );
 
-    let xx = qx * qx;
-    let yy = qy * qy;
-    let zz = qz * qz;
-    let xy = qx * qy;
-    let xz = qx * qz;
-    let yz = qy * qz;
-    let wx = qw * qx;
-    let wy = qw * qy;
-    let wz = qw * qz;
+    let quat_ii = quat_i * quat_i;
+    let quat_jj = quat_j * quat_j;
+    let quat_kk = quat_k * quat_k;
+    let quat_ij = quat_i * quat_j;
+    let quat_ik = quat_i * quat_k;
+    let quat_jk = quat_j * quat_k;
+    let quat_wi = quat_w * quat_i;
+    let quat_wj = quat_w * quat_j;
+    let quat_wk = quat_w * quat_k;
 
     [
-        1.0 - 2.0 * (yy + zz), 2.0 * (xy + wz), 2.0 * (xz - wy),//col 0
-        2.0 * (xy - wz), 1.0 - 2.0 * (xx + zz), 2.0 * (yz + wx),//col 1
-        2.0 * (xz + wy), 2.0 * (yz - wx), 1.0 - 2.0 * (xx + yy) //col 2
+        1.0 - 2.0 * (quat_jj + quat_kk), 2.0 * (quat_ij + quat_wk), 2.0 * (quat_ik - quat_wj),//col 0
+        2.0 * (quat_ij - quat_wk), 1.0 - 2.0 * (quat_ii + quat_kk), 2.0 * (quat_jk + quat_wi),//col 1
+        2.0 * (quat_ik + quat_wj), 2.0 * (quat_jk - quat_wi), 1.0 - 2.0 * (quat_ii + quat_jj) //col 2
     ]
 }
 
+// world
 #[rustfmt::skip]
 pub fn get_transformation_matrix(position : Translation, rotation : Rotation, scale : Scale) -> [f32; 16] {
     let rotation_matrix = get_rotation_matrix(rotation);
@@ -77,12 +78,18 @@ pub fn get_transformation_matrix(position : Translation, rotation : Rotation, sc
         ScaleType::Uniform(uniform) => [uniform; 3],
         ScaleType::NonUniform(non_uniform) => non_uniform
     };
+
+    let inner_position = position.value;
+    
+    let rcp_position_scalar = 1.0 / inner_position[3];
+    
+    let norm_position = [inner_position[0] * rcp_position_scalar, inner_position[1] * rcp_position_scalar, inner_position[2] * rcp_position_scalar];
     
     [
         rotation_matrix[0] * scalar[0], rotation_matrix[1] * scalar[0], rotation_matrix[2] * scalar[0], 0.0, // col 0
         rotation_matrix[3] * scalar[1], rotation_matrix[4] * scalar[1], rotation_matrix[5] * scalar[1], 0.0, // col 1
         rotation_matrix[6] * scalar[2], rotation_matrix[7] * scalar[2], rotation_matrix[8] * scalar[2], 0.0, // col 2
-        position.value[0], position.value[1],  position.value[2], 1.0 // col 3
+        norm_position[0], norm_position[1],  norm_position[2], 1.0 // col 3
     ]
 
 }
@@ -90,23 +97,27 @@ pub fn get_transformation_matrix(position : Translation, rotation : Rotation, sc
 pub fn get_axis_angle(rotation: Rotation) -> ([f32; 3], f32) {
     const SQR_EPSILON: f32 = f32::EPSILON * f32::EPSILON;
 
-    let (i, j, k, w) = (
+    let (quat_i, quat_j, quat_k, quat_w) = (
         rotation.value[0],
         rotation.value[1],
         rotation.value[2],
         rotation.value[3],
     );
 
-    let scale_sq = (1.0 - w * w).max(0.0);
+    let scale_sq = (1.0 - quat_w * quat_w).max(0.0);
 
-    let angle = 2.0 * acos(w);
+    let angle = 2.0 * acos(quat_w);
 
     if scale_sq < SQR_EPSILON {
         ([1.0, 0.0, 0.0], angle)
     } else {
         let inv_sqrt_scale = scale_sq.sqrt().recip();
         (
-            [i * inv_sqrt_scale, j * inv_sqrt_scale, k * inv_sqrt_scale],
+            [
+                quat_i * inv_sqrt_scale,
+                quat_j * inv_sqrt_scale,
+                quat_k * inv_sqrt_scale,
+            ],
             angle,
         )
     }
@@ -119,43 +130,209 @@ pub fn get_angle_axis_magnitude(rotation: Rotation) -> [f32; 3] {
 }
 
 pub fn get_euler_angle(rotation: Rotation) -> [f32; 3] {
-    let (i, j, k, w) = (
+    let (quat_i, quat_j, quat_k, quat_w) = (
         rotation.value[0],
         rotation.value[1],
         rotation.value[2],
         rotation.value[3],
     );
 
-    let xx = i * i;
-    let xy = i * j;
-    let xz = i * k;
-    let xw = i * w;
+    let quat_ii = quat_i * quat_i;
+    let quat_ij = quat_i * quat_j;
+    let quat_ik = quat_i * quat_k;
+    let quat_iw = quat_i * quat_w;
 
-    let yy = j * j;
-    let yz = j * k;
-    let yw = j * w;
+    let quat_jj = quat_j * quat_j;
+    let quat_jk = quat_j * quat_k;
+    let quat_jw = quat_j * quat_w;
 
-    let zz = k * k;
-    let zw = k * w;
+    let quat_kk = quat_k * quat_k;
+    let quat_kw = quat_k * quat_w;
 
-    let ww = w * w;
+    let quat_ww = quat_w * quat_w;
 
-    let x = (-2.0 * (yz - xw)).atan2(ww - xx - yy + zz);
+    let x = (-2.0 * (quat_jk - quat_iw)).atan2(quat_ww - quat_ii - quat_jj + quat_kk);
 
-    let unsafe_y = 2.0 * (xz + yw);
+    let unsafe_y = 2.0 * (quat_ik + quat_jw);
 
     let y = unsafe_y.clamp(-1.0, 1.0).asin();
 
-    let z = (-2.0 * (xy - zw)).atan2(ww + xx - yy - zz);
+    let z = (-2.0 * (quat_ij - quat_kw)).atan2(quat_ww + quat_ii - quat_jj - quat_kk);
 
     [x, y, z]
+}
+
+pub fn decompose_transformation_matrix(
+    transformation_matrix: [f32; 16],
+) -> (Translation, Rotation, Scale) {
+    let rcp_translation_scalar = 1.0 / transformation_matrix[15];
+
+    let translation_inner = [
+        transformation_matrix[12] * rcp_translation_scalar,
+        transformation_matrix[13] * rcp_translation_scalar,
+        transformation_matrix[14] * rcp_translation_scalar,
+        1.0,
+    ];
+
+    let sqr_scale_x = transformation_matrix[0] * transformation_matrix[0]
+        + transformation_matrix[1] * transformation_matrix[1]
+        + transformation_matrix[2] * transformation_matrix[2];
+    let sqr_scale_y = transformation_matrix[4] * transformation_matrix[4]
+        + transformation_matrix[5] * transformation_matrix[5]
+        + transformation_matrix[6] * transformation_matrix[6];
+    let sqr_scale_z = transformation_matrix[8] * transformation_matrix[8]
+        + transformation_matrix[9] * transformation_matrix[9]
+        + transformation_matrix[10] * transformation_matrix[10];
+
+    let scale_inner = [sqr_scale_x.sqrt(), sqr_scale_y.sqrt(), sqr_scale_z.sqrt()];
+
+    let rcp_scale_x = scale_inner[0].recip();
+    let rcp_scale_y = scale_inner[1].recip();
+    let rcp_scale_z = scale_inner[2].recip();
+
+    let rotation_matrix = [
+        transformation_matrix[0] * rcp_scale_x,
+        transformation_matrix[1] * rcp_scale_x,
+        transformation_matrix[2] * rcp_scale_x, // col 0
+        transformation_matrix[4] * rcp_scale_y,
+        transformation_matrix[5] * rcp_scale_y,
+        transformation_matrix[6] * rcp_scale_y, // col 1
+        transformation_matrix[8] * rcp_scale_z,
+        transformation_matrix[9] * rcp_scale_z,
+        transformation_matrix[10] * rcp_scale_z, // col 2
+    ];
+
+    let mut e0 = 0.0;
+
+    let intermediate_quaternion = if rotation_matrix[8] >= 0.0 {
+        let permutation_sum_diagonal = rotation_matrix[0] + rotation_matrix[4];
+        let permutation_diff_diagonal = rotation_matrix[1] - rotation_matrix[3];
+        let c = 1.0 + rotation_matrix[8];
+
+        if permutation_sum_diagonal >= 0.0 {
+            e0 = c + permutation_sum_diagonal;
+
+            [
+                rotation_matrix[5] - rotation_matrix[7],
+                rotation_matrix[6] - rotation_matrix[2],
+                permutation_diff_diagonal,
+                e0,
+            ]
+        } else {
+            e0 = c - permutation_sum_diagonal;
+
+            [
+                rotation_matrix[6] + rotation_matrix[2],
+                rotation_matrix[5] + rotation_matrix[7],
+                e0,
+                permutation_diff_diagonal,
+            ]
+        }
+    } else {
+        let permutation_diff_diagonal = rotation_matrix[0] - rotation_matrix[4];
+        let permutation_sum_diagonal = rotation_matrix[1] + rotation_matrix[3];
+        let c = 1.0 - rotation_matrix[8];
+
+        if permutation_diff_diagonal >= 0.0 {
+            e0 = c + permutation_diff_diagonal;
+
+            [
+                e0,
+                permutation_sum_diagonal,
+                rotation_matrix[6] + rotation_matrix[2],
+                rotation_matrix[5] - rotation_matrix[7],
+            ]
+        } else {
+            e0 = c - permutation_diff_diagonal;
+            [
+                permutation_sum_diagonal,
+                e0,
+                rotation_matrix[5] + rotation_matrix[7],
+                rotation_matrix[6] - rotation_matrix[2],
+            ]
+        }
+    };
+
+    let sqrt_e0 = e0.sqrt();
+
+    let x2 =
+        (intermediate_quaternion[0] * 0.5 * sqrt_e0) * (intermediate_quaternion[0] * 0.5 * sqrt_e0);
+
+    let y2 =
+        (intermediate_quaternion[1] * 0.5 * sqrt_e0) * (intermediate_quaternion[1] * 0.5 * sqrt_e0);
+
+    let z2 =
+        (intermediate_quaternion[2] * 0.5 * sqrt_e0) * (intermediate_quaternion[2] * 0.5 * sqrt_e0);
+
+    let w2 =
+        (intermediate_quaternion[3] * 0.5 * sqrt_e0) * (intermediate_quaternion[3] * 0.5 * sqrt_e0);
+
+    let rcp_quaternion_magnitude = (x2 + y2 + z2 + w2).sqrt().recip();
+
+    let quaternion_inner = [
+        (intermediate_quaternion[0] * 0.5 * sqrt_e0) * rcp_quaternion_magnitude,
+        (intermediate_quaternion[1] * 0.5 * sqrt_e0) * rcp_quaternion_magnitude,
+        (intermediate_quaternion[2] * 0.5 * sqrt_e0) * rcp_quaternion_magnitude,
+        (intermediate_quaternion[3] * 0.5 * sqrt_e0) * rcp_quaternion_magnitude,
+    ];
+
+    let translation = Translation {
+        value: translation_inner,
+    };
+
+    let rotation = Rotation {
+        value: quaternion_inner,
+    };
+
+    let scale = Scale {
+        value: ScaleType::NonUniform(scale_inner),
+    };
+
+
+    (translation, rotation, scale)
+}
+
+pub fn transform(vector: [f32; 4], quaternion: [f32; 4]) -> [f32; 3] {
+    let quaternion_vector = [quaternion[0], quaternion[1], quaternion[2]];
+
+    let quaternion_scalar = quaternion[3];
+
+    let quaternion_dot_vector = quaternion_vector[0] * vector[0]
+        + quaternion_vector[1] * vector[1]
+        + quaternion_vector[2] * vector[2];
+
+    let quaternion_vector_dot_quaternion_vector = quaternion_vector[0] * quaternion_vector[0]
+        + quaternion_vector[1] * quaternion_vector[1]
+        + quaternion_vector[2] * quaternion_vector[2];
+
+    let quaternion_vector_cross_vector = [
+        quaternion_vector[1] * vector[2] - quaternion_vector[2] * vector[1],
+        quaternion_vector[2] * vector[0] - quaternion_vector[0] * vector[2],
+        quaternion_vector[0] * vector[1] - quaternion_vector[1] * vector[0],
+    ];
+
+    [
+        2.0 * quaternion_dot_vector * quaternion_vector[0]
+            + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
+                * vector[0]
+            + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[0],
+        2.0 * quaternion_dot_vector * quaternion_vector[1]
+            + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
+                * vector[1]
+            + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[1],
+        2.0 * quaternion_dot_vector * quaternion_vector[2]
+            + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
+                * vector[2]
+            + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[2],
+    ]
 }
 
 #[cfg(test)]
 mod transform_test {
     use crate::{
-        forward, get_angle_axis_magnitude, get_axis_angle, get_euler_angle, get_rotation_matrix,
-        get_transformation_matrix, right, up, Rotation, Translation,
+        decompose_transformation_matrix, forward, get_angle_axis_magnitude, get_axis_angle,
+        get_euler_angle, get_rotation_matrix, get_transformation_matrix, right, transform, up,
+        Rotation, Scale, ScaleType, Translation,
     };
 
     #[test]
@@ -208,6 +385,7 @@ mod transform_test {
         assert!((rotation.z - quaternion.z).abs() < threshold);
         assert!((rotation.w - quaternion.w).abs() < threshold);
     }
+
 
     #[test]
     fn rotation_matrix() {
@@ -426,5 +604,60 @@ mod transform_test {
         assert!(up_difference[0] <= THRESHOLD);
         assert!(up_difference[1] <= THRESHOLD);
         assert!(up_difference[2] <= THRESHOLD);
+    }
+
+    #[test]
+    fn calculate_decompose_transform() {
+        const ROTATION_THRESHOLD: f32 = 0.0001;
+
+        let translation = Translation {
+            value: [23.3, 12.12, 100.29, 1.0],
+        };
+        let rotation = Rotation {
+            value: [0.0815932, 0.2447796, 0.5303558, 0.8075569],
+        };
+        let scale = Scale {
+            value: ScaleType::NonUniform([1.123, 2.0, 3.3]),
+        };
+
+        let transform_matrix = get_transformation_matrix(translation, rotation, scale);
+
+        let (decomposed_translation, decomposed_rotation, decomposed_scale) =
+            decompose_transformation_matrix(transform_matrix);
+
+        assert!(translation.value[0].eq(&decomposed_translation.value[0]));
+        assert!(translation.value[1].eq(&decomposed_translation.value[1]));
+        assert!(translation.value[2].eq(&decomposed_translation.value[2]));
+
+        assert!((rotation.value[0] - decomposed_rotation.value[0]).abs() < ROTATION_THRESHOLD);
+        assert!((rotation.value[1] - decomposed_rotation.value[1]).abs() < ROTATION_THRESHOLD);
+        assert!((rotation.value[2] - decomposed_rotation.value[2]).abs() < ROTATION_THRESHOLD);
+
+        let scale = match scale.value {
+            ScaleType::Uniform(uniform) => [uniform; 3],
+            ScaleType::NonUniform(non_uniform) => non_uniform,
+        };
+
+        let decomposed_scale = match decomposed_scale.value {
+            ScaleType::Uniform(uniform) => [uniform; 3],
+            ScaleType::NonUniform(non_uniform) => non_uniform,
+        };
+
+        assert!(scale[0].eq(&decomposed_scale[0]));
+        assert!(scale[1].eq(&decomposed_scale[1]));
+        assert!(scale[2].eq(&decomposed_scale[2]));
+    }
+
+    #[test]
+    fn calculate_transform() {
+        let translation = Translation {
+            value: [20.0, 0.0, 0.0, 1.0],
+        };
+        let rotation = Rotation {
+            value: [0.3097265, 0.2101103, 0.5141426, 0.7717387],
+        };
+
+        let b = transform(translation.value, rotation.value);
+        println!("{:?}", b);
     }
 }

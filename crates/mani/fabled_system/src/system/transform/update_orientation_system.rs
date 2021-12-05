@@ -5,12 +5,17 @@ use rayon::iter::ParallelIterator;
 use shipyard::IntoIter;
 
 pub fn re_orientate_entity(
-    mut orientation: shipyard::ViewMut<Orientation>,
-    rotation: shipyard::View<Rotation>,
-    frozen: shipyard::View<Frozen>,
+    mut orientation_storage: shipyard::ViewMut<Orientation>,
+    rotation_storage: shipyard::View<Rotation>,
+    frozen_storage: shipyard::View<Frozen>,
 ) {
-    (&mut orientation, &rotation, !&frozen).par_iter().for_each(
-        |(mut orientation, quaternion, _)| {
+    (
+        &mut orientation_storage,
+        &rotation_storage,
+        !&frozen_storage,
+    )
+        .par_iter()
+        .for_each(|(mut orientation, quaternion, _)| {
             let (i, j, k, w) = (
                 quaternion.value[0],
                 quaternion.value[1],
@@ -52,8 +57,7 @@ pub fn re_orientate_entity(
             ];
 
             orientation.right = right;
-        },
-    );
+        });
 }
 
 

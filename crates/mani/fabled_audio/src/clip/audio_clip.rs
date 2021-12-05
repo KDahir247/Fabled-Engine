@@ -2,11 +2,6 @@ use crate::{AudioDecodingError, RawAmbisonicClip, RawClip};
 use rodio::Source;
 use std::io::Read;
 
-// A Rust object that represents a sound should implement the `Source` trait.
-
-// We don't know if the data is f32, i16, or u16 and want to support current
-// data types and future types deriving from rodio::Sample. Not just restrict it
-// to one type.
 #[derive(Debug)]
 pub struct AudioClip<D> {
     pub audio_data: parking_lot::Mutex<std::vec::IntoIter<D>>,

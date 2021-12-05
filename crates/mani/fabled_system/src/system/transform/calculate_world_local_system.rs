@@ -1,26 +1,26 @@
 use fabled_transform::{
-    get_rotation_matrix, Frozen, Parent, Rotation, Scale, ScaleType, Translation, WorldToLocal,
+    get_rotation_matrix, Frozen, Parent, Rotation, Scale, ScaleType,
+    Translation, WorldToLocal,
 };
 
 use shipyard::*;
 
-// todo add frozen component to signify static.
 #[rustfmt::skip]
 pub fn world_local_system(
-    translation: shipyard::View<Translation>,
-    rotation: View<Rotation>,
-    scale: View<Scale>,
-    frozen : View<Frozen>,
-    parent: View<Parent>,
-    mut world_to_local: ViewMut<WorldToLocal>,
+    translation_storage: shipyard::View<Translation>,
+    rotation_storage: View<Rotation>,
+    scale_storage: View<Scale>,
+    frozen_storage: View<Frozen>,
+    parent_storage: View<Parent>,
+    mut world_to_local_storage: ViewMut<WorldToLocal>,
 ) {
     (
-        &translation,
-        &rotation,
-        &scale,
-        &mut world_to_local,
-        !&parent,
-        !&frozen
+        &translation_storage,
+        &rotation_storage,
+        &scale_storage,
+        &mut world_to_local_storage,
+        !&parent_storage,
+        !&frozen_storage
     )
         .fast_iter()
         .for_each(|(translation, rotation, scale, world_to_local_matrix,..)| {
@@ -75,7 +75,6 @@ pub fn world_local_system(
                 rotation_matrix[0] * rotation_matrix[4] - rotation_matrix[1] * rotation_matrix[3],
             ];
 
-            // dot product of z axis and cross xy
             let determinant = rotation_matrix[6] * cross_xy[0]
                 + rotation_matrix[7] * cross_xy[1]
                 + rotation_matrix[8] * cross_xy[2];
@@ -115,16 +114,30 @@ pub fn world_local_system(
 
 
     (
-        &translation,
-        &rotation,
-        &scale,
-        &parent,
-        !&frozen,
-        &mut world_to_local,
+        &translation_storage,
+        &rotation_storage,
+        &scale_storage,
+        &parent_storage,
+        &mut world_to_local_storage,
+        !&frozen_storage,
     )
         .fast_iter()
-        .for_each(|_| {
-            // todo entity with parent.
+        .for_each(|(translation, rotation, scale, parent,mut world_to_local_matrix, _)| {
+            let parent_entity_index = parent.value;
+            
+            let mut parent_entity_id = shipyard::EntityId::from_inner(parent_entity_index);
+            
+            while parent_entity_id.is_some(){
+                let valid_parent_entity = parent_entity_id.unwrap();
+
+
+                let inner_parent_component = (&parent_storage).fast_get(valid_parent_entity).unwrap_or(&Parent{ value: 0 });
+
+                parent_entity_id = shipyard::EntityId::from_inner(inner_parent_component.value);
+            }
+            
+            
+            
         });
 }
 
@@ -164,7 +177,8 @@ mod world_local_test {
 
         if let Ok(parent_component) = (&parent_storage).get(entity) {
         } else {
-            let world_local_matrix = (&world_to_local_storage).get(entity).unwrap();
+            let world_local_matrix =
+                (&world_to_local_storage).get(entity).unwrap();
             println!("{:?}", world_local_matrix);
         }
     }
