@@ -48,7 +48,7 @@ pub fn calculate_local_world_parent_system(
         .fast_iter()
         .with_id()
         .for_each(|(entity_id, (translation, rotation, scale, parent, _))| {
-            let identity_matrix = LocalToWorld::default();
+            let mut identity_matrix = LocalToWorld::default();
 
             let parent_entity_id =
                 EntityId::from_inner(parent.value).unwrap_or_else(EntityId::dead);
@@ -118,8 +118,10 @@ pub fn calculate_local_world_parent_system(
                 ]),
             };
 
-            let child_local_to_world_matrix =
-                (&mut local_to_world_storage).fast_get(entity_id).unwrap();
+            let child_local_to_world_matrix = (&mut local_to_world_storage)
+                .fast_get(entity_id)
+                .unwrap_or(&mut identity_matrix);
+
 
             child_local_to_world_matrix.value = get_transformation_matrix(
                 child_world_translation,
@@ -134,16 +136,21 @@ mod local_world_test {
     use crate::system::transform::calculate_local_world_system::{
         calculate_local_world_parent_system, calculate_local_world_system,
     };
-    use fabled_transform::{Parent, ScaleType};
+    use fabled_transform::{LocalToWorld, Parent, ScaleType};
+    use shipyard::Get;
 
     #[test]
     fn retrieve_modified_world_matrix() {
+        const THRESHOLD: f32 = 0.00001;
+
         let mut world = shipyard::World::new();
 
-        world.add_entity((
-            fabled_transform::Translation::default(),
+        let entity = world.add_entity((
+            fabled_transform::Translation {
+                value: [94.53416, 50.44112, 26.40424, 1.0],
+            },
             fabled_transform::Scale {
-                value: ScaleType::Uniform(1.0),
+                value: ScaleType::NonUniform([1.0, 2.1, 11.1]),
             },
             fabled_transform::Rotation {
                 value: [0.3097265, 0.2101103, 0.5141426, 0.7717387],
@@ -157,13 +164,38 @@ mod local_world_test {
             .unwrap();
 
         world.run_workload("run_test").unwrap();
+
+        let local_world_storage = world.borrow::<shipyard::View<LocalToWorld>>().unwrap();
+
+        let local_world = (&local_world_storage).get(entity).unwrap();
+
+        let local_world_inner = local_world.value;
+
+        // Unity's result (our matrix is column-major)
+        //  0.38302	 -1.39317   7.13494	  94.53416
+        //  0.92372	  0.58685  -2.90823	  50.44112
+        // -0.00581	  1.45763   7.99029	  26.40424
+        //  0.00000	  0.00000   0.00000	  1.00000
+
+        let proven_result = [
+            0.38302, 0.92372, -0.00581, 0.00000, // col 0
+            -1.39317, 0.58685, 1.45763, 0.00000, // col 1
+            7.13494, -2.90823, 7.99029, 0.00000, // col 2
+            94.53416, 50.44112, 26.40424, 1.00000, // col 3
+        ];
+
+        for each in 0..16_usize {
+            assert!((local_world_inner[each] - proven_result[each]).abs() <= THRESHOLD);
+        }
     }
 
     #[test]
-    fn parent_entity() {
+    fn retrieve_parented_modified_world_matrix() {
+        const THRESHOLD: f32 = 0.0001;
+
         let mut world = shipyard::World::new();
 
-        let aentity_parent = world.add_entity((
+        let root_entity_parent = world.add_entity((
             fabled_transform::Translation {
                 value: [44.42781, 13.65856, 41.4725, 1.0],
             },
@@ -175,7 +207,6 @@ mod local_world_test {
             },
             fabled_transform::LocalToWorld::default(),
         ));
-
 
         let entity_parent = world.add_entity((
             fabled_transform::Translation {
@@ -189,12 +220,12 @@ mod local_world_test {
             },
             fabled_transform::LocalToWorld::default(),
             fabled_transform::Parent {
-                value: aentity_parent.inner(),
+                value: root_entity_parent.inner(),
             },
         ));
 
 
-        let _entity_child = world.add_entity((
+        let entity_child = world.add_entity((
             fabled_transform::Translation {
                 value: [12.2, 9.45, 11.0, 1.0],
             },
@@ -217,5 +248,64 @@ mod local_world_test {
             .unwrap();
 
         world.run_workload("run_test").unwrap();
+
+        let local_world_storage = world.borrow::<shipyard::View<LocalToWorld>>().unwrap();
+
+        let root_parent_local_world = (&local_world_storage).get(root_entity_parent).unwrap();
+        let parent_local_world = (&local_world_storage).get(entity_parent).unwrap();
+        let child_local_world = (&local_world_storage).get(entity_child).unwrap();
+
+        // Unity's root parent local to world matrix result (our matrix is column-major)
+        // 2.00000	0.00000	0.00000	44.42781
+        // 0.00000	2.00000	0.00000	13.65856
+        // 0.00000	0.00000	2.00000	41.47250
+        // 0.00000	0.00000	0.00000	 1.00000
+
+        let proven_root_parent_local_world = [
+            2.00000, 0.00000, 0.00000, 0.00000, // col 0
+            0.00000, 2.00000, 0.00000, 0.00000, // col 1
+            0.00000, 0.00000, 2.00000, 0.00000, // col 2
+            44.42781, 13.65856, 41.47250, 1.00000, // col 3
+        ];
+
+        // Unity's parent local to world matrix result (our matrix is column-major)
+        //  2.29813	-3.98048	 3.85673	113.28340
+        //  5.54233	 1.67672	-1.57202	-13.65856
+        // -0.03488	 4.16466	 4.31908	 38.52750
+        //  0.00000	 0.00000	 0.00000	  1.00000
+
+        let proven_parent_local_world = [
+            2.29813, 5.54233, -0.03488, 0.00000, // col 0
+            -3.98048, 1.67672, 4.16466, 0.00000, // col 1
+            3.85673, -1.57202, 4.31908, 0.00000, // col 2
+            113.28340, -13.65856, 38.52750, 1.00000, // col 3
+        ];
+
+        // Unity's child local to world matrix result (our matrix is column-major)
+        // -5.63808	  0.08003	10.59272	146.12910
+        //  7.36159	 -8.59888	3.98325	     52.51069
+        //  7.61702	  8.36976	3.99100	    124.96780
+        //  0.00000	  0.00000	0.00000	      1.00000
+
+        let proven_child_local_world = [
+            -5.63808, 7.36159, 7.61702, 0.00000, // col 0
+            0.08003, -8.59888, 8.36976, 0.00000, // col 1
+            10.59272, 3.98325, 3.99100, 0.00000, // col 2
+            146.129_1, 52.51069, 124.967_8, 1.00000, // col 3
+        ];
+
+        for each in 0..16_usize {
+            assert!(
+                (proven_root_parent_local_world[each] - root_parent_local_world.value[each]).abs()
+                    <= THRESHOLD
+            );
+            assert!(
+                (proven_parent_local_world[each] - parent_local_world.value[each]).abs()
+                    <= THRESHOLD
+            );
+            assert!(
+                (proven_child_local_world[each] - child_local_world.value[each]).abs() <= THRESHOLD
+            );
+        }
     }
 }
