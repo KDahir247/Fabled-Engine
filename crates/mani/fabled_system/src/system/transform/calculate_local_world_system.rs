@@ -2,9 +2,11 @@ use fabled_transform::{
     decompose_transformation_matrix, get_transformation_matrix, transform, Frozen, LocalToWorld,
     Parent, Rotation, Scale, ScaleType, Translation,
 };
+use rayon::iter::ParallelIterator;
+
 use shipyard::*;
 
-pub fn local_world_system(
+pub fn calculate_local_world_system(
     translation_storage: View<Translation>,
     rotation_storage: View<Rotation>,
     scale_storage: View<Scale>,
@@ -20,15 +22,20 @@ pub fn local_world_system(
         !&parent_storage,
         !&frozen_storage,
     )
-        .fast_iter()
-        .for_each(
-            |(translation, rotation, scale, mut local_to_world_matrix, ..)| {
-                local_to_world_matrix.value =
-                    get_transformation_matrix(*translation, *rotation, *scale);
-            },
-        );
+        .fast_par_iter()
+        .for_each(|(translation, rotation, scale, mut local_world, _, _)| {
+            local_world.value = get_transformation_matrix(*translation, *rotation, *scale);
+        });
+}
 
-
+pub fn calculate_local_world_parent_system(
+    translation_storage: View<Translation>,
+    rotation_storage: View<Rotation>,
+    scale_storage: View<Scale>,
+    frozen_storage: View<Frozen>,
+    parent_storage: View<Parent>,
+    mut local_to_world_storage: ViewMut<LocalToWorld>,
+) {
     (
         &translation_storage,
         &rotation_storage,
@@ -39,105 +46,99 @@ pub fn local_world_system(
         .fast_iter()
         .with_id()
         .for_each(|(entity_id, (translation, rotation, scale, parent, _))| {
-            let parent_entity_id = shipyard::EntityId::from_inner(parent.value);
+            let identity_matrix = LocalToWorld::default();
 
-            let child_scale = match scale.value {
+            let parent_entity_id =
+                EntityId::from_inner(parent.value).unwrap_or_else(EntityId::dead);
+
+            let parent_local_to_world_matrix = (&local_to_world_storage)
+                .fast_get(parent_entity_id)
+                .unwrap_or(&identity_matrix);
+
+            let (parent_world_translation, parent_world_rotation, parent_world_scale) =
+                decompose_transformation_matrix(parent_local_to_world_matrix.value);
+
+            let parent_world_translation = parent_world_translation.value;
+            let parent_world_rotation = parent_world_rotation.value;
+            let parent_world_scale = match parent_world_scale.value {
                 ScaleType::Uniform(uniform) => [uniform; 3],
                 ScaleType::NonUniform(non_uniform) => non_uniform,
             };
 
-            if parent_entity_id.is_some() {
-                let valid_parent_entity = parent_entity_id.unwrap();
+            let child_local_translation = translation.value;
+            let child_local_rotation = rotation.value;
+            let child_local_scale = match scale.value {
+                ScaleType::Uniform(uniform) => [uniform; 3],
+                ScaleType::NonUniform(non_uniform) => non_uniform,
+            };
 
-                let parent_local_to_world_matrix = (&local_to_world_storage)
-                    .fast_get(valid_parent_entity)
-                    .unwrap();
+            let transform_child = transform(child_local_translation, parent_world_rotation);
 
-                let (parent_translation, parent_rotation, parent_scale) =
-                    decompose_transformation_matrix(parent_local_to_world_matrix.value);
+            let child_world_translation = Translation {
+                value: [
+                    transform_child[0] * parent_world_scale[0] + parent_world_translation[0],
+                    transform_child[1] * parent_world_scale[1] + parent_world_translation[1],
+                    transform_child[2] * parent_world_scale[2] + parent_world_translation[2],
+                    1.0,
+                ],
+            };
 
-                let parent_scale = match parent_scale.value {
-                    ScaleType::Uniform(uniform) => [uniform; 3],
-                    ScaleType::NonUniform(non_uniform) => non_uniform,
-                };
+            let child_world_rotation = Rotation {
+                value: [
+                    parent_world_rotation[3] * child_local_rotation[0]
+                        + parent_world_rotation[0] * child_local_rotation[3]
+                        + parent_world_rotation[1] * child_local_rotation[2]
+                        - parent_world_rotation[2] * child_local_rotation[1],
+                    //
+                    parent_world_rotation[3] * child_local_rotation[1]
+                        - parent_world_rotation[0] * child_local_rotation[2]
+                        + parent_world_rotation[1] * child_local_rotation[3]
+                        + parent_world_rotation[2] * child_local_rotation[0],
+                    //
+                    parent_world_rotation[3] * child_local_rotation[2]
+                        + parent_world_rotation[0] * child_local_rotation[1]
+                        - parent_world_rotation[1] * child_local_rotation[0]
+                        + parent_world_rotation[2] * child_local_rotation[3],
+                    //
+                    parent_world_rotation[3] * child_local_rotation[3]
+                        - parent_world_rotation[0] * child_local_rotation[0]
+                        - parent_world_rotation[1] * child_local_rotation[1]
+                        - parent_world_rotation[2] * child_local_rotation[2],
+                ],
+            };
 
-                let child_world_scale = Scale {
-                    value: ScaleType::NonUniform([
-                        parent_scale[0] * child_scale[0],
-                        parent_scale[1] * child_scale[1],
-                        parent_scale[2] * child_scale[2],
-                    ]),
-                };
 
-                let child_rotation = rotation.value;
-                let parent_rotation = parent_rotation.value;
+            let child_world_scale = Scale {
+                value: ScaleType::NonUniform([
+                    parent_world_scale[0] * child_local_scale[0],
+                    parent_world_scale[1] * child_local_scale[1],
+                    parent_world_scale[2] * child_local_scale[2],
+                ]),
+            };
 
-                let child_world_rotation = Rotation {
-                    value: [
-                        parent_rotation[3] * child_rotation[0]
-                            + parent_rotation[0] * child_rotation[3]
-                            + parent_rotation[1] * child_rotation[2]
-                            - parent_rotation[2] * child_rotation[1],
-                        parent_rotation[3] * child_rotation[1]
-                            - parent_rotation[0] * child_rotation[2]
-                            + parent_rotation[1] * child_rotation[3]
-                            + parent_rotation[2] * child_rotation[0],
-                        parent_rotation[3] * child_rotation[2]
-                            + parent_rotation[0] * child_rotation[1]
-                            - parent_rotation[1] * child_rotation[0]
-                            + parent_rotation[2] * child_rotation[3],
-                        parent_rotation[3] * child_rotation[3]
-                            - parent_rotation[0] * child_rotation[0]
-                            - parent_rotation[1] * child_rotation[1]
-                            - parent_rotation[2] * child_rotation[2],
-                    ],
-                };
+            let child_local_to_world_matrix =
+                (&mut local_to_world_storage).fast_get(entity_id).unwrap();
 
-                let parent_translation = parent_translation.value;
-                let child_translation = translation.value;
-
-                let transform_child = transform(child_translation, parent_rotation);
-
-                let child_world_translation = Translation {
-                    value: [
-                        transform_child[0] * parent_scale[0] + parent_translation[0],
-                        transform_child[1] * parent_scale[1] + parent_translation[1],
-                        transform_child[2] * parent_scale[2] + parent_translation[2],
-                        1.0,
-                    ],
-                };
-
-                let local_to_world_matrix =
-                    (&mut local_to_world_storage).fast_get(entity_id).unwrap();
-
-                local_to_world_matrix.value = get_transformation_matrix(
-                    child_world_translation,
-                    child_world_rotation,
-                    child_world_scale,
-                );
-
-                println!("{:?}", local_to_world_matrix.value);
-            } else {
-                let local_to_world_matrix =
-                    (&mut local_to_world_storage).fast_get(entity_id).unwrap();
-
-                local_to_world_matrix.value =
-                    get_transformation_matrix(*translation, *rotation, *scale);
-            }
+            child_local_to_world_matrix.value = get_transformation_matrix(
+                child_world_translation,
+                child_world_rotation,
+                child_world_scale,
+            );
         });
 }
 
 #[cfg(test)]
 mod local_world_test {
-    use crate::system::transform::calculate_local_world_system::local_world_system;
-    use fabled_transform::{LocalToWorld, Parent, ScaleType};
-    use shipyard::{Get, ViewMut};
+    use crate::system::transform::calculate_local_world_system::{
+        calculate_local_world_parent_system, calculate_local_world_system,
+    };
+    use fabled_transform::{Parent, ScaleType};
 
     #[test]
     fn retrieve_modified_world_matrix() {
         let mut world = shipyard::World::new();
 
-        let entity = world.add_entity((
+        world.add_entity((
             fabled_transform::Translation::default(),
             fabled_transform::Scale {
                 value: ScaleType::Uniform(1.0),
@@ -149,23 +150,11 @@ mod local_world_test {
         ));
 
         shipyard::Workload::builder("run_test")
-            .with_system(&local_world_system)
+            .with_system(&calculate_local_world_system)
             .add_to_world(&world)
             .unwrap();
 
         world.run_workload("run_test").unwrap();
-
-        let (parent_storage, local_to_world_storage) = world
-            .borrow::<(ViewMut<Parent>, ViewMut<LocalToWorld>)>()
-            .unwrap();
-
-
-        if let Ok(_parent_component) = (&parent_storage).get(entity) {
-            // test the result with the entity having a parent in mind.
-        } else {
-            let local_world_matrix = (&local_to_world_storage).get(entity).unwrap();
-            println!("{:?}", local_world_matrix);
-        }
     }
 
     #[test]
@@ -220,7 +209,8 @@ mod local_world_test {
         ));
 
         shipyard::Workload::builder("run_test")
-            .with_system(&local_world_system)
+            .with_system(&calculate_local_world_system)
+            .with_system(&calculate_local_world_parent_system)
             .add_to_world(&world)
             .unwrap();
 

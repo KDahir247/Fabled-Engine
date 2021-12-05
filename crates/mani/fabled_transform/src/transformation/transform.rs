@@ -650,14 +650,23 @@ mod transform_test {
 
     #[test]
     fn calculate_transform() {
+        const THRESHOLD: f32 = 0.0001;
+
         let translation = Translation {
-            value: [20.0, 0.0, 0.0, 1.0],
+            value: [12.2, 9.45, 11.0, 1.0],
         };
         let rotation = Rotation {
-            value: [0.3097265, 0.2101103, 0.5141426, 0.7717387],
+            value: [0.4780559, 0.3243005, 0.7935674, 0.1911612],
         };
 
-        let b = transform(translation.value, rotation.value);
-        println!("{:?}", b);
+        let transform = transform(translation.value, rotation.value);
+
+        // C# System.Numerics.Vector4.transform result (4.040963, 4.363978, 17.99358, 1)
+
+        const TARGET_RESULT: [f32; 3] = [4.040963, 4.363978, 17.99358];
+
+        assert!((transform[0] - TARGET_RESULT[0]).abs() <= THRESHOLD);
+        assert!((transform[1] - TARGET_RESULT[1]).abs() <= THRESHOLD);
+        assert!((transform[2] - TARGET_RESULT[2]).abs() <= THRESHOLD);
     }
 }

@@ -1,6 +1,5 @@
 use fabled_transform::{
-    get_rotation_matrix, Frozen, Parent, Rotation, Scale, ScaleType,
-    Translation, WorldToLocal,
+    get_rotation_matrix, Frozen, Parent, Rotation, Scale, ScaleType, Translation, WorldToLocal,
 };
 
 use shipyard::*;
@@ -143,7 +142,7 @@ pub fn world_local_system(
 
 #[cfg(test)]
 mod world_local_test {
-    use crate::system::transform::calculate_world_local_system::world_local_system;
+    use crate::system::transform::world_local_system::world_local_system;
     use fabled_transform::{Parent, ScaleType, WorldToLocal};
     use shipyard::{Get, ViewMut};
 
@@ -177,8 +176,7 @@ mod world_local_test {
 
         if let Ok(parent_component) = (&parent_storage).get(entity) {
         } else {
-            let world_local_matrix =
-                (&world_to_local_storage).get(entity).unwrap();
+            let world_local_matrix = (&world_to_local_storage).get(entity).unwrap();
             println!("{:?}", world_local_matrix);
         }
     }
