@@ -1,4 +1,4 @@
-//test from jetbrain space
+// test from jetbrain space
 
 use fabled_transform::{
     decompose_transformation_matrix, get_transformation_matrix, transform, Frozen, LocalToWorld,
@@ -60,7 +60,15 @@ pub fn calculate_local_world_parent_system(
             let (parent_world_translation, parent_world_rotation, parent_world_scale) =
                 decompose_transformation_matrix(parent_local_to_world_matrix.value);
 
+
             let parent_world_translation = parent_world_translation.value;
+            let inv_parent_world_scalar = 1.0 / parent_world_translation[3];
+            let parent_world_translation = [
+                parent_world_translation[0] * inv_parent_world_scalar,
+                parent_world_translation[1] * inv_parent_world_scalar,
+                parent_world_translation[2] * inv_parent_world_scalar,
+            ];
+
             let parent_world_rotation = parent_world_rotation.value;
             let parent_world_scale = match parent_world_scale.value {
                 ScaleType::Uniform(uniform) => [uniform; 3],
@@ -133,7 +141,7 @@ pub fn calculate_local_world_parent_system(
 
 #[cfg(test)]
 mod local_world_test {
-    use crate::system::transform::calculate_local_world_system::{
+    use crate::system::transform::local_world_system::{
         calculate_local_world_parent_system, calculate_local_world_system,
     };
     use fabled_transform::{LocalToWorld, Parent, ScaleType};
@@ -265,7 +273,7 @@ mod local_world_test {
             2.00000, 0.00000, 0.00000, 0.00000, // col 0
             0.00000, 2.00000, 0.00000, 0.00000, // col 1
             0.00000, 0.00000, 2.00000, 0.00000, // col 2
-            44.42781, 13.65856, 41.47250, 1.00000, // col 3
+            44.42781, 13.65856, 41.472_5, 1.00000, // col 3
         ];
 
         // Unity's parent local to world matrix result (our matrix is column-major)
@@ -278,7 +286,7 @@ mod local_world_test {
             2.29813, 5.54233, -0.03488, 0.00000, // col 0
             -3.98048, 1.67672, 4.16466, 0.00000, // col 1
             3.85673, -1.57202, 4.31908, 0.00000, // col 2
-            113.28340, -13.65856, 38.52750, 1.00000, // col 3
+            113.283_4, -13.65856, 38.527_5, 1.00000, // col 3
         ];
 
         // Unity's child local to world matrix result (our matrix is column-major)

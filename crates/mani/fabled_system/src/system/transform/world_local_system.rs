@@ -5,7 +5,7 @@ use fabled_transform::{
 use shipyard::*;
 
 #[rustfmt::skip]
-pub fn world_local_system(
+pub fn calculate_world_local_system(
     translation_storage: shipyard::View<Translation>,
     rotation_storage: View<Rotation>,
     scale_storage: View<Scale>,
@@ -13,6 +13,7 @@ pub fn world_local_system(
     parent_storage: View<Parent>,
     mut world_to_local_storage: ViewMut<WorldToLocal>,
 ) {
+
     (
         &translation_storage,
         &rotation_storage,
@@ -23,15 +24,8 @@ pub fn world_local_system(
     )
         .fast_iter()
         .for_each(|(translation, rotation, scale, world_to_local_matrix,..)| {
-            // column array matrix
-            // [0   4    8   12]
-            // [1   5    9   13]
-            // [2   6   10   14]
-            // [3   7   11   15]
 
             let translation_vector = translation.value;
-
-            assert!(translation_vector[3].ne(&0.0));
 
             let inv_scalar = 1.0 / translation_vector[3];
 
@@ -111,29 +105,34 @@ pub fn world_local_system(
             world_to_local_matrix.value = matrix4x4;
         });
 
+}
+
+#[rustfmt::skip]
+pub fn calculate_world_local_parent_system(
+    translation_storage: shipyard::View<Translation>,
+    rotation_storage: View<Rotation>,
+    scale_storage: View<Scale>,
+    frozen_storage: View<Frozen>,
+    parent_storage: View<Parent>,
+    mut world_to_local_storage: ViewMut<WorldToLocal>,
+) {
+  
 
     (
         &translation_storage,
         &rotation_storage,
         &scale_storage,
         &parent_storage,
-        &mut world_to_local_storage,
         !&frozen_storage,
     )
         .fast_iter()
-        .for_each(|(translation, rotation, scale, parent,mut world_to_local_matrix, _)| {
-            let parent_entity_index = parent.value;
+        .for_each(|(translation, rotation, scale, parent, _)| {
+            let mut identity_matrix = WorldToLocal::default();
+
+            let mut parent_entity_id = shipyard::EntityId::from_inner(parent.value).unwrap_or_else(EntityId::dead);
             
-            let mut parent_entity_id = shipyard::EntityId::from_inner(parent_entity_index);
+            let parent_world_to_local = (&world_to_local_storage).fast_get(parent_entity_id).unwrap_or(&identity_matrix);
             
-            while parent_entity_id.is_some(){
-                let valid_parent_entity = parent_entity_id.unwrap();
-
-
-                let inner_parent_component = (&parent_storage).fast_get(valid_parent_entity).unwrap_or(&Parent{ value: 0 });
-
-                parent_entity_id = shipyard::EntityId::from_inner(inner_parent_component.value);
-            }
             
             
             
@@ -142,42 +141,57 @@ pub fn world_local_system(
 
 #[cfg(test)]
 mod world_local_test {
-    use crate::system::transform::world_local_system::world_local_system;
+    use crate::system::transform::world_local_system::{
+        calculate_world_local_parent_system, calculate_world_local_system,
+    };
     use fabled_transform::{Parent, ScaleType, WorldToLocal};
     use shipyard::{Get, ViewMut};
 
     #[test]
     fn retrieve_modified_local_matrix() {
+        const THRESHOLD: f32 = 0.0001;
+
         let mut world = shipyard::World::new();
 
         let entity = world.add_entity((
             fabled_transform::Translation {
-                value: [5.0, 13.0, 2.0, 1.0],
+                value: [44.42781, 13.65856, 41.4725, 1.0],
             },
             fabled_transform::Scale {
-                value: ScaleType::Uniform(1.0),
+                value: ScaleType::NonUniform([1.0, 2.1, 11.1]),
             },
             fabled_transform::Rotation {
-                value: [0.3097265, 0.2101103, 0.5141426, 0.7717387],
+                value: [0.2439353, -0.0781964, 0.6303434, 0.7328356],
             },
             fabled_transform::WorldToLocal::default(),
         ));
 
         shipyard::Workload::builder("run_test")
-            .with_system(&world_local_system)
+            .with_system(&calculate_world_local_system)
             .add_to_world(&world)
             .unwrap();
 
         world.run_workload("run_test").unwrap();
 
-        let (parent_storage, world_to_local_storage) = world
-            .borrow::<(ViewMut<Parent>, ViewMut<WorldToLocal>)>()
-            .unwrap();
+        // Unity's world to local result (our matrix is column-major)
+        //  0.19310	  0.88573	0.42214	 -38.18402
+        // -0.45811	  0.04111	0.12331	  14.67734
+        //  0.01738	 -0.04109	0.07827	  -3.45682
+        //  0.00000	  0.00000	0.00000	   1.00000
 
-        if let Ok(parent_component) = (&parent_storage).get(entity) {
-        } else {
-            let world_local_matrix = (&world_to_local_storage).get(entity).unwrap();
-            println!("{:?}", world_local_matrix);
+        let world_local_storage = world.borrow::<shipyard::View<WorldToLocal>>().unwrap();
+
+        let world_local = (&world_local_storage).get(entity).unwrap();
+
+        let proven_result = [
+            0.19310, -0.45811, 0.01738, 0.00000, // col 0
+            0.88573, 0.04111, -0.04109, 0.00000, // col 1
+            0.42214, 0.12331, 0.07827, 0.00000, // col 2
+            -38.18402, 14.67734, -3.45682, 1.00000, // col 3
+        ];
+
+        for each in 0..16_usize {
+            assert!((world_local.value[each] - proven_result[each]).abs() <= THRESHOLD);
         }
     }
 }

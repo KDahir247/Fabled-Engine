@@ -293,36 +293,44 @@ pub fn decompose_transformation_matrix(
 }
 
 pub fn transform(vector: [f32; 4], quaternion: [f32; 4]) -> [f32; 3] {
+    let inv_scalar = 1.0 / vector[3];
+
+    let norm_vector = [
+        vector[0] * inv_scalar,
+        vector[1] * inv_scalar,
+        vector[2] * inv_scalar,
+    ];
+
     let quaternion_vector = [quaternion[0], quaternion[1], quaternion[2]];
 
     let quaternion_scalar = quaternion[3];
 
-    let quaternion_dot_vector = quaternion_vector[0] * vector[0]
-        + quaternion_vector[1] * vector[1]
-        + quaternion_vector[2] * vector[2];
+    let quaternion_dot_vector = quaternion_vector[0] * norm_vector[0]
+        + quaternion_vector[1] * norm_vector[1]
+        + quaternion_vector[2] * norm_vector[2];
 
     let quaternion_vector_dot_quaternion_vector = quaternion_vector[0] * quaternion_vector[0]
         + quaternion_vector[1] * quaternion_vector[1]
         + quaternion_vector[2] * quaternion_vector[2];
 
     let quaternion_vector_cross_vector = [
-        quaternion_vector[1] * vector[2] - quaternion_vector[2] * vector[1],
-        quaternion_vector[2] * vector[0] - quaternion_vector[0] * vector[2],
-        quaternion_vector[0] * vector[1] - quaternion_vector[1] * vector[0],
+        quaternion_vector[1] * norm_vector[2] - quaternion_vector[2] * norm_vector[1],
+        quaternion_vector[2] * norm_vector[0] - quaternion_vector[0] * norm_vector[2],
+        quaternion_vector[0] * norm_vector[1] - quaternion_vector[1] * norm_vector[0],
     ];
 
     [
         2.0 * quaternion_dot_vector * quaternion_vector[0]
             + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
-                * vector[0]
+                * norm_vector[0]
             + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[0],
         2.0 * quaternion_dot_vector * quaternion_vector[1]
             + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
-                * vector[1]
+                * norm_vector[1]
             + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[1],
         2.0 * quaternion_dot_vector * quaternion_vector[2]
             + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
-                * vector[2]
+                * norm_vector[2]
             + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[2],
     ]
 }
