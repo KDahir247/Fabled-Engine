@@ -49,7 +49,6 @@ pub fn calculate_local_world_parent_system(
         .with_id()
         .for_each(|(entity_id, (translation, rotation, scale, parent, _))| {
             let mut identity_matrix = LocalToWorld::default();
-
             let parent_entity_id =
                 EntityId::from_inner(parent.value).unwrap_or_else(EntityId::dead);
 
@@ -60,8 +59,8 @@ pub fn calculate_local_world_parent_system(
             let (parent_world_translation, parent_world_rotation, parent_world_scale) =
                 decompose_transformation_matrix(parent_local_to_world_matrix.value);
 
-
             let parent_world_translation = parent_world_translation.value;
+
             let inv_parent_world_scalar = 1.0 / parent_world_translation[3];
             let parent_world_translation = [
                 parent_world_translation[0] * inv_parent_world_scalar,
@@ -95,7 +94,7 @@ pub fn calculate_local_world_parent_system(
 
             let child_world_rotation = Rotation {
                 value: [
-                    parent_world_rotation[3] * child_local_rotation[0]
+                    parent_world_rotation[3] * child_local_rotation[0] // 0
                         + parent_world_rotation[0] * child_local_rotation[3]
                         + parent_world_rotation[1] * child_local_rotation[2]
                         - parent_world_rotation[2] * child_local_rotation[1],
@@ -116,7 +115,6 @@ pub fn calculate_local_world_parent_system(
                         - parent_world_rotation[2] * child_local_rotation[2],
                 ],
             };
-
 
             let child_world_scale = Scale {
                 value: ScaleType::NonUniform([
@@ -198,7 +196,7 @@ mod local_world_test {
     }
 
     #[test]
-    fn retrieve_parented_modified_world_matrix() {
+    fn retrieve_parent_modified_world_matrix() {
         const THRESHOLD: f32 = 0.0001;
 
         let mut world = shipyard::World::new();

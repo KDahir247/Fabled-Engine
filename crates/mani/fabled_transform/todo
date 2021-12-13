@@ -22,15 +22,10 @@ Should we have a enum inside the transform or orientation component to specify i
 or since this is a ecs should we have a single struct with a enum to specify if it is local or world and
 transform or orientation depend on the meta-data component to determine if it is in local or world.
 
-We should create a struct for LocalToWorld and WorldToLocal.
-are we going to add both of LocalToWorld and WorldToLocal matrix to entities that contain
-orientation
 
 eg.
 Entity1:
 Orientation -> Transform -> Space -> WorldToLocal -> LocalToWorld
-
-Is model getting scaled uniformly or not?
 
 translation will be calculated by space.
 

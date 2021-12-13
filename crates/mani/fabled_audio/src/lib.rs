@@ -68,8 +68,8 @@ mod tests {
 
         let raw_clip = RawClip::from(audio_clip);
 
-        standard_output.play_omni(raw_clip, 0.2);
+        standard_output.play_omni(raw_clip, 3.);
 
-        std::thread::sleep(std::time::Duration::from_secs(5));
+        std::thread::sleep(std::time::Duration::from_secs(10000));
     }
 }

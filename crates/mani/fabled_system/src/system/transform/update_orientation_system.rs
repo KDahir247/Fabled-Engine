@@ -4,6 +4,7 @@ use rayon::iter::ParallelIterator;
 
 use shipyard::IntoIter;
 
+// todo remove and make a function in transform instead of this.
 pub fn re_orientate_entity(
     mut orientation_storage: shipyard::ViewMut<Orientation>,
     rotation_storage: shipyard::View<Rotation>,
@@ -30,9 +31,9 @@ pub fn re_orientate_entity(
 
             let result_upper = [k2 * i, k2 * j, k2 * k];
 
-            let sq_sclr_min_sq_forw = w * w - quat_dot;
+            let quaternion_scalar_mul_quat_dot = w * w - quat_dot;
 
-            let result_middle = [0.0, 0.0, sq_sclr_min_sq_forw];
+            let result_middle = [0.0, 0.0, quaternion_scalar_mul_quat_dot];
 
             let result_bottom = [w2 * j, w2 * -i, 0.0];
 
@@ -46,7 +47,7 @@ pub fn re_orientate_entity(
 
             let result_upper = [2.0 * i * i, 2.0 * i * j, 2.0 * i * k];
 
-            let result_middle = [sq_sclr_min_sq_forw, 0.0, 0.0];
+            let result_middle = [quaternion_scalar_mul_quat_dot, 0.0, 0.0];
 
             let result_bottom = [0.0, w2 * k, w2 * -j];
 

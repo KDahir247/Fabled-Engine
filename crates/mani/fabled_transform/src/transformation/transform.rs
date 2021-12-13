@@ -51,7 +51,7 @@ pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
         rotation.value[2],
         rotation.value[3],
     );
-
+    
     let quat_ii = quat_i * quat_i;
     let quat_jj = quat_j * quat_j;
     let quat_kk = quat_k * quat_k;
@@ -73,7 +73,6 @@ pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
 #[rustfmt::skip]
 pub fn get_transformation_matrix(position : Translation, rotation : Rotation, scale : Scale) -> [f32; 16] {
     let rotation_matrix = get_rotation_matrix(rotation);
-    
     let scalar = match scale.value{
         ScaleType::Uniform(uniform) => [uniform; 3],
         ScaleType::NonUniform(non_uniform) => non_uniform
@@ -333,6 +332,47 @@ pub fn transform(vector: [f32; 4], quaternion: [f32; 4]) -> [f32; 3] {
                 * norm_vector[2]
             + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[2],
     ]
+}
+
+#[rustfmt::skip]
+pub fn inverse_rotation_matrix(rotation_matrix: [f32; 9]) -> [f32; 9] {
+    let cross_yz = [
+        rotation_matrix[4] * rotation_matrix[8] - rotation_matrix[5] * rotation_matrix[7],
+        rotation_matrix[5] * rotation_matrix[6] - rotation_matrix[3] * rotation_matrix[8],
+        rotation_matrix[3] * rotation_matrix[7] - rotation_matrix[4] * rotation_matrix[6],
+    ];
+    let cross_zx = [
+        rotation_matrix[7] * rotation_matrix[2] - rotation_matrix[8] * rotation_matrix[1],
+        rotation_matrix[8] * rotation_matrix[0] - rotation_matrix[6] * rotation_matrix[2],
+        rotation_matrix[6] * rotation_matrix[1] - rotation_matrix[7] * rotation_matrix[0],
+    ];
+
+    let cross_xy = [
+        rotation_matrix[1] * rotation_matrix[5] - rotation_matrix[2] * rotation_matrix[4],
+        rotation_matrix[2] * rotation_matrix[3] - rotation_matrix[0] * rotation_matrix[5],
+        rotation_matrix[0] * rotation_matrix[4] - rotation_matrix[1] * rotation_matrix[3],
+    ];
+
+    let determinant = rotation_matrix[6] * cross_xy[0]
+        + rotation_matrix[7] * cross_xy[1]
+        + rotation_matrix[8] * cross_xy[2];
+
+    assert!(determinant.ne(&0.0));
+
+    let inv_determinant = 1.0 / determinant;
+
+    [
+        cross_yz[0] * inv_determinant, cross_zx[0] * inv_determinant, cross_xy[0] * inv_determinant, // col 0
+        cross_yz[1] * inv_determinant, cross_zx[1] * inv_determinant, cross_xy[1] * inv_determinant, // col 1
+        cross_yz[2] * inv_determinant, cross_zx[2] * inv_determinant, cross_xy[2] * inv_determinant, // col 2
+    ]
+}
+
+
+pub fn inverse_matrix(matrix: [f32; 16]) -> [f32; 16] {
+    glam::Mat4::from_cols_array(&matrix)
+        .inverse()
+        .to_cols_array()
 }
 
 #[cfg(test)]
