@@ -52,7 +52,7 @@ rayon = "1.4"
 glam = {version = "*", features = ["bytemuck"]}
 shipyard = {version = "*", features = ["default", "thread_local"]}
 superluminal-perf = "*"
-naga = {version = "0.4.2", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga
+naga = {version = "0.7.3", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga
 serde = {version = "*", features = ["derive"], optional = true}
 
 [dependencies.gltf]
