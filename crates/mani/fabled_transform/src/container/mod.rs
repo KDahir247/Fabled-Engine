@@ -1,26 +1,20 @@
 pub use direction::*;
 pub use frozen::*;
 pub use local_world::*;
-pub use orientation::*;
 pub use parent::*;
 pub use rotation::*;
 pub use scale::*;
 pub use scale_ty::*;
-pub use space::*;
-pub use space_ty::*;
 pub use translation::*;
 pub use world_local::*;
 
 mod direction;
 mod frozen;
 mod local_world;
-mod orientation;
 mod parent;
 mod rotation;
 mod scale;
 mod scale_ty;
-mod space;
-mod space_ty;
 mod translation;
 mod world_local;
 
@@ -28,7 +22,7 @@ mod world_local;
 #[cfg(test)]
 mod data_test {
     use crate::container::rotation::Rotation;
-    use crate::{AxisDirection, Frozen, Orientation, Parent, Scale, Space, Translation};
+    use crate::{AxisDirection, Frozen, Parent, Scale, Translation};
 
     #[test]
     fn data_size() {
@@ -41,8 +35,6 @@ mod data_test {
         let parent_size = std::mem::size_of::<Parent>();
         assert_eq!(parent_size & (parent_size - 1), 0);
 
-        let space_size = std::mem::size_of::<Space>();
-        assert_eq!(space_size & (space_size - 1), 0);
 
         let position_size = std::mem::size_of::<Translation>();
         assert_eq!(position_size & (position_size - 1), 0);
@@ -52,9 +44,6 @@ mod data_test {
 
         let scale_size = std::mem::size_of::<Scale>();
         assert_eq!(scale_size & (scale_size - 1), 0);
-
-        let orientation_size = std::mem::size_of::<Orientation>();
-        assert_eq!(orientation_size & (orientation_size - 1), 0);
     }
 
 
@@ -69,9 +58,6 @@ mod data_test {
         let parent_alignment = std::mem::align_of::<Parent>();
         assert_eq!(parent_alignment & (parent_alignment - 1), 0);
 
-        let space_alignment = std::mem::align_of::<Space>();
-        assert_eq!(space_alignment & (space_alignment - 1), 0);
-
         let position_alignment = std::mem::align_of::<Translation>();
         assert_eq!(position_alignment & (position_alignment - 1), 0);
 
@@ -80,8 +66,5 @@ mod data_test {
 
         let scale_alignment = std::mem::align_of::<Scale>();
         assert_eq!(scale_alignment & (scale_alignment - 1), 0);
-
-        let orientation_alignment = std::mem::align_of::<Orientation>();
-        assert_eq!(orientation_alignment & (orientation_alignment - 1), 0);
     }
 }

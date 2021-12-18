@@ -1,9 +1,7 @@
 use fabled_transform::{
-    decompose_transformation_matrix, get_rotation_matrix, get_transformation_matrix,
-    inverse_matrix, inverse_rotation_matrix, transform, Frozen, Parent, Rotation, Scale, ScaleType,
-    Translation, WorldToLocal,
+    get_transformation_matrix, inverse_rotation_matrix, transform, Frozen, Parent, Rotation, Scale,
+    ScaleType, Translation, WorldToLocal,
 };
-use std::f32::consts::E;
 
 use fabled_transform::ScaleType::NonUniform;
 use shipyard::*;

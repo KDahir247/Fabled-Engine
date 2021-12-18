@@ -2,55 +2,54 @@ use crate::util::acos;
 use crate::{Rotation, Scale, ScaleType, Translation};
 
 pub fn forward(rotation: Rotation) -> [f32; 3] {
-    let forward_translation = Translation {
-        value: [0.0, 0.0, 1.0, 1.0],
-    };
+    let [i, j, k, w] = rotation.value;
 
-    vec_mul_qut(rotation, forward_translation)
-}
+    let quat_dot = i * i + j * j + k * k;
 
-pub fn right(rotation: Rotation) -> [f32; 3] {
-    let right_translation = Translation {
-        value: [1.0, 0.0, 0.0, 1.0],
-    };
+    let k2 = k * 2.0;
+    let w2 = w * 2.0;
 
-    vec_mul_qut(rotation, right_translation)
-}
+    let result_upper = [k2 * i, k2 * j, k2 * k];
 
-pub fn up(rotation: Rotation) -> [f32; 3] {
-    let up_translation = Translation {
-        value: [0.0, 1.0, 0.0, 1.0],
-    };
+    let quaternion_scalar_mul_quat_dot = w * w - quat_dot;
 
-    vec_mul_qut(rotation, up_translation)
-}
+    let result_middle = [0.0, 0.0, quaternion_scalar_mul_quat_dot];
 
-
-pub fn vec_mul_qut(rotation: Rotation, translation: Translation) -> [f32; 3] {
-    let rotation_matrix = get_rotation_matrix(rotation);
-
-    let direction_vector = translation.value;
-
-    let dir_x = direction_vector[0];
-    let dir_y = direction_vector[1];
-    let dir_z = direction_vector[2];
+    let result_bottom = [w2 * j, w2 * -i, 0.0];
 
     [
-        rotation_matrix[0] * dir_x + rotation_matrix[3] * dir_y + rotation_matrix[6] * dir_z,
-        rotation_matrix[1] * dir_x + rotation_matrix[4] * dir_y + rotation_matrix[7] * dir_z,
-        rotation_matrix[2] * dir_x + rotation_matrix[6] * dir_y + rotation_matrix[8] * dir_z,
+        result_upper[0] + result_middle[0] + result_bottom[0],
+        result_upper[1] + result_middle[1] + result_bottom[1],
+        result_upper[2] + result_middle[2] + result_bottom[2],
     ]
 }
 
+pub fn right(rotation: Rotation) -> [f32; 3] {
+    let [i, j, k, w] = rotation.value;
+
+    let quat_dot = i * i + j * j + k * k;
+
+    let quaternion_scalar_mul_quat_dot = w * w - quat_dot;
+
+    let i2 = i * 2.0;
+    let w2 = w * 2.0;
+
+    let result_upper = [i2 * i, i2 * j, i2 * k];
+
+    let result_middle = [quaternion_scalar_mul_quat_dot, 0.0, 0.0];
+
+    let result_bottom = [0.0, w2 * k, w2 * -j];
+
+    [
+        result_upper[0] + result_middle[0] + result_bottom[0],
+        result_upper[1] + result_middle[1] + result_bottom[1],
+        result_upper[2] + result_middle[2] + result_bottom[2],
+    ]
+}
 
 #[rustfmt::skip]
 pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
-    let (quat_i, quat_j, quat_k, quat_w) = (
-        rotation.value[0],
-        rotation.value[1],
-        rotation.value[2],
-        rotation.value[3],
-    );
+    let [quat_i, quat_j, quat_k, quat_w] = rotation.value;
     
     let quat_ii = quat_i * quat_i;
     let quat_jj = quat_j * quat_j;
@@ -69,7 +68,51 @@ pub fn get_rotation_matrix(rotation : Rotation) -> [f32; 9] {
     ]
 }
 
-// world
+pub fn rotation_matrix_to_quaternion(rotation_matrix: [f32; 9]) -> Rotation {
+    // 0, 3, 6,
+    // 1, 4, 7,
+    // 2, 5, 8,
+
+    let matrix_00 = rotation_matrix[0];
+    let matrix_11 = rotation_matrix[4];
+    let matrix_22 = rotation_matrix[8];
+
+    let matrix_21 = rotation_matrix[5];
+    let matrix_12 = rotation_matrix[7];
+    let matrix_02 = rotation_matrix[6];
+    let matrix_20 = rotation_matrix[2];
+    let matrix_10 = rotation_matrix[1];
+    let matrix_01 = rotation_matrix[3];
+
+    let w = 0.0f32
+        .max(1.0 + matrix_00 + matrix_11 + matrix_22)
+        .sqrt()
+        * 0.5;
+
+    let i = 0.0f32
+        .max(1.0 + matrix_00 - matrix_11 - matrix_22)
+        .sqrt()
+        * 0.5;
+
+    let j = 0.0f32
+        .max(1.0 - matrix_00 + matrix_11 - matrix_22)
+        .sqrt()
+        * 0.5;
+
+    let k = 0.0f32
+        .max(1.0 - matrix_00 - matrix_11 + matrix_22)
+        .sqrt()
+        * 0.5;
+
+    let signed_i = i.copysign(matrix_21 - matrix_12);
+    let signed_j = j.copysign(matrix_02 - matrix_20);
+    let signed_k = k.copysign(matrix_10 - matrix_01);
+
+    Rotation{
+        value: [signed_i, signed_j, signed_k,w]
+    }
+}
+
 #[rustfmt::skip]
 pub fn get_transformation_matrix(position : Translation, rotation : Rotation, scale : Scale) -> [f32; 16] {
     let rotation_matrix = get_rotation_matrix(rotation);
@@ -96,12 +139,7 @@ pub fn get_transformation_matrix(position : Translation, rotation : Rotation, sc
 pub fn get_axis_angle(rotation: Rotation) -> ([f32; 3], f32) {
     const SQR_EPSILON: f32 = f32::EPSILON * f32::EPSILON;
 
-    let (quat_i, quat_j, quat_k, quat_w) = (
-        rotation.value[0],
-        rotation.value[1],
-        rotation.value[2],
-        rotation.value[3],
-    );
+    let [quat_i, quat_j, quat_k, quat_w] = rotation.value;
 
     let scale_sq = (1.0 - quat_w * quat_w).max(0.0);
 
@@ -122,19 +160,44 @@ pub fn get_axis_angle(rotation: Rotation) -> ([f32; 3], f32) {
     }
 }
 
-pub fn get_angle_axis_magnitude(rotation: Rotation) -> [f32; 3] {
-    let (axis, angle) = get_axis_angle(rotation);
+pub fn axis_angle_to_quaternion(axis: [f32; 3], angle: f32) -> Rotation {
+    let [x, y, z] = axis;
 
-    [axis[0] * angle, axis[1] * angle, axis[2] * angle]
+    let (sin_half_angle, cos_half_angle) = (angle * 0.5).sin_cos();
+
+    let quat_i = x * sin_half_angle;
+    let quat_j = y * sin_half_angle;
+    let quat_k = z * sin_half_angle;
+    let quat_w = cos_half_angle;
+
+    Rotation {
+        value: [quat_i, quat_j, quat_k, quat_w],
+    }
+}
+
+pub fn get_angle_axis_magnitude(rotation: Rotation) -> [f32; 3] {
+    let ([axis_x, axis_y, axis_z], angle) = get_axis_angle(rotation);
+
+    [axis_x * angle, axis_y * angle, axis_z * angle]
+}
+
+pub fn angle_axis_mag_to_quaternion(axis_mag: [f32; 3]) -> Rotation {
+    let angle =
+        (axis_mag[0] * axis_mag[0] + axis_mag[1] * axis_mag[1] + axis_mag[2] * axis_mag[2]).sqrt();
+
+    let rcp_angle = angle.recip();
+
+    let axis = [
+        axis_mag[0] * rcp_angle,
+        axis_mag[1] * rcp_angle,
+        axis_mag[2] * rcp_angle,
+    ];
+
+    axis_angle_to_quaternion(axis, angle)
 }
 
 pub fn get_euler_angle(rotation: Rotation) -> [f32; 3] {
-    let (quat_i, quat_j, quat_k, quat_w) = (
-        rotation.value[0],
-        rotation.value[1],
-        rotation.value[2],
-        rotation.value[3],
-    );
+    let [quat_i, quat_j, quat_k, quat_w] = rotation.value;
 
     let quat_ii = quat_i * quat_i;
     let quat_ij = quat_i * quat_j;
@@ -150,15 +213,46 @@ pub fn get_euler_angle(rotation: Rotation) -> [f32; 3] {
 
     let quat_ww = quat_w * quat_w;
 
-    let x = (-2.0 * (quat_jk - quat_iw)).atan2(quat_ww - quat_ii - quat_jj + quat_kk);
-
     let unsafe_y = 2.0 * (quat_ik + quat_jw);
+
+    let x = (-2.0 * (quat_jk - quat_iw)).atan2(quat_ww - quat_ii - quat_jj + quat_kk);
 
     let y = unsafe_y.clamp(-1.0, 1.0).asin();
 
     let z = (-2.0 * (quat_ij - quat_kw)).atan2(quat_ww + quat_ii - quat_jj - quat_kk);
 
     [x, y, z]
+}
+
+pub fn euler_to_quaternion(euler: [f32; 3]) -> Rotation {
+    let [x, y, z] = euler;
+
+    let (sin_quat_i, cos_quat_iw) = (x * 0.5).sin_cos();
+    let (sin_quat_j, cos_quat_jw) = (y * 0.5).sin_cos();
+    let (sin_quat_k, cos_quat_kw) = (z * 0.5).sin_cos();
+
+    let [quat_axis_ix, _, _, quat_axis_iw] = [sin_quat_i, 0.0, 0.0, cos_quat_iw];
+
+    let [_, quat_axis_jy, _, quat_axis_jw] = [0.0, sin_quat_j, 0.0, cos_quat_jw];
+
+    let [_, _, quat_axis_kz, quat_axis_kw] = [0.0, 0.0, sin_quat_k, cos_quat_kw];
+
+    let w = quat_axis_iw * quat_axis_jw;
+
+    let i = quat_axis_ix * quat_axis_jw;
+
+    let j = quat_axis_iw * quat_axis_jy;
+
+    let k = quat_axis_ix * quat_axis_jy;
+
+    Rotation {
+        value: [
+            i * quat_axis_kw + j * quat_axis_kz,
+            -i * quat_axis_kz + j * quat_axis_kw,
+            w * quat_axis_kz + k * quat_axis_kw,
+            w * quat_axis_kw - k * quat_axis_kz,
+        ],
+    }
 }
 
 pub fn decompose_transformation_matrix(
@@ -291,8 +385,11 @@ pub fn decompose_transformation_matrix(
     (translation, rotation, scale)
 }
 
-pub fn transform(vector: [f32; 4], quaternion: [f32; 4]) -> [f32; 3] {
+pub fn transform(vector: [f32; 4], quaternion: Rotation) -> [f32; 3] {
+    let [i, j, k, w] = quaternion.value;
+
     let inv_scalar = 1.0 / vector[3];
+
 
     let norm_vector = [
         vector[0] * inv_scalar,
@@ -300,9 +397,9 @@ pub fn transform(vector: [f32; 4], quaternion: [f32; 4]) -> [f32; 3] {
         vector[2] * inv_scalar,
     ];
 
-    let quaternion_vector = [quaternion[0], quaternion[1], quaternion[2]];
+    let quaternion_vector = [i, j, k];
 
-    let quaternion_scalar = quaternion[3];
+    let quaternion_scalar = w;
 
     let quaternion_dot_vector = quaternion_vector[0] * norm_vector[0]
         + quaternion_vector[1] * norm_vector[1]
@@ -368,19 +465,13 @@ pub fn inverse_rotation_matrix(rotation_matrix: [f32; 9]) -> [f32; 9] {
     ]
 }
 
-
-pub fn inverse_matrix(matrix: [f32; 16]) -> [f32; 16] {
-    glam::Mat4::from_cols_array(&matrix)
-        .inverse()
-        .to_cols_array()
-}
-
 #[cfg(test)]
 mod transform_test {
     use crate::{
-        decompose_transformation_matrix, forward, get_angle_axis_magnitude, get_axis_angle,
-        get_euler_angle, get_rotation_matrix, get_transformation_matrix, right, transform, up,
-        Rotation, Scale, ScaleType, Translation,
+        angle_axis_mag_to_quaternion, axis_angle_to_quaternion, decompose_transformation_matrix,
+        euler_to_quaternion, forward, get_angle_axis_magnitude, get_axis_angle, get_euler_angle,
+        get_rotation_matrix, get_transformation_matrix, right, rotation_matrix_to_quaternion,
+        transform, Rotation, Scale, ScaleType, Translation,
     };
 
     #[test]
@@ -410,20 +501,9 @@ mod transform_test {
 
         let decomposed_translation = m4_transformation_representation.w_axis.truncate();
 
-        println!("{:?}", position);
-        println!("{:?}", decomposed_translation);
-
         assert!(position
             .value
             .eq(&decomposed_translation.extend(1.0).to_array()));
-
-        // let c1 = m4_transformation_representation.x_axis.truncate();
-        // let c2 = m4_transformation_representation.y_axis.truncate();
-        // let c3 = m4_transformation_representation.z_axis.truncate();
-        //
-        // let angle_x = c3.y.atan2(c3.z).to_degrees();
-        // let angle_y = c3.x.atan2((c3.y * c3.y + c3.z * c3.z).sqrt()).to_degrees();
-        // let angle_z = c1.y.atan2(c1.x).to_degrees();
 
         let (_scale, rotation, _position) =
             m4_transformation_representation.to_scale_rotation_translation();
@@ -433,7 +513,6 @@ mod transform_test {
         assert!((rotation.z - quaternion.z).abs() < threshold);
         assert!((rotation.w - quaternion.w).abs() < threshold);
     }
-
 
     #[test]
     fn rotation_matrix() {
@@ -581,6 +660,7 @@ mod transform_test {
 
         let euler_0 = get_euler_angle(rotation);
 
+
         let glm_quaternion = glam::Quat::from_array(quaternion);
 
         let euler_1 = glm_quaternion.to_euler(glam::EulerRot::XYZ);
@@ -614,13 +694,11 @@ mod transform_test {
 
         let forward_direction = forward(rotation);
         let right_direction = right(rotation);
-        let up_direction = up(rotation);
 
         // retrieved from a proven game engine. Editor rounds to integer, so there will
         // be an error_threshold, sine we don't round our calculation to integer
         let proven_forward_direction = [0.5, -0.3, 0.8];
         let proven_right_direction = [0.8, 0.4, -0.4];
-        let proven_up_direction = [-0.2, 0.8, 0.5];
 
         let forward_difference = [
             (forward_direction[0] - proven_forward_direction[0]).abs(),
@@ -634,13 +712,6 @@ mod transform_test {
             (right_direction[2] - proven_right_direction[2]).abs(),
         ];
 
-        let up_difference = [
-            (up_direction[0] - proven_up_direction[0]).abs(),
-            (up_direction[1] - proven_up_direction[1]).abs(),
-            (up_direction[2] - proven_up_direction[2]).abs(),
-        ];
-
-
         assert!(forward_difference[0] <= THRESHOLD);
         assert!(forward_difference[1] <= THRESHOLD);
         assert!(forward_difference[2] <= THRESHOLD);
@@ -648,10 +719,6 @@ mod transform_test {
         assert!(right_difference[0] <= THRESHOLD);
         assert!(right_difference[1] <= THRESHOLD);
         assert!(right_difference[2] <= THRESHOLD);
-
-        assert!(up_difference[0] <= THRESHOLD);
-        assert!(up_difference[1] <= THRESHOLD);
-        assert!(up_difference[2] <= THRESHOLD);
     }
 
     #[test]
@@ -707,7 +774,7 @@ mod transform_test {
             value: [0.4780559, 0.3243005, 0.7935674, 0.1911612],
         };
 
-        let transform = transform(translation.value, rotation.value);
+        let transform = transform(translation.value, rotation);
 
         // C# System.Numerics.Vector4.transform result (4.040963, 4.363978, 17.99358, 1)
 
@@ -716,5 +783,108 @@ mod transform_test {
         assert!((transform[0] - TARGET_RESULT[0]).abs() <= THRESHOLD);
         assert!((transform[1] - TARGET_RESULT[1]).abs() <= THRESHOLD);
         assert!((transform[2] - TARGET_RESULT[2]).abs() <= THRESHOLD);
+    }
+
+
+    #[test]
+    fn euler_to_quat() {
+        const THRESHOLD: f32 = 0.1;
+
+        let euler = [
+            45.25_f32.to_radians(),
+            11.11_f32.to_radians(),
+            1.123_f32.to_radians(),
+        ];
+
+        let quat = euler_to_quaternion(euler).value;
+        let proven_quat = glam::Quat::from_euler(glam::EulerRot::XYZ, euler[0], euler[1], euler[2]);
+
+
+        let difference = [
+            (quat[0] - proven_quat.x).abs(),
+            (quat[1] - proven_quat.y).abs(),
+            (quat[2] - proven_quat.z).abs(),
+            (quat[3] - proven_quat.w).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
+        assert!(difference[3] <= THRESHOLD);
+    }
+
+    #[test]
+    fn angle_axis_to_quat() {
+        const THRESHOLD: f32 = 0.0001;
+
+        let quaternion = Rotation {
+            value: [0.3004045, -0.03679, 0.4609919, 0.8342003],
+        };
+
+        let (axis, angle) = get_axis_angle(quaternion);
+
+        let quat = axis_angle_to_quaternion(axis, angle);
+
+        let difference = [
+            (quat.value[0] - quaternion.value[0]).abs(),
+            (quat.value[1] - quaternion.value[1]).abs(),
+            (quat.value[2] - quaternion.value[2]).abs(),
+            (quat.value[3] - quaternion.value[3]).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
+        assert!(difference[3] <= THRESHOLD);
+    }
+
+    #[test]
+    fn angle_axis_mag_to_quat() {
+        const THRESHOLD: f32 = 0.0001;
+
+        let quaternion = Rotation {
+            value: [0.5085492, -0.0231115, 0.2273495, 0.8301541],
+        };
+
+        let angle_mag = get_angle_axis_magnitude(quaternion);
+
+        let quat = angle_axis_mag_to_quaternion(angle_mag);
+
+        let difference = [
+            (quaternion.value[0] - quat.value[0]).abs(),
+            (quaternion.value[1] - quat.value[1]).abs(),
+            (quaternion.value[2] - quat.value[2]).abs(),
+            (quaternion.value[3] - quat.value[3]).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
+        assert!(difference[3] <= THRESHOLD);
+    }
+
+    #[test]
+    fn rotation_matrix_to_quat() {
+        const THRESHOLD: f32 = 0.0001;
+
+        let quaternion = Rotation {
+            value: [0.5085492, -0.0231115, 0.2273495, 0.8301541],
+        };
+
+        let rotation_matrix = get_rotation_matrix(quaternion);
+
+        let quat = rotation_matrix_to_quaternion(rotation_matrix);
+
+        let difference = [
+            (quaternion.value[0] - quat.value[0]).abs(),
+            (quaternion.value[1] - quat.value[1]).abs(),
+            (quaternion.value[2] - quat.value[2]).abs(),
+            (quaternion.value[3] - quat.value[3]).abs(),
+        ];
+
+        assert!(difference[0] <= THRESHOLD);
+        assert!(difference[1] <= THRESHOLD);
+        assert!(difference[2] <= THRESHOLD);
+        assert!(difference[3] <= THRESHOLD);
     }
 }

@@ -1,15 +1,11 @@
 use crate::{Missing, MissingTy};
-use fabled_transform::{
-    LocalToWorld, Rotation, Scale, Space, SpaceType, Translation, WorldToLocal,
-};
+use fabled_transform::{Rotation, Scale, Translation, WorldToLocal};
 use shipyard::*;
 
 pub fn removed_deleted_transform_system(
     mut translation_storage: shipyard::ViewMut<Translation>,
     mut rotation_storage: shipyard::ViewMut<Rotation>,
     mut scale_storage: shipyard::ViewMut<Scale>,
-    mut space_storage: shipyard::ViewMut<Space>,
-    mut local_world_storage: ViewMut<LocalToWorld>,
     mut world_local_storage: ViewMut<WorldToLocal>,
 ) {
     let (removed_position, deleted_position) = translation_storage.take_removed_and_deleted();
@@ -54,24 +50,6 @@ pub fn removed_deleted_transform_system(
             });
     }
 
-    let (removed_space, deleted_space) = space_storage.take_removed_and_deleted();
-
-    {
-        removed_space.iter().for_each(|&entity_id| {
-            space_storage.add_component_unchecked(
-                entity_id,
-                Space {
-                    value: SpaceType::World,
-                },
-            )
-        });
-
-        deleted_space
-            .iter()
-            .for_each(|&(entity_id, deleted_space)| {
-                space_storage.add_component_unchecked(entity_id, deleted_space);
-            });
-    }
 
     let (removed_world_local, deleted_world_local) = world_local_storage.take_removed_and_deleted();
 
@@ -86,20 +64,6 @@ pub fn removed_deleted_transform_system(
                 world_local_storage.add_component_unchecked(entity_id, deleted_world_local);
             });
     }
-
-    let (removed_local_world, deleted_local_world) = local_world_storage.take_removed_and_deleted();
-
-    {
-        removed_local_world.iter().for_each(|&entity_id| {
-            local_world_storage.add_component_unchecked(entity_id, LocalToWorld::default());
-        });
-
-        deleted_local_world
-            .iter()
-            .for_each(|&(entity_id, deleted_local_world)| {
-                local_world_storage.add_component_unchecked(entity_id, deleted_local_world);
-            });
-    }
 }
 
 
@@ -109,7 +73,6 @@ pub fn missing_core_transform_system(
     translation_storage: ViewMut<Translation>,
     rotation_storage: ViewMut<Rotation>,
     scale_storage: ViewMut<Scale>,
-    mut space_storage: shipyard::ViewMut<Space>,
 ) {
     (!&translation_storage)
         .iter()
@@ -191,13 +154,6 @@ pub fn missing_core_transform_system(
                 //  2. add rotation
                 //  3. add scale.
 
-
-                space_storage.add_component_unchecked(
-                    entity_id,
-                    Space {
-                        value: SpaceType::World,
-                    },
-                )
                 // Add transform.
                 // I need the world
             }
