@@ -1,4 +1,3 @@
-use crate::util::acos;
 use crate::{Rotation, Scale, ScaleType, Translation};
 
 pub fn forward(rotation: Rotation) -> [f32; 3] {
@@ -132,7 +131,7 @@ pub fn get_axis_angle(rotation: Rotation) -> ([f32; 3], f32) {
 
     let scale_sq = (1.0 - quat_w * quat_w).max(0.0);
 
-    let angle = 2.0 * acos(quat_w);
+    let angle = 2.0 * quat_w.acos();
 
     if scale_sq < SQR_EPSILON {
         ([1.0, 0.0, 0.0], angle)
