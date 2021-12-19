@@ -10,3 +10,9 @@ impl Default for Rotation {
         }
     }
 }
+
+impl From<[f32; 4]> for Rotation {
+    fn from(rot: [f32; 4]) -> Self {
+        Self { value: rot }
+    }
+}

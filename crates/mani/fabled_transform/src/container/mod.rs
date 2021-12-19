@@ -1,4 +1,4 @@
-pub use direction::*;
+pub use child::*;
 pub use frozen::*;
 pub use local_world::*;
 pub use parent::*;
@@ -6,9 +6,8 @@ pub use rotation::*;
 pub use scale::*;
 pub use scale_ty::*;
 pub use translation::*;
-pub use world_local::*;
 
-mod direction;
+mod child;
 mod frozen;
 mod local_world;
 mod parent;
@@ -16,19 +15,15 @@ mod rotation;
 mod scale;
 mod scale_ty;
 mod translation;
-mod world_local;
 
 
 #[cfg(test)]
 mod data_test {
     use crate::container::rotation::Rotation;
-    use crate::{AxisDirection, Frozen, Parent, Scale, Translation};
+    use crate::{Frozen, Parent, Scale, Translation};
 
     #[test]
     fn data_size() {
-        let direction_size = std::mem::size_of::<AxisDirection>();
-        assert_eq!(direction_size & (direction_size - 1), 0);
-
         let frozen_size = std::mem::size_of::<Frozen>();
         assert!(frozen_size.eq(&0));
 
@@ -49,9 +44,6 @@ mod data_test {
 
     #[test]
     fn data_alignment() {
-        let direction_alignment = std::mem::align_of::<AxisDirection>();
-        assert_eq!(direction_alignment & (direction_alignment - 1), 0);
-
         let frozen_alignment = std::mem::align_of::<Frozen>();
         assert_eq!(frozen_alignment & (frozen_alignment - 1), 0);
 

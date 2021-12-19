@@ -1,5 +1,3 @@
-// test from jetbrain space
-
 use fabled_transform::{
     decompose_transformation_matrix, get_transformation_matrix, transform, Frozen, LocalToWorld,
     Parent, Rotation, Scale, ScaleType, Translation,
@@ -81,7 +79,7 @@ pub fn calculate_local_world_parent_system(
                 ScaleType::NonUniform(non_uniform) => non_uniform,
             };
 
-            let transform_child = transform(child_local_translation, parent_world_rotation);
+            let transform_child = transform(child_local_translation, parent_world_rotation.into());
 
             let child_world_translation = Translation {
                 value: [
