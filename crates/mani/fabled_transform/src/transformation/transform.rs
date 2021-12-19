@@ -84,32 +84,20 @@ pub fn rotation_matrix_to_quaternion(rotation_matrix: [f32; 9]) -> Rotation {
     let matrix_10 = rotation_matrix[1];
     let matrix_01 = rotation_matrix[3];
 
-    let quat_w = 0.0f32
-        .max(1.0 + matrix_00 + matrix_11 + matrix_22)
-        .sqrt()
-        * 0.5;
+    let quat_w = 0.0f32.max(1.0 + matrix_00 + matrix_11 + matrix_22).sqrt() * 0.5;
 
-    let quat_i = 0.0f32
-        .max(1.0 + matrix_00 - matrix_11 - matrix_22)
-        .sqrt()
-        * 0.5;
+    let quat_i = 0.0f32.max(1.0 + matrix_00 - matrix_11 - matrix_22).sqrt() * 0.5;
 
-    let quat_j = 0.0f32
-        .max(1.0 - matrix_00 + matrix_11 - matrix_22)
-        .sqrt()
-        * 0.5;
+    let quat_j = 0.0f32.max(1.0 - matrix_00 + matrix_11 - matrix_22).sqrt() * 0.5;
 
-    let quat_k = 0.0f32
-        .max(1.0 - matrix_00 - matrix_11 + matrix_22)
-        .sqrt()
-        * 0.5;
+    let quat_k = 0.0f32.max(1.0 - matrix_00 - matrix_11 + matrix_22).sqrt() * 0.5;
 
     let signed_quat_i = quat_i.copysign(matrix_21 - matrix_12);
     let signed_quat_j = quat_j.copysign(matrix_02 - matrix_20);
     let signed_quat_k = quat_k.copysign(matrix_10 - matrix_01);
 
-    Rotation{
-        value: [signed_quat_i, signed_quat_j, signed_quat_k, quat_w]
+    Rotation {
+        value: [signed_quat_i, signed_quat_j, signed_quat_k, quat_w],
     }
 }
 
@@ -123,11 +111,11 @@ pub fn get_transformation_matrix(position : Translation, rotation : Rotation, sc
     };
 
     let inner_position = position.value;
-    
+
     let rcp_position_scalar = 1.0 / inner_position[3];
-    
+
     let norm_position = [inner_position[0] * rcp_position_scalar, inner_position[1] * rcp_position_scalar, inner_position[2] * rcp_position_scalar];
-    
+
     [
         rotation_matrix[0] * scalar[0], rotation_matrix[1] * scalar[0], rotation_matrix[2] * scalar[0], 0.0, // col 0
         rotation_matrix[3] * scalar[1], rotation_matrix[4] * scalar[1], rotation_matrix[5] * scalar[1], 0.0, // col 1
@@ -185,16 +173,11 @@ pub fn get_angle_axis_magnitude(rotation: Rotation) -> [f32; 3] {
 pub fn angle_axis_mag_to_quaternion(axis_mag: [f32; 3]) -> Rotation {
     let [pitch, yaw, roll] = axis_mag;
 
-    let angle =
-        (pitch * pitch + yaw * yaw + roll * roll).sqrt();
+    let angle = (pitch * pitch + yaw * yaw + roll * roll).sqrt();
 
     let rcp_angle = angle.recip();
 
-    let axis = [
-        pitch * rcp_angle,
-        yaw * rcp_angle,
-        roll * rcp_angle,
-    ];
+    let axis = [pitch * rcp_angle, yaw * rcp_angle, roll * rcp_angle];
 
     axis_angle_to_quaternion(axis, angle)
 }
@@ -236,7 +219,7 @@ pub fn euler_to_quaternion(euler: [f32; 3]) -> Rotation {
 
     let [quat_axis_ix, quat_axis_iw] = [sin_quat_i, cos_quat_iw];
 
-    let [quat_axis_jy, quat_axis_jw] = [ sin_quat_j, cos_quat_jw];
+    let [quat_axis_jy, quat_axis_jw] = [sin_quat_j, cos_quat_jw];
 
     let [quat_axis_kz, quat_axis_kw] = [sin_quat_k, cos_quat_kw];
 
@@ -300,31 +283,32 @@ pub fn decompose_transformation_matrix(
         transformation_matrix[10] * rcp_scale_z, // col 2
     ];
 
-    let mut e0 = 0.0;
 
-    let intermediate_quaternion = if rotation_matrix[8] >= 0.0 {
+    let ([im_quat_i, im_quat_j, im_quat_k, im_quat_w], min_1_ii_jj) = if rotation_matrix[8] >= 0.0 {
         let permutation_sum_diagonal = rotation_matrix[0] + rotation_matrix[4];
         let permutation_diff_diagonal = rotation_matrix[1] - rotation_matrix[3];
         let c = 1.0 + rotation_matrix[8];
 
         if permutation_sum_diagonal >= 0.0 {
-            e0 = c + permutation_sum_diagonal;
-
-            [
-                rotation_matrix[5] - rotation_matrix[7],
-                rotation_matrix[6] - rotation_matrix[2],
-                permutation_diff_diagonal,
-                e0,
-            ]
+            (
+                [
+                    rotation_matrix[5] - rotation_matrix[7],
+                    rotation_matrix[6] - rotation_matrix[2],
+                    permutation_diff_diagonal,
+                    c + permutation_sum_diagonal,
+                ],
+                c + permutation_sum_diagonal,
+            )
         } else {
-            e0 = c - permutation_sum_diagonal;
-
-            [
-                rotation_matrix[6] + rotation_matrix[2],
-                rotation_matrix[5] + rotation_matrix[7],
-                e0,
-                permutation_diff_diagonal,
-            ]
+            (
+                [
+                    rotation_matrix[6] + rotation_matrix[2],
+                    rotation_matrix[5] + rotation_matrix[7],
+                    c - permutation_sum_diagonal,
+                    permutation_diff_diagonal,
+                ],
+                c - permutation_sum_diagonal,
+            )
         }
     } else {
         let permutation_diff_diagonal = rotation_matrix[0] - rotation_matrix[4];
@@ -332,46 +316,45 @@ pub fn decompose_transformation_matrix(
         let c = 1.0 - rotation_matrix[8];
 
         if permutation_diff_diagonal >= 0.0 {
-            e0 = c + permutation_diff_diagonal;
-
-            [
-                e0,
-                permutation_sum_diagonal,
-                rotation_matrix[6] + rotation_matrix[2],
-                rotation_matrix[5] - rotation_matrix[7],
-            ]
+            (
+                [
+                    c + permutation_diff_diagonal,
+                    permutation_sum_diagonal,
+                    rotation_matrix[6] + rotation_matrix[2],
+                    rotation_matrix[5] - rotation_matrix[7],
+                ],
+                c + permutation_diff_diagonal,
+            )
         } else {
-            e0 = c - permutation_diff_diagonal;
-            [
-                permutation_sum_diagonal,
-                e0,
-                rotation_matrix[5] + rotation_matrix[7],
-                rotation_matrix[6] - rotation_matrix[2],
-            ]
+            (
+                [
+                    permutation_sum_diagonal,
+                    c - permutation_diff_diagonal,
+                    rotation_matrix[5] + rotation_matrix[7],
+                    rotation_matrix[6] - rotation_matrix[2],
+                ],
+                c - permutation_diff_diagonal,
+            )
         }
     };
 
-    let sqrt_e0 = e0.sqrt();
+    let min_1_ii_jj_sqrt = min_1_ii_jj.sqrt();
 
-    let x2 =
-        (intermediate_quaternion[0] * 0.5 * sqrt_e0) * (intermediate_quaternion[0] * 0.5 * sqrt_e0);
+    let x2 = (im_quat_i * 0.5 * min_1_ii_jj_sqrt) * (im_quat_i * 0.5 * min_1_ii_jj_sqrt);
 
-    let y2 =
-        (intermediate_quaternion[1] * 0.5 * sqrt_e0) * (intermediate_quaternion[1] * 0.5 * sqrt_e0);
+    let y2 = (im_quat_j * 0.5 * min_1_ii_jj_sqrt) * (im_quat_j * 0.5 * min_1_ii_jj_sqrt);
 
-    let z2 =
-        (intermediate_quaternion[2] * 0.5 * sqrt_e0) * (intermediate_quaternion[2] * 0.5 * sqrt_e0);
+    let z2 = (im_quat_k * 0.5 * min_1_ii_jj_sqrt) * (im_quat_k * 0.5 * min_1_ii_jj_sqrt);
 
-    let w2 =
-        (intermediate_quaternion[3] * 0.5 * sqrt_e0) * (intermediate_quaternion[3] * 0.5 * sqrt_e0);
+    let w2 = (im_quat_w * 0.5 * min_1_ii_jj_sqrt) * (im_quat_w * 0.5 * min_1_ii_jj_sqrt);
 
     let rcp_quaternion_magnitude = (x2 + y2 + z2 + w2).sqrt().recip();
 
     let quaternion_inner = [
-        (intermediate_quaternion[0] * 0.5 * sqrt_e0) * rcp_quaternion_magnitude,
-        (intermediate_quaternion[1] * 0.5 * sqrt_e0) * rcp_quaternion_magnitude,
-        (intermediate_quaternion[2] * 0.5 * sqrt_e0) * rcp_quaternion_magnitude,
-        (intermediate_quaternion[3] * 0.5 * sqrt_e0) * rcp_quaternion_magnitude,
+        (im_quat_i * 0.5 * min_1_ii_jj_sqrt) * rcp_quaternion_magnitude,
+        (im_quat_j * 0.5 * min_1_ii_jj_sqrt) * rcp_quaternion_magnitude,
+        (im_quat_k * 0.5 * min_1_ii_jj_sqrt) * rcp_quaternion_magnitude,
+        (im_quat_w * 0.5 * min_1_ii_jj_sqrt) * rcp_quaternion_magnitude,
     ];
 
     let translation = Translation {
@@ -398,21 +381,14 @@ pub fn transform(vector: [f32; 4], quaternion: Rotation) -> [f32; 3] {
     let inv_scalar = 1.0 / scalar;
 
 
-    let [norm_x_pos, norm_y_pos, norm_z_pos] = [
-        x_pos * inv_scalar,
-        y_pos * inv_scalar,
-        z_pos * inv_scalar,
-    ];
+    let [norm_x_pos, norm_y_pos, norm_z_pos] =
+        [x_pos * inv_scalar, y_pos * inv_scalar, z_pos * inv_scalar];
 
-    let quaternion_dot_vector = quat_i * norm_x_pos
-        + quat_j * norm_y_pos
-        + quat_k * norm_z_pos;
+    let quaternion_dot_vector = quat_i * norm_x_pos + quat_j * norm_y_pos + quat_k * norm_z_pos;
 
-    let quaternion_vector_magnitude_sqr = quat_i * quat_i
-        + quat_j * quat_j
-        + quat_k * quat_k;
+    let quaternion_vector_magnitude_sqr = quat_i * quat_i + quat_j * quat_j + quat_k * quat_k;
 
-    let [quat_cross_norm_pos_x,quat_cross_norm_pos_y, quat_cross_norm_pos_z ] = [
+    let [quat_cross_norm_pos_x, quat_cross_norm_pos_y, quat_cross_norm_pos_z] = [
         quat_j * norm_z_pos - quat_k * norm_y_pos,
         quat_k * norm_x_pos - quat_i * norm_z_pos,
         quat_i * norm_y_pos - quat_j * norm_x_pos,
@@ -420,18 +396,15 @@ pub fn transform(vector: [f32; 4], quaternion: Rotation) -> [f32; 3] {
 
     [
         2.0 * quaternion_dot_vector * quat_i
-            + (quat_w * quat_w - quaternion_vector_magnitude_sqr)
-                * norm_x_pos
+            + (quat_w * quat_w - quaternion_vector_magnitude_sqr) * norm_x_pos
             + 2.0 * quat_w * quat_cross_norm_pos_x,
         //
         2.0 * quaternion_dot_vector * quat_j
-            + (quat_w * quat_w - quaternion_vector_magnitude_sqr)
-                * norm_y_pos
+            + (quat_w * quat_w - quaternion_vector_magnitude_sqr) * norm_y_pos
             + 2.0 * quat_w * quat_cross_norm_pos_y,
         //
         2.0 * quaternion_dot_vector * quat_k
-            + (quat_w * quat_w - quaternion_vector_magnitude_sqr)
-                * norm_z_pos
+            + (quat_w * quat_w - quaternion_vector_magnitude_sqr) * norm_z_pos
             + 2.0 * quat_w * quat_cross_norm_pos_z,
     ]
 }
