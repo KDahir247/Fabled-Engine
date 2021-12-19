@@ -176,6 +176,10 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/tokio-89926a1edef7decc/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_compression/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_async/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_asset/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_fx/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_physic/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_intrinsic/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />

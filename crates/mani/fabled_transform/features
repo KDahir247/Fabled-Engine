@@ -1,0 +1,2 @@
+Having something like InverseTransformDirection, InverseTransformPoint, and InverseTransformVector.
+Also having it counterpart TransformDirection, TransformPoint, TransformVector.

@@ -1,3 +1,3 @@
-mod mat4;
-
-pub use mat4::*;
+mod vec2;
+mod vec3;
+mod vec4;
