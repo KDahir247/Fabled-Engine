@@ -19,17 +19,21 @@ mod translation;
 
 #[cfg(test)]
 mod data_test {
-    use crate::container::rotation::Rotation;
-    use crate::{Frozen, Parent, Scale, Translation};
+    use crate::{Child, Frozen, LocalToWorld, Parent, Rotation, Scale, ScaleType, Translation};
 
     #[test]
     fn data_size() {
+        let child_size = std::mem::size_of::<Child>();
+        assert_eq!(child_size & (child_size - 1), 0);
+
+        let local_world_size = std::mem::size_of::<LocalToWorld>();
+        assert_eq!(local_world_size & (local_world_size - 1), 0);
+
         let frozen_size = std::mem::size_of::<Frozen>();
         assert!(frozen_size.eq(&0));
 
         let parent_size = std::mem::size_of::<Parent>();
         assert_eq!(parent_size & (parent_size - 1), 0);
-
 
         let position_size = std::mem::size_of::<Translation>();
         assert_eq!(position_size & (position_size - 1), 0);
@@ -39,11 +43,20 @@ mod data_test {
 
         let scale_size = std::mem::size_of::<Scale>();
         assert_eq!(scale_size & (scale_size - 1), 0);
+
+        let scale_type = std::mem::size_of::<ScaleType>();
+        assert_eq!(scale_type & (scale_type - 1), 0);
     }
 
 
     #[test]
     fn data_alignment() {
+        let child_alignment = std::mem::align_of::<Child>();
+        assert_eq!(child_alignment & (child_alignment - 1), 0);
+
+        let local_world_alignment = std::mem::align_of::<LocalToWorld>();
+        assert_eq!(local_world_alignment & (local_world_alignment - 1), 0);
+
         let frozen_alignment = std::mem::align_of::<Frozen>();
         assert_eq!(frozen_alignment & (frozen_alignment - 1), 0);
 
@@ -58,5 +71,8 @@ mod data_test {
 
         let scale_alignment = std::mem::align_of::<Scale>();
         assert_eq!(scale_alignment & (scale_alignment - 1), 0);
+
+        let scale_type_alignment = std::mem::align_of::<ScaleType>();
+        assert_eq!(scale_type_alignment & (scale_type_alignment - 1), 0);
     }
 }

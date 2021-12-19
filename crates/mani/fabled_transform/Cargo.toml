@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 glam = {version = "0.19.0", features = ["bytemuck"]}
+shipyard = {git = "https://github.com/leudz/shipyard", branch = "master" , features = ["thread_local", "proc", "parallel"]}

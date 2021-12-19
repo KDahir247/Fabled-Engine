@@ -11,3 +11,7 @@ impl Default for Translation {
         }
     }
 }
+
+impl shipyard::Component for Translation {
+    type Tracking = shipyard::track::All;
+}

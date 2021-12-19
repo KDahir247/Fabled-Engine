@@ -7,12 +7,6 @@ pub fn removed_deleted_transform_system(
     mut scale_storage: shipyard::ViewMut<Scale>,
     mut local_to_world_storage: ViewMut<LocalToWorld>,
 ) {
-    translation_storage.track_deletion().track_removal();
-    rotation_storage.track_deletion().track_removal();
-    scale_storage.track_deletion().track_removal();
-    local_to_world_storage.track_deletion().track_removal();
-
-
     let (removed_position, deleted_position) = translation_storage.take_removed_and_deleted();
 
     {
@@ -72,65 +66,59 @@ pub fn removed_deleted_transform_system(
     }
 }
 
-pub fn missing_core_transform_system(
-    entity: EntitiesView,
-    mut translation_storage: ViewMut<Translation>,
-    mut rotation_storage: ViewMut<Rotation>,
-    mut scale_storage: ViewMut<Scale>,
-    mut local_to_world_storage: ViewMut<LocalToWorld>,
-) {
-    (&entity).iter().for_each(|entity_id| {
-        if !translation_storage.contains(entity_id) {
-            translation_storage.add_component_unchecked(entity_id, Translation::default());
-        }
-
-        if !rotation_storage.contains(entity_id) {
-            rotation_storage.add_component_unchecked(entity_id, Rotation::default());
-        }
-
-        if !scale_storage.contains(entity_id) {
-            scale_storage.add_component_unchecked(entity_id, Scale::default());
-        }
-        if !local_to_world_storage.contains(entity_id) {
-            local_to_world_storage.add_component_unchecked(entity_id, LocalToWorld::default());
-        }
-    });
-}
-
 
 #[cfg(test)]
 mod transform_validation_test {
 
-    use crate::system::transform::transform_validation_system::{
-        missing_core_transform_system, removed_deleted_transform_system,
-    };
+    use crate::system::transform::transform_validation_system::removed_deleted_transform_system;
     use fabled_transform::{LocalToWorld, Rotation, Scale, Translation};
-    use shipyard::{Get, World};
+    use shipyard::{Get, Remove, World};
 
     #[test]
     fn transform_validation() {
         let mut world = World::new();
 
-        let entity_id = world.add_entity((Translation::default(),));
+        let entity_id = world.add_entity((
+            Translation::default(),
+            Rotation::default(),
+            Scale::default(),
+            LocalToWorld::default(),
+        ));
 
         shipyard::Workload::builder("run_test")
-            .with_system(&missing_core_transform_system)
             .with_system(&removed_deleted_transform_system)
             .add_to_world(&world)
             .unwrap();
 
+        {
+            let (mut local_world_storage, mut scale_storage, mut rotation_storage) = world
+                .borrow::<(
+                    shipyard::ViewMut<LocalToWorld>,
+                    shipyard::ViewMut<Scale>,
+                    shipyard::ViewMut<Rotation>,
+                )>()
+                .unwrap();
+
+            rotation_storage.remove(entity_id);
+            scale_storage.remove(entity_id);
+            local_world_storage.remove(entity_id);
+        }
+
         world.run_workload("run_test").unwrap();
 
-        let (local_world_storage, scale_storage, rotation_storage) = world
-            .borrow::<(
-                shipyard::View<LocalToWorld>,
-                shipyard::View<Scale>,
-                shipyard::View<Rotation>,
-            )>()
-            .unwrap();
+        {
+            let (local_world_storage, scale_storage, rotation_storage) = world
+                .borrow::<(
+                    shipyard::View<LocalToWorld>,
+                    shipyard::View<Scale>,
+                    shipyard::View<Rotation>,
+                )>()
+                .unwrap();
 
-        (&local_world_storage).get(entity_id).unwrap();
-        (&scale_storage).get(entity_id).unwrap();
-        (&rotation_storage).get(entity_id).unwrap();
+            (&local_world_storage).get(entity_id).unwrap();
+            (&scale_storage).get(entity_id).unwrap();
+            (&rotation_storage).get(entity_id).unwrap();
+        }
+        world.run_workload("run_test").unwrap();
     }
 }

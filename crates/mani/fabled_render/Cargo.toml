@@ -15,7 +15,7 @@ basis-universal-sys = "0.1.1"
 
 # Core
 serde = "1.0.126"
-thiserror = "1.0.29"
+thiserror = "1.0.30"
 anyhow = {version = "1.0.42"}
 bytemuck = {version = "1.7.0", features = ["derive"]}
 bitflags = "1.2.1"

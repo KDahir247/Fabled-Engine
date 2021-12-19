@@ -22,7 +22,7 @@ pub fn calculate_local_world_system(
         !&parent_storage,
         !&frozen_storage,
     )
-        .fast_par_iter()
+        .par_iter()
         .for_each(|(translation, rotation, scale, mut local_world, _, _)| {
             local_world.value = get_transformation_matrix(*translation, *rotation, *scale);
         });
@@ -43,16 +43,14 @@ pub fn calculate_local_world_parent_system(
         &parent_storage,
         !&frozen_storage,
     )
-        .fast_iter()
+        .iter()
         .with_id()
         .for_each(|(entity_id, (translation, rotation, scale, parent, _))| {
-            let mut identity_matrix = LocalToWorld::default();
             let parent_entity_id =
                 EntityId::from_inner(parent.value).unwrap_or_else(EntityId::dead);
 
-            let parent_local_to_world_matrix = (&local_to_world_storage)
-                .fast_get(parent_entity_id)
-                .unwrap_or(&identity_matrix);
+            let parent_local_to_world_matrix =
+                (&local_to_world_storage).get(parent_entity_id).unwrap();
 
             let (parent_world_translation, parent_world_rotation, parent_world_scale) =
                 decompose_transformation_matrix(parent_local_to_world_matrix.value);
@@ -122,9 +120,8 @@ pub fn calculate_local_world_parent_system(
                 ]),
             };
 
-            let child_local_to_world_matrix = (&mut local_to_world_storage)
-                .fast_get(entity_id)
-                .unwrap_or(&mut identity_matrix);
+            let mut child_local_to_world_matrix =
+                (&mut local_to_world_storage).get(entity_id).unwrap();
 
 
             child_local_to_world_matrix.value = get_transformation_matrix(

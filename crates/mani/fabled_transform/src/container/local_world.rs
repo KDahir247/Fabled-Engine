@@ -15,3 +15,7 @@ impl Default for LocalToWorld {
         }
     }
 }
+
+impl shipyard::Component for LocalToWorld {
+    type Tracking = shipyard::track::All;
+}

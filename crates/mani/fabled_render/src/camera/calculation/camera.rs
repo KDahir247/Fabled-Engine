@@ -1,5 +1,5 @@
 use crate::camera::{Oblique, Orthographic, Projection, ViewPort};
-use fabled_transform::{get_transformation_matrix, Orientation, Rotation, Scale, Translation};
+use fabled_transform::{get_transformation_matrix, Rotation, Scale, Translation};
 
 use glam::Vec4Swizzles;
 
@@ -222,8 +222,8 @@ mod camera_matrix_test {
     use crate::camera::{
         Camera, ClippingPlane, Oblique, Orthographic, Perspective, Projection, ViewPort,
     };
-    use crate::shader::SpvOptions::Default;
-    use fabled_transform::{Orientation, Rotation, Scale, Translation};
+
+    use fabled_transform::{Rotation, Scale, Translation};
 
     fn initialize_projection_view_matrix(
         translation_target: [f32; 3],
