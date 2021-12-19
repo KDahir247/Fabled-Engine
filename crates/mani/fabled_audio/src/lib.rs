@@ -70,6 +70,6 @@ mod tests {
 
         standard_output.play_omni(raw_clip, 3.);
 
-        std::thread::sleep(std::time::Duration::from_secs(10000));
+        std::thread::sleep(std::time::Duration::from_secs(5));
     }
 }

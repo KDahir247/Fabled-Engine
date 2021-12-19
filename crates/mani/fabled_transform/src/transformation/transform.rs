@@ -2,20 +2,20 @@ use crate::util::acos;
 use crate::{Rotation, Scale, ScaleType, Translation};
 
 pub fn forward(rotation: Rotation) -> [f32; 3] {
-    let [i, j, k, w] = rotation.value;
+    let [quat_i, quat_j, quat_k, quat_w] = rotation.value;
 
-    let quat_dot = i * i + j * j + k * k;
+    let quat_vector_dot = quat_i * quat_i + quat_j * quat_j + quat_k * quat_k;
 
-    let k2 = k * 2.0;
-    let w2 = w * 2.0;
+    let quat_k2 = quat_k * 2.0;
+    let quat_w2 = quat_w * 2.0;
 
-    let result_upper = [k2 * i, k2 * j, k2 * k];
+    let result_upper = [quat_k2 * quat_i, quat_k2 * quat_j, quat_k2 * quat_k];
 
-    let quaternion_scalar_mul_quat_dot = w * w - quat_dot;
+    let quaternion_scalar_mul_quat_vector_dot = quat_w * quat_w - quat_vector_dot;
 
-    let result_middle = [0.0, 0.0, quaternion_scalar_mul_quat_dot];
+    let result_middle = [0.0, 0.0, quaternion_scalar_mul_quat_vector_dot];
 
-    let result_bottom = [w2 * j, w2 * -i, 0.0];
+    let result_bottom = [quat_w2 * quat_j, quat_w2 * -quat_i, 0.0];
 
     [
         result_upper[0] + result_middle[0] + result_bottom[0],
@@ -25,20 +25,20 @@ pub fn forward(rotation: Rotation) -> [f32; 3] {
 }
 
 pub fn right(rotation: Rotation) -> [f32; 3] {
-    let [i, j, k, w] = rotation.value;
+    let [quat_i, quat_j, quat_k, quat_w] = rotation.value;
 
-    let quat_dot = i * i + j * j + k * k;
+    let quat_vector_dot = quat_i * quat_i + quat_j * quat_j + quat_k * quat_k;
 
-    let quaternion_scalar_mul_quat_dot = w * w - quat_dot;
+    let quaternion_scalar_mul_quat_vector_dot = quat_w * quat_w - quat_vector_dot;
 
-    let i2 = i * 2.0;
-    let w2 = w * 2.0;
+    let quat_i2 = quat_i * 2.0;
+    let quat_w2 = quat_w * 2.0;
 
-    let result_upper = [i2 * i, i2 * j, i2 * k];
+    let result_upper = [quat_i2 * quat_i, quat_i2 * quat_j, quat_i2 * quat_k];
 
-    let result_middle = [quaternion_scalar_mul_quat_dot, 0.0, 0.0];
+    let result_middle = [quaternion_scalar_mul_quat_vector_dot, 0.0, 0.0];
 
-    let result_bottom = [0.0, w2 * k, w2 * -j];
+    let result_bottom = [0.0, quat_w2 * quat_k, quat_w2 * -quat_j];
 
     [
         result_upper[0] + result_middle[0] + result_bottom[0],
@@ -84,38 +84,39 @@ pub fn rotation_matrix_to_quaternion(rotation_matrix: [f32; 9]) -> Rotation {
     let matrix_10 = rotation_matrix[1];
     let matrix_01 = rotation_matrix[3];
 
-    let w = 0.0f32
+    let quat_w = 0.0f32
         .max(1.0 + matrix_00 + matrix_11 + matrix_22)
         .sqrt()
         * 0.5;
 
-    let i = 0.0f32
+    let quat_i = 0.0f32
         .max(1.0 + matrix_00 - matrix_11 - matrix_22)
         .sqrt()
         * 0.5;
 
-    let j = 0.0f32
+    let quat_j = 0.0f32
         .max(1.0 - matrix_00 + matrix_11 - matrix_22)
         .sqrt()
         * 0.5;
 
-    let k = 0.0f32
+    let quat_k = 0.0f32
         .max(1.0 - matrix_00 - matrix_11 + matrix_22)
         .sqrt()
         * 0.5;
 
-    let signed_i = i.copysign(matrix_21 - matrix_12);
-    let signed_j = j.copysign(matrix_02 - matrix_20);
-    let signed_k = k.copysign(matrix_10 - matrix_01);
+    let signed_quat_i = quat_i.copysign(matrix_21 - matrix_12);
+    let signed_quat_j = quat_j.copysign(matrix_02 - matrix_20);
+    let signed_quat_k = quat_k.copysign(matrix_10 - matrix_01);
 
     Rotation{
-        value: [signed_i, signed_j, signed_k,w]
+        value: [signed_quat_i, signed_quat_j, signed_quat_k, quat_w]
     }
 }
 
 #[rustfmt::skip]
 pub fn get_transformation_matrix(position : Translation, rotation : Rotation, scale : Scale) -> [f32; 16] {
     let rotation_matrix = get_rotation_matrix(rotation);
+
     let scalar = match scale.value{
         ScaleType::Uniform(uniform) => [uniform; 3],
         ScaleType::NonUniform(non_uniform) => non_uniform
@@ -161,13 +162,13 @@ pub fn get_axis_angle(rotation: Rotation) -> ([f32; 3], f32) {
 }
 
 pub fn axis_angle_to_quaternion(axis: [f32; 3], angle: f32) -> Rotation {
-    let [x, y, z] = axis;
+    let [pitch, yaw, roll] = axis;
 
     let (sin_half_angle, cos_half_angle) = (angle * 0.5).sin_cos();
 
-    let quat_i = x * sin_half_angle;
-    let quat_j = y * sin_half_angle;
-    let quat_k = z * sin_half_angle;
+    let quat_i = pitch * sin_half_angle;
+    let quat_j = yaw * sin_half_angle;
+    let quat_k = roll * sin_half_angle;
     let quat_w = cos_half_angle;
 
     Rotation {
@@ -176,21 +177,23 @@ pub fn axis_angle_to_quaternion(axis: [f32; 3], angle: f32) -> Rotation {
 }
 
 pub fn get_angle_axis_magnitude(rotation: Rotation) -> [f32; 3] {
-    let ([axis_x, axis_y, axis_z], angle) = get_axis_angle(rotation);
+    let ([pitch, yaw, roll], angle) = get_axis_angle(rotation);
 
-    [axis_x * angle, axis_y * angle, axis_z * angle]
+    [pitch * angle, yaw * angle, roll * angle]
 }
 
 pub fn angle_axis_mag_to_quaternion(axis_mag: [f32; 3]) -> Rotation {
+    let [pitch, yaw, roll] = axis_mag;
+
     let angle =
-        (axis_mag[0] * axis_mag[0] + axis_mag[1] * axis_mag[1] + axis_mag[2] * axis_mag[2]).sqrt();
+        (pitch * pitch + yaw * yaw + roll * roll).sqrt();
 
     let rcp_angle = angle.recip();
 
     let axis = [
-        axis_mag[0] * rcp_angle,
-        axis_mag[1] * rcp_angle,
-        axis_mag[2] * rcp_angle,
+        pitch * rcp_angle,
+        yaw * rcp_angle,
+        roll * rcp_angle,
     ];
 
     axis_angle_to_quaternion(axis, angle)
@@ -213,44 +216,44 @@ pub fn get_euler_angle(rotation: Rotation) -> [f32; 3] {
 
     let quat_ww = quat_w * quat_w;
 
-    let unsafe_y = 2.0 * (quat_ik + quat_jw);
+    let unsafe_euler_y = 2.0 * (quat_ik + quat_jw);
 
-    let x = (-2.0 * (quat_jk - quat_iw)).atan2(quat_ww - quat_ii - quat_jj + quat_kk);
+    let euler_x = (-2.0 * (quat_jk - quat_iw)).atan2(quat_ww - quat_ii - quat_jj + quat_kk);
 
-    let y = unsafe_y.clamp(-1.0, 1.0).asin();
+    let euler_y = unsafe_euler_y.clamp(-1.0, 1.0).asin();
 
-    let z = (-2.0 * (quat_ij - quat_kw)).atan2(quat_ww + quat_ii - quat_jj - quat_kk);
+    let euler_z = (-2.0 * (quat_ij - quat_kw)).atan2(quat_ww + quat_ii - quat_jj - quat_kk);
 
-    [x, y, z]
+    [euler_x, euler_y, euler_z]
 }
 
 pub fn euler_to_quaternion(euler: [f32; 3]) -> Rotation {
-    let [x, y, z] = euler;
+    let [euler_x, euler_y, euler_z] = euler;
 
-    let (sin_quat_i, cos_quat_iw) = (x * 0.5).sin_cos();
-    let (sin_quat_j, cos_quat_jw) = (y * 0.5).sin_cos();
-    let (sin_quat_k, cos_quat_kw) = (z * 0.5).sin_cos();
+    let (sin_quat_i, cos_quat_iw) = (euler_x * 0.5).sin_cos();
+    let (sin_quat_j, cos_quat_jw) = (euler_y * 0.5).sin_cos();
+    let (sin_quat_k, cos_quat_kw) = (euler_z * 0.5).sin_cos();
 
-    let [quat_axis_ix, _, _, quat_axis_iw] = [sin_quat_i, 0.0, 0.0, cos_quat_iw];
+    let [quat_axis_ix, quat_axis_iw] = [sin_quat_i, cos_quat_iw];
 
-    let [_, quat_axis_jy, _, quat_axis_jw] = [0.0, sin_quat_j, 0.0, cos_quat_jw];
+    let [quat_axis_jy, quat_axis_jw] = [ sin_quat_j, cos_quat_jw];
 
-    let [_, _, quat_axis_kz, quat_axis_kw] = [0.0, 0.0, sin_quat_k, cos_quat_kw];
+    let [quat_axis_kz, quat_axis_kw] = [sin_quat_k, cos_quat_kw];
 
-    let w = quat_axis_iw * quat_axis_jw;
+    let quat_w = quat_axis_iw * quat_axis_jw;
 
-    let i = quat_axis_ix * quat_axis_jw;
+    let quat_i = quat_axis_ix * quat_axis_jw;
 
-    let j = quat_axis_iw * quat_axis_jy;
+    let quat_j = quat_axis_iw * quat_axis_jy;
 
-    let k = quat_axis_ix * quat_axis_jy;
+    let quat_k = quat_axis_ix * quat_axis_jy;
 
     Rotation {
         value: [
-            i * quat_axis_kw + j * quat_axis_kz,
-            -i * quat_axis_kz + j * quat_axis_kw,
-            w * quat_axis_kz + k * quat_axis_kw,
-            w * quat_axis_kw - k * quat_axis_kz,
+            quat_i * quat_axis_kw + quat_j * quat_axis_kz,
+            -quat_i * quat_axis_kz + quat_j * quat_axis_kw,
+            quat_w * quat_axis_kz + quat_k * quat_axis_kw,
+            quat_w * quat_axis_kw - quat_k * quat_axis_kz,
         ],
     }
 }
@@ -270,9 +273,11 @@ pub fn decompose_transformation_matrix(
     let sqr_scale_x = transformation_matrix[0] * transformation_matrix[0]
         + transformation_matrix[1] * transformation_matrix[1]
         + transformation_matrix[2] * transformation_matrix[2];
+
     let sqr_scale_y = transformation_matrix[4] * transformation_matrix[4]
         + transformation_matrix[5] * transformation_matrix[5]
         + transformation_matrix[6] * transformation_matrix[6];
+
     let sqr_scale_z = transformation_matrix[8] * transformation_matrix[8]
         + transformation_matrix[9] * transformation_matrix[9]
         + transformation_matrix[10] * transformation_matrix[10];
@@ -386,48 +391,48 @@ pub fn decompose_transformation_matrix(
 }
 
 pub fn transform(vector: [f32; 4], quaternion: Rotation) -> [f32; 3] {
-    let [i, j, k, w] = quaternion.value;
+    let [x_pos, y_pos, z_pos, scalar] = vector;
 
-    let inv_scalar = 1.0 / vector[3];
+    let [quat_i, quat_j, quat_k, quat_w] = quaternion.value;
+
+    let inv_scalar = 1.0 / scalar;
 
 
-    let norm_vector = [
-        vector[0] * inv_scalar,
-        vector[1] * inv_scalar,
-        vector[2] * inv_scalar,
+    let [norm_x_pos, norm_y_pos, norm_z_pos] = [
+        x_pos * inv_scalar,
+        y_pos * inv_scalar,
+        z_pos * inv_scalar,
     ];
 
-    let quaternion_vector = [i, j, k];
+    let quaternion_dot_vector = quat_i * norm_x_pos
+        + quat_j * norm_y_pos
+        + quat_k * norm_z_pos;
 
-    let quaternion_scalar = w;
+    let quaternion_vector_magnitude_sqr = quat_i * quat_i
+        + quat_j * quat_j
+        + quat_k * quat_k;
 
-    let quaternion_dot_vector = quaternion_vector[0] * norm_vector[0]
-        + quaternion_vector[1] * norm_vector[1]
-        + quaternion_vector[2] * norm_vector[2];
-
-    let quaternion_vector_dot_quaternion_vector = quaternion_vector[0] * quaternion_vector[0]
-        + quaternion_vector[1] * quaternion_vector[1]
-        + quaternion_vector[2] * quaternion_vector[2];
-
-    let quaternion_vector_cross_vector = [
-        quaternion_vector[1] * norm_vector[2] - quaternion_vector[2] * norm_vector[1],
-        quaternion_vector[2] * norm_vector[0] - quaternion_vector[0] * norm_vector[2],
-        quaternion_vector[0] * norm_vector[1] - quaternion_vector[1] * norm_vector[0],
+    let [quat_cross_norm_pos_x,quat_cross_norm_pos_y, quat_cross_norm_pos_z ] = [
+        quat_j * norm_z_pos - quat_k * norm_y_pos,
+        quat_k * norm_x_pos - quat_i * norm_z_pos,
+        quat_i * norm_y_pos - quat_j * norm_x_pos,
     ];
 
     [
-        2.0 * quaternion_dot_vector * quaternion_vector[0]
-            + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
-                * norm_vector[0]
-            + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[0],
-        2.0 * quaternion_dot_vector * quaternion_vector[1]
-            + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
-                * norm_vector[1]
-            + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[1],
-        2.0 * quaternion_dot_vector * quaternion_vector[2]
-            + (quaternion_scalar * quaternion_scalar - quaternion_vector_dot_quaternion_vector)
-                * norm_vector[2]
-            + 2.0 * quaternion_scalar * quaternion_vector_cross_vector[2],
+        2.0 * quaternion_dot_vector * quat_i
+            + (quat_w * quat_w - quaternion_vector_magnitude_sqr)
+                * norm_x_pos
+            + 2.0 * quat_w * quat_cross_norm_pos_x,
+        //
+        2.0 * quaternion_dot_vector * quat_j
+            + (quat_w * quat_w - quaternion_vector_magnitude_sqr)
+                * norm_y_pos
+            + 2.0 * quat_w * quat_cross_norm_pos_y,
+        //
+        2.0 * quaternion_dot_vector * quat_k
+            + (quat_w * quat_w - quaternion_vector_magnitude_sqr)
+                * norm_z_pos
+            + 2.0 * quat_w * quat_cross_norm_pos_z,
     ]
 }
 
