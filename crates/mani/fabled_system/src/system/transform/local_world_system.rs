@@ -46,22 +46,26 @@ pub fn calculate_local_world_parent_system(
         .iter()
         .with_id()
         .for_each(|(entity_id, (translation, rotation, scale, parent, _))| {
+            let identity_matrix = LocalToWorld::default();
+
             let parent_entity_id =
                 EntityId::from_inner(parent.value).unwrap_or_else(EntityId::dead);
 
-            let parent_local_to_world_matrix =
-                (&local_to_world_storage).get(parent_entity_id).unwrap();
+            let parent_local_to_world_matrix = (&local_to_world_storage)
+                .get(parent_entity_id)
+                .unwrap_or(&identity_matrix);
 
             let (parent_world_translation, parent_world_rotation, parent_world_scale) =
                 decompose_transformation_matrix(parent_local_to_world_matrix.value);
 
             let parent_world_translation = parent_world_translation.value;
 
-            let inv_parent_world_scalar = 1.0 / parent_world_translation[3];
+            let rcp_parent_world_scalar = 1.0 / (parent_world_translation[3] + f32::EPSILON);
+
             let parent_world_translation = [
-                parent_world_translation[0] * inv_parent_world_scalar,
-                parent_world_translation[1] * inv_parent_world_scalar,
-                parent_world_translation[2] * inv_parent_world_scalar,
+                parent_world_translation[0] * rcp_parent_world_scalar,
+                parent_world_translation[1] * rcp_parent_world_scalar,
+                parent_world_translation[2] * rcp_parent_world_scalar,
             ];
 
             let parent_world_rotation = parent_world_rotation.value;

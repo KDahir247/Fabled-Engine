@@ -11,43 +11,53 @@ pub fn removed_deleted_transform_system(
         translation_storage.take_removed_and_deleted();
 
     {
-        removed_translation_entities.iter().for_each(|&entity_id| {
-            translation_storage.add_component_unchecked(entity_id, Translation::default());
-        });
-
-        deleted_translation_metas
+        removed_translation_entities
             .iter()
-            .for_each(|&(entity_id, deleted_translation)| {
-                translation_storage.add_component_unchecked(entity_id, deleted_translation);
+            .for_each(|&removed_translation_entity_id| {
+                translation_storage
+                    .add_component_unchecked(removed_translation_entity_id, Translation::default());
             });
+
+        deleted_translation_metas.iter().for_each(
+            |&(deleted_translation_entity_id, deleted_translation)| {
+                translation_storage
+                    .add_component_unchecked(deleted_translation_entity_id, deleted_translation);
+            },
+        );
     }
 
     let (removed_rotation_entities, deleted_rotation_metas) =
         rotation_storage.take_removed_and_deleted();
 
     {
-        removed_rotation_entities.iter().for_each(|&entity_id| {
-            rotation_storage.add_component_unchecked(entity_id, Rotation::default());
-        });
-
-        deleted_rotation_metas
+        removed_rotation_entities
             .iter()
-            .for_each(|&(entity_id, deleted_rotation)| {
-                rotation_storage.add_component_unchecked(entity_id, deleted_rotation)
+            .for_each(|&removed_rotation_entity_id| {
+                rotation_storage
+                    .add_component_unchecked(removed_rotation_entity_id, Rotation::default());
             });
+
+        deleted_rotation_metas.iter().for_each(
+            |&(deleted_rotation_entity_id, deleted_rotation)| {
+                rotation_storage
+                    .add_component_unchecked(deleted_rotation_entity_id, deleted_rotation)
+            },
+        );
     }
 
     let (removed_scale_entities, deleted_scale_metas) = scale_storage.take_removed_and_deleted();
 
     {
-        removed_scale_entities.iter().for_each(|&entity_id| {
-            scale_storage.add_component_unchecked(entity_id, Scale::default());
-        });
+        removed_scale_entities
+            .iter()
+            .for_each(|&removed_scale_entity_id| {
+                scale_storage.add_component_unchecked(removed_scale_entity_id, Scale::default());
+            });
 
         deleted_scale_metas
             .iter()
-            .for_each(|&(entity_id, deleted_scale)| {
-                scale_storage.add_component_unchecked(entity_id, deleted_scale);
+            .for_each(|&(deleted_scale_entity_id, deleted_scale)| {
+                scale_storage.add_component_unchecked(deleted_scale_entity_id, deleted_scale);
             });
     }
 
@@ -56,15 +66,21 @@ pub fn removed_deleted_transform_system(
         local_to_world_storage.take_removed_and_deleted();
 
     {
-        removed_local_world_entities.iter().for_each(|&entity_id| {
-            local_to_world_storage.add_component_unchecked(entity_id, LocalToWorld::default());
-        });
-
-        deleted_local_world_metas
+        removed_local_world_entities
             .iter()
-            .for_each(|&(entity_id, deleted_local_world)| {
-                local_to_world_storage.add_component_unchecked(entity_id, deleted_local_world);
+            .for_each(|&removed_local_world_entity_id| {
+                local_to_world_storage.add_component_unchecked(
+                    removed_local_world_entity_id,
+                    LocalToWorld::default(),
+                );
             });
+
+        deleted_local_world_metas.iter().for_each(
+            |&(deleted_local_world_entity_id, deleted_local_world)| {
+                local_to_world_storage
+                    .add_component_unchecked(deleted_local_world_entity_id, deleted_local_world);
+            },
+        );
     }
 }
 
