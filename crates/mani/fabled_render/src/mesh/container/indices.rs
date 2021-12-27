@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Indices {
     U16(Vec<u16>),
     U32(Vec<u32>),

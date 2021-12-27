@@ -13,5 +13,7 @@ bitflags = {version = "1.2.1"}
 rayon = {version = "1.5.1" }
 parking_lot = { version = "0.11.2" }
 thiserror = "1.0.29"
+fabled_system = {path = "../fabled_system", version = "*"}
+
 
 fabled_render = {path = "../fabled_render", version = "*"}

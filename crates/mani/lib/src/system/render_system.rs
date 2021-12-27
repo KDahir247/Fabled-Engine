@@ -101,6 +101,9 @@ pub fn begin_render_pass_system(
 
 
                 for m in &render.model.as_ref().unwrap().meshes {
+
+
+
                     render_pass.set_bind_group(
                         0,
                         &render.model.as_ref().unwrap().materials[m.material_id].mat_group,

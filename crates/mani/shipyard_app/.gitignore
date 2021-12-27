@@ -1,0 +1,8 @@
+/target
+_archive
+
+.DS_Store
+Thumbs.db
+
+# ignore for libraries
+Cargo.lock

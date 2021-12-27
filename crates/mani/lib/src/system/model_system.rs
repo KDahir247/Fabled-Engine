@@ -2,7 +2,6 @@ use crate::component::prelude::*;
 use crate::util::texture::*;
 use rayon::prelude::*;
 
-use crate::util::math::reject;
 use shipyard::{IntoFastIter, IntoWithId};
 use wgpu::util::DeviceExt;
 
@@ -119,171 +118,94 @@ pub fn load_model_system(
         .for_each(|(model, render_detail)| {
             let parent_directory: &std::path::Path = model.path.parent().unwrap();
 
-            let file_ext = model.path.extension().unwrap().to_str().unwrap();
+            let obj_loader = fabled_obj::ObjLoader::default();
 
-            match file_ext {
-                "obj" => { println!("Reading wavefront obj file at : {}", parent_directory.display()); }
-                ext => {eprintln!("Unsupported file extension for reading : {}. \nOnly file obj extensions are supported \n", ext) }
-            }
 
-            let (obj_model, obj_material) = tobj::load_obj(&model.path, &tobj::LoadOptions{
-                single_index: true,
-                triangulate: true,
-                ignore_points: true,
-                ignore_lines: true
-            }).unwrap();
+            let (model, materials) = obj_loader.load(&model.path, 4).unwrap();
 
-            match obj_material{
-                Ok(_) => {}
-                Err(err) => {eprintln!("error : {}", err);}
-            }
-
-            let obj_material = obj_material.unwrap();
-
-            let materials : Vec<Material> = obj_material
+            let materials: Vec<Material> = materials
                 .par_iter()
-                .map(|mat : &tobj::Material|{
-                    let diffuse_path : &String = &mat.diffuse_texture;
+                .map(|mat| {
+                    let diffuse_path: &String = &mat.diffuse_texture;
 
-                    //todo once loaded we dont need to store it????????????
-                    let diffuse_texture = load(&render.core.device, &render.pass.queue, parent_directory.join(diffuse_path)).unwrap();
 
-                    let diffuse_map = Mapping{ texture: diffuse_texture };
+                    // todo once loaded we dont need to store it????????????
+                    let diffuse_texture = load(
+                        &render.core.device,
+                        &render.pass.queue,
+                        parent_directory.join(diffuse_path),
+                    )
+                    .unwrap();
 
-                    let material_color = ColorRaw{
+                    let diffuse_map = Mapping {
+                        texture: diffuse_texture,
+                    };
+
+                    let material_color = ColorRaw {
                         ambient_color: glam::Vec3::from(mat.ambient).extend(0.5),
                         diffuse_color: glam::Vec3::from(mat.diffuse).extend(0.9),
                         specular_color: glam::Vec3::from(mat.specular).extend(0.8),
-                        factor: glam::const_vec3!([mat.shininess, mat.dissolve, mat.optical_density]),
-                        ___padding___: 0
+                        factor: glam::const_vec3!([
+                            mat.shininess,
+                            mat.dissolve,
+                            mat.optical_density
+                        ]),
+                        ___padding___: 0,
                     };
 
-                    Material::new(&render.core.device, mat.to_owned().name, material_color, diffuse_map, &render_detail.material_layout)
-
-                }).collect::<Vec<Material>>();
-
-            let meshes : Vec<Mesh> = obj_model
-                .par_iter()
-                .map(|m : &tobj::Model|{
-
-                    let mut vertices: Vec<VertexRaw> = (0..m.mesh.positions.len() / 3)
-                        .into_iter()
-                        .map(|i|{
-
-                            let vertex : [f32 ; 3] =
-                                [
-                                    m.mesh.positions[i * 3],
-                                    m.mesh.positions[i * 3 + 1],
-                                    m.mesh.positions[i * 3 + 2]
-                                ];
-
-                            let normal : [f32;3] = if m.mesh.normals.is_empty(){
-                                [0.0, 0.0, 0.0]
-                            }else{
-                                [
-                                    m.mesh.normals[i * 3],
-                                    m.mesh.normals[i * 3 + 1],
-                                    m.mesh.normals[i * 3 + 2],
-                                ]
-                            };
-
-                            let tex_coord = if m.mesh.texcoords.is_empty(){
-                                [0.0,0.0]
-                            }else{
-                                [
-                                    m.mesh.texcoords[i * 2],
-                                    m.mesh.texcoords[i * 2 + 1]
-                                ]
-                            };
-
-                            VertexRaw{
-                                position: glam::const_vec3!(vertex),
-                                tex_coord: glam::const_vec2!(tex_coord),
-                                normal: glam::const_vec3!(normal),
-                                tangent : glam::Vec4::ZERO,
-                                bi_tangent: glam::Vec4::ZERO
-                            }
-                        }).collect::<Vec<VertexRaw>>();
-
-                    //todo re-look at
-                    for c in m.mesh.indices.chunks(3){
-                        //calculate tangent and bi-tangent
-                        let i0 = vertices[c[0] as usize];
-                        let i1 = vertices[c[1] as usize];
-                        let i2 = vertices[c[2] as usize];
-
-                        let p0 = i0.position;
-                        let p1 = i1.position;
-                        let p2 = i2.position;
-
-                        let w0 = i0.tex_coord;
-                        let w1 = i1.tex_coord;
-                        let w2 = i2.tex_coord;
+                    Material::new(
+                        &render.core.device,
+                        mat.to_owned().name,
+                        material_color,
+                        diffuse_map,
+                        &render_detail.material_layout,
+                    )
+                })
+                .collect::<Vec<Material>>();
 
 
-                        let e1 = p1 - p0;
-                        let e2 = p2 - p0;
+            let meshes: Vec<Mesh> =
+                model
+                    .meshes
+                    .par_iter()
+                    .map(|m| {
+                        let mesh = m.to_owned();
+                        let vertices = mesh.vertices;
 
-                        let x1 = w1.x - w0.x;
-                        let y1 = w1.y - w0.y;
+                        let mut ab = Vec::new();
 
-                        let x2 = w2.x - w0.x;
-                        let y2 = w2.y - w0.y;
-
-                        let r = 1.0f32 / (x1 * y2 - x2 * y1 );
-                        let t = (e1 * y2 - e2 * y1) * r;
-                        let b = (e2 * x1 - e1 * x2) * r;
+                        if let fabled_render::mesh::Indices::U32(a) = mesh.indices {
+                            ab = a;
+                        }
 
 
-                        vertices[c[0] as usize].tangent = t.extend(0.0);
-                        vertices[c[1] as usize].tangent = t.extend(0.0);
-                        vertices[c[2] as usize].tangent = t.extend(0.0);
+                        let vertex_buffer = render.core.device.create_buffer_init(
+                            &wgpu::util::BufferInitDescriptor {
+                                label: Some("Vertex Buffer"),
+                                contents: bytemuck::cast_slice(&vertices),
+                                usage: wgpu::BufferUsage::VERTEX,
+                            },
+                        );
 
-                        vertices[c[0] as usize].bi_tangent = b.extend(0.0);
-                        vertices[c[1] as usize].bi_tangent = b.extend(0.0);
-                        vertices[c[2] as usize].bi_tangent = b.extend(0.0);
-                    };
+                        let index_buffer = render.core.device.create_buffer_init(
+                            &wgpu::util::BufferInitDescriptor {
+                                label: Some("Index Buffer"),
+                                contents: bytemuck::cast_slice(ab.as_slice()),
+                                usage: wgpu::BufferUsage::INDEX,
+                            },
+                        );
 
-                    // Orthonormalize each tangent amd calculate the handedness
-                    // todo normal is not normalized, bi_tangent is not normalized
-                    for vertex in vertices.iter_mut(){
-                        vertex.normal = vertex.normal.normalize();
+                        // todo remove.
+                        Mesh {
+                            vertex_buffer,
+                            index_buffer,
+                            indices: ab.len() as u32,
+                            material_id: m.material_id as usize,
+                        }
+                    })
+                    .collect::<Vec<Mesh>>();
 
-                        let t = vertex.tangent;
-                        let b = vertex.bi_tangent;
-                        let n = vertex.normal;
-
-                        let w : f32 = if t.truncate().cross(b.truncate()).dot(n) > 0.0{
-                            1.0
-                        }else{
-                            -1.0
-                        };
-
-                        vertex.tangent = reject(n,t.truncate()).normalize().extend(w);
-                    }
-
-                    let vertex_buffer = render.core.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
-                        label: Some("Vertex Buffer"),
-                        contents: bytemuck::cast_slice(&vertices),
-                        usage: wgpu::BufferUsage::VERTEX
-                    });
-
-                    let index_buffer = render.core.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
-                        label: Some("Index Buffer"),
-                        contents: bytemuck::cast_slice(&m.mesh.indices),
-                        usage: wgpu::BufferUsage::INDEX
-                    });
-
-                    Mesh{
-                        name: m.name.to_owned(),
-                        vertex_buffer,
-                        index_buffer,
-                        indices: m.mesh.indices.len() as u32,
-                        material_id: m.mesh.material_id.unwrap_or(0)
-                    }
-                }).collect::<Vec<Mesh>>();
-
-            render_detail.model = Some(Model{ meshes, materials });
+            render_detail.model = Some(Model { meshes, materials });
         });
 
     Ok(())
