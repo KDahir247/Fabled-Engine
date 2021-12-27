@@ -24,8 +24,6 @@ pub fn calculate_local_world_system(
     )
         .par_iter()
         .for_each(|(translation, rotation, scale, mut local_world, _, _)| {
-            println!("works");
-
             local_world.value = get_transformation_matrix(*translation, *rotation, *scale);
         });
 }
@@ -143,7 +141,6 @@ mod local_world_test {
     use crate::system::transform::local_world_system::{
         calculate_local_world_parent_system, calculate_local_world_system,
     };
-    use crate::TransformPlugin;
     use fabled_transform::{LocalToWorld, Parent, ScaleType};
     use shipyard::Get;
 
@@ -203,9 +200,7 @@ mod local_world_test {
 
         let mut world = shipyard::World::new();
 
-        let mut app = shipyard_app::App::new_with_world(world);
-
-        let root_entity_parent = app.world.add_entity((
+        let root_entity_parent = world.add_entity((
             fabled_transform::Translation {
                 value: [44.42781, 13.65856, 41.4725, 1.0],
             },
@@ -218,7 +213,7 @@ mod local_world_test {
             fabled_transform::LocalToWorld::default(),
         ));
 
-        let entity_parent = app.world.add_entity((
+        let entity_parent = world.add_entity((
             fabled_transform::Translation {
                 value: [34.42781, -13.65856, -1.472504, 1.0],
             },
@@ -235,7 +230,7 @@ mod local_world_test {
         ));
 
 
-        let entity_child = app.world.add_entity((
+        let entity_child = world.add_entity((
             fabled_transform::Translation {
                 value: [12.2, 9.45, 11.0, 1.0],
             },
@@ -251,17 +246,20 @@ mod local_world_test {
             },
         ));
 
-        let mut builder = shipyard_app::AppBuilder::new(&app);
-        builder.add_plugin(TransformPlugin::default());
-        builder.finish().run(&app);
+        shipyard::Workload::builder("run_test")
+            .with_system(&calculate_local_world_system)
+            .with_system(&calculate_local_world_parent_system)
+            .add_to_world(&world)
+            .unwrap();
 
-        let local_world_storage = app.world.borrow::<shipyard::View<LocalToWorld>>().unwrap();
+        world.run_workload("run_test").unwrap();
+
+        let local_world_storage = world.borrow::<shipyard::View<LocalToWorld>>().unwrap();
 
         let root_parent_local_world = (&local_world_storage).get(root_entity_parent).unwrap();
         let parent_local_world = (&local_world_storage).get(entity_parent).unwrap();
         let child_local_world = (&local_world_storage).get(entity_child).unwrap();
 
-        println!("{:?}", root_parent_local_world);
         // Unity's root parent local to world matrix result (our matrix is column-major)
         // 2.00000	0.00000	0.00000	44.42781
         // 0.00000	2.00000	0.00000	13.65856

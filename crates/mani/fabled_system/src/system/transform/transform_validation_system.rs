@@ -89,7 +89,6 @@ pub fn removed_deleted_transform_system(
 mod transform_validation_test {
 
     use crate::system::transform::transform_validation_system::removed_deleted_transform_system;
-    use crate::TransformPlugin;
     use fabled_transform::{LocalToWorld, Rotation, Scale, Translation};
     use shipyard::{Get, Remove, World};
 
@@ -97,13 +96,18 @@ mod transform_validation_test {
     fn transform_validation() {
         let mut world = World::new();
 
-
         let entity_id = world.add_entity((
             Translation::default(),
             Rotation::default(),
             Scale::default(),
             LocalToWorld::default(),
         ));
+
+        shipyard::Workload::builder("transform_validation_test")
+            .with_system(&removed_deleted_transform_system)
+            .add_to_world(&world)
+            .unwrap();
+
         {
             let (mut local_world_storage, mut scale_storage, mut rotation_storage) = world
                 .borrow::<(
@@ -118,15 +122,10 @@ mod transform_validation_test {
             local_world_storage.remove(entity_id);
         }
 
-        let app = shipyard_app::App::new_with_world(world);
-        let mut app_builder = shipyard_app::AppBuilder::new(&app);
-        app_builder.add_plugin(TransformPlugin::default());
-        app_builder.finish().run(&app);
-
+        world.run_workload("transform_validation_test").unwrap();
 
         {
-            let (local_world_storage, scale_storage, rotation_storage) = app
-                .world
+            let (local_world_storage, scale_storage, rotation_storage) = world
                 .borrow::<(
                     shipyard::View<LocalToWorld>,
                     shipyard::View<Scale>,
@@ -138,5 +137,6 @@ mod transform_validation_test {
             (&scale_storage).get(entity_id).unwrap();
             (&rotation_storage).get(entity_id).unwrap();
         }
+        world.run_workload("transform_validation_test").unwrap();
     }
 }

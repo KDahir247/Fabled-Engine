@@ -153,6 +153,7 @@ impl VertexRaw {
 }
 
 pub struct Mesh {
+    pub name: String,
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
     pub indices: u32,
