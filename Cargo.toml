@@ -36,6 +36,7 @@ optional = true
 logger = ["log" ,"env_logger"]
 
 [dependencies]
+fabled_obj = {path = "crates/mani/fabled_obj", version = "*"}
 fabled_gltf = {path = "crates/mani/fabled_gltf", version = "*"}
 fabled_render = {path = "crates/mani/fabled_render", version = "*"}
 fabled_audio = {path = "crates/mani/fabled_audio", version = "*"}

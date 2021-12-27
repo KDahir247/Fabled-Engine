@@ -5,7 +5,7 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 <br/>
 <br/>
 
-# The transform branch is where frequent development and up to date development will occur
+# The fbx branch is where frequent development and up to date development will occur
 
 Going to change my development pipeline. I will use github for public changes, while also using jetbrain source for interal team/self project management and
 forward detail github.
@@ -20,9 +20,6 @@ forward detail github.
 
 <br/>
 
-# current progress:
-* Working on the obj branch for loading obj and mtl files
-<br/>
 
 ![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)
 <br/>

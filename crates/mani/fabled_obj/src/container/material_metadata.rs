@@ -1,6 +1,6 @@
 use crate::{IlluminationModel, Material};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct MaterialMetadata<'a> {
     pub illum_model: IlluminationModel,
     pub materials: Vec<Material<'a>>,
