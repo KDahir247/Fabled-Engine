@@ -1,6 +1,6 @@
-use crate::{LoadFlags, ObjError};
-use fabled_render::mesh::{Indices, Mesh, Model, Vertex};
+use crate::{LoadFlags, ModelMetadata, ObjError};
 
+use fabled_render::mesh::{Indices, Mesh, Model, Vertex};
 
 use rayon::prelude::*;
 
@@ -26,8 +26,8 @@ impl ObjLoader {
     pub fn load<P: AsRef<std::path::Path>>(
         &self,
         obj_path: P,
-        chunk_size: Option<usize>,
-    ) -> Result<(Model, Vec<tobj::Material>), ObjError> {
+        chunk_size: usize,
+    ) -> Result<ModelMetadata, ObjError> {
         let obj_path = obj_path.as_ref();
 
         let file = std::fs::File::open(obj_path)?;
@@ -36,20 +36,13 @@ impl ObjLoader {
 
         let load_flags = LoadFlags::from_bits(self.flags).unwrap_or_default();
 
-        let (models, mtl) =
-            tobj::load_obj_buf(&mut obj_file_buffer, &load_flags.into(), |mtl_path| {
-                let full_path = if let Some(parent) = obj_path.parent() {
-                    parent.join(mtl_path)
-                } else {
-                    mtl_path.to_owned()
-                };
-
-                tobj::load_mtl(full_path)
+        let (models, _) =
+            tobj::load_obj_buf(&mut obj_file_buffer, &load_flags.into(), |_mtl_path| {
+                Err(tobj::LoadError::GenericFailure)
             })
             .map_err(ObjError::ObjError)?;
 
-
-        let chunk_size = chunk_size.unwrap_or(4).min(models.len());
+        let chunk_size = chunk_size.min(models.len());
 
         let chunk_model_data = models.chunks_exact(chunk_size);
 
@@ -76,64 +69,46 @@ impl ObjLoader {
             meshes.push(mesh);
         }
 
-
-        // add it to a entity ecs such as shipyard.
-        // create a entity for each mesh and add the same index material to it.
-
-
-        let a = mtl.unwrap_or_default();
-
-        for c in &a {
-            println!("{:}", c.name)
-        }
-
-        for b in &meshes {
-            println!("{} {}", b.material_id, a.len());
-        }
-
-        Ok((Model { meshes }, a))
+        Ok(ModelMetadata {
+            mtl_path: std::path::PathBuf::from(obj_path.parent().unwrap()),
+            model: Model { meshes },
+        })
     }
 
     fn calculate_obj_internal(&self, model: &tobj::Model) -> Mesh {
-        let vertex_len = model.mesh.positions.len() / 3;
-
-        let mut vertices = vec![Vertex::default(); vertex_len];
-
-        println!("{}", model.name);
-
-        vertices
-            .par_iter_mut()
-            .enumerate()
-            .for_each(|(index, vertex)| {
-                let index_3 = index * 3;
-                let index_2 = index * 2;
-
-                assert!(model.mesh.positions.len() > index_3 + 1);
-                assert!(model.mesh.normals.len() > index_3 + 1);
-                assert!(model.mesh.texcoords.len() > index_2);
-
-                vertex.position = [
-                    model.mesh.positions[index_3],
-                    model.mesh.positions[index_3 + 1],
-                    model.mesh.positions[index_3 + 2],
+        let vertices = (0..model.mesh.positions.len() / 3)
+            .into_par_iter()
+            .map(|index| {
+                let vertex = [
+                    model.mesh.positions[index * 3],
+                    model.mesh.positions[index * 3 + 1],
+                    model.mesh.positions[index * 3 + 2],
                 ];
 
-                vertex.normal = [
-                    model.mesh.normals[index_3],
-                    model.mesh.normals[index_3 + 1],
-                    model.mesh.normals[index_3 + 2],
-                ];
+                let normal: &[f32] = model
+                    .mesh
+                    .normals
+                    .get((index * 3)..(index * 3 + 3))
+                    .unwrap_or(&[0.0; 3]);
 
-                vertex.tex_coord = [
-                    model.mesh.texcoords[index_2],
-                    model.mesh.texcoords[index_2 + 1],
-                ];
-            });
+                let tex_coord: &[f32] = model
+                    .mesh
+                    .texcoords
+                    .get((index * 2)..(index * 2 + 2))
+                    .unwrap_or(&[0.0; 3]);
 
+                Vertex {
+                    position: vertex,
+                    tex_coord: [tex_coord[0], tex_coord[1]],
+                    normal: [normal[0], normal[1], normal[2]],
+                    ..Default::default()
+                }
+            })
+            .collect::<Vec<Vertex>>();
 
-        let indices = model.mesh.indices.to_vec();
+        let indices = model.mesh.indices.to_owned();
 
-        let material_id = model.mesh.material_id.unwrap_or_default();
+        let material_id = model.mesh.material_id.unwrap_or_default() as u32;
 
         Mesh {
             vertices,
@@ -155,7 +130,7 @@ mod obj_loader_test {
         let mut obj_dir = load_test_obj("obj");
 
         if let Some(path) = obj_dir.pop() {
-            let model = obj.load(path, Some(5));
+            let model = obj.load(path, 3);
             assert!(model.is_ok());
         } else {
             panic!("Could not find obj file in obj/test");
@@ -169,7 +144,7 @@ mod obj_loader_test {
         let mut obj_dir = load_test_obj("obj");
 
         if let Some(path) = obj_dir.pop() {
-            let girl = obj.load(path.clone(), Some(3)).unwrap();
+            let girl = obj.load(path.clone(), 3).unwrap();
 
             let file = std::fs::File::open(path).unwrap();
 
@@ -183,7 +158,7 @@ mod obj_loader_test {
             )
             .unwrap();
 
-            assert_eq!(models.len(), girl.0.meshes.len());
+            assert_eq!(models.len(), girl.model.meshes.len());
         } else {
             panic!("Could not find obj file in obj/test");
         }
