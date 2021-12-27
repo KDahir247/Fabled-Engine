@@ -30,7 +30,7 @@ mod data_test {
     #[test]
     fn align_size() {
         let mesh_data = std::mem::align_of::<Mesh>();
-        assert_eq!(mesh_data, 8);
+        assert_eq!(mesh_data, 16);
 
         let model = std::mem::align_of::<Model>();
         assert_eq!(model, 16);
