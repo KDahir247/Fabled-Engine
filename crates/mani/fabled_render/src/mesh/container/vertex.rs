@@ -1,11 +1,11 @@
 #[repr(C, align(16))]
 #[derive(Debug, Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Vertex {
-    pub tangent: [f32; 4],    // x, y, z, w
-    pub bi_tangent: [f32; 4], // x, y, z, w
     pub position: [f32; 3],   // x, y, z
     pub tex_coord: [f32; 2],  // u, v
     pub normal: [f32; 3],     // x, y, z
+    pub tangent: [f32; 4],    // x, y, z, w
+    pub bi_tangent: [f32; 4], // x, y, z, w
 }
 
 impl Default for Vertex {
