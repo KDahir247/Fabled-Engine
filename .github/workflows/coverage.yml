@@ -16,7 +16,7 @@ jobs:
       - name: Generate report
         uses: actions-rs/tarpaulin@v0.1
         with:
-          args: '-p src -p crates'
+          args: '-p Fabled_Engine'
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1
         with:
