@@ -39,6 +39,7 @@ logger = ["log" ,"env_logger"]
 fabled_gltf = {path = "crates/mani/fabled_gltf", version = "*"}
 fabled_render = {path = "crates/mani/fabled_render", version = "*"}
 fabled_audio = {path = "crates/mani/fabled_audio", version = "*"}
+fabled_fbx = {path = "crates/mani/fabled_fbx", version = "*"}
 
 # todo others remove
 image = "*"

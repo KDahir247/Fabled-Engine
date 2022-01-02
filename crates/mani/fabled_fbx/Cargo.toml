@@ -8,3 +8,4 @@ edition = "2018"
 [dependencies]
 fbxcel = { version = "0.7.0", features = ["tree", "writer"] }
 fbxcel-dom = "0.0.6"
+rayon = {version = "1.5.1" }
