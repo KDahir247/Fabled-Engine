@@ -1,10 +1,13 @@
-use crate::{FullData, ShaderModel, StandardData};
+use crate::{triangulate, FbxLoadError, Material, MaterialData};
+
 use fbxcel_dom::v7400::data::material::ShadingModel;
 use fbxcel_dom::v7400::object::material::MaterialProperties;
 use fbxcel_dom::v7400::object::model::TypedModelHandle;
 use fbxcel_dom::v7400::object::TypedObjectHandle;
-use std::io::Read;
 
+use crate::FbxLoadError::{FBXLayerMaterialError, FBXLayerNormalError, FBXLayerUVError};
+
+use std::io::Read;
 use std::ops::Mul;
 
 pub fn load<P: AsRef<std::path::Path>>(path: P) {
@@ -26,46 +29,188 @@ pub fn load<P: AsRef<std::path::Path>>(path: P) {
     if let Ok(document) = fbxcel_dom::v7400::Loader::default().load_from_tree(fbx_v7400_tree) {
         document.objects().for_each(|obj_handle| {
             if let TypedObjectHandle::Model(TypedModelHandle::Mesh(mesh)) = obj_handle.get_typed() {
-                // if the mesh is already loaded then return the mesh index
-                // to get the mesh. otherwise load.
 
-                let geometry_obj = mesh.geometry().unwrap();
+                // todo we will not load the video clip from the diffuse or transparent texture,
+                // since the path to the  texture will be invalid which will
+                // cause a error.
+                println!("{:?}", mesh.name());
 
                 let materials = mesh.materials().map(|material_handle| {
-                    //  let transparent_texture = material_handle.transparent_texture().unwrap();
-                    //
-                    // let diffuse_texture = material_handle.diffuse_texture();
-
                     let material_properties = material_handle.properties();
 
-                    let standard_data = get_standard_material_property(material_properties);
 
                     let shading_data = match material_properties.shading_model().unwrap() {
                         None => {
                             panic!("none???")
                         }
-                        Some(a) => match a {
-                            ShadingModel::Unknown => {
-                                get_full_material_property(standard_data, material_properties)
-                            }
-                            _ => ShaderModel::Standard(standard_data),
+                        Some(shading_model) => match shading_model {
+                            ShadingModel::Unknown => get_material_property(material_properties),
+                            _ => get_material_property(material_properties),
                         },
                     };
 
-                    println!("{:?} {:?}", mesh.name(), standard_data);
+                    Material {
+                        name: material_handle.name().unwrap().into(),
+                        data: shading_data,
+                    }
+                    // todo get material index
+                }).collect::<Vec<_>>();
+                for a in &materials {
+                    println!("{} {:?}", a.name, a.data)
+                }
 
-                    2
-                });
-                println!("{:?}", materials.count());
+                let geometry_obj = mesh.geometry().unwrap();
+
+                let polygon_vertices = geometry_obj.polygon_vertices().unwrap();
+
+                let triangle_pvi_indices = polygon_vertices.triangulate_each(triangulate).unwrap();
+
+                let position = triangle_pvi_indices
+                    .iter_control_point_indices()
+                    .map(|cpi| {
+                        cpi.ok_or(FbxLoadError::FbxHeaderError)
+                            .and_then(|valid_cpi| {
+                                polygon_vertices
+                                    .control_point(valid_cpi)
+                                    .map(|point| [point.x as f32, point.y as f32, point.z as f32])
+                                    .ok_or(FbxLoadError::ControlPointError(valid_cpi))
+                            })
+                    })
+                    .collect::<Result<Vec<_>, _>>();
+
+                for layer in geometry_obj.layers() {
+
+                    let normals = {
+                        let normal_handle = layer.layer_element_entries()
+                            .filter_map(|layer_entry_handle| match layer_entry_handle.typed_layer_element(){
+                                Ok(fbxcel_dom::v7400::data::mesh::layer::TypedLayerElementHandle::Normal(normal_layer_handle)) => Some(normal_layer_handle),
+                                _ => None
+                            }).next();
+
+                        let normals= if let Some(valid_normal_handle) = normal_handle {
+                             //todo switch unwrap with ? to prevent hard panic
+                            let normals = valid_normal_handle.normals().map_err(|err|FBXLayerNormalError).unwrap();
+
+                             let normal : Vec<[f32; 3]>= triangle_pvi_indices.triangle_vertex_indices().map(|tri_vert_index|{
+                                 let normal = normals.normal(&triangle_pvi_indices, tri_vert_index).unwrap();
+                                 [normal.x as f32, normal.y as f32, normal.z as f32]
+                             }).collect::<Vec<_>>();
+
+                            normal
+                         }else {
+                             Vec::new()
+                         };
+
+                        normals
+                    };
+
+                    let uv = {
+                        let uv_handle = layer.layer_element_entries()
+                            .filter_map(|layer_entry_handle| match layer_entry_handle.typed_layer_element(){
+                                Ok(fbxcel_dom::v7400::data::mesh::layer::TypedLayerElementHandle::Uv(uv_layer_handle)) => Some(uv_layer_handle),
+                                _ => None,
+                            }).next();
+
+                        let uvs = if let Some(valid_uv_handle) = uv_handle{
+
+                            let uvs = valid_uv_handle.uv().map_err(|_err| FBXLayerUVError).unwrap();
+
+                            let uv : Vec<[f32; 2]> = triangle_pvi_indices.triangle_vertex_indices().map(|tri_vert_index|{
+                                let uv = uvs.uv(&triangle_pvi_indices, tri_vert_index).unwrap();
+                                [uv.x as f32, uv.y as f32]
+                            }).collect::<Vec<_>>();
+
+                            uv
+                        }else{
+                            Vec::new()
+                        };
+
+                        uvs
+                    };
+
+                    let indices_per_material = {
+                        let mut indices_per_material = vec![Vec::new(); materials.len()];
+
+                        let material_handle = layer.layer_element_entries()
+                            .filter_map(|layer_entry_handle| match layer_entry_handle.typed_layer_element(){
+                                Ok(fbxcel_dom::v7400::data::mesh::layer::TypedLayerElementHandle::Material(material_layer_handle)) => Some(material_layer_handle),
+                                _ => None,
+                            }).next();
+
+                        if let Some(valid_material_handle) = material_handle{
+
+                            let materials = valid_material_handle.materials().map_err(|_err|FBXLayerMaterialError).unwrap();
+
+                            for tri_vert_index in triangle_pvi_indices.triangle_vertex_indices(){
+                                let local_material_index = materials.material_index(&triangle_pvi_indices, tri_vert_index)
+                                    .unwrap().to_u32();
+
+                                indices_per_material.get_mut(local_material_index as usize)
+                                    .unwrap().push(tri_vert_index.to_usize() as u32);
+
+
+                            }
+                            indices_per_material
+                        }else{
+                            Vec::new()
+                        }
+                    };
+
+                    println!("mesh {:?}, position {}, normals {}, uvs {}, material indices {}",geometry_obj.name(),position.as_ref().unwrap().len(), normals.len(), uv.len(), indices_per_material.len());
+                    // get normal if the layer is a normal layer
+                    // get uv if the layer is a uv layer
+                    // get material if the layer is a material layer
+                    // get color if the layer is a color channel layer
+                }
+
+                // todo why are we only getting one layer
+                for b in geometry_obj.layers() {
+                    for (index, a) in b.layer_element_entries().enumerate() {
+                        println!("{} {:?}", index, a.type_str());
+                    }
+                    println!()
+                }
             };
         });
     }
 }
 
-fn get_full_material_property(
-    standard_model: StandardData,
-    material_properties: MaterialProperties,
-) -> ShaderModel {
+fn get_material_property(material_properties: MaterialProperties) -> MaterialData {
+    let diffuse_coefficient = material_properties.diffuse_factor_or_default().unwrap();
+
+    let diffuse_color_coe: [f64; 3] = material_properties
+        .diffuse_color_or_default()
+        .unwrap()
+        .mul(diffuse_coefficient)
+        .into();
+
+
+    let ambient_coefficient = material_properties.ambient_factor_or_default().unwrap();
+
+    let ambient_color: [f64; 3] = material_properties
+        .ambient_color_or_default()
+        .unwrap()
+        .mul(ambient_coefficient)
+        .into();
+
+    let specular_coefficient = material_properties.specular_factor_or_default().unwrap();
+
+    let specular_color_coe: [f64; 3] = material_properties
+        .specular_or_default()
+        .unwrap()
+        .mul(specular_coefficient)
+        .into();
+
+    let emissive_factor = material_properties.emissive_factor_or_default().unwrap();
+
+    let emissive_color_coe: [f64; 3] = material_properties
+        .emissive_color_or_default()
+        .unwrap()
+        .mul(emissive_factor)
+        .into();
+
+    let shininess = material_properties.shininess_or_default().unwrap();
+
     let bump_factor = material_properties.bump_factor_or_default().unwrap();
     let bump_vector = material_properties
         .bump_or_default()
@@ -113,59 +258,17 @@ fn get_full_material_property(
         .mul(reflection_coefficient)
         .into();
 
-    ShaderModel::Full(FullData {
-        standard_param: standard_model,
-        bump_vector_coe: bump_vector,
-        normal_map: normal_map.map(|f_64| f_64 as f32),
-        transparent_color_coe: transparent_color_coe.map(|f_64| f_64 as f32),
-        displacement_color_coe: displacement_color_coe.map(|f_64| f_64 as f32),
-        vector_displacement_color_coe: vector_displacement_color_coe.map(|f_64| f_64 as f32),
-        reflection_coe: reflection_coe.map(|f_64| f_64 as f32),
-    })
-}
-
-fn get_standard_material_property(material_properties: MaterialProperties) -> StandardData {
-    let diffuse_coefficient = material_properties.diffuse_factor_or_default().unwrap();
-
-    let diffuse_color_coe: [f64; 3] = material_properties
-        .diffuse_color_or_default()
-        .unwrap()
-        .mul(diffuse_coefficient)
-        .into();
-
-
-    let ambient_coefficient = material_properties.ambient_factor_or_default().unwrap();
-
-    let ambient_color: [f64; 3] = material_properties
-        .ambient_color_or_default()
-        .unwrap()
-        .mul(ambient_coefficient)
-        .into();
-
-    let specular_coefficient = material_properties.specular_factor_or_default().unwrap();
-
-    let specular_color_coe: [f64; 3] = material_properties
-        .specular_or_default()
-        .unwrap()
-        .mul(specular_coefficient)
-        .into();
-
-    let emissive_factor = material_properties.emissive_factor_or_default().unwrap();
-
-    let emissive_color_coe: [f64; 3] = material_properties
-        .emissive_color_or_default()
-        .unwrap()
-        .mul(emissive_factor)
-        .into();
-
-    let shininess = material_properties.shininess_or_default().unwrap();
-
-
-    StandardData {
-        ambient_color_coe: ambient_color.map(|f_64| f_64 as f32),
-        diffuse_color_coe: diffuse_color_coe.map(|f_64| f_64 as f32),
-        specular_color_coe: specular_color_coe.map(|f_64| f_64 as f32),
-        emissive_color_factor: emissive_color_coe.map(|f_64| f_64 as f32),
+    MaterialData {
+        ambient_color: ambient_color.map(|f_64| f_64 as f32),
+        diffuse_color: diffuse_color_coe.map(|f_64| f_64 as f32),
+        specular_color: specular_color_coe.map(|f_64| f_64 as f32),
+        emissive_color: emissive_color_coe.map(|f_64| f_64 as f32),
         shininess: shininess as f32,
+        bump_vector,
+        normal_map: normal_map.map(|f_64| f_64 as f32),
+        transparent_color: transparent_color_coe.map(|f_64| f_64 as f32),
+        displacement_color: displacement_color_coe.map(|f_64| f_64 as f32),
+        vector_displacement_color: vector_displacement_color_coe.map(|f_64| f_64 as f32),
+        reflection: reflection_coe.map(|f_64| f_64 as f32),
     }
 }

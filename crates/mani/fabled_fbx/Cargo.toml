@@ -8,4 +8,17 @@ edition = "2018"
 [dependencies]
 fbxcel = { version = "0.7.0", features = ["tree", "writer"] }
 fbxcel-dom = "0.0.6"
-rayon = {version = "1.5.1" }
+thiserror = {version = "1.0.29"}
+fabled_render = {path = "../fabled_render", version = "*"}
+anyhow = "1"
+rayon = "1.5.1"
+rgb = {version = "0.8.31"}
+
+
+[features]
+default = ["blendshape", "skinning"]
+light = []
+camera = []
+blendshape = []
+skinning = []
+cluster = []

@@ -1,12 +1,22 @@
+extern crate core;
+
 mod container;
+mod error;
 mod loader;
+mod macros;
+mod properties;
+mod util;
 
 pub use container::*;
+pub use error::*;
 pub use loader::*;
+use properties::*;
+pub use util::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::load;
+
+    use crate::{load, V7400Loader};
     use fbxcel::low::v7400::{AttributeType, AttributeValue};
     use fbxcel::pull_parser::reader::SeekableSource;
     use fbxcel::pull_parser::v7400::attribute::loaders::DirectLoader;
@@ -16,7 +26,9 @@ mod tests {
 
     #[test]
     fn print_obj() {
-        load("C:/Users/kdahi/Downloads/goultard-chibi/source/GoultardtoDecimated.fbx");
+        V7400Loader::loads(
+            "C:/Users/kdahi/Downloads/jun-goto-tenshi-no-3p/source/Jun Goto/Jun Goto.fbx",
+        );
     }
 
     #[test]
