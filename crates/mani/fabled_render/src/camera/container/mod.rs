@@ -1,7 +1,14 @@
+pub use aperture_format::*;
 pub use aperture_len::*;
+pub use aperture_mode::*;
 pub use aspect_ratio::*;
+pub use aspect_ratio_mode::*;
+pub use camera_format::*;
 pub use clipping_plane::*;
+pub use fish_eye_len::*;
 pub use fov::*;
+pub use fov_scaling::*;
+pub use gate_fit::*;
 pub use iso_speed::*;
 pub use oblique::*;
 pub use orthographic::*;
@@ -11,10 +18,17 @@ pub use shutter::*;
 pub use unit_type::*;
 pub use viewport::*;
 
+mod aperture_format;
 mod aperture_len;
+mod aperture_mode;
 mod aspect_ratio;
+mod aspect_ratio_mode;
+mod camera_format;
 mod clipping_plane;
+mod fish_eye_len;
 mod fov;
+mod fov_scaling;
+mod gate_fit;
 mod iso_speed;
 mod oblique;
 mod orthographic;
@@ -28,8 +42,9 @@ mod viewport;
 #[cfg(test)]
 mod data_test {
     use crate::camera::{
-        AspectRatio, ClippingPlane, Fov, FovAxis, FullStop, ISOSpeed, Oblique, Orthographic,
-        Perspective, Projection, Shutter, ViewPort,
+        Aperture, AspectRatio, AspectRatioMode, CameraFormat, ClippingPlane, Fov, FovAxis,
+        FovScalingAlgorithm, FullStop, GateFit, ISOSpeed, Oblique, Orthographic, Perspective,
+        Projection, Shutter, ViewPort,
     };
 
     #[test]
@@ -69,6 +84,21 @@ mod data_test {
 
         let shutter_size = std::mem::size_of::<Shutter>();
         assert_eq!(shutter_size & (shutter_size - 1), 0);
+
+        let camera_format_size = std::mem::size_of::<CameraFormat>();
+        assert_eq!(camera_format_size & (camera_format_size - 1), 0);
+
+        let fov_algorithm_size = std::mem::size_of::<FovScalingAlgorithm>();
+        assert_eq!(fov_algorithm_size & (fov_algorithm_size - 1), 0);
+
+        let aperture_format_size = std::mem::size_of::<Aperture>();
+        assert_eq!(aperture_format_size & (aperture_format_size - 1), 0);
+
+        let aspect_ratio_mode_size = std::mem::size_of::<AspectRatioMode>();
+        assert_eq!(aspect_ratio_mode_size & (aspect_ratio_mode_size - 1), 0);
+
+        let gate_fit_size = std::mem::size_of::<GateFit>();
+        assert_eq!(gate_fit_size & (gate_fit_size - 1), 0);
     }
 
     #[test]
@@ -110,5 +140,26 @@ mod data_test {
 
         let shutter_alignment = std::mem::align_of::<Shutter>();
         assert_eq!(shutter_alignment & (shutter_alignment - 1), 0);
+
+        let camera_format_alignment = std::mem::align_of::<CameraFormat>();
+        assert_eq!(camera_format_alignment & (camera_format_alignment - 1), 0);
+
+        let fov_algorithm_alignment = std::mem::align_of::<FovScalingAlgorithm>();
+        assert_eq!(fov_algorithm_alignment & (fov_algorithm_alignment - 1), 0);
+
+        let aperture_format_alignment = std::mem::align_of::<Aperture>();
+        assert_eq!(
+            aperture_format_alignment & (aperture_format_alignment - 1),
+            0
+        );
+
+        let aspect_ratio_mode_alignment = std::mem::align_of::<AspectRatioMode>();
+        assert_eq!(
+            aspect_ratio_mode_alignment & (aspect_ratio_mode_alignment - 1),
+            0
+        );
+
+        let gate_fit_alignment = std::mem::align_of::<GateFit>();
+        assert_eq!(gate_fit_alignment & (gate_fit_alignment - 1), 0);
     }
 }

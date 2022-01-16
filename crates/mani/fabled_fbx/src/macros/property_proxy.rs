@@ -1,4 +1,3 @@
-use crate::FbxLoadError;
 #[macro_export]
 macro_rules! prop_proxy_getters {
     ($(

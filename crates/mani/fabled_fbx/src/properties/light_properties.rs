@@ -18,10 +18,10 @@ impl<'a> LightProperties<'a> {
         })
     }
 
-    #[allow(dead_code)]
     prop_proxy_getters! {
 
         //Light Type
+
 
         cast_light -> bool{
             name = "CastLight",
@@ -87,6 +87,25 @@ impl<'a> LightProperties<'a> {
                 shadow_color_or_default = rgb::RGB::from([0.0; 3])
             }
         }
+
+        outer_angle -> f32{
+            name = "OuterAngle",
+            loader = PrimitiveLoader::<f32>::default(),
+            description = "point light outer angle",
+            default : {
+                outer_angle_or_default = 70.0
+            }
+        }
+
+        inner_angle -> f32{
+            name = "InnerAngle",
+            loader = PrimitiveLoader::<f32>::default(),
+            description = "point light inner angle",
+            default : {
+                inner_angle_or_default = 70.0
+            }
+        }
+
     }
 }
 

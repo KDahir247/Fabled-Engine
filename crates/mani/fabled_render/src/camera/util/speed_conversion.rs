@@ -16,6 +16,7 @@ pub fn logarithmic_to_arithmetic_speed(logarithmic_speed: f32) -> f32 {
 
 #[cfg(test)]
 mod iso_speed_test {
+
     use crate::camera::{arithmetic_to_logarithmic_speed, logarithmic_to_arithmetic_speed};
 
     #[test]

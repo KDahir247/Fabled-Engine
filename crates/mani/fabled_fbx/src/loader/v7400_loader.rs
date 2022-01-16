@@ -47,35 +47,11 @@ impl V7400Loader {
                 let geometry_mesh = collect_geometry(mesh, materials.len()).unwrap();
             }
 
-
             #[cfg(feature = "light")]
             light_impl::load_light_handle(&obj_handle);
 
-
             #[cfg(feature = "camera")]
             camera_impl::load_camera_handle(&obj_handle);
-
-
-            if let fbxcel_dom::v7400::object::TypedObjectHandle::NodeAttribute(
-                fbxcel_dom::v7400::object::nodeattribute::TypedNodeAttributeHandle::Light(
-                    light_handle,
-                ),
-            ) = obj_handle.get_typed()
-            {
-                let f = light_handle.direct_properties().unwrap();
-                println!("{:#?}", f);
-                let x = light_handle
-                    .direct_properties()
-                    .unwrap()
-                    .get_property("LightType");
-            }
-
-            if let fbxcel_dom::v7400::object::TypedObjectHandle::NodeAttribute(
-                fbxcel_dom::v7400::object::nodeattribute::TypedNodeAttributeHandle::Camera(
-                    camera_handle,
-                ),
-            ) = obj_handle.get_typed()
-            {}
         });
 
         Ok(())
