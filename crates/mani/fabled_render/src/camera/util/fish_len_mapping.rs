@@ -1,10 +1,44 @@
-use crate::camera::FishLens;
+use crate::camera::{FishLens, Fov, FovAxis};
+
+// all angle are in radians
 
 // focal length in millimeter
 // frame_aperture in millimeter
+// set frame aperture x if fov axis is horizontal, otherwise set aperture y if
+// fov axis is vertical (set the other to zero.)
 pub fn focal_length_to_fov(
     focal_length: f32,
+    frame_aperture: f32,
+    fov_axis: FovAxis,
+    focus_distance: Option<f32>,
+    lens_type: FishLens,
+) -> Fov {
+    let frame_size = (frame_aperture * frame_aperture).sqrt();
+
+    let rad_angle = internal_focal_to_fov(focal_length, frame_size, focus_distance, lens_type);
+
+    Fov {
+        radian: rad_angle,
+        axis: fov_axis,
+    }
+}
+
+pub fn focal_length_to_directional_fov(
+    focal_length: f32,
     frame_aperture: [f32; 2],
+    focus_distance: Option<f32>,
+    lens_type: FishLens,
+) -> f32 {
+    let frame_size =
+        (frame_aperture[0] * frame_aperture[0] + frame_aperture[1] * frame_aperture[1]).sqrt();
+
+    internal_focal_to_fov(focal_length, frame_size, focus_distance, lens_type)
+}
+
+
+fn internal_focal_to_fov(
+    focal_length: f32,
+    frame_size: f32,
     focus_distance: Option<f32>,
     lens_type: FishLens,
 ) -> f32 {
@@ -12,19 +46,17 @@ pub fn focal_length_to_fov(
         .map(|focus_distance| compute_approx_magnification(focal_length, focus_distance) + 1.0)
         .unwrap_or(1.0);
 
-    let frame_size =
-        (frame_aperture[0] * frame_aperture[0] + frame_aperture[1] * frame_aperture[1]).sqrt();
 
-
-    match lens_type {
+    let rad_angle = match lens_type {
         FishLens::Rectilinear => (frame_size / (focal_length * 2.0 * magnification)).atan() * 2.0,
         FishLens::Stereographic => (frame_size / (focal_length * 4.0)).atan() * 4.0,
         FishLens::Equidistant => (frame_size / focal_length) * 57.3,
         FishLens::EquisolidAngle => (frame_size / (focal_length * 4.0)).asin() * 4.0,
         FishLens::Orthographic => (frame_size / (focal_length * 2.0)).asin() * 2.0,
-    }
-}
+    };
 
+    rad_angle
+}
 
 pub fn fov_to_focal_length(
     field_of_view: f32,
@@ -54,6 +86,24 @@ pub fn fov_to_focal_length(
         }
     }
 }
+
+// todo
+/// field of view should be converter to Vertical prior to calling this
+/// calculation
+pub fn compute_vertical_focal_length(aperture_size_y: f32, field_of_view: Fov) -> f32 {
+    aperture_size_y / field_of_view.radian
+}
+
+///
+pub fn compute_horizontal_focal_length(aperture_size_x: f32, field_of_view: Fov) -> f32 {
+    aperture_size_x / field_of_view.radian
+}
+
+pub fn compute_vertical_field_of_view(aperture_size_y: f32, field_of_view: Fov) -> f32 {
+    todo!()
+}
+
+//
 
 pub fn compute_focal_length(
     distance_image_plane: f32,
@@ -101,8 +151,8 @@ pub fn compute_approx_magnification(focal_length: f32, focus_distance: f32) -> f
 mod len_mapping {
     use crate::camera::{
         compute_approx_magnification, compute_distance_image_plane_from_optical_axis,
-        compute_focal_length, compute_magnification, focal_length_to_fov, fov_to_focal_length,
-        FishLens,
+        compute_focal_length, compute_magnification, focal_length_to_directional_fov,
+        fov_to_focal_length, FishLens, Fov, FovAxis,
     };
 
     #[test]
@@ -123,12 +173,21 @@ mod len_mapping {
 
     // todo got to write test
     #[test]
-    fn focal_to_fov() {
+    fn focal_to_fov() {}
+
+    // todo got to write test
+    #[test]
+    fn focal_to_direction_fov() {
         // Calculated using.
         // http://kmp.pentaxians.eu/technology/fov/
         // result 110.52703743126978 degree
-        let full_frame_fov = focal_length_to_fov(15.0, [36., 24.], None, FishLens::Rectilinear);
-        println!("{}", full_frame_fov.to_degrees());
+        let full_frame_fov =
+            focal_length_to_directional_fov(15.0, [36., 24.], None, FishLens::Rectilinear);
+        println!("{:?}", full_frame_fov.to_degrees());
+
+        let full_frame_focal_length =
+            fov_to_focal_length(full_frame_fov, [36., 24.], FishLens::Rectilinear);
+        println!("{}", full_frame_focal_length);
     }
 
     // todo got to write test

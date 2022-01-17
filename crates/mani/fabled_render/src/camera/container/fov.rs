@@ -37,19 +37,24 @@ impl Fov {
             let aspect_w = aspect_ratio.horizontal;
             let aspect_h = aspect_ratio.vertical;
 
-            let mut aspect_axis = aspect_w / aspect_h;
+            let previous_axis = self.axis;
+
+            let vertical = aspect_h / aspect_w;
+            let horizontal = aspect_w / aspect_h;
+            let mut axis_instructions = horizontal;
 
             match axis {
-                FovAxis::Horizontal => self.axis = FovAxis::Horizontal,
+                FovAxis::Horizontal => {
+                    self.axis = FovAxis::Horizontal;
+                }
                 FovAxis::Vertical => {
                     self.axis = FovAxis::Vertical;
-                    aspect_axis = aspect_h / aspect_w;
+                    axis_instructions = vertical;
                 }
             }
 
-            let result_fov = 2.0 * ((self.radian / 2.0).tan() * aspect_axis).atan();
 
-            self.radian = result_fov;
+            self.radian = 2.0 * ((self.radian / 2.0).tan() * axis_instructions).atan();
         }
     }
 }
@@ -59,11 +64,24 @@ mod fov_test {
     use crate::camera::{AspectRatio, Fov, FovAxis};
 
     #[test]
+    fn diagonal_test() {
+        let horizontal = 16.0;
+        let vertical = 9.0;
+
+        let horizontal_fv = 17.5f32.to_radians();
+
+        let mut fov = Fov::new(horizontal_fv, FovAxis::Horizontal);
+
+        fov.convert_axis(FovAxis::Vertical, AspectRatio::default());
+        println!("{}", fov.radian.to_degrees());
+    }
+
+    #[test]
     fn vertical_to_horizontal() {
         let horizontal = 16.0;
         let vertical = 9.0;
 
-        let horizontal_fv = 90.0f32.to_radians();
+        let horizontal_fv = 17.5f32.to_radians();
 
         let vertical_new = 2.0 * ((horizontal_fv / 2.0).tan() * vertical / horizontal).atan();
         let horizontal_new = 2.0 * ((vertical_new / 2.0).tan() * horizontal / vertical).atan();
@@ -80,6 +98,9 @@ mod fov_test {
         fov.convert_axis(FovAxis::Vertical, AspectRatio::default());
 
         assert!(fov.radian.to_degrees().eq(&vertical_new.to_degrees()));
+        fov.convert_axis(FovAxis::Horizontal, AspectRatio::default());
+
+        assert!(fov.radian.to_degrees().eq(&horizontal_fv.to_degrees()));
     }
 
     #[test]
