@@ -1,6 +1,8 @@
 use crate::loader::AspectRatioLoader;
 use crate::loader::CameraFormatLoader;
+use crate::loader::CameraGateFitLoader;
 use crate::loader::CameraProjectionTypeLoader;
+use crate::loader::{ApertureFormatLoader, ApertureModeLoader};
 use crate::prop_proxy_getters;
 type PrimitiveLoader<T> = fbxcel_dom::v7400::object::property::loaders::PrimitiveLoader<T>;
 type RgbLoader<T> = fbxcel_dom::v7400::object::property::loaders::RgbLoader<T>;
@@ -25,7 +27,7 @@ impl<'a> CameraProperties<'a> {
         camera_projection -> fabled_render::camera::Projection{
             name = "CameraProjectionType",
             loader = CameraProjectionTypeLoader::default(),
-            description = "camera projection type",
+            description = "Camera projection type",
             default : {
                 camera_projection_or_default = fabled_render::camera::Projection::Perspective(fabled_render::camera::Perspective::default())
             }
@@ -34,7 +36,7 @@ impl<'a> CameraProperties<'a> {
         aspect_ratio_mode -> fabled_render::camera::AspectRatioMode{
             name = "AspectRatioMode",
             loader = AspectRatioLoader::default(),
-            description = "camera aspect ratio mode",
+            description = "Camera aspect ratio mode",
             default : {
                 aspect_ratio_mode_or_default  = fabled_render::camera::AspectRatioMode::WindowSize
             }
@@ -43,7 +45,7 @@ impl<'a> CameraProperties<'a> {
         aspect_width -> f32{
             name = "AspectWidth",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "aspect width value or an undefined value if aspect ratio mode is set to WINDOW_SIZE",
+            description = "Aspect width value or an undefined value if aspect ratio mode is set to WINDOW_SIZE",
             default : {
                 aspect_width_or_default = 320.0
             }
@@ -52,7 +54,7 @@ impl<'a> CameraProperties<'a> {
         aspect_height -> f32{
             name = "AspectHeight",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "aspect height value or an undefined value if aspect ratio mode is set to WINDOW_SIZE",
+            description = "Aspect height value or an undefined value if aspect ratio mode is set to WINDOW_SIZE",
             default : {
                 aspect_height_or_default = 200.0
             }
@@ -61,7 +63,7 @@ impl<'a> CameraProperties<'a> {
         pixel_aspect_ratio -> f32{
             name = "PixelAspectRatio",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "pixel aspect ratio for the camera",
+            description = "Pixel aspect ratio for the camera",
             default : {
                 pixel_aspect_ratio_or_default = 1.0
             }
@@ -71,7 +73,7 @@ impl<'a> CameraProperties<'a> {
         field_of_view -> f32{
             name = "FieldOfView",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the angle (degree) of view base on the given focal length, aperture width, and aperture height (x = diagonal of film, f = focal length) FOV = 2 arctan(x/ (2 * f))",
+            description = "Angle (degree) of view base on the given focal length, aperture width, and aperture height (x = diagonal of film, f = focal length) FOV = 2 arctan(x/ (2 * f))",
             default : {
                 field_of_view_or_default = 90.0
             }
@@ -80,7 +82,7 @@ impl<'a> CameraProperties<'a> {
         field_of_view_X -> f32{
             name = "FieldOfViewX",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the horizontal field of view angle (degree)",
+            description = "Horizontal field of view angle (degree)",
             default : {
                 field_of_view_X_or_default = 90.0
             }
@@ -89,7 +91,7 @@ impl<'a> CameraProperties<'a> {
         field_of_view_Y -> f32{
             name = "FieldOfViewY",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the vertical field of view angle (degree)",
+            description = "Vertical field of view angle (degree)",
             default : {
                 field_of_view_Y_or_default = 77.3196197066
             }
@@ -98,7 +100,7 @@ impl<'a> CameraProperties<'a> {
         optical_center_X -> f32{
             name = "OpticalCenterX",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the optical center X (pixels)",
+            description = "Optical center X (pixels)",
             default : {
                 optical_center_X_or_default = 0.0
             }
@@ -107,7 +109,7 @@ impl<'a> CameraProperties<'a> {
         optical_center_Y -> f32{
             name = "OpticalCenterY",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the optical center y (pixels)",
+            description = "Optical center y (pixels)",
             default : {
                 optical_center_Y_or_default = 0.0
             }
@@ -116,16 +118,26 @@ impl<'a> CameraProperties<'a> {
         focal_length -> f32{
             name = "FocalLength",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the camera focal length (millimeters)",
+            description = "Camera focal length (millimeters)",
             default : {
                 focal_length_or_default = 15.0
             }
         }
 
+        focus_distance -> f32{
+            name = "FocusDistance",
+            loader = PrimitiveLoader::<f32>::default(),
+            description = "Camera focus distance",
+            default : {
+                focus_distance_or_default = 200.0
+            }
+        }
+
+
         film_squeeze_ratio -> f32{
             name = "FilmSqueezeRatio",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the camera aperture squeeze ratio",
+            description = "Camera aperture squeeze ratio",
             default : {
                 film_squeeze_ratio_or_default = 1.0
             }
@@ -134,7 +146,7 @@ impl<'a> CameraProperties<'a> {
         film_aspect_ratio -> f32{
             name = "FilmAspectRatio",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the camera aperture aspect ratio (film width / film height)",
+            description = "Camera aperture aspect ratio (film width / film height)",
             default : {
                 //we will use a SUPER_35MM as default
                 // 24.89 mm width
@@ -147,7 +159,7 @@ impl<'a> CameraProperties<'a> {
         film_width -> f32{
             name = "FilmWidth",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the camera film aperture width in inches",
+            description = "Camera film aperture width in inches",
             default : {
                 //we will use a SUPER_35MM as default
                 film_width_or_default = 0.97992126
@@ -157,7 +169,7 @@ impl<'a> CameraProperties<'a> {
         film_height -> f32{
             name = "FilmHeight",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the camera film aperture height in inches",
+            description = "Camera film aperture height in inches",
             default : {
                 //we will use a SUPER_35MM as default
                 film_height_or_default = 0.73464567
@@ -167,9 +179,18 @@ impl<'a> CameraProperties<'a> {
         ortho_zoom -> f32{
             name = "OrthoZoom",
             loader = PrimitiveLoader::<f32>::default(),
-            description = "the camera ortho zoom",
+            description = "Camera ortho zoom",
             default : {
                 ortho_zoom_or_default = 1.0
+            }
+        }
+
+        gate_fit -> fabled_render::camera::GateFit{
+            name = "GateFit",
+            loader = CameraGateFitLoader::default(),
+            description = "Camera gate fit mode",
+            default : {
+                gate_fit_or_default = fabled_render::camera::GateFit::None
             }
         }
 
@@ -191,10 +212,28 @@ impl<'a> CameraProperties<'a> {
             }
         }
 
+        aperture_mode -> fabled_render::camera::ApertureMode{
+            name = "ApertureMode",
+            loader = ApertureModeLoader::default(),
+            description = "Aperture mode determines which values drive the camera aperture",
+            default : {
+                aperture_mode_or_default = fabled_render::camera::ApertureMode::Vertical
+            }
+        }
+
+        aperture_format -> fabled_render::camera::Aperture{
+            name = "ApertureFormat",
+            loader = ApertureLoader::default(),
+            description = "The aperture detail from the aperture format",
+            default : {
+                aperture_format_or_default = fabled_render::camera::Aperture::SUPER_35MM
+            }
+        }
+
         camera_format -> fabled_render::camera::CameraFormat{
             name = "CameraFormat",
             loader = CameraFormatLoader::default(),
-            description = "camera format type",
+            description = "Camera format type",
             default : {
                 camera_format_or_default =  fabled_render::camera::CameraFormat::FullScreen
             }

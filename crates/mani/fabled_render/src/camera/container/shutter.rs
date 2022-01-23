@@ -1,4 +1,12 @@
 use crate::camera::FStop;
+// longer shutter speed result in blurrier image.
+// shorter shutter speed will capture fasting-moving action and eliminate motion
+// blur
+
+// shutter speed also affect exposure. The faster the shutter speed the less
+// exposure on sensor. While having a slow shutter speed will increase the
+// exposure on sensor depending on how slow the shutter speed is.
+
 
 #[derive(Copy, Clone, Debug)]
 pub struct Shutter {
@@ -21,9 +29,9 @@ impl Shutter {
         }
     }
 
-    pub fn new(shutter_speeed: f32) -> Self {
+    pub fn new(shutter_speed: f32) -> Self {
         Self {
-            speed: shutter_speeed,
+            speed: shutter_speed,
         }
     }
 }
@@ -35,7 +43,7 @@ mod shutter_test {
 
     #[test]
     fn retrieve_shutter() {
-        let f1_4_aperture = FStop::FullStop(FullStop::f1_4_stop());
+        let f1_4_aperture = FStop::FullStop(FullStop::F1_4_STOP);
         let mut shutter = Shutter::compute_shutter_speed(f1_4_aperture);
 
         let initial_shutter = 4000.0;
@@ -49,27 +57,27 @@ mod shutter_test {
 
         assert!(shutter.speed.eq(&f1_4_shutter));
 
-        let f2_aperture = FStop::FullStop(FullStop::f2_stop());
+        let f2_aperture = FStop::FullStop(FullStop::F2_STOP);
         shutter = Shutter::compute_shutter_speed(f2_aperture);
 
         assert!(shutter.speed.eq(&f2_shutter));
 
-        let f2_8_aperture = FStop::FullStop(FullStop::f2_8_stop());
+        let f2_8_aperture = FStop::FullStop(FullStop::F2_8_STOP);
         shutter = Shutter::compute_shutter_speed(f2_8_aperture);
 
         assert!(shutter.speed.eq(&f2_8_shutter));
 
-        let f4_aperture = FStop::FullStop(FullStop::f4_stop());
+        let f4_aperture = FStop::FullStop(FullStop::F4_STOP);
         shutter = Shutter::compute_shutter_speed(f4_aperture);
 
         assert!(shutter.speed.eq(&f4_shutter));
 
-        let f5_6_aperture = FStop::FullStop(FullStop::f5_6_stop());
+        let f5_6_aperture = FStop::FullStop(FullStop::F5_6_STOP);
         shutter = Shutter::compute_shutter_speed(f5_6_aperture);
 
         assert!(shutter.speed.eq(&f5_6_shutter));
 
-        let f8_aperture = FStop::FullStop(FullStop::f8_stop());
+        let f8_aperture = FStop::FullStop(FullStop::F8_STOP);
         shutter = Shutter::compute_shutter_speed(f8_aperture);
 
         assert!(shutter.speed.eq(&f8_shutter));

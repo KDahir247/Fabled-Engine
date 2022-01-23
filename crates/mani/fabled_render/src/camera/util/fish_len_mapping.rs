@@ -11,28 +11,41 @@ pub fn focal_length_to_fov(
     frame_aperture: f32,
     fov_axis: FovAxis,
     focus_distance: Option<f32>,
+    crop_factor: Option<f32>,
     lens_type: FishLens,
-) -> Fov {
+) -> (Fov, f32) {
     let frame_size = (frame_aperture * frame_aperture).sqrt();
 
-    let rad_angle = internal_focal_to_fov(focal_length, frame_size, focus_distance, lens_type);
+    let crop_focal_length = focal_length * crop_factor.unwrap_or(1.0);
 
-    Fov {
-        radian: rad_angle,
-        axis: fov_axis,
-    }
+    let (rad_angle, magnification) =
+        internal_focal_to_fov(crop_focal_length, frame_size, focus_distance, lens_type);
+
+    (
+        Fov {
+            radian: rad_angle,
+            axis: fov_axis,
+        },
+        magnification,
+    )
 }
 
 pub fn focal_length_to_directional_fov(
     focal_length: f32,
     frame_aperture: [f32; 2],
     focus_distance: Option<f32>,
+    crop_factor: Option<f32>,
     lens_type: FishLens,
-) -> f32 {
+) -> (f32, f32) {
     let frame_size =
         (frame_aperture[0] * frame_aperture[0] + frame_aperture[1] * frame_aperture[1]).sqrt();
 
-    internal_focal_to_fov(focal_length, frame_size, focus_distance, lens_type)
+    internal_focal_to_fov(
+        focal_length * crop_factor.unwrap_or(1.0),
+        frame_size,
+        focus_distance,
+        lens_type,
+    )
 }
 
 
@@ -41,13 +54,12 @@ fn internal_focal_to_fov(
     frame_size: f32,
     focus_distance: Option<f32>,
     lens_type: FishLens,
-) -> f32 {
+) -> (f32, f32) {
     let magnification = focus_distance
         .map(|focus_distance| compute_approx_magnification(focal_length, focus_distance) + 1.0)
         .unwrap_or(1.0);
 
-
-    let rad_angle = match lens_type {
+    let fov_result = match lens_type {
         FishLens::Rectilinear => (frame_size / (focal_length * 2.0 * magnification)).atan() * 2.0,
         FishLens::Stereographic => (frame_size / (focal_length * 4.0)).atan() * 4.0,
         FishLens::Equidistant => (frame_size / focal_length) * 57.3,
@@ -55,22 +67,24 @@ fn internal_focal_to_fov(
         FishLens::Orthographic => (frame_size / (focal_length * 2.0)).asin() * 2.0,
     };
 
-    rad_angle
+    (fov_result, magnification)
 }
 
 pub fn fov_to_focal_length(
     field_of_view: f32,
     frame_aperture: [f32; 2],
+    crop_factor: Option<f32>,
+    magnification: f32,
     lens_type: FishLens,
 ) -> f32 {
     let frame_size =
         (frame_aperture[0] * frame_aperture[0] + frame_aperture[1] * frame_aperture[1]).sqrt();
 
-    match lens_type {
+    let focal_length = match lens_type {
         FishLens::Rectilinear => {
-            frame_size / (2.0 * (field_of_view.to_degrees() * std::f32::consts::PI / 360.0).tan())
-            // todo if the specify a focus distance the we need to divide this
-            //  by the magnification value
+            frame_size
+                / (2.0 * (field_of_view.to_degrees() * std::f32::consts::PI / 360.0).tan())
+                / magnification
         }
         FishLens::Stereographic => {
             frame_size
@@ -84,26 +98,24 @@ pub fn fov_to_focal_length(
         FishLens::Orthographic => {
             frame_size / (2.0 * (field_of_view.to_degrees() / 360.0 * std::f32::consts::PI).sin())
         }
-    }
+    };
+
+
+    focal_length / crop_factor.unwrap_or(1.0)
 }
 
-// todo
-/// field of view should be converter to Vertical prior to calling this
-/// calculation
+/// field of view should be converter to Vertical prior using convert_axis to
+/// calling this calculation
 pub fn compute_vertical_focal_length(aperture_size_y: f32, field_of_view: Fov) -> f32 {
     aperture_size_y / field_of_view.radian
 }
 
-///
+/// field of view should be converted to Horizontal prior using convert_axis to
+/// call this calculation
 pub fn compute_horizontal_focal_length(aperture_size_x: f32, field_of_view: Fov) -> f32 {
     aperture_size_x / field_of_view.radian
 }
 
-pub fn compute_vertical_field_of_view(aperture_size_y: f32, field_of_view: Fov) -> f32 {
-    todo!()
-}
-
-//
 
 pub fn compute_focal_length(
     distance_image_plane: f32,
@@ -178,15 +190,30 @@ mod len_mapping {
     // todo got to write test
     #[test]
     fn focal_to_direction_fov() {
+        const ERROR_THRESHOLD: f32 = 0.0001;
+
         // Calculated using.
         // http://kmp.pentaxians.eu/technology/fov/
         // result 110.52703743126978 degree
-        let full_frame_fov =
-            focal_length_to_directional_fov(15.0, [36., 24.], None, FishLens::Rectilinear);
+        let result = 110.52703743126978f32.to_radians();
+
+        let (full_frame_fov, magnification) =
+            focal_length_to_directional_fov(15.0, [36., 24.], None, None, FishLens::Rectilinear);
+
+        println!("{}", (full_frame_fov - result).abs());
+
+        assert!((full_frame_fov - result).abs() < ERROR_THRESHOLD);
+
         println!("{:?}", full_frame_fov.to_degrees());
 
-        let full_frame_focal_length =
-            fov_to_focal_length(full_frame_fov, [36., 24.], FishLens::Rectilinear);
+        let full_frame_focal_length = fov_to_focal_length(
+            full_frame_fov,
+            [36., 24.],
+            Some(1.5),
+            magnification,
+            FishLens::Rectilinear,
+        );
+
         println!("{}", full_frame_focal_length);
     }
 
