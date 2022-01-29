@@ -157,7 +157,7 @@ pub fn spot_light_approx_candela_to_lumen(candela: f32) -> f32 {
 }
 
 
-// Oposite operation of spot light luminance power (luminance flux) to
+// Opposite operation of spot light luminance power (luminance flux) to
 // luminance. Calculate approximate spot light's luminance intensity from
 // luminance power (luminance flux) (disregarding outer_angle)
 // I = φ / π

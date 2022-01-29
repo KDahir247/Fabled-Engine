@@ -62,6 +62,7 @@ impl PointLight {
         }
     }
 
+
     pub fn illuminance_interior(&self) -> f32 {
         self.intensity / self.radius.powf(2.0)
     }

@@ -4,8 +4,8 @@ use crate::loader::CameraGateFitLoader;
 use crate::loader::CameraProjectionTypeLoader;
 use crate::loader::{ApertureFormatLoader, ApertureModeLoader};
 use crate::prop_proxy_getters;
+
 type PrimitiveLoader<T> = fbxcel_dom::v7400::object::property::loaders::PrimitiveLoader<T>;
-type RgbLoader<T> = fbxcel_dom::v7400::object::property::loaders::RgbLoader<T>;
 
 pub struct CameraProperties<'a> {
     prop_handle: fbxcel_dom::v7400::object::property::PropertiesHandle<'a>,
@@ -223,7 +223,7 @@ impl<'a> CameraProperties<'a> {
 
         aperture_format -> fabled_render::camera::Aperture{
             name = "ApertureFormat",
-            loader = ApertureLoader::default(),
+            loader = ApertureFormatLoader::default(),
             description = "The aperture detail from the aperture format",
             default : {
                 aperture_format_or_default = fabled_render::camera::Aperture::SUPER_35MM

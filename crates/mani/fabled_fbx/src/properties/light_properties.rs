@@ -1,5 +1,8 @@
 use crate::loader::DecayLightLoader;
+use crate::loader::LightTypeLoader;
+
 use crate::prop_proxy_getters;
+
 type PrimitiveLoader<T> = fbxcel_dom::v7400::object::property::loaders::PrimitiveLoader<T>;
 type RgbLoader<T> = fbxcel_dom::v7400::object::property::loaders::RgbLoader<T>;
 
@@ -19,16 +22,21 @@ impl<'a> LightProperties<'a> {
     }
 
     prop_proxy_getters! {
-
         //Light Type
-
+        light_type -> fabled_render::light::LightType{
+            name = "LightType",
+            loader = LightTypeLoader::default(),
+            description = "light type",
+            default : {
+                light_type_or_default = fabled_render::light::LightType::DirectionalLight(fabled_render::light::DirectionalLight::default())
+            }
+        }
 
         cast_light -> bool{
             name = "CastLight",
             loader = PrimitiveLoader::<bool>::default(),
             description = "cast lighting",
             default : {
-                // don't enable light to be casted if it returns default.
                 cast_light_or_default = false
             }
         }
@@ -105,7 +113,6 @@ impl<'a> LightProperties<'a> {
                 inner_angle_or_default = 70.0
             }
         }
-
     }
 }
 

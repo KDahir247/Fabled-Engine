@@ -13,6 +13,15 @@ normalize_comments = true
 # Put empty-body functions and impls on a single line
 empty_item_single_line = true
 
+# Combine control expressions with function calls.
+combine_control_expr = "false"
+
+# Force multiline closure and match arm bodies to be wrapped in a block
+force_multiline_blocks = false
+
+# Whether to use colored output or not.
+color = "Always"
+
 #error_on_line_overflow = true
 #error_on_unformatted = true
 

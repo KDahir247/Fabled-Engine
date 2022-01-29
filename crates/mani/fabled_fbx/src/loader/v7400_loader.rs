@@ -15,11 +15,11 @@ impl V7400Loader {
 
         let mut buff_reader = std::io::BufReader::with_capacity(file_bytes_size, file);
 
-        let header = fbxcel::low::FbxHeader::load(buff_reader.by_ref())
+        let fbx_header = fbxcel::low::FbxHeader::load(buff_reader.by_ref())
             .map_err(|_err| FbxLoadError::FbxHeaderError)?;
 
         let mut fbx_v7400_parser =
-            fbxcel::pull_parser::v7400::from_seekable_reader(header, buff_reader)
+            fbxcel::pull_parser::v7400::from_seekable_reader(fbx_header, buff_reader)
                 .map_err(|_| FbxLoadError::FBXInvalidVersionError)?;
 
         fbx_v7400_parser.set_warning_handler(|fbx_warning, syn_pos| {

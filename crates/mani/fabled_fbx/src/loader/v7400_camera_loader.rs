@@ -1,13 +1,14 @@
 use crate::FbxLoadError;
 use fabled_render::camera::{
     focal_length_to_directional_fov, focal_length_to_fov, fov_to_focal_length, Aperture,
-    ApertureMode, CameraFormat, FishLens, FovAxis, GateFit, Projection,
+    ApertureMode, FishLens, FovAxis, GateFit, Projection,
 };
 
 // What we need.
 // Projection, Sensor Type, Aperture (x, y), ISO, Shutter, Gate, Focal length,
 // Aperture
 
+// This function will be responsible only for loading the fbx camera data.
 pub fn load_camera_handle(
     obj_handle: &fbxcel_dom::v7400::object::ObjectHandle,
 ) -> Result<(), FbxLoadError> {
@@ -19,13 +20,11 @@ pub fn load_camera_handle(
             FbxLoadError::FBXPropertiesError("failed to retrieve camera properties"),
         )?;
 
-        // todo Create an empty entity.
-
         let film_width = camera_handle.film_width_or_default().unwrap_or(0.979_921_3);
         let film_height = camera_handle.film_height_or_default().unwrap_or(0.73464567);
 
-        let film_width_mm = fabled_render::camera::inch_to_millimeter(film_width);
-        let film_height_mm = fabled_render::camera::inch_to_millimeter(film_height);
+        let aperture_x_mm = fabled_render::camera::inch_to_millimeter(film_width);
+        let aperture_y_mm = fabled_render::camera::inch_to_millimeter(film_height);
 
         let aperture_mode = camera_handle
             .aperture_mode_or_default()
@@ -36,10 +35,7 @@ pub fn load_camera_handle(
 
         let focus_distance = camera_handle.focus_distance_or_default().ok();
 
-        let aperture = Aperture::new(film_width_mm, film_height_mm);
-
-        // Fbx doesn't have shutter speed or iso speed, so we will hard code a default
-        // value.
+        let aperture = Aperture::new(aperture_x_mm, aperture_y_mm);
 
         let iso_speed = fabled_render::camera::ISOSpeed::new_standard(
             400.0,
@@ -101,7 +97,7 @@ pub fn load_camera_handle(
                     ApertureMode::HorizontalAndVertical => {
                         let (diagonal_fov, magnification) = focal_length_to_directional_fov(
                             focal_length,
-                            [film_width_mm, film_height_mm],
+                            [aperture_x_mm, aperture_y_mm],
                             focus_distance,
                             None,
                             FishLens::Rectilinear,
@@ -112,7 +108,7 @@ pub fn load_camera_handle(
                     ApertureMode::Horizontal => {
                         let (horizontal_fov, magnification) = focal_length_to_fov(
                             focal_length,
-                            film_width_mm,
+                            aperture_x_mm,
                             FovAxis::Horizontal,
                             focus_distance,
                             None,
@@ -122,10 +118,9 @@ pub fn load_camera_handle(
                         horizontal_fov.radian
                     }
                     ApertureMode::Vertical => {
-                        //
                         let (vertical_fov, magnification) = focal_length_to_fov(
                             focal_length,
-                            film_height_mm,
+                            aperture_y_mm,
                             FovAxis::Vertical,
                             focus_distance,
                             None,
@@ -154,10 +149,6 @@ pub fn load_camera_handle(
                 };
             }
         }
-
-        // we now need to get the properties.
-
-        //
     }
     Ok(())
 }

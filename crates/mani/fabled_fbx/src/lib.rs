@@ -16,7 +16,7 @@ pub use util::*;
 #[cfg(test)]
 mod tests {
 
-    use crate::{load, V7400Loader};
+    use crate::V7400Loader;
     use fbxcel::low::v7400::{AttributeType, AttributeValue};
     use fbxcel::pull_parser::reader::SeekableSource;
     use fbxcel::pull_parser::v7400::attribute::loaders::DirectLoader;

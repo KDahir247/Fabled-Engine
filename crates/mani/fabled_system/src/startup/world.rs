@@ -1,6 +1,23 @@
 use crate::WorldFlag;
 
 pub struct World {
-    value: shipyard::World,
-    flags: WorldFlag,
+    pub value: shipyard::World,
+    pub flags: WorldFlag,
+}
+
+impl Default for World {
+    fn default() -> Self {
+        Self {
+            value: Default::default(),
+            flags: WorldFlag::all(),
+        }
+    }
+}
+
+
+pub fn create_new_world() -> World {
+    World {
+        value: Default::default(),
+        flags: WorldFlag::all(),
+    }
 }
