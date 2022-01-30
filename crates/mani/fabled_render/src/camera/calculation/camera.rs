@@ -3,6 +3,8 @@ use fabled_transform::{get_transformation_matrix, Rotation, Scale, Translation};
 
 use glam::Vec4Swizzles;
 
+
+// todo remove.
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Camera {
@@ -12,6 +14,7 @@ pub struct Camera {
     pub inv_view: [f32; 16],
 }
 
+// todo isolate function from Camera struct and make it into a separate function. We are using a ECS approach.
 impl Camera {
     pub fn project(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
         let model_representation = glam::Mat4::from_cols_array(&model);
@@ -70,7 +73,7 @@ impl Camera {
     ) {
         let forward = fabled_transform::forward(rotation);
 
-        let transformation_matrix = get_transformation_matrix(translation, rotation, scale);
+        let transformation_matrix = fabled_transform::get_transformation_matrix(translation, rotation, scale);
 
         let position = [
             transformation_matrix[12],

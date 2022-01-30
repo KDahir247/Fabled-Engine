@@ -100,7 +100,7 @@ impl LightAppearance {
 
 impl LightAppearance {
     pub fn new(kelvin: f32, temperature_unit_type: TemperatureUnit, color: [f32; 3]) -> Self {
-        // Convert unit type to Kelvin.
+
         let temperature = match temperature_unit_type {
             TemperatureUnit::Kelvin => kelvin,
             TemperatureUnit::Celsius => celsius_to_kelvin(kelvin),

@@ -7,4 +7,4 @@ edition = "2018"
 
 [dependencies]
 glam = {version = "0.20.1", features = ["bytemuck"]}
-
+bytemuck = {version = "1.7.0", features = ["derive"]}

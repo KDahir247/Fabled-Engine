@@ -18,10 +18,11 @@ pub fn lux_to_candela(lux: f32, distance: f32) -> f32 {
 // Candela to lumens where apex angle is the full angle in degree of the the
 // light apex.
 // luminance intensity in candela (cd) to luminance flux in lumen (lm)
+
 // Φv(lm) =  Iv(cd) × ( 2π(1 - cos(°/2)) )
 pub fn candela_to_lumen(candela: f32, apex_angle: f32) -> f32 {
     let target_angle = apex_angle * std::f32::consts::PI / 180.0;
-    candela * (std::f32::consts::TAU * (1.0 - (target_angle / 2.0).cos()))
+    candela * (std::f32::consts::TAU * (1.0 - (target_angle * 0.5).cos()))
 }
 
 // For uniform, isotropic light source,
@@ -30,7 +31,7 @@ pub fn candela_to_lumen(candela: f32, apex_angle: f32) -> f32 {
 // cd = lm / ( 2π(1 - cos(º/2)) )
 pub fn lumen_to_candela(lumen: f32, apex_angle: f32) -> f32 {
     let target_angle = apex_angle * std::f32::consts::PI / 180.0;
-    lumen / (std::f32::consts::TAU * (1.0 - (target_angle / 2.0).cos()))
+    lumen / (std::f32::consts::TAU * (1.0 - (target_angle * 0.5).cos()))
 }
 
 
@@ -280,6 +281,7 @@ mod unit_conversion_tests {
         let error_threshold = 0.001;
 
         let luminance_intensity = 1000.0;
+
         let distance_meter = 15.5;
 
         let result = 4.162_330_6;
@@ -297,6 +299,7 @@ mod unit_conversion_tests {
     #[test]
     fn candela_lumens_test() {
         let error_threshold = 0.001;
+
         let luminance_intensity = 1234.0;
         // Flood light angle 32 to 45 degree angle
         // middle light angle of 32 and 45
@@ -317,11 +320,15 @@ mod unit_conversion_tests {
     fn ev_luminance() {
         // See EV100 to Luminance Chart above
         let ev = 7.0;
+
         let iso_arithmetic = ISOSpeed::default();
+
         let luminance = ev_to_luminance(ev, iso_arithmetic, None);
+
         assert!(luminance.eq(&16.0));
 
         let in_question_ev = luminance_to_ev(luminance, iso_arithmetic, None);
+
         assert!(in_question_ev.eq(&ev));
     }
 
@@ -348,6 +355,7 @@ mod unit_conversion_tests {
 
 
         let in_question_candela = spot_light_lumen_to_candela(lumen, spot_light_angle.to_radians());
+
         assert!(in_question_candela.eq(&candela));
     }
 
@@ -360,19 +368,23 @@ mod unit_conversion_tests {
         println!("{}", lumen);
 
         let in_question_candela = spot_light_approx_lumen_to_candela(lumen);
+
         assert!(in_question_candela.eq(&candela));
     }
 
     #[test]
     fn frustum_light_candela_lumen() {
         let candela = 231.0;
+
         let angle_1 = 43.3f32.to_radians();
+
         let angle_2 = 15.123f32.to_radians();
 
         let lumen = frustum_light_candela_to_lumen(candela, angle_1, angle_2);
         println!("{}", lumen);
 
         let in_question_candela = frustum_light_lumen_to_candela(lumen, angle_1, angle_2);
+
         assert!(in_question_candela.eq(&candela));
     }
 
@@ -382,14 +394,18 @@ mod unit_conversion_tests {
         // luminance of 1688 cd.m−2.
 
         let lumen = 1500.0;
+
         let radius_centimeter_to_meter = 15.0 / 100.0;
 
         let luminance = sphere_area_light_lumen_to_luminance(lumen, radius_centimeter_to_meter);
+
         let truncated_luminance = luminance.trunc();
+
         assert!(truncated_luminance.eq(&1688.0));
 
         let in_question_lumen =
             sphere_area_light_luminance_to_lumen(luminance, radius_centimeter_to_meter);
+
         assert!(in_question_lumen.eq(&lumen));
     }
 
@@ -397,13 +413,17 @@ mod unit_conversion_tests {
     #[test]
     fn disk_area_light_lumen_luminance() {
         let lumen = 1500.0;
+
         let radius_centimeter_to_meter = 15.0 / 100.0;
+
         let luminance = disk_area_light_lumen_to_luminance(lumen, radius_centimeter_to_meter);
+
         let truncated_luminance = (luminance / 4.0).trunc();
 
         // Similar to sphere area light. so we can divide it by 4 to get the same result
         // as sphere area light
         println!("{}", truncated_luminance);
+
         assert!(truncated_luminance.eq(&1688.0));
 
         let in_question_lumen =
@@ -417,6 +437,7 @@ mod unit_conversion_tests {
     #[test]
     fn tube_area_light_lumen_luminance() {
         let lumen = 15000.0;
+
         let radius_centimeter_to_meter = 30.0 / 100.0;
 
         let luminance = tube_area_light_lumen_to_luminance(lumen, 15.0, radius_centimeter_to_meter);
@@ -424,13 +445,16 @@ mod unit_conversion_tests {
 
         let in_question_lumen =
             tube_area_light_luminance_to_lumen(luminance, 15.0, radius_centimeter_to_meter);
+
         assert!(in_question_lumen.eq(&lumen));
     }
 
     #[test]
     fn rectangle_area_light_lumen_luminance() {
         let lumen = 15670.0;
+
         let width = 100.0;
+
         let height = 10.0;
 
         let luminance = rectangle_area_light_lumen_to_luminance(lumen, width, height);
@@ -438,8 +462,10 @@ mod unit_conversion_tests {
 
         let in_question_lumen = rectangle_area_light_luminance_to_lumen(luminance, width, height);
         println!("{}", in_question_lumen);
+
         let rounded_in_question_lumen = in_question_lumen.round();
         println!("{}", rounded_in_question_lumen);
+
         assert!(rounded_in_question_lumen.eq(&lumen));
     }
 }

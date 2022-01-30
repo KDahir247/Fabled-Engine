@@ -15,7 +15,7 @@ pub fn load_light_handle(obj_handle: &fbxcel_dom::v7400::object::ObjectHandle) {
 
         let light_luminous_efficacy = fabled_render::light::Efficacy::INCANDESCENT;
 
-        let [low_lumen, high_lumen, average_lumen] =
+        let [low_lumen, average_lumen, high_lumen] =
             fabled_render::light::watt_to_lumen(light_intensity, light_luminous_efficacy);
 
         let enabled_light = light_handle.cast_light_or_default().unwrap_or(false);

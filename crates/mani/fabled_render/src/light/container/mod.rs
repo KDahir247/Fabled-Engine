@@ -14,7 +14,7 @@ mod unit_type;
 
 #[cfg(test)]
 mod data_test {
-    use crate::light::{Attenuation, LightAppearance, LightType, LightUnit, TemperatureUnit};
+    use crate::light::{Attenuation, LightAppearance, LightType, IntensityUnit, TemperatureUnit};
 
     #[test]
     fn data_size() {
@@ -27,7 +27,7 @@ mod data_test {
         let light_size = std::mem::size_of::<LightType>();
         println!("{}", light_size);
 
-        let unit_type_size = std::mem::size_of::<LightUnit>();
+        let unit_type_size = std::mem::size_of::<IntensityUnit>();
         println!("{}", unit_type_size);
 
         let temperature_size = std::mem::size_of::<TemperatureUnit>();
@@ -46,7 +46,7 @@ mod data_test {
         let light_alignment = std::mem::align_of::<LightType>();
         assert_eq!(light_alignment & (light_alignment - 1), 0);
 
-        let unit_type_alignment = std::mem::align_of::<LightUnit>();
+        let unit_type_alignment = std::mem::align_of::<IntensityUnit>();
         assert_eq!(unit_type_alignment & (unit_type_alignment - 1), 0);
 
         let temperature_alignment = std::mem::align_of::<TemperatureUnit>();
