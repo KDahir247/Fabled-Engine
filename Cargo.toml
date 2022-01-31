@@ -56,6 +56,6 @@ naga = {version = "0.4.2", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out
 serde = {version = "*", features = ["derive"], optional = true}
 
 [dependencies.gltf]
-version = "0.16"
+version = "1.0"
 features = ["KHR_materials_unlit", "KHR_materials_pbrSpecularGlossiness", "extras", "names", "utils", "import"]
 
