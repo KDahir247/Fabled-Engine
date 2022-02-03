@@ -66,9 +66,7 @@ mod tests {
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(file, true).unwrap();
 
-        let raw_clip = RawClip::from(audio_clip);
-
-        standard_output.play_omni(raw_clip, 3.);
+        standard_output.play_omni(raw_clip, 1.);
 
         std::thread::sleep(std::time::Duration::from_secs(5));
     }

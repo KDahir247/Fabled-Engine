@@ -1,342 +1,304 @@
 use crate::camera::{Oblique, Orthographic, Projection, ViewPort};
-use fabled_transform::{get_transformation_matrix, Rotation, Scale, Translation};
+use fabled_transform::{Rotation, Scale, Translation};
 
-use glam::Vec4Swizzles;
+use fabled_math::Matrix4x4;
 
-
-// todo remove.
-#[repr(C)]
-#[derive(Debug, Default, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct Camera {
-    pub view: [f32; 16],
-    pub proj: [f32; 16],
-    pub inv_proj: [f32; 16],
-    pub inv_view: [f32; 16],
+#[derive(Copy, Clone, Default, Debug)]
+pub struct MatrixDescriptor {
+    pub projection: Matrix4x4,
+    pub view: Matrix4x4,
+    pub model: Matrix4x4,
 }
 
-// todo isolate function from Camera struct and make it into a separate function. We are using a ECS approach.
-impl Camera {
-    pub fn project(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
-        let model_representation = glam::Mat4::from_cols_array(&model);
-        let projection_representation = glam::Mat4::from_cols_array(&self.proj);
-        let view_representation = glam::Mat4::from_cols_array(&self.view);
+pub fn project(
+    target: [f32; 3],
+    viewport: &ViewPort,
+    matrix_descriptor: MatrixDescriptor,
+) -> [f32; 3] {
+    let model = glam::Mat4::from_cols_array(&matrix_descriptor.model.inner);
+    let projection = glam::Mat4::from_cols_array(&matrix_descriptor.projection.inner);
+    let view = glam::Mat4::from_cols_array(&matrix_descriptor.view.inner);
 
-        let vector = projection_representation
-            * view_representation
-            * model_representation
-            * glam::Vec4::new(target[0], target[1], target[2], 1.0);
+    let t_mvp_target_vector =
+        projection * view * model * glam::Vec4::new(target[0], target[1], target[2], 1.0);
 
-        let normalized_factor = 1.0 / vector.w;
+    let normalized_factor = 1.0 / t_mvp_target_vector.w;
 
-        assert!(normalized_factor.ne(&0.0));
+    assert!(normalized_factor.ne(&0.0));
 
-        let project = glam::Vec3::new(
-            (((vector.x * normalized_factor + 1.0) * 0.5) * viewport.w) + viewport.x,
-            (((-vector.y * normalized_factor + 1.0) * 0.5) * viewport.h) + viewport.y,
-            (vector.z * normalized_factor * (viewport.max_depth - viewport.min_depth))
-                + viewport.min_depth,
-        );
+    let project = glam::Vec3::new(
+        (((t_mvp_target_vector.x * normalized_factor + 1.0) * 0.5) * viewport.w) + viewport.x,
+        (((-t_mvp_target_vector.y * normalized_factor + 1.0) * 0.5) * viewport.h) + viewport.y,
+        (t_mvp_target_vector.z * normalized_factor * (viewport.max_depth - viewport.min_depth))
+            + viewport.min_depth,
+    );
 
-        project.to_array()
-    }
 
-    pub fn unproject(&self, target: [f32; 3], model: [f32; 16], viewport: &ViewPort) -> [f32; 3] {
-        let model_representation = glam::Mat4::from_cols_array(&model);
-        let projection_representation = glam::Mat4::from_cols_array(&self.proj);
-        let view_representation = glam::Mat4::from_cols_array(&self.view);
+    project.to_array()
+}
 
-        let matrix =
-            (projection_representation * (view_representation * model_representation)).inverse();
+pub fn unproject(
+    target: [f32; 3],
+    viewport: &ViewPort,
+    matrix_descriptor: MatrixDescriptor,
+) -> [f32; 3] {
+    let model = glam::Mat4::from_cols_array(&matrix_descriptor.model.inner);
+    let projection = glam::Mat4::from_cols_array(&matrix_descriptor.projection.inner);
+    let view = glam::Mat4::from_cols_array(&matrix_descriptor.view.inner);
 
-        let mut vector = glam::vec4(
+    let matrix = (projection * (view * model)).inverse();
+
+    let vector = matrix
+        * glam::vec4(
             ((target[0] - viewport.x) / viewport.w) * 2.0 - 1.0,
             -(((target[1] - viewport.y) / viewport.h) * 2.0 - 1.0),
             (target[2] - viewport.min_depth) / (viewport.max_depth - viewport.min_depth),
             1.0,
         );
 
-        vector = matrix * vector;
+    assert!(vector.w.ne(&0.0));
 
-        assert!(vector.w.ne(&0.0));
+    let rcp_vec_w = 1.0 / vector.w;
 
-        let result = vector.xyz() / vector.w;
+    [
+        vector.x * rcp_vec_w,
+        vector.y * rcp_vec_w,
+        vector.z * rcp_vec_w,
+    ]
+}
 
-        result.to_array()
-    }
+pub fn compute_look_at_matrix(
+    translation: Translation,
+    rotation: Rotation,
+    scale: Scale,
+) -> Matrix4x4 {
+    let forward = fabled_transform::forward(rotation);
 
+    let transformation_matrix =
+        fabled_transform::get_transformation_matrix(translation, rotation, scale);
 
-    pub fn calculate_look_at_matrix(
-        &mut self,
-        translation: Translation,
-        rotation: Rotation,
-        scale: Scale,
-    ) {
-        let forward = fabled_transform::forward(rotation);
+    let position = glam::Vec3A::from([
+        transformation_matrix[12],
+        transformation_matrix[13],
+        transformation_matrix[14],
+    ]);
 
-        let transformation_matrix = fabled_transform::get_transformation_matrix(translation, rotation, scale);
+    let z_axis = -glam::Vec3A::from(forward).normalize_or_zero();
+    let x_axis = glam::Vec3A::Y.cross(z_axis).normalize_or_zero();
+    let y_axis = z_axis.cross(x_axis);
 
-        let position = [
-            transformation_matrix[12],
-            transformation_matrix[13],
-            transformation_matrix[14],
-        ];
+    let t_axis = glam::Vec3A::new(
+        -position.dot(x_axis),
+        -position.dot(y_axis),
+        -position.dot(z_axis),
+    );
 
-        let position = glam::Vec3A::from(position);
+    [
+        x_axis.x, y_axis.x, z_axis.x, 0.0, // 0
+        x_axis.y, y_axis.y, z_axis.y, 0.0, // 1
+        x_axis.z, y_axis.z, z_axis.z, 0.0, // 2
+        t_axis.x, t_axis.y, t_axis.z, 1.0,
+    ]
+    .into()
+}
 
+#[deprecated(note = "Calculate arc ball matrix function has not been tested.")]
+pub fn compute_arc_ball_matrix(
+    translation: Translation,
+    rotation: Rotation,
+    center: Option<[f32; 3]>,
+) -> Matrix4x4 {
+    let translation_scalar = translation.value[3];
 
-        let z_axis = -glam::Vec3A::from(forward).normalize();
-        let x_axis = glam::Vec3A::Y.cross(z_axis).normalize();
-        let y_axis = z_axis.cross(x_axis);
-
-
-        let w = glam::Vec3A::new(
-            -position.dot(x_axis),
-            -position.dot(y_axis),
-            -position.dot(z_axis),
-        );
-
-        let view_matrix = [
-            x_axis.x, y_axis.x, z_axis.x, 0.0, // 0
-            x_axis.y, y_axis.y, z_axis.y, 0.0, // 1
-            x_axis.z, y_axis.z, z_axis.z, 0.0, // 2
-            w.x, w.y, w.z, 1.0, // 3
-        ];
-
-        self.view = view_matrix;
-    }
-
-    #[deprecated(note = "Calculate arc ball matrix has not been tested.")]
-    pub fn calculate_arc_ball_matrix(
-        &mut self,
-        translation: Translation,
-        rotation: Rotation,
-        scale: Scale,
-        center: Option<[f32; 3]>,
-    ) {
-        let transformation_matrix = get_transformation_matrix(translation, rotation, scale);
-
-        let mat4_transformation_representation =
-            glam::Mat4::from_cols_array(&transformation_matrix);
-
-        let (_, rotation, _) = mat4_transformation_representation.to_scale_rotation_translation();
-
-        let translation = mat4_transformation_representation.w_axis.xyz()
-            / mat4_transformation_representation.w_axis.w;
-
-        let center = glam::Vec3::from(center.unwrap_or([0.0; 3]));
-
-        let rotation_translation =
-            glam::Mat4::from_rotation_translation(rotation.inverse(), -translation);
-        let translation_to_center = glam::Mat4::from_translation(-center);
-
-        let result_view = rotation_translation * translation_to_center;
-
-        self.view = result_view.to_cols_array();
-    }
-
-    pub fn calculate_inverse_view_matrix(&mut self) {
-        let mat4_view_representation = glam::Mat4::from_cols_array(&self.view);
-        let inverse_view_matrix = mat4_view_representation.inverse();
-
-        self.inv_view = inverse_view_matrix.to_cols_array()
-    }
-
-    #[rustfmt::skip]
-    pub fn calculate_projection_matrix(&mut self, projection: Projection) {
-        match projection {
-            Projection::Orthographic(orthographic) => {
-
-                let Orthographic {
-                    right,
-                    left,
-                    top,
-                    bottom,
-                    clipping,
-                } = orthographic;
-
-                let right_min_left = right - left;
-                let right_plus_left = right + left;
-                let top_min_bottom = top - bottom;
-                let top_plus_bottom = top + bottom;
-                let far_min_near = clipping.far - clipping.near;
-
-                let orthographic_matrix = [
-                    2.0 / right_min_left, 0.0, 0.0, 0.0, // 0
-                    0.0, 2.0 /  top_min_bottom, 0.0, 0.0, // 1
-                    0.0, 0.0, -1.0 / far_min_near, 0.0, // 2
-                    -(right_plus_left / right_min_left), -(top_plus_bottom / top_min_bottom), -(clipping.near / far_min_near), 1.0, // 3
-                ];
+    let translation = glam::Vec3::from([
+        translation.value[0],
+        translation.value[1],
+        translation.value[2],
+    ]) / translation_scalar;
 
 
-                self.proj = orthographic_matrix;
-            }
+    let center = glam::Vec3::from(center.unwrap_or([0.0; 3]));
 
+    let rotation = glam::Quat::from_array(rotation.value);
 
-            Projection::Perspective(perspective) => {
+    let rotation_translation_matrix =
+        glam::Mat4::from_rotation_translation(rotation.inverse(), -translation);
 
-                let h = 1.0 / (perspective.fov.radian * 0.5).tan();
-                let w = h / (perspective.aspect.horizontal / perspective.aspect.vertical);
+    let translation_to_center = glam::Mat4::from_translation(-center);
 
-                let near_min_far = perspective.clipping.near - perspective.clipping.far;
+    (rotation_translation_matrix * translation_to_center)
+        .to_cols_array()
+        .into()
+}
 
-                let inv_near_min_far = 1.0 / near_min_far;
+pub fn compute_inverse_view_matrix(view_matrix: Matrix4x4) -> Matrix4x4 {
+    let view_matrix = glam::Mat4::from_cols_array(&view_matrix.inner);
 
-                let projection_matrix = [
-                    w, 0.0, 0.0, 0.0, // 0
-                    0.0, h , 0.0, 0.0, // 1
-                    0.0, 0.0, perspective.clipping.far * inv_near_min_far, -1.0, // 2
-                    0.0, 0.0, perspective.clipping.near * perspective.clipping.far * inv_near_min_far, 0.0, // 3
-                ];
+    view_matrix.inverse().to_cols_array().into()
+}
 
+#[rustfmt::skip]
+pub fn compute_projection_matrix(projection: Projection) -> Matrix4x4 {
+    match projection {
+        Projection::Orthographic(orthographic) => {
+            //
 
-                self.proj = projection_matrix;
-            }
+            let Orthographic {
+                clipping,
+                right,
+                left,
+                top,
+                bottom,
+            } = orthographic;
+            
+            let right_min_left = right - left;
+            let right_plus_left = right + left;
+            let top_min_bottom = top - bottom;
+            let top_plus_bottom = top + bottom;
+            let far_min_near = clipping.far - clipping.near;
+            
+            [
+                2.0 / right_min_left, 0.0, 0.0, 0.0, // 0
+                0.0, 2.0 / top_min_bottom, 0.0, 0.0, // 1
+                0.0, 0.0, -1.0 / far_min_near, 0.0, // 2
+                -(right_plus_left / right_min_left), -(top_plus_bottom / top_min_bottom), -(clipping.near / far_min_near), 1.0 // 3
+            ]
+            
         }
-    }
+        Projection::Perspective(perspective) => {
 
-    #[rustfmt::skip]
-    pub fn calculate_oblique_projection_matrix(&mut self, orthographic: Orthographic, oblique: Oblique) {
-        Self::calculate_projection_matrix(self, Projection::Orthographic(orthographic));
+            let h = 1.0 / (perspective.fov.radian * 0.5).tan();
+            let w = h / (perspective.aspect.horizontal / perspective.aspect.vertical);
 
-        let size = oblique.vertical_position / orthographic.top;
+            let near_min_far = perspective.clipping.near - perspective.clipping.far;
 
-        let rotation_x =  size * -oblique.angle_rad.sin();
-        let rotation_y  = -size * -oblique.angle_rad.cos();
+            let inv_near_min_far = 1.0 / near_min_far;
 
-        self.proj = [
-            self.proj[0], self.proj[1], rotation_x, -oblique.depth_offset * rotation_x, // 0
-            self.proj[4], self.proj[5], rotation_y, -oblique.depth_offset * rotation_y, // 1
-            self.proj[8], self.proj[9], self.proj[10], self.proj[11], // 2
-            self.proj[12], self.proj[13], self.proj[14], self.proj[15]
-        ]
-    }
+             [
+                w, 0.0, 0.0, 0.0, // 0
+                0.0, h , 0.0, 0.0, // 1
+                0.0, 0.0, perspective.clipping.far * inv_near_min_far, -1.0, // 2
+                0.0, 0.0, perspective.clipping.near * perspective.clipping.far * inv_near_min_far, 0.0, // 3
+            ]
+        }
+    }.into()
 
-    pub fn calculate_inverse_projection_matrix(&mut self) {
-        let mat4_projection_representation = glam::Mat4::from_cols_array(&self.proj);
-        let inverse_view_matrix = mat4_projection_representation.inverse();
+}
 
-        self.inv_proj = inverse_view_matrix.to_cols_array()
-    }
+
+#[rustfmt::skip]
+pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique : Oblique) -> Matrix4x4{
+    
+    let projection = compute_projection_matrix(Projection::Orthographic(orthographic)).inner;
+    
+    let size = oblique.vertical_position / orthographic.top;
+    
+    let rotation_x = size * -oblique.angle_rad.sin();
+    let rotation_y = -size * -oblique.angle_rad.cos();
+
+    let depth_offset_x = -oblique.depth_offset * rotation_x;
+    let depth_offset_y = -oblique.depth_offset * rotation_y;
+
+    [
+        projection[0], projection[1], rotation_x, depth_offset_x, // 0
+        projection[4], projection[5], rotation_y, depth_offset_y, // 1
+        projection[8], projection[9], projection[10], projection[11], // 2
+        projection[12], projection[13], projection[14], projection[15], // 3
+    ].into()
+}
+
+pub fn compute_inverse_projection_matrix(projection_matrix: Matrix4x4) -> Matrix4x4 {
+    let projection = glam::Mat4::from_cols_array(&projection_matrix.inner);
+
+    projection.inverse().to_cols_array().into()
 }
 
 #[cfg(test)]
 mod camera_matrix_test {
-
     use crate::camera::{
-        Camera, ClippingPlane, Oblique, Orthographic, Perspective, Projection, ViewPort,
+        compute_inverse_projection_matrix, compute_inverse_view_matrix, compute_look_at_matrix,
+        compute_oblique_projection_matrix, compute_projection_matrix, project, unproject,
+        ClippingPlane, MatrixDescriptor, Oblique, Orthographic, Perspective, Projection, ViewPort,
     };
+    use fabled_math::Matrix4x4;
 
     use fabled_transform::{Rotation, Scale, Translation};
-
-    fn initialize_projection_view_matrix(
-        translation_target: [f32; 3],
-        rotation_target: [f32; 3],
-    ) -> Camera {
-        // Create camera orientation and update translation and rotation.
-
-        let translation = Translation {
-            value: [
-                translation_target[0],
-                translation_target[1],
-                translation_target[2],
-                1.0,
-            ],
-        };
-
-        let euler_to_quaternion = glam::Quat::from_euler(
-            glam::EulerRot::XYZ,
-            rotation_target[0],
-            rotation_target[1],
-            rotation_target[2],
-        );
-
-        let rotation = Rotation {
-            value: [
-                euler_to_quaternion.x,
-                euler_to_quaternion.y,
-                euler_to_quaternion.z,
-                euler_to_quaternion.w,
-            ],
-        };
-
-        let uniform_scale = Scale::default();
-
-        // Create a camera matrix and create a view matrix and a projection matrix.
-        let mut camera_matrix = Camera::default();
-
-        camera_matrix.calculate_look_at_matrix(translation, rotation, uniform_scale);
-
-        let perspective = Perspective::default();
-        let projection = Projection::Perspective(perspective);
-
-        camera_matrix.calculate_projection_matrix(projection);
-
-
-        camera_matrix
-    }
-
 
     #[test]
     fn calculate_project() {
         // Threshold to determine if passed due to float precision error.
         let threshold = 0.00002;
 
-        // Predefine data such as rotation translation and point target.
-        let rotation_target = [
-            30.0f32.to_radians(),
-            25.0f32.to_radians(),
-            160.0f32.to_radians(),
-        ];
-        let translation_target = [20.0, 1.0, 0.3];
+
+        let rotation_target = Rotation {
+            value: [0.2497666, -0.2125415, 0.9384303, 0.1085877],
+        };
+
+        let translation_target = Translation {
+            value: [20.0, 1.0, 0.3, 1.0],
+        };
+
         let point_target = [1.0, 15.0, 20.2];
 
-        let camera_matrix = initialize_projection_view_matrix(rotation_target, translation_target);
+        let (view_matrix, projection_matrix) =
+            compute_view_projection(rotation_target, translation_target);
 
         let viewport = ViewPort::default();
 
-        let project_vector = camera_matrix.project(
+        let project_vector = project(
             point_target,
-            glam::Mat4::IDENTITY.to_cols_array(),
             &viewport,
+            MatrixDescriptor {
+                projection: projection_matrix,
+                view: view_matrix,
+                model: Matrix4x4::default(),
+            },
         );
+
 
         assert!(!project_vector[0].is_nan());
         assert!(!project_vector[1].is_nan());
         assert!(!project_vector[2].is_nan());
 
         // Tested in other game engine "project" function
-        //         -2.2656322  4.9326377  1.0340623
-        let tested_result = [-2.2656322, 4.9326377, 1.0340623];
+        //         10.734505  -10.861914  0.9197902
+        let tested_result = [10.734505, -10.861914, 0.9197902];
 
         assert!((tested_result[0] - project_vector[0]).abs() < threshold);
         assert!((tested_result[1] - project_vector[1]).abs() < threshold);
         assert!((tested_result[2] - project_vector[2]).abs() < threshold);
     }
 
+    // todo failed test re-look at unproject
     #[test]
     fn calculate_unproject() {
         // Threshold to determine if passed due to float precision error.
         let threshold = 0.2;
 
-        // Predefine data such as rotation translation and point target.
-        let rotation_target = [
-            30.0f32.to_radians(),
-            270.0f32.to_radians(),
-            160.0f32.to_radians(),
-        ];
-        let translation_target = [90.0, 1.234, 23.3];
+        let rotation_target = Rotation {
+            value: [0.6212777, 0.0184258, 0.7806049, 0.0658067],
+        };
+
+        let translation_target = Translation {
+            value: [90.0, 1.234, 23.3, 1.0],
+        };
         let point_target = [23.0, 15.333, 20.2];
 
-
-        let camera_matrix = initialize_projection_view_matrix(rotation_target, translation_target);
+        let (view_matrix, projection_matrix) =
+            compute_view_projection(rotation_target, translation_target);
 
         // Create viewport and calculate the project.
         let viewport = ViewPort::default();
 
-        let unprojected_vector = camera_matrix.unproject(
+
+        let unprojected_vector = unproject(
             point_target,
-            glam::Mat4::IDENTITY.to_cols_array(),
             &viewport,
+            MatrixDescriptor {
+                projection: projection_matrix,
+                view: view_matrix,
+                model: Matrix4x4::default(),
+            },
         );
 
         assert!(!unprojected_vector[0].is_nan());
@@ -344,17 +306,30 @@ mod camera_matrix_test {
         assert!(!unprojected_vector[2].is_nan());
 
         // Tested in other game engine "unproject" function
-        //         0.5074327  4.799162  2.5515323
-        let tested_result = [0.5074327, 4.799162, 2.5515323];
+        //         90.0543  1.3233609  23.065624
+        let tested_result = [90.0543, 1.3233609, 23.065624];
 
         assert!((tested_result[0] - unprojected_vector[0]).abs() < threshold);
         assert!((tested_result[1] - unprojected_vector[1]).abs() < threshold);
         assert!((tested_result[2] - unprojected_vector[2]).abs() < threshold);
     }
 
+    fn compute_view_projection(
+        rotation_target: Rotation,
+        translation_target: Translation,
+    ) -> (Matrix4x4, Matrix4x4) {
+        let view_matrix =
+            compute_look_at_matrix(translation_target, rotation_target, Scale::default());
+
+        let perspective = Perspective::default();
+        let projection = Projection::Perspective(perspective);
+
+        let projection_matrix = compute_projection_matrix(projection);
+        (view_matrix, projection_matrix)
+    }
+
     #[test]
-    fn calculate_look_at_matrix() {
-        // Create camera orientation and update translation and rotation.
+    fn calc_look_at_matrix() {
         let rotation = [
             90.0f32.to_radians(),
             45.0f32.to_radians(),
@@ -381,56 +356,50 @@ mod camera_matrix_test {
 
         let scale = Scale::default();
 
-        // Create a camera matrix and create a view matrix and a projection matrix.
-        let mut camera_matrix = Camera::default();
+        let view_matrix = compute_look_at_matrix(translation, rotation, scale);
 
-        camera_matrix.calculate_look_at_matrix(translation, rotation, scale);
-
-
-        println!("view matrix {:?}", camera_matrix.view);
+        println!("view matrix {:?}", view_matrix);
     }
 
     #[test]
-    fn calculate_arc_ball_matrix() {
+    fn calc_arc_ball_matrix() {
         // will test arc ball matrix later. since I have nothing to test it
     }
 
-
     #[test]
     fn calculate_inverse_matrix() {
-        // Create camera orientation and update translation and rotation.
-        let rotation = [
-            270.0f32.to_radians(),
-            130.0f32.to_radians(),
-            185.0f32.to_radians(),
-        ];
+        let rotation = Rotation {
+            value: [-0.6532815, -0.2705981, -0.3265056, -0.6272114],
+        };
 
-        let translation = [10.0f32, 20.0f32, 30.0f32];
+        let translation = Translation {
+            value: [10.0f32, 20.0f32, 30.0f32, 1.0],
+        };
 
-        let mut camera_matrix = initialize_projection_view_matrix(translation, rotation);
+        let (view_matrix, _) = compute_view_projection(rotation, translation);
 
-
-        let inv_view = glam::Mat4::from_cols_array(&camera_matrix.view)
+        let inv_view = glam::Mat4::from_cols_array(&view_matrix.inner)
             .inverse()
             .to_cols_array();
 
-        camera_matrix.calculate_inverse_view_matrix();
+        let inverse_view = compute_inverse_view_matrix(view_matrix);
 
-        assert!(camera_matrix.inv_view.eq(&inv_view));
+        assert!(inv_view.eq(&inverse_view.inner));
     }
 
     #[test]
     fn calculate_projection_matrix() {
         let threshold = 0.0003;
 
-        let translation = [1.0, 23.0, 15.0];
-        let rotation = [
-            20.0f32.to_radians(),
-            15.5f32.to_radians(),
-            55.5f32.to_radians(),
-        ];
+        let translation = Translation {
+            value: [1.0, 23.0, 15.0, 1.0],
+        };
 
-        let camera_matrix = initialize_projection_view_matrix(translation, rotation);
+        let rotation = Rotation {
+            value: [0.2141074, 0.0374137, 0.4750758, 0.8526788],
+        };
+
+        let (_, projection_matrix) = compute_view_projection(rotation, translation);
 
 
         let proven_projection_matrix = [
@@ -460,64 +429,50 @@ mod camera_matrix_test {
         // {M41:0 M42:0 M43:-0.10001 M44:0}
         // }
 
-        println!("{:?}", camera_matrix.proj);
+        println!("{:?}", projection_matrix);
 
-        assert!((camera_matrix.proj[0] - proven_projection_matrix[0]).abs() < threshold);
-        assert!((camera_matrix.proj[1] - proven_projection_matrix[1]).abs() < threshold);
-        assert!((camera_matrix.proj[2] - proven_projection_matrix[2]).abs() < threshold);
-        assert!((camera_matrix.proj[3] - proven_projection_matrix[3]).abs() < threshold);
-        assert!((camera_matrix.proj[4] - proven_projection_matrix[4]).abs() < threshold);
-        assert!((camera_matrix.proj[5] - proven_projection_matrix[5]).abs() < threshold);
-        assert!((camera_matrix.proj[6] - proven_projection_matrix[6]).abs() < threshold);
-        assert!((camera_matrix.proj[7] - proven_projection_matrix[7]).abs() < threshold);
-        assert!((camera_matrix.proj[8] - proven_projection_matrix[8]).abs() < threshold);
-        assert!((camera_matrix.proj[9] - proven_projection_matrix[9]).abs() < threshold);
-        assert!((camera_matrix.proj[10] - proven_projection_matrix[10]).abs() < threshold);
-        assert!((camera_matrix.proj[11] - proven_projection_matrix[11]).abs() < threshold);
-        assert!((camera_matrix.proj[12] - proven_projection_matrix[12]).abs() < threshold);
-        assert!((camera_matrix.proj[13] - proven_projection_matrix[13]).abs() < threshold);
-        assert!((camera_matrix.proj[14] - proven_projection_matrix[14]).abs() < threshold);
-        assert!((camera_matrix.proj[15] - proven_projection_matrix[15]).abs() < threshold);
+        assert!((projection_matrix.inner[0] - proven_projection_matrix[0]).abs() < threshold);
+        assert!((projection_matrix.inner[1] - proven_projection_matrix[1]).abs() < threshold);
+        assert!((projection_matrix.inner[2] - proven_projection_matrix[2]).abs() < threshold);
+        assert!((projection_matrix.inner[3] - proven_projection_matrix[3]).abs() < threshold);
+        assert!((projection_matrix.inner[4] - proven_projection_matrix[4]).abs() < threshold);
+        assert!((projection_matrix.inner[5] - proven_projection_matrix[5]).abs() < threshold);
+        assert!((projection_matrix.inner[6] - proven_projection_matrix[6]).abs() < threshold);
+        assert!((projection_matrix.inner[7] - proven_projection_matrix[7]).abs() < threshold);
+        assert!((projection_matrix.inner[8] - proven_projection_matrix[8]).abs() < threshold);
+        assert!((projection_matrix.inner[9] - proven_projection_matrix[9]).abs() < threshold);
+        assert!((projection_matrix.inner[10] - proven_projection_matrix[10]).abs() < threshold);
+        assert!((projection_matrix.inner[11] - proven_projection_matrix[11]).abs() < threshold);
+        assert!((projection_matrix.inner[12] - proven_projection_matrix[12]).abs() < threshold);
+        assert!((projection_matrix.inner[13] - proven_projection_matrix[13]).abs() < threshold);
+        assert!((projection_matrix.inner[14] - proven_projection_matrix[14]).abs() < threshold);
+        assert!((projection_matrix.inner[15] - proven_projection_matrix[15]).abs() < threshold);
     }
 
     #[test]
     fn calculate_inverse_projection_matrix() {
-        // Create camera orientation and update translation and rotation.
-        let rotation = [
-            270.0f32.to_radians(),
-            130.0f32.to_radians(),
-            185.0f32.to_radians(),
-        ];
+        let rotation = Rotation {
+            value: [-0.6532815, -0.2705981, -0.3265056, -0.6272114],
+        };
 
-        let translation = [10.0f32, 20.0f32, 30.0f32];
+        let translation = Translation {
+            value: [10.0f32, 20.0f32, 30.0f32, 1.0],
+        };
 
-        let mut camera_matrix = initialize_projection_view_matrix(translation, rotation);
+        let (_, projection_matrix) = compute_view_projection(rotation, translation);
 
-
-        let inv_proj = glam::Mat4::from_cols_array(&camera_matrix.proj)
+        let inv_proj = glam::Mat4::from_cols_array(&projection_matrix.inner)
             .inverse()
             .to_cols_array();
 
-        camera_matrix.calculate_inverse_projection_matrix();
+        let inverse_projection_matrix = compute_inverse_projection_matrix(projection_matrix).inner;
 
-        assert!(camera_matrix.inv_proj.eq(&inv_proj));
+        assert!(inverse_projection_matrix.eq(&inv_proj));
     }
 
 
     #[test]
     fn calculate_oblique_projection_matrix() {
-        let rotation = [
-            270.0f32.to_radians(),
-            130.0f32.to_radians(),
-            185.0f32.to_radians(),
-        ];
-
-        let translation = [10.0f32, 20.0f32, 30.0f32];
-
-
-        // Create a camera matrix and create a view matrix and a projection matrix.
-        let mut camera = Camera::default();
-
         let error_threshold = 0.001;
 
         let orthographic_detail = Orthographic {
@@ -537,7 +492,9 @@ mod camera_matrix_test {
             depth_offset: 8.64,
         };
 
-        camera.calculate_oblique_projection_matrix(orthographic_detail, oblique_detail);
+        let projection =
+            compute_oblique_projection_matrix(orthographic_detail, oblique_detail).inner;
+
 
         let proven_oblique_matrix = [
             0.11250, 0.00000, -0.00989, 0.08542, // 0
@@ -561,25 +518,25 @@ mod camera_matrix_test {
         //  0.0,         0.0,     0.0010000999,  0.0,
         // -0.0,        -0.0,     1.0001,        1.0
 
-        assert!((proven_oblique_matrix[0] - camera.proj[0]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[1] - camera.proj[1]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[2] - camera.proj[2]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[3] - camera.proj[3]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[4] - camera.proj[4]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[5] - camera.proj[5]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[6] - camera.proj[6]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[7] - camera.proj[7]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[8] - camera.proj[8]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[9] - camera.proj[9]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[10] - camera.proj[10]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[11] - camera.proj[11]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[12] - camera.proj[12]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[13] - camera.proj[13]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[14] - camera.proj[14]).abs() < error_threshold);
-        assert!((proven_oblique_matrix[15] - camera.proj[15]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[0] - projection[0]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[1] - projection[1]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[2] - projection[2]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[3] - projection[3]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[4] - projection[4]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[5] - projection[5]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[6] - projection[6]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[7] - projection[7]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[8] - projection[8]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[9] - projection[9]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[10] - projection[10]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[11] - projection[11]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[12] - projection[12]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[13] - projection[13]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[14] - projection[14]).abs() < error_threshold);
+        assert!((proven_oblique_matrix[15] - projection[15]).abs() < error_threshold);
 
 
-        println!("oblique projection \n{:?}", camera.proj);
+        println!("oblique projection \n{:?}", projection);
     }
 
 
@@ -587,16 +544,15 @@ mod camera_matrix_test {
     fn convert_test() {
         let error_threshold = 0.2;
 
-        let rotation = [
-            270.0f32.to_radians(),
-            130.0f32.to_radians(),
-            185.0f32.to_radians(),
-        ];
+        let rotation = Rotation {
+            value: [-0.6532815, -0.2705981, -0.3265056, -0.6272114],
+        };
 
-        let translation = [10.0f32, 20.0f32, 30.0f32];
+        let translation = Translation {
+            value: [10.0f32, 20.0f32, 30.0f32, 1.0f32],
+        };
 
-
-        let camera = initialize_projection_view_matrix(translation, rotation);
+        let (view_matrix, projection_matrix) = compute_view_projection(rotation, translation);
 
         let viewport = ViewPort {
             x: 0.0,
@@ -611,24 +567,37 @@ mod camera_matrix_test {
 
         println!("starting value is {:?}", starting_value);
 
-        let start_unproject = camera.unproject(
+        let start_unproject = unproject(
             starting_value,
-            glam::Mat4::IDENTITY.to_cols_array(),
             &viewport,
+            MatrixDescriptor {
+                projection: projection_matrix,
+                view: view_matrix,
+                model: Matrix4x4::default(),
+            },
         );
         println!("unproject value is {:?}", start_unproject);
 
-        let start_project = camera.project(
+        let start_project = project(
             start_unproject,
-            glam::Mat4::IDENTITY.to_cols_array(),
             &viewport,
+            MatrixDescriptor {
+                projection: projection_matrix,
+                view: view_matrix,
+                model: Matrix4x4::default(),
+            },
         );
+
         println!("project value is {:?}", start_project);
 
-        let end_unproject = camera.unproject(
+        let end_unproject = unproject(
             start_project,
-            glam::Mat4::IDENTITY.to_cols_array(),
             &viewport,
+            MatrixDescriptor {
+                projection: projection_matrix,
+                view: view_matrix,
+                model: Matrix4x4::default(),
+            },
         );
 
         println!("unproject value is {:?}", end_unproject);

@@ -17,7 +17,6 @@ pub use projection::*;
 pub use shutter::*;
 pub use unit_type::*;
 pub use viewport::*;
-pub use matrix::*;
 
 mod aperture_format;
 mod aperture_mode;
@@ -38,12 +37,15 @@ mod projection;
 mod shutter;
 mod unit_type;
 mod viewport;
-mod matrix;
 
 
 #[cfg(test)]
 mod data_test {
-    use crate::camera::{Aperture, AspectRatio, AspectRatioMode, CameraFormat, ClippingPlane, Fov, FovAxis, FovScalingAlgorithm, FullStop, GateFit, InverseProjectionMatrix, InverseViewMatrix, ISOSpeed, Oblique, Orthographic, Perspective, Projection, ProjectionMatrix, Shutter, ViewMatrix, ViewPort};
+    use crate::camera::{
+        Aperture, AspectRatio, AspectRatioMode, CameraFormat, ClippingPlane, Fov, FovAxis,
+        FovScalingAlgorithm, FullStop, GateFit, ISOSpeed, Oblique, Orthographic, Perspective,
+        Projection, Shutter, ViewPort,
+    };
 
     #[test]
     fn data_size() {
@@ -97,18 +99,6 @@ mod data_test {
 
         let gate_fit_size = std::mem::size_of::<GateFit>();
         assert_eq!(gate_fit_size & (gate_fit_size - 1), 0);
-
-        let projection_matrix_size = std::mem::size_of::<ProjectionMatrix>();
-        assert_eq!(projection_matrix_size & (projection_matrix_size - 1), 0);
-
-        let view_matrix_size = std::mem::size_of::<ViewMatrix>();
-        assert_eq!(view_matrix_size & (view_matrix_size - 1), 0);
-
-        let inverse_projection_size = std::mem::size_of::<InverseProjectionMatrix>();
-        assert_eq!(inverse_projection_size & (inverse_projection_size - 1), 0);
-
-        let inverse_view_matrix_size = std::mem::size_of::<InverseViewMatrix>();
-        assert_eq!(inverse_view_matrix_size & (inverse_view_matrix_size - 1), 0);
     }
 
     #[test]
@@ -171,17 +161,5 @@ mod data_test {
 
         let gate_fit_alignment = std::mem::align_of::<GateFit>();
         assert_eq!(gate_fit_alignment & (gate_fit_alignment - 1), 0);
-
-        let projection_matrix_alignment = std::mem::align_of::<ProjectionMatrix>();
-        assert_eq!(projection_matrix_alignment & (projection_matrix_alignment - 1), 0);
-
-        let view_matrix_alignment = std::mem::align_of::<ViewMatrix>();
-        assert_eq!(view_matrix_alignment & (view_matrix_alignment - 1), 0);
-
-        let inverse_projection_matrix_alignment = std::mem::align_of::<InverseProjectionMatrix>();
-        assert_eq!(inverse_projection_matrix_alignment & (inverse_projection_matrix_alignment - 1), 0);
-
-        let inverse_view_matrix_alignment = std::mem::align_of::<InverseViewMatrix>();
-        assert_eq!(inverse_view_matrix_alignment & (inverse_view_matrix_alignment - 1), 0);
     }
 }
