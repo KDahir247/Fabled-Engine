@@ -42,9 +42,9 @@ mod viewport;
 #[cfg(test)]
 mod data_test {
     use crate::camera::{
-        Aperture, AspectRatio, AspectRatioMode, CameraFormat, ClippingPlane, Fov, FovAxis,
-        FovScalingAlgorithm, FullStop, GateFit, ISOSpeed, Oblique, Orthographic, Perspective,
-        Projection, Shutter, ViewPort,
+        Aperture, ApertureMode, AspectRatio, AspectRatioMode, CameraFormat, ClippingPlane, FStop,
+        FishLens, Fov, FovAxis, FovScalingAlgorithm, GateFit, ISOSpeed, ISOSpeedUnit, Oblique,
+        Orthographic, Perspective, Projection, Shutter, ViewPort,
     };
 
     #[test]
@@ -56,7 +56,7 @@ mod data_test {
         assert_eq!(perspective_size & (perspective_size - 1), 0);
 
         let projection_size = std::mem::size_of::<Projection>();
-        println!("Projection size {}", projection_size);
+        assert_eq!(projection_size & (projection_size - 1), 0);
 
         let viewport_rect_size = std::mem::size_of::<ViewPort>();
         assert_eq!(viewport_rect_size & (viewport_rect_size - 1), 0);
@@ -73,11 +73,14 @@ mod data_test {
         let aspect_ratio_size = std::mem::size_of::<AspectRatio>();
         assert_eq!(aspect_ratio_size & (aspect_ratio_size - 1), 0);
 
-        let aperture_len_size = std::mem::size_of::<FullStop>();
+        let aperture_len_size = std::mem::size_of::<FStop>();
         assert_eq!(aperture_len_size & (aperture_len_size - 1), 0);
 
         let iso_speed_size = std::mem::size_of::<ISOSpeed>();
         assert_eq!(iso_speed_size & (iso_speed_size - 1), 0);
+
+        let iso_speed_unit_size = std::mem::size_of::<ISOSpeedUnit>();
+        assert_eq!(iso_speed_unit_size & (iso_speed_unit_size - 1), 0);
 
         let oblique_size = std::mem::size_of::<Oblique>();
         assert_eq!(oblique_size & (oblique_size - 1), 0);
@@ -94,11 +97,17 @@ mod data_test {
         let aperture_format_size = std::mem::size_of::<Aperture>();
         assert_eq!(aperture_format_size & (aperture_format_size - 1), 0);
 
+        let aperture_mode_size = std::mem::size_of::<ApertureMode>();
+        assert_eq!(aperture_mode_size & (aperture_mode_size - 1), 0);
+
         let aspect_ratio_mode_size = std::mem::size_of::<AspectRatioMode>();
         assert_eq!(aspect_ratio_mode_size & (aspect_ratio_mode_size - 1), 0);
 
         let gate_fit_size = std::mem::size_of::<GateFit>();
         assert_eq!(gate_fit_size & (gate_fit_size - 1), 0);
+
+        let fish_len_size = std::mem::size_of::<FishLens>();
+        assert_eq!(fish_len_size & (fish_len_size - 1), 0);
     }
 
     #[test]
@@ -129,11 +138,14 @@ mod data_test {
         let aspect_ratio_alignment = std::mem::align_of::<AspectRatio>();
         assert_eq!(aspect_ratio_alignment & (aspect_ratio_alignment - 1), 0);
 
-        let aperture_len_alignment = std::mem::align_of::<FullStop>();
+        let aperture_len_alignment = std::mem::align_of::<FStop>();
         assert_eq!(aperture_len_alignment & (aperture_len_alignment - 1), 0);
 
         let iso_speed_alignment = std::mem::align_of::<ISOSpeed>();
         assert_eq!(iso_speed_alignment & (iso_speed_alignment - 1), 0);
+
+        let iso_speed_unit_alignment = std::mem::align_of::<ISOSpeedUnit>();
+        assert_eq!(iso_speed_unit_alignment & (iso_speed_unit_alignment - 1), 0);
 
         let oblique_alignment = std::mem::align_of::<Oblique>();
         assert_eq!(oblique_alignment & (oblique_alignment - 1), 0);
@@ -153,6 +165,9 @@ mod data_test {
             0
         );
 
+        let aperture_mode_alignment = std::mem::align_of::<ApertureMode>();
+        assert_eq!(aperture_mode_alignment & (aperture_mode_alignment - 1), 0);
+
         let aspect_ratio_mode_alignment = std::mem::align_of::<AspectRatioMode>();
         assert_eq!(
             aspect_ratio_mode_alignment & (aspect_ratio_mode_alignment - 1),
@@ -161,5 +176,8 @@ mod data_test {
 
         let gate_fit_alignment = std::mem::align_of::<GateFit>();
         assert_eq!(gate_fit_alignment & (gate_fit_alignment - 1), 0);
+
+        let fish_len_alignment = std::mem::align_of::<FishLens>();
+        assert_eq!(fish_len_alignment & (fish_len_alignment - 1), 0);
     }
 }

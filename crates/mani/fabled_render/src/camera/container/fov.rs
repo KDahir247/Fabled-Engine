@@ -37,8 +37,6 @@ impl Fov {
             let aspect_w = aspect_ratio.horizontal;
             let aspect_h = aspect_ratio.vertical;
 
-            let previous_axis = self.axis;
-
             let vertical = aspect_h / aspect_w;
             let horizontal = aspect_w / aspect_h;
             let mut axis_instructions = horizontal;
@@ -65,9 +63,6 @@ mod fov_test {
 
     #[test]
     fn diagonal_test() {
-        let horizontal = 16.0;
-        let vertical = 9.0;
-
         let horizontal_fv = 17.5f32.to_radians();
 
         let mut fov = Fov::new(horizontal_fv, FovAxis::Horizontal);

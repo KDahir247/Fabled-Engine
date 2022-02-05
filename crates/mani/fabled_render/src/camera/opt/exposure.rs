@@ -14,9 +14,7 @@ use crate::camera::{FStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUATION};
 pub fn compute_exposure_value(f_stop: FStop) -> f32 {
     let shutter = Shutter::compute_shutter_speed(f_stop);
 
-    let FStop::FullStop(target_stop) = f_stop;
-
-    let f_number = target_stop.get_f_number();
+    let f_number = f_stop.get_f_number();
 
     f32::log2(f_number * f_number / shutter.speed)
 }

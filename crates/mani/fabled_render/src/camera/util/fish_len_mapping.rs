@@ -164,7 +164,7 @@ mod len_mapping {
     use crate::camera::{
         compute_approx_magnification, compute_distance_image_plane_from_optical_axis,
         compute_focal_length, compute_magnification, focal_length_to_directional_fov,
-        fov_to_focal_length, FishLens, Fov, FovAxis,
+        focal_length_to_fov, fov_to_focal_length, FishLens, FovAxis,
     };
 
     #[test]
@@ -183,11 +183,35 @@ mod len_mapping {
         assert!((precise_magnification - approx_magnification).abs() < ERROR_THRESHOLD);
     }
 
-    // todo got to write test
-    #[test]
-    fn focal_to_fov() {}
 
-    // todo got to write test
+    #[test]
+    fn focal_to_fov() {
+        const ERROR_THRESHOLD: f32 = 0.0001;
+
+        let focal_length = 15.0;
+
+        let (vertical_fov, _) = focal_length_to_fov(
+            focal_length,
+            28.0,
+            FovAxis::Vertical,
+            None,
+            None,
+            FishLens::Rectilinear,
+        );
+
+        let (diagonal_fov, _) = focal_length_to_directional_fov(
+            focal_length,
+            [28.0, 0.0],
+            None,
+            None,
+            FishLens::Rectilinear,
+        );
+
+        assert!(vertical_fov.axis.eq(&FovAxis::Vertical));
+
+        assert!((vertical_fov.radian - diagonal_fov).abs() < ERROR_THRESHOLD);
+    }
+
     #[test]
     fn focal_to_direction_fov() {
         const ERROR_THRESHOLD: f32 = 0.0001;
@@ -195,31 +219,58 @@ mod len_mapping {
         // Calculated using.
         // http://kmp.pentaxians.eu/technology/fov/
         // result 110.52703743126978 degree
-        let result = 110.52703743126978f32.to_radians();
+        let result = 110.527_04_f32.to_radians();
 
-        let (full_frame_fov, magnification) =
-            focal_length_to_directional_fov(15.0, [36., 24.], None, None, FishLens::Rectilinear);
+        let focal_length = 15.0;
 
-        println!("{}", (full_frame_fov - result).abs());
+        let (full_frame_fov, magnification) = focal_length_to_directional_fov(
+            focal_length,
+            [36., 24.],
+            None,
+            None,
+            FishLens::Rectilinear,
+        );
 
         assert!((full_frame_fov - result).abs() < ERROR_THRESHOLD);
-
-        println!("{:?}", full_frame_fov.to_degrees());
 
         let full_frame_focal_length = fov_to_focal_length(
             full_frame_fov,
             [36., 24.],
-            Some(1.5),
+            None,
             magnification,
             FishLens::Rectilinear,
         );
 
-        println!("{}", full_frame_focal_length);
+        assert!((full_frame_focal_length - focal_length).abs() < ERROR_THRESHOLD);
     }
 
-    // todo got to write test
     #[test]
-    fn fov_to_focal() {}
+    fn fov_to_focal() {
+        const ERROR_THRESHOLD: f32 = 0.0001;
+        const CROP_FACTOR: f32 = 1.5f32;
+
+        let fov = 90.0f32.to_radians();
+
+
+        let focal_length = fov_to_focal_length(
+            fov,
+            [36., 24.],
+            Some(CROP_FACTOR),
+            1.0,
+            FishLens::Rectilinear,
+        );
+
+
+        let (resulting_fov, _) = focal_length_to_directional_fov(
+            focal_length,
+            [36., 24.],
+            None,
+            Some(CROP_FACTOR),
+            FishLens::Rectilinear,
+        );
+
+        assert!((fov - resulting_fov).abs() < ERROR_THRESHOLD);
+    }
 
     #[test]
     fn compute_focal() {

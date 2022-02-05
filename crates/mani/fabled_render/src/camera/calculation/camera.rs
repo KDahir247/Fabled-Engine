@@ -1,5 +1,5 @@
-use crate::camera::{Oblique, Orthographic, Projection, ViewPort};
-use fabled_transform::{Rotation, Scale, Translation};
+use crate::camera::{ClippingPlane, Oblique, Orthographic, Projection, ViewPort};
+use fabled_transform::{Rotation, Translation};
 
 use fabled_math::Matrix4x4;
 
@@ -26,15 +26,12 @@ pub fn project(
 
     assert!(normalized_factor.ne(&0.0));
 
-    let project = glam::Vec3::new(
+    [
         (((t_mvp_target_vector.x * normalized_factor + 1.0) * 0.5) * viewport.w) + viewport.x,
         (((-t_mvp_target_vector.y * normalized_factor + 1.0) * 0.5) * viewport.h) + viewport.y,
         (t_mvp_target_vector.z * normalized_factor * (viewport.max_depth - viewport.min_depth))
             + viewport.min_depth,
-    );
-
-
-    project.to_array()
+    ]
 }
 
 pub fn unproject(
@@ -70,18 +67,18 @@ pub fn unproject(
 pub fn compute_look_at_matrix(
     translation: Translation,
     rotation: Rotation,
-    scale: Scale,
 ) -> Matrix4x4 {
     let forward = fabled_transform::forward(rotation);
 
-    let transformation_matrix =
-        fabled_transform::get_transformation_matrix(translation, rotation, scale);
+    let translation_xyz = [
+        translation.value[0],
+        translation.value[1],
+        translation.value[2],
+    ];
 
-    let position = glam::Vec3A::from([
-        transformation_matrix[12],
-        transformation_matrix[13],
-        transformation_matrix[14],
-    ]);
+    let rcp_translation_scalar = translation.value[3].recip();
+
+    let position = glam::Vec3A::from(translation_xyz) * rcp_translation_scalar;
 
     let z_axis = -glam::Vec3A::from(forward).normalize_or_zero();
     let x_axis = glam::Vec3A::Y.cross(z_axis).normalize_or_zero();
@@ -108,21 +105,20 @@ pub fn compute_arc_ball_matrix(
     rotation: Rotation,
     center: Option<[f32; 3]>,
 ) -> Matrix4x4 {
-    let translation_scalar = translation.value[3];
+    let rcp_translation_scalar = translation.value[3].recip();
 
-    let translation = glam::Vec3::from([
+    let normalized_translation = glam::Vec3::from([
         translation.value[0],
         translation.value[1],
         translation.value[2],
-    ]) / translation_scalar;
-
-
-    let center = glam::Vec3::from(center.unwrap_or([0.0; 3]));
+    ]) * rcp_translation_scalar;
 
     let rotation = glam::Quat::from_array(rotation.value);
 
+    let center = glam::Vec3::from(center.unwrap_or_default());
+
     let rotation_translation_matrix =
-        glam::Mat4::from_rotation_translation(rotation.inverse(), -translation);
+        glam::Mat4::from_rotation_translation(rotation.inverse(), -normalized_translation);
 
     let translation_to_center = glam::Mat4::from_translation(-center);
 
@@ -138,13 +134,17 @@ pub fn compute_inverse_view_matrix(view_matrix: Matrix4x4) -> Matrix4x4 {
 }
 
 #[rustfmt::skip]
-pub fn compute_projection_matrix(projection: Projection) -> Matrix4x4 {
+pub fn compute_projection_matrix(projection: Projection, clipping_plane : ClippingPlane) -> Matrix4x4 {
+
+    let far_plane = clipping_plane.far;
+    let near_plane = clipping_plane.near;
+
+    let near_plane_min_far_plane = near_plane - far_plane;
+
     match projection {
         Projection::Orthographic(orthographic) => {
-            //
 
             let Orthographic {
-                clipping,
                 right,
                 left,
                 top,
@@ -155,13 +155,12 @@ pub fn compute_projection_matrix(projection: Projection) -> Matrix4x4 {
             let right_plus_left = right + left;
             let top_min_bottom = top - bottom;
             let top_plus_bottom = top + bottom;
-            let far_min_near = clipping.far - clipping.near;
-            
+
             [
                 2.0 / right_min_left, 0.0, 0.0, 0.0, // 0
                 0.0, 2.0 / top_min_bottom, 0.0, 0.0, // 1
-                0.0, 0.0, -1.0 / far_min_near, 0.0, // 2
-                -(right_plus_left / right_min_left), -(top_plus_bottom / top_min_bottom), -(clipping.near / far_min_near), 1.0 // 3
+                0.0, 0.0, -1.0 / near_plane_min_far_plane, 0.0, // 2
+                -(right_plus_left / right_min_left), -(top_plus_bottom / top_min_bottom), -(far_plane / near_plane_min_far_plane), 1.0 // 3
             ]
             
         }
@@ -170,15 +169,14 @@ pub fn compute_projection_matrix(projection: Projection) -> Matrix4x4 {
             let h = 1.0 / (perspective.fov.radian * 0.5).tan();
             let w = h / (perspective.aspect.horizontal / perspective.aspect.vertical);
 
-            let near_min_far = perspective.clipping.near - perspective.clipping.far;
 
-            let inv_near_min_far = 1.0 / near_min_far;
+            let inv_near_min_far = 1.0 / near_plane_min_far_plane;
 
              [
                 w, 0.0, 0.0, 0.0, // 0
                 0.0, h , 0.0, 0.0, // 1
-                0.0, 0.0, perspective.clipping.far * inv_near_min_far, -1.0, // 2
-                0.0, 0.0, perspective.clipping.near * perspective.clipping.far * inv_near_min_far, 0.0, // 3
+                0.0, 0.0, far_plane * inv_near_min_far, -1.0, // 2
+                0.0, 0.0, near_plane * far_plane * inv_near_min_far, 0.0, // 3
             ]
         }
     }.into()
@@ -187,9 +185,9 @@ pub fn compute_projection_matrix(projection: Projection) -> Matrix4x4 {
 
 
 #[rustfmt::skip]
-pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique : Oblique) -> Matrix4x4{
+pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique : Oblique, clipping_plane: ClippingPlane) -> Matrix4x4{
     
-    let projection = compute_projection_matrix(Projection::Orthographic(orthographic)).inner;
+    let projection = compute_projection_matrix(Projection::Orthographic(orthographic), clipping_plane).inner;
     
     let size = oblique.vertical_position / orthographic.top;
     
@@ -222,20 +220,22 @@ mod camera_matrix_test {
     };
     use fabled_math::Matrix4x4;
 
-    use fabled_transform::{Rotation, Scale, Translation};
+    use fabled_transform::{Rotation, Translation};
 
     #[test]
     fn calculate_project() {
-        // Threshold to determine if passed due to float precision error.
-        let threshold = 0.00002;
+        const THRESHOLD: f32 = 0.00002;
 
-
-        let rotation_target = Rotation {
-            value: [0.2497666, -0.2125415, 0.9384303, 0.1085877],
-        };
+        // Tested in other game engine "project" function
+        //         10.734505  -10.861914  0.9197902
+        const TESTED_RESULT: [f32; 3] = [10.734505, -10.861914, 0.9197902];
 
         let translation_target = Translation {
             value: [20.0, 1.0, 0.3, 1.0],
+        };
+
+        let rotation_target = Rotation {
+            value: [0.2497666, -0.2125415, 0.9384303, 0.1085877],
         };
 
         let point_target = [1.0, 15.0, 20.2];
@@ -255,33 +255,32 @@ mod camera_matrix_test {
             },
         );
 
-
         assert!(!project_vector[0].is_nan());
         assert!(!project_vector[1].is_nan());
         assert!(!project_vector[2].is_nan());
 
-        // Tested in other game engine "project" function
-        //         10.734505  -10.861914  0.9197902
-        let tested_result = [10.734505, -10.861914, 0.9197902];
-
-        assert!((tested_result[0] - project_vector[0]).abs() < threshold);
-        assert!((tested_result[1] - project_vector[1]).abs() < threshold);
-        assert!((tested_result[2] - project_vector[2]).abs() < threshold);
+        assert!((TESTED_RESULT[0] - project_vector[0]).abs() < THRESHOLD);
+        assert!((TESTED_RESULT[1] - project_vector[1]).abs() < THRESHOLD);
+        assert!((TESTED_RESULT[2] - project_vector[2]).abs() < THRESHOLD);
     }
 
-    // todo failed test re-look at unproject
     #[test]
     fn calculate_unproject() {
         // Threshold to determine if passed due to float precision error.
-        let threshold = 0.2;
+        const THRESHOLD: f32 = 0.2;
+
+        // Tested in other game engine "unproject" function
+        //         90.0543  1.3233609  23.065624
+        const TESTED_RESULT: [f32; 3] = [90.0543, 1.3233609, 23.065624];
+
+        let translation_target = Translation {
+            value: [90.0, 1.234, 23.3, 1.0],
+        };
 
         let rotation_target = Rotation {
             value: [0.6212777, 0.0184258, 0.7806049, 0.0658067],
         };
 
-        let translation_target = Translation {
-            value: [90.0, 1.234, 23.3, 1.0],
-        };
         let point_target = [23.0, 15.333, 20.2];
 
         let (view_matrix, projection_matrix) =
@@ -289,7 +288,6 @@ mod camera_matrix_test {
 
         // Create viewport and calculate the project.
         let viewport = ViewPort::default();
-
 
         let unprojected_vector = unproject(
             point_target,
@@ -305,13 +303,10 @@ mod camera_matrix_test {
         assert!(!unprojected_vector[1].is_nan());
         assert!(!unprojected_vector[2].is_nan());
 
-        // Tested in other game engine "unproject" function
-        //         90.0543  1.3233609  23.065624
-        let tested_result = [90.0543, 1.3233609, 23.065624];
 
-        assert!((tested_result[0] - unprojected_vector[0]).abs() < threshold);
-        assert!((tested_result[1] - unprojected_vector[1]).abs() < threshold);
-        assert!((tested_result[2] - unprojected_vector[2]).abs() < threshold);
+        assert!((TESTED_RESULT[0] - unprojected_vector[0]).abs() < THRESHOLD);
+        assert!((TESTED_RESULT[1] - unprojected_vector[1]).abs() < THRESHOLD);
+        assert!((TESTED_RESULT[2] - unprojected_vector[2]).abs() < THRESHOLD);
     }
 
     fn compute_view_projection(
@@ -319,44 +314,28 @@ mod camera_matrix_test {
         translation_target: Translation,
     ) -> (Matrix4x4, Matrix4x4) {
         let view_matrix =
-            compute_look_at_matrix(translation_target, rotation_target, Scale::default());
+            compute_look_at_matrix(translation_target, rotation_target);
 
         let perspective = Perspective::default();
         let projection = Projection::Perspective(perspective);
 
-        let projection_matrix = compute_projection_matrix(projection);
+        let clipping_plane = ClippingPlane::default();
+
+        let projection_matrix = compute_projection_matrix(projection, clipping_plane);
         (view_matrix, projection_matrix)
     }
 
     #[test]
     fn calc_look_at_matrix() {
-        let rotation = [
-            90.0f32.to_radians(),
-            45.0f32.to_radians(),
-            130.0f32.to_radians(),
-        ];
-
-
         let translation = Translation {
             value: [10.0f32, 2.0f32, 30.0f32, 1.0f32],
         };
 
-
-        let glm_quaternion =
-            glam::Quat::from_euler(glam::EulerRot::XYZ, rotation[0], rotation[1], rotation[2]);
-
         let rotation = Rotation {
-            value: [
-                glm_quaternion.x,
-                glm_quaternion.y,
-                glm_quaternion.z,
-                glm_quaternion.w,
-            ],
+            value: [0.5213338, -0.4777144, 0.7064338, 0.0308436],
         };
 
-        let scale = Scale::default();
-
-        let view_matrix = compute_look_at_matrix(translation, rotation, scale);
+        let view_matrix = compute_look_at_matrix(translation, rotation);
 
         println!("view matrix {:?}", view_matrix);
     }
@@ -368,12 +347,12 @@ mod camera_matrix_test {
 
     #[test]
     fn calculate_inverse_matrix() {
-        let rotation = Rotation {
-            value: [-0.6532815, -0.2705981, -0.3265056, -0.6272114],
-        };
-
         let translation = Translation {
             value: [10.0f32, 20.0f32, 30.0f32, 1.0],
+        };
+
+        let rotation = Rotation {
+            value: [-0.6532815, -0.2705981, -0.3265056, -0.6272114],
         };
 
         let (view_matrix, _) = compute_view_projection(rotation, translation);
@@ -389,7 +368,7 @@ mod camera_matrix_test {
 
     #[test]
     fn calculate_projection_matrix() {
-        let threshold = 0.0003;
+        const THRESHOLD: f32 = 0.0003;
 
         let translation = Translation {
             value: [1.0, 23.0, 15.0, 1.0],
@@ -400,12 +379,6 @@ mod camera_matrix_test {
         };
 
         let (_, projection_matrix) = compute_view_projection(rotation, translation);
-
-
-        let proven_projection_matrix = [
-            0.9742759, 0.00000, 0.00000, 0.00000, 0.00000, 1.732046, 0.00000, 0.00000, 0.00000,
-            0.00000, -1.00020, -1.00000, 0.00000, 0.00000, -0.10001, 0.00000,
-        ];
 
         // Our Game engine
         //[
@@ -429,34 +402,37 @@ mod camera_matrix_test {
         // {M41:0 M42:0 M43:-0.10001 M44:0}
         // }
 
-        println!("{:?}", projection_matrix);
+        let proven_projection_matrix = [
+            0.9742759, 0.00000, 0.00000, 0.00000, 0.00000, 1.732046, 0.00000, 0.00000, 0.00000,
+            0.00000, -1.00020, -1.00000, 0.00000, 0.00000, -0.10001, 0.00000,
+        ];
 
-        assert!((projection_matrix.inner[0] - proven_projection_matrix[0]).abs() < threshold);
-        assert!((projection_matrix.inner[1] - proven_projection_matrix[1]).abs() < threshold);
-        assert!((projection_matrix.inner[2] - proven_projection_matrix[2]).abs() < threshold);
-        assert!((projection_matrix.inner[3] - proven_projection_matrix[3]).abs() < threshold);
-        assert!((projection_matrix.inner[4] - proven_projection_matrix[4]).abs() < threshold);
-        assert!((projection_matrix.inner[5] - proven_projection_matrix[5]).abs() < threshold);
-        assert!((projection_matrix.inner[6] - proven_projection_matrix[6]).abs() < threshold);
-        assert!((projection_matrix.inner[7] - proven_projection_matrix[7]).abs() < threshold);
-        assert!((projection_matrix.inner[8] - proven_projection_matrix[8]).abs() < threshold);
-        assert!((projection_matrix.inner[9] - proven_projection_matrix[9]).abs() < threshold);
-        assert!((projection_matrix.inner[10] - proven_projection_matrix[10]).abs() < threshold);
-        assert!((projection_matrix.inner[11] - proven_projection_matrix[11]).abs() < threshold);
-        assert!((projection_matrix.inner[12] - proven_projection_matrix[12]).abs() < threshold);
-        assert!((projection_matrix.inner[13] - proven_projection_matrix[13]).abs() < threshold);
-        assert!((projection_matrix.inner[14] - proven_projection_matrix[14]).abs() < threshold);
-        assert!((projection_matrix.inner[15] - proven_projection_matrix[15]).abs() < threshold);
+        assert!((projection_matrix.inner[0] - proven_projection_matrix[0]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[1] - proven_projection_matrix[1]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[2] - proven_projection_matrix[2]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[3] - proven_projection_matrix[3]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[4] - proven_projection_matrix[4]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[5] - proven_projection_matrix[5]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[6] - proven_projection_matrix[6]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[7] - proven_projection_matrix[7]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[8] - proven_projection_matrix[8]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[9] - proven_projection_matrix[9]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[10] - proven_projection_matrix[10]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[11] - proven_projection_matrix[11]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[12] - proven_projection_matrix[12]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[13] - proven_projection_matrix[13]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[14] - proven_projection_matrix[14]).abs() < THRESHOLD);
+        assert!((projection_matrix.inner[15] - proven_projection_matrix[15]).abs() < THRESHOLD);
     }
 
     #[test]
     fn calculate_inverse_projection_matrix() {
-        let rotation = Rotation {
-            value: [-0.6532815, -0.2705981, -0.3265056, -0.6272114],
-        };
-
         let translation = Translation {
             value: [10.0f32, 20.0f32, 30.0f32, 1.0],
+        };
+
+        let rotation = Rotation {
+            value: [-0.6532815, -0.2705981, -0.3265056, -0.6272114],
         };
 
         let (_, projection_matrix) = compute_view_projection(rotation, translation);
@@ -471,37 +447,10 @@ mod camera_matrix_test {
     }
 
 
+    #[rustfmt::skip]
     #[test]
     fn calculate_oblique_projection_matrix() {
         let error_threshold = 0.001;
-
-        let orthographic_detail = Orthographic {
-            right: 8.8889,
-            left: -8.8889,
-            top: 5.0,
-            bottom: -5.0,
-            clipping: ClippingPlane {
-                far: 0.1,
-                near: 1000.0,
-            },
-        };
-
-        let oblique_detail = Oblique {
-            angle_rad: 64.0f32.to_radians(),
-            vertical_position: 0.055,
-            depth_offset: 8.64,
-        };
-
-        let projection =
-            compute_oblique_projection_matrix(orthographic_detail, oblique_detail).inner;
-
-
-        let proven_oblique_matrix = [
-            0.11250, 0.00000, -0.00989, 0.08542, // 0
-            0.00000, 0.20000, 0.00482,
-            -0.04166, // 1 swap -0.0482 and -0.04166 to positive since we are rhs
-            0.00000, 0.00000, 0.00200, 0.00000, 0.00000, 0.00000, 1.00000, 1.00000,
-        ];
 
         // Angle 64
         // Vertical 0.055
@@ -517,6 +466,37 @@ mod camera_matrix_test {
         //  0.0,         0.2,     0.004822083,  -0.041662797,
         //  0.0,         0.0,     0.0010000999,  0.0,
         // -0.0,        -0.0,     1.0001,        1.0
+        
+        let proven_oblique_matrix = [
+            0.11250, 0.00000, -0.00989, 0.08542, // 0
+            0.00000, 0.20000, 0.00482, -0.04166, // 1
+            0.00000, 0.00000, 0.00100,  0.00000, // 2
+            0.00000, 0.00000, 1.0001,  1.00000, // 3
+        ];
+
+        
+        let orthographic_detail = Orthographic {
+            right: 8.8889,
+            left: -8.8889,
+            top: 5.0,
+            bottom: -5.0,
+
+        };
+
+        let oblique_detail = Oblique {
+            angle_rad: 64.0f32.to_radians(),
+            vertical_position: 0.055,
+            depth_offset: 8.64,
+        };
+
+        let clipping_plane = ClippingPlane::default();
+
+        let projection =
+            compute_oblique_projection_matrix(orthographic_detail, oblique_detail, clipping_plane).inner;
+        
+
+        println!("{} {}", proven_oblique_matrix[10], projection[10]);
+        println!("{} {}", proven_oblique_matrix[14], projection[14]);
 
         assert!((proven_oblique_matrix[0] - projection[0]).abs() < error_threshold);
         assert!((proven_oblique_matrix[1] - projection[1]).abs() < error_threshold);

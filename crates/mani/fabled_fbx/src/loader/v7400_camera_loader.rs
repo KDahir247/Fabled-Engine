@@ -42,8 +42,7 @@ pub fn load_camera_handle(
             fabled_render::camera::ISOSpeedUnit::Arithmetic,
         );
 
-        let f_stop =
-            fabled_render::camera::FStop::FullStop(fabled_render::camera::FullStop::F4_STOP);
+        let f_stop = fabled_render::camera::FStop::FullStop(fabled_render::camera::FStop::F4_STOP);
 
         let shutter_speed = fabled_render::camera::Shutter::compute_shutter_speed(f_stop);
 

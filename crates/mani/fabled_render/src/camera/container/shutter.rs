@@ -15,17 +15,13 @@ pub struct Shutter {
 
 impl Shutter {
     pub fn compute_shutter_speed(f_stop: FStop) -> Self {
-        match f_stop {
-            FStop::FullStop(full_stop) => {
-                let mut shutter = 4000.0;
+        let mut shutter = 4000.0;
 
-                for _ in 0..full_stop.get_step() {
-                    shutter /= 2.0;
-                }
-                Self {
-                    speed: 1.0 / shutter,
-                }
-            }
+        for _ in 0..f_stop.get_step() {
+            shutter /= 2.0;
+        }
+        Self {
+            speed: 1.0 / shutter,
         }
     }
 
@@ -39,12 +35,11 @@ impl Shutter {
 
 #[cfg(test)]
 mod shutter_test {
-    use crate::camera::{FStop, FullStop, Shutter};
+    use crate::camera::{FStop, Shutter};
 
     #[test]
     fn retrieve_shutter() {
-        let f1_4_aperture = FStop::FullStop(FullStop::F1_4_STOP);
-        let mut shutter = Shutter::compute_shutter_speed(f1_4_aperture);
+        let mut shutter = Shutter::compute_shutter_speed(FStop::F1_4_STOP);
 
         let initial_shutter = 4000.0;
         let f1_4_shutter = 1.0 / (initial_shutter / 2.0);
@@ -57,28 +52,23 @@ mod shutter_test {
 
         assert!(shutter.speed.eq(&f1_4_shutter));
 
-        let f2_aperture = FStop::FullStop(FullStop::F2_STOP);
-        shutter = Shutter::compute_shutter_speed(f2_aperture);
+        shutter = Shutter::compute_shutter_speed(FStop::F2_STOP);
 
         assert!(shutter.speed.eq(&f2_shutter));
 
-        let f2_8_aperture = FStop::FullStop(FullStop::F2_8_STOP);
-        shutter = Shutter::compute_shutter_speed(f2_8_aperture);
+        shutter = Shutter::compute_shutter_speed(FStop::F2_8_STOP);
 
         assert!(shutter.speed.eq(&f2_8_shutter));
 
-        let f4_aperture = FStop::FullStop(FullStop::F4_STOP);
-        shutter = Shutter::compute_shutter_speed(f4_aperture);
+        shutter = Shutter::compute_shutter_speed(FStop::F4_STOP);
 
         assert!(shutter.speed.eq(&f4_shutter));
 
-        let f5_6_aperture = FStop::FullStop(FullStop::F5_6_STOP);
-        shutter = Shutter::compute_shutter_speed(f5_6_aperture);
+        shutter = Shutter::compute_shutter_speed(FStop::F5_6_STOP);
 
         assert!(shutter.speed.eq(&f5_6_shutter));
 
-        let f8_aperture = FStop::FullStop(FullStop::F8_STOP);
-        shutter = Shutter::compute_shutter_speed(f8_aperture);
+        shutter = Shutter::compute_shutter_speed(FStop::F8_STOP);
 
         assert!(shutter.speed.eq(&f8_shutter));
     }
