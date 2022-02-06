@@ -1,8 +1,7 @@
-use crate::light::{
-    ev_to_candela, lux_to_candela, spot_light_candela_to_lumen, IntensityUnit,
-};
+use crate::light::{ev_to_candela, lux_to_candela, spot_light_candela_to_lumen, IntensityUnit};
 
 // Intensity is Luminance Power (Luminance flux) in lumen
+#[repr(align(16))]
 pub struct SpotLight {
     pub intensity: f32,
     pub range: f32,

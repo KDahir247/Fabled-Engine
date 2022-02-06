@@ -1,7 +1,7 @@
 Research about lighting for game engine.
 
 
-Luminous Flux is the total amout of visual power emitted by a light source.
+Luminous Flux is the total amount of visual power emitted by a light source.
 
 
 Calculate the light attenuation in the fragment shader.

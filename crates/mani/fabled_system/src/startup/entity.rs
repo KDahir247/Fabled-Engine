@@ -1,4 +1,4 @@
-use crate::World;
+use crate::{startup, World};
 
 pub fn create_entity(world: Option<World>) -> u64 {
     let mut world = world.unwrap_or_default();

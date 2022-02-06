@@ -7,4 +7,6 @@ edition = "2018"
 
 [dependencies]
 glam = {version = "0.20.1", features = ["bytemuck"]}
+fabled_ecs = {path = "../fabled_ecs", version = "*"}
+
 shipyard = {git = "https://github.com/leudz/shipyard", branch = "master" , features = ["thread_local", "proc", "parallel"]}
