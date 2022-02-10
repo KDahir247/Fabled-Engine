@@ -1,3 +1,6 @@
+// todo we can remove this, since we aren't following this way to create a
+//  material.
+
 // This is the default implementation for basic non pbr material.
 
 #[derive(Copy, Clone, Debug, bytemuck::Zeroable, bytemuck::Pod)]

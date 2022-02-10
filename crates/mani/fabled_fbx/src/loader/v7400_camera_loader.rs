@@ -42,7 +42,7 @@ pub fn load_camera_handle(
             fabled_render::camera::ISOSpeedUnit::Arithmetic,
         );
 
-        let f_stop = fabled_render::camera::FStop::FullStop(fabled_render::camera::FStop::F4_STOP);
+        let f_stop = fabled_render::camera::FStop::F4_STOP;
 
         let shutter_speed = fabled_render::camera::Shutter::compute_shutter_speed(f_stop);
 
@@ -62,7 +62,7 @@ pub fn load_camera_handle(
             Projection::Orthographic(mut orthographic) => {
                 let orthographic_zoom = camera_handle.ortho_zoom_or_default().unwrap_or(1.0);
 
-                orthographic.clipping = camera_clipping_plane;
+                // orthographic.clipping = camera_clipping_plane;
 
                 orthographic.left = -orthographic_zoom;
                 orthographic.right = orthographic_zoom;
@@ -80,7 +80,7 @@ pub fn load_camera_handle(
                 let aspect_width = camera_handle.aspect_width_or_default().unwrap_or(16.0);
                 let aspect_height = camera_handle.aspect_height_or_default().unwrap_or(9.0);
 
-                perspective.clipping = camera_clipping_plane;
+                // perspective.clipping = camera_clipping_plane;
 
 
                 let magnification = focus_distance

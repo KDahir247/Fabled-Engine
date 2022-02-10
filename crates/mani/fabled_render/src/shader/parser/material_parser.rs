@@ -140,6 +140,7 @@ mod material_test {
 
         let mut material_wgsl_parser = MaterialParser::default();
 
+        println!("{:?}", wgsl_path);
         let wgsl_tree = material_wgsl_parser.parse_material(wgsl_path);
 
         println!("WGSL TREE:\n{}\n\n", wgsl_tree);

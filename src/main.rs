@@ -1,14 +1,18 @@
+use fabled_render::mesh::{Cone, Model};
+
 mod core;
 mod test;
 
 fn main() {
     superluminal_perf::set_current_thread_name("Main_Thread");
-    // superluminal_perf::begin_event("Staring");
-    //
-    // fabled_fbx::V7400Loader::loads(
-    // "C:/Users/kdahi/Downloads/jun-goto-tenshi-no-3p/source/Jun Goto/Jun
-    // Goto.fbx", );
-    // superluminal_perf::end_event();
+    superluminal_perf::begin_event("Staring");
 
-    core::State::run();
+    let cone = Cone::new(1.0, 64, 2., [0.0, 1.0, 0.0]);
+    let cone_model: Model = cone.into();
+
+    println!("{:?}", cone_model);
+
+    superluminal_perf::end_event();
+
+    // core::State::run();
 }
