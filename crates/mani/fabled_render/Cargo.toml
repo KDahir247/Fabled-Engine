@@ -34,7 +34,7 @@ ron = "0.6.0"
 glam = {version = "0.20.1", features = ["bytemuck"]}
 
 # EXT
-gltf = {version = "0.16.0", features = ["KHR_lights_punctual", "KHR_materials_ior"]}
+gltf = {version = "1.0.0", features = ["KHR_lights_punctual", "KHR_materials_ior"]}
 
 # Features
 [features]
