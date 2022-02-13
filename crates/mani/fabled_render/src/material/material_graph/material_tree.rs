@@ -1,4 +1,4 @@
-use crate::material::{MaterialAttributes, MaterialBranch};
+use crate::material::{MaterialBranch, MaterialPrimitiveType};
 pub use serde::*;
 use std::borrow::Borrow;
 use std::ops::{Deref, Index, IndexMut};
@@ -42,12 +42,12 @@ impl MaterialTree {
     pub const fn new() -> Self {
         Self {
             branches: [
-                MaterialBranch::new(MaterialAttributes::Scalar),
-                MaterialBranch::new(MaterialAttributes::Vector),
-                MaterialBranch::new(MaterialAttributes::Matrix),
-                MaterialBranch::new(MaterialAttributes::Image),
-                MaterialBranch::new(MaterialAttributes::Sampler),
-                MaterialBranch::new(MaterialAttributes::Array),
+                MaterialBranch::new(MaterialPrimitiveType::Scalar),
+                MaterialBranch::new(MaterialPrimitiveType::Vector),
+                MaterialBranch::new(MaterialPrimitiveType::Matrix),
+                MaterialBranch::new(MaterialPrimitiveType::Image),
+                MaterialBranch::new(MaterialPrimitiveType::Sampler),
+                MaterialBranch::new(MaterialPrimitiveType::Array),
             ],
         }
     }

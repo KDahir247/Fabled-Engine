@@ -1,57 +1,79 @@
-(
-    material_name: "Material",
-    shader: "Material",
-    attributes: (
-        (
-            type_name: "Scalar",
-            types: [],
+WGSL TREE:
+ (
+    metadata: (
+        material: (
+            branches: ((
+                primitive_ty: Scalar,
+                keys: [],
+            ), (
+                primitive_ty: Vector,
+                keys: [
+                    (idx:1,version:1),
+                ],
+            ), (
+                primitive_ty: Matrix,
+                keys: [
+                    (idx:2,version:1),// [0]
+                    (idx:3,version:1),// [1]
+                    (idx:4,version:1),// [2]
+                    (idx:5,version:1),
+                ],
+            ), (
+                primitive_ty: Image,
+                keys: [],
+            ), (
+                primitive_ty: Sampler,
+                keys: [],
+            ), (
+                primitive_ty: Array,
+                keys: [],
+            )),
         ),
-        (
-            type_name: "Vector",
-            types: [],
-        ),
-        (
-            type_name: "Matrix",
-            types: [],
-        ),
-        (
-            type_name: "Pointer",
-            types: [],
-        ),
-        (
-            type_name: "ValuePointer",
-            types: [],
-        ),
-        (
-            type_name: "Array",
-            types: [],
-        ),
-        (
-            type_name: "Struct",
-            types: [
-                (
-                    value_name: "uniform",
-                    value_type: Struct(top_level:true,members:[(name:Some("u_view_position"),ty:1,binding:None,offset:0),(name:Some("view_proj"),ty:2,binding:None,offset:16)],span:80),
-                    value_group: Some(0),
-                    value_binding: Some(0),
-                    value: None,
-                ),// [0]
-                (
-                    value_name: "light",
-                    value_type: Struct(top_level:true,members:[(name:Some("position"),ty:1,binding:None,offset:0),(name:Some("color"),ty:1,binding:None,offset:16)],span:32),
-                    value_group: Some(1),
-                    value_binding: Some(0),
-                    value: None,
-                ),
-            ],
-        ),
-        (
-            type_name: "Image",
-            types: [],
-        ),
-        (
-            type_name: "Sampler",
-            types: [],
-        ),
+        map: [
+            (
+                value: None,
+                version: 0,
+            ),// [0]
+            (
+                value: Some((
+                    value_detail: (value_ty:Vec4Float,value_bytes:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+                    value_group: 0,
+                    value_binding: 0,
+                )),
+                version: 1,
+            ),// [1]
+            (
+                value: Some((
+                    value_detail: (value_ty:Mat4Float,value_bytes:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+                    value_group: 0,
+                    value_binding: 0,
+                )),
+                version: 1,
+            ),// [2]
+            (
+                value: Some((
+                    value_detail: (value_ty:Mat4Float,value_bytes:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+                    value_group: 0,
+                    value_binding: 0,
+                )),
+                version: 1,
+            ),// [3]
+            (
+                value: Some((
+                    value_detail: (value_ty:Mat4Float,value_bytes:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+                    value_group: 0,
+                    value_binding: 0,
+                )),
+                version: 1,
+            ),// [4]
+            (
+                value: Some((
+                    value_detail: (value_ty:Mat4Float,value_bytes:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+                    value_group: 0,
+                    value_binding: 0,
+                )),
+                version: 1,
+            ),
+        ],
     ),
 )

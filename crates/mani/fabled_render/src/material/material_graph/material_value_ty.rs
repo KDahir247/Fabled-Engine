@@ -1,4 +1,4 @@
-use crate::material::MaterialAttributes;
+use crate::material::MaterialPrimitiveType;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Eq)]
@@ -29,14 +29,14 @@ pub enum MaterialValueType {
 }
 
 
-impl From<MaterialValueType> for Option<MaterialAttributes> {
+impl From<MaterialValueType> for Option<MaterialPrimitiveType> {
     fn from(target: MaterialValueType) -> Self {
         match target {
             MaterialValueType::None => None,
 
             MaterialValueType::UnsignedInt
             | MaterialValueType::SignedInt
-            | MaterialValueType::Float => Some(MaterialAttributes::Scalar),
+            | MaterialValueType::Float => Some(MaterialPrimitiveType::Scalar),
 
             MaterialValueType::Vec2Unsigned
             | MaterialValueType::Vec2Signed
@@ -46,13 +46,13 @@ impl From<MaterialValueType> for Option<MaterialAttributes> {
             | MaterialValueType::Vec3Float
             | MaterialValueType::Vec4Unsigned
             | MaterialValueType::Vec4Signed
-            | MaterialValueType::Vec4Float => Some(MaterialAttributes::Vector),
+            | MaterialValueType::Vec4Float => Some(MaterialPrimitiveType::Vector),
 
             MaterialValueType::Mat2Float
             | MaterialValueType::Mat3Float
-            | MaterialValueType::Mat4Float => Some(MaterialAttributes::Matrix),
+            | MaterialValueType::Mat4Float => Some(MaterialPrimitiveType::Matrix),
 
-            MaterialValueType::Sampler => Some(MaterialAttributes::Sampler),
+            MaterialValueType::Sampler => Some(MaterialPrimitiveType::Sampler),
         }
     }
 }

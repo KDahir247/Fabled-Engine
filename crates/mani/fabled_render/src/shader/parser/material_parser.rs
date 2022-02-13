@@ -1,15 +1,15 @@
 use crate::material::*;
 use crate::shader::parser::*;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::ops::IndexMut;
 
 #[derive(Debug, Serialize, Deserialize)]
-#[repr(align(16))]
-pub struct MaterialParser {
+#[repr(align(32))]
+pub struct MaterialParserMetadata {
     material: MaterialTree,
-    map: slotmap::SlotMap<MaterialKey, MaterialNode>,
+    map: slotmap::DenseSlotMap<MaterialKey, MaterialNode>,
 }
-
-impl Default for MaterialParser {
+impl Default for MaterialParserMetadata {
     fn default() -> Self {
         Self {
             material: MaterialTree::new(),
@@ -18,82 +18,109 @@ impl Default for MaterialParser {
     }
 }
 
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct MaterialParser {
+    metadata: parking_lot::RwLock<MaterialParserMetadata>,
+}
+
+
 impl MaterialParser {
+    pub fn new() -> Self {
+        Self {
+            metadata: parking_lot::const_rwlock(Default::default()),
+        }
+    }
+
     pub fn parse_material<P: AsRef<std::path::Path>>(&mut self, path: P) -> String {
         // handle case here where it a user error (invalid path specified) and not a
         // internal bug.
-        // todo bottle neck
-        let module = parse_shader(path, None).map_or(naga::Module::default(), |(module, _)| module);
+        let shader_module =
+            parse_shader(path, None).map_or(naga::Module::default(), |(module, _)| module);
 
         let naga::Module {
             types,
             global_variables,
             ..
-        } = module;
+        } = shader_module;
 
-        let globals = global_variables.into_inner();
+        let globals_variables = global_variables.into_inner();
 
-        for global_with_binding in globals.iter().filter(|glob_var| glob_var.binding.is_some()) {
-            let type_var = types
-                .try_get(global_with_binding.ty)
-                .expect("type arena len is less then the handle of type index specified and is out of bounds");
+        globals_variables
+            .into_par_iter()
+            .filter(|module_glob_var| module_glob_var.binding.is_some())
+            .for_each(|resource_bounded_var| unsafe {
+                let resource_binding_type_var = &types[resource_bounded_var.ty];
 
-            let res_binding = global_with_binding.binding.as_ref().expect("Global Binding for variable has previous pass check of not being None and and has been evaluated as None after the check.");
+                // We can guarantee that unwrap will succeed, since we filter for
+                // binding.is_some()
+                let res_binding = resource_bounded_var.binding.unwrap_unchecked();
 
-            if let naga::TypeInner::Struct {
-                top_level, members, ..
-            } = &type_var.inner
-            {
-                if *top_level {
-                    let (group, binding) = (res_binding.group, res_binding.binding);
+                let (value_group, value_binding) = (res_binding.group, res_binding.binding);
 
-                    for member in members {
-                        if let Some(member_ty) = types.try_get(member.ty) {
-                            let material_node = MaterialNode {
-                                value_group: group,
-                                value_binding: binding,
-                                ty: MaterialTarget::from(&member_ty.inner),
-                            };
+                if let naga::TypeInner::Struct {
+                    top_level: true,
+                    members: struct_members,
+                    ..
+                } = &resource_binding_type_var.inner
+                {
+                    for struct_member in struct_members {
+                        let struct_member_ty = &types[struct_member.ty];
 
-                            // todo
-                            let mat_attr: Option<MaterialAttributes> = material_node.ty.ty.into();
+                        let struct_member_material_node = MaterialNode {
+                            value_group,
+                            value_binding,
+                            value_detail: MaterialValue::from(&struct_member_ty.inner),
+                        };
 
-                            if let Some(attr) = mat_attr {
-                                let index = attr as usize;
-                                let material_key = self.map.insert(material_node);
-                                self.material.index_mut(index).add_to_keys(material_key);
+                        let struct_member_primitive_ty: Option<MaterialPrimitiveType> =
+                            struct_member_material_node.value_detail.get_primitive_ty();
+
+                        if let Some(valid_primitive_ty) = struct_member_primitive_ty {
+                            let primitive_ty_index = valid_primitive_ty as usize;
+
+                            {
+                                // blocking.
+                                let mut write_rw_guard = self.metadata.write();
+
+                                let material_key =
+                                    write_rw_guard.map.insert(struct_member_material_node);
+
+
+                                write_rw_guard
+                                    .material
+                                    .index_mut(primitive_ty_index)
+                                    .add_to_keys(material_key);
                             }
                         }
                     }
-                } else {
-                    let struct_name = type_var
-                        .name
-                        .as_ref()
-                        .expect("One of the shader struct name is consider empty.");
-
-                    println!("Skipped struct name due to having nested struct types as member variable/s.\n The struct in questioning is named : {}", struct_name);
                 }
-            }
 
-            // Handle case where the binding variable in the shader is a sampler or a
-            // texture.
-            let (group, binding) = (res_binding.group, res_binding.binding);
+                // Handle case where the binding variable in the shader is a sampler or a
+                // texture.
+                let material_node = MaterialNode {
+                    value_group,
+                    value_binding,
+                    value_detail: MaterialValue::from(&resource_binding_type_var.inner),
+                };
 
-            let material_node = MaterialNode {
-                value_group: group,
-                value_binding: binding,
-                ty: MaterialTarget::from(&type_var.inner),
-            };
+                let primitive_ty: Option<MaterialPrimitiveType> =
+                    material_node.value_detail.get_primitive_ty();
 
-            // todo
-            let mat_attr: Option<MaterialAttributes> = material_node.ty.ty.into();
+                if let Some(valid_primitive_ty) = primitive_ty {
+                    let primitive_ty_index = valid_primitive_ty as usize;
 
-            if let Some(attr) = mat_attr {
-                let index = attr as usize;
-                let material_key = self.map.insert(material_node);
-                self.material.index_mut(index).add_to_keys(material_key);
-            }
-        }
+                    {
+                        // blocking.
+                        let mut write_rw_guard = self.metadata.write();
+
+                        let material_key = write_rw_guard.map.insert(material_node);
+                        write_rw_guard
+                            .material
+                            .index_mut(primitive_ty_index)
+                            .add_to_keys(material_key);
+                    }
+                }
+            });
 
         let pretty = ron::ser::PrettyConfig::new()
             .decimal_floats(true)
@@ -104,7 +131,10 @@ impl MaterialParser {
     }
 
     pub fn get_group(&self, index: u32) -> Vec<(MaterialKey, MaterialNode)> {
-        self.map
+        let reader_rw_guard = self.metadata.read();
+
+        reader_rw_guard
+            .map
             .to_owned()
             .into_iter()
             .filter(|key_value| key_value.1.value_group.eq(&index))
@@ -112,7 +142,10 @@ impl MaterialParser {
     }
 
     pub fn get_binding(&self, index: u32) -> Vec<(MaterialKey, MaterialNode)> {
-        self.map
+        let reader_rw_guard = self.metadata.read();
+
+        reader_rw_guard
+            .map
             .to_owned()
             .into_iter()
             .filter(|key_value| key_value.1.value_binding.eq(&index))

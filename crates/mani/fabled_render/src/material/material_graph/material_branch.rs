@@ -1,23 +1,23 @@
-use crate::material::{MaterialAttributes, MaterialKey};
+use crate::material::{MaterialKey, MaterialPrimitiveType};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialBranch {
-    attribute: MaterialAttributes,
+    primitive_ty: MaterialPrimitiveType,
     keys: smallvec::SmallVec<[MaterialKey; 6]>,
 }
 
 impl MaterialBranch {
-    pub const fn new(attribute: MaterialAttributes) -> Self {
+    pub const fn new(attribute: MaterialPrimitiveType) -> Self {
         Self {
-            attribute,
+            primitive_ty: attribute,
             keys: smallvec::SmallVec::new_const(),
         }
     }
 
-    pub fn with_capacity(attribute: MaterialAttributes, capacity: usize) -> Self {
+    pub fn with_capacity(attribute: MaterialPrimitiveType, capacity: usize) -> Self {
         Self {
-            attribute,
+            primitive_ty: attribute,
             keys: smallvec::SmallVec::with_capacity(capacity),
         }
     }
