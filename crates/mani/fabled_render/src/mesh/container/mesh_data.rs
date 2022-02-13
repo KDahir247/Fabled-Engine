@@ -1,9 +1,9 @@
 use crate::mesh::container::Vertex;
+use crate::mesh::Indices;
 
-#[derive(Debug)]
-#[repr(C, align(16))]
+#[derive(Debug, Clone)]
 pub struct Mesh {
     pub vertices: Vec<Vertex>,
-    pub indices: Vec<usize>,
-    pub material_id: u32,
+    pub indices: Indices,
+    pub material_id: usize,
 }
