@@ -21,7 +21,7 @@ pub fn super_compress(
         ColorType::Nil => 0,
     };
 
-    let mut compression_params = CompressorParams::default();
+    let mut compression_params = CompressorParams::new();
 
     compression_params.set_basis_format(compression_desc.compression_format.into());
 
@@ -53,6 +53,8 @@ pub fn super_compress(
         compression_params.set_no_endpoint_rdo(rdo_desc.no_endpoint_rdo);
         compression_params.set_no_selector_rdo(rdo_desc.no_selector_rdo);
     }
+
+    compression_params.set_print_status_to_stdout(false);
 
     let mut compress_image = compression_params.source_image_mut(0);
 

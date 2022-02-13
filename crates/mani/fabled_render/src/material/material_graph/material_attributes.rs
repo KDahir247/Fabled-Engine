@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone, PartialEq, Eq)]
 pub enum MaterialAttributes {
-    Empty = -1000,
     Scalar = 0,
     Vector = 1,
     Matrix = 2,

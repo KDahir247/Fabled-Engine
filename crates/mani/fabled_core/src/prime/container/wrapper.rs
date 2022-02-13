@@ -36,7 +36,7 @@ where
     }
 
     pub fn is_empty(&self) -> bool {
-        self.length.le(&0)
+        self.length.eq(&0)
     }
 }
 
