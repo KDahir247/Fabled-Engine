@@ -21,7 +21,6 @@
 
 use crate::light::{celsius_to_kelvin, fahrenheit_to_kelvin, TemperatureUnit};
 
-// temperature is in kelvin
 #[derive(Copy, Clone, Debug)]
 pub struct LightAppearance {
     pub color: [f32; 3],
@@ -32,29 +31,82 @@ impl Default for LightAppearance {
     fn default() -> Self {
         Self {
             temperature: 6500.0,
-            color: [0.0; 3],
+            color: [1.0; 3],
         }
     }
 }
 
 impl LightAppearance {
-    pub fn new(unit: f32, unit_type: TemperatureUnit, color: [f32; 3]) -> Self {
-        let mut unit = unit;
+    pub const MATCH_FLAME: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 1750.0,
+    };
 
-        // Convert unit type to Kelvin.
-        match unit_type {
-            TemperatureUnit::Kelvin => {} // Already in kelvin, so no conversion needed.
-            TemperatureUnit::Celsius => {
-                unit = celsius_to_kelvin(unit);
-            }
-            TemperatureUnit::Fahrenheit => {
-                unit = fahrenheit_to_kelvin(unit);
-            }
-        }
+    pub const CANDLE_FLAME: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 1890.0,
+    };
 
-        Self {
-            temperature: unit,
-            color,
-        }
+    pub const SUN_SUNRISE_SUNSET: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 2500.0,
+    };
+
+    pub const HOUSEHOLD_TUNGSTEN: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 2700.0,
+    };
+
+    pub const TUNGSTEN_500W_1K: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 3000.0,
+    };
+
+    pub const TUNGSTEN_2K: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 3275.0,
+    };
+
+    pub const TUNGSTEN_5K_10K: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 3380.0,
+    };
+
+    pub const QUARTZ: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 3500.0,
+    };
+
+    pub const FLUORESCENT: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 5350.0,
+    };
+
+    pub const SUN_DIRECT_NOON: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 5200.0,
+    };
+
+    pub const DAYLIGHT: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 6000.0,
+    };
+
+    pub const SKY_OVERCAST: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        temperature: 6750.0,
+    };
+}
+
+impl LightAppearance {
+    pub fn new(kelvin: f32, temperature_unit_type: TemperatureUnit, color: [f32; 3]) -> Self {
+
+        let temperature = match temperature_unit_type {
+            TemperatureUnit::Kelvin => kelvin,
+            TemperatureUnit::Celsius => celsius_to_kelvin(kelvin),
+            TemperatureUnit::Fahrenheit => fahrenheit_to_kelvin(kelvin),
+        };
+
+        Self { temperature, color }
     }
 }

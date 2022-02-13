@@ -1,13 +1,15 @@
 # Fabled Engine
-# Current solution will might break, since KTX 2.0 and Dds texture support is Experimental
-# Also Texture Compression Method which is quite volatile due to quick testing
-Self Study on developing a game engine. Learning as I go.
-<br/> Not done the core parts of the rendering.
 <br/>
 <br/>
 Any issues, enhancement, features, or bugs report are always welcome in Issues.
 <br/>
 <br/>
+
+# The fbx branch is where frequent development and up to date development will occur
+
+Going to change my development pipeline. I will use github for public changes, while also using jetbrain source for interal team/self project management and
+forward detail github.
+
 ## Camera Movement
 * Forward : Up or W
 * Backward : Down or S
@@ -16,10 +18,8 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 * Up : Q
 * Down : E
 
-# current progress:
-* Finalizing Render module to be merged.
-* Going to work on the obj module next when the render module is merged to main.
 <br/>
+
 
 ![alt text](https://github.com/KDahir247/Fabled-Engine/blob/render/sample/gridsystem.png)
 <br/>
@@ -40,4 +40,13 @@ RGBAUNORMSRGB
 
 <br/>
 
+# Audio Support
+
+### Click picture for video.
+[<img src="https://github.com/KDahir247/Fabled-Engine/blob/render/sample/RGBAUNORMSRGB.png">](https://streamable.com/3tltml)
+
 model is made by theStoff, Wesai, and xahun. Attribution is stated in the example folder.
+
+Music by Matthew Pablo
+<br/>
+www.matthewpablo.com

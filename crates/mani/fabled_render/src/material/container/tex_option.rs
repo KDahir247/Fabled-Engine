@@ -1,10 +1,12 @@
 use serde::*;
 
-#[derive(Debug, Copy, Clone, Deserialize, Serialize, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(
+    Debug, Copy, Clone, PartialEq, Deserialize, Serialize, bytemuck::Pod, bytemuck::Zeroable,
+)]
 #[repr(C)]
 pub struct TextureOptions {
-    offset: [f32; 3],
-    scale: [f32; 3],
+    pub offset: [f32; 3],
+    pub scale: [f32; 3],
 }
 
 impl Default for TextureOptions {

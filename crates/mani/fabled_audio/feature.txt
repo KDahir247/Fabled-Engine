@@ -1,0 +1,11 @@
+split audio clip by specifying the start duration and end duration and add mixer capability to it such as
+looping through the sliced audio.
+
+I don't want to create alot of sink at the benefit of allowing each clip to adjust their own volume
+as it is expensive to create alot of sink rather than just having on sink that has a mixer append to it
+to represent the spatial position audio.
+
+We can also create a single sink which will hold a mixer for all the standard audio.
+If we look at unity audio system the default audio source will play on top of other audio sources in (spatial set to 2d).
+It doesn't play in sequence. If the user want to play the audio clip after the other audio is finished.
+They can specify the delay for the audio clip to wait before playing.

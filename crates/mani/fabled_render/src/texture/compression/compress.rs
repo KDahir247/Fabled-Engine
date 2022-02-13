@@ -1,5 +1,5 @@
 use crate::texture::compression::{BasisTexture, CompressionDescriptor, CompressionQuality};
-use crate::texture::container::{ColorType, Texture};
+use crate::texture::container::{ColorType, TextureData};
 
 use basis_universal::{Compressor, CompressorParams};
 use fabled_core::concurrent::container::thread_op::ThreadOperation;
@@ -9,7 +9,7 @@ use fabled_core::concurrent::container::thread_op::ThreadOperation;
     note = "Don't use this function It will cause a stack corruption and has been ignored for now"
 )]
 pub fn super_compress(
-    texture: Texture,
+    texture: TextureData,
     compression_desc: &CompressionDescriptor,
     thread_op: ThreadOperation,
 ) -> anyhow::Result<BasisTexture> {
@@ -21,7 +21,7 @@ pub fn super_compress(
         ColorType::Nil => 0,
     };
 
-    let mut compression_params = CompressorParams::default();
+    let mut compression_params = CompressorParams::new();
 
     compression_params.set_basis_format(compression_desc.compression_format.into());
 
@@ -53,6 +53,8 @@ pub fn super_compress(
         compression_params.set_no_endpoint_rdo(rdo_desc.no_endpoint_rdo);
         compression_params.set_no_selector_rdo(rdo_desc.no_selector_rdo);
     }
+
+    compression_params.set_print_status_to_stdout(false);
 
     let mut compress_image = compression_params.source_image_mut(0);
 

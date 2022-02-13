@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "cargo" 
+    directory: "/" 
+    schedule:
+      interval: "daily"
+    reviewers:
+    - KDahir247
+    labels:
+      - "dependences"
+    ignore:
+    - dependency-name: wgpu 
+      versions:
+      - 0.10.0
+    - dependency-name: naga
+      versions:
+      - 0.5.0 
+  
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+    - KDahir247
+    labels:
+      - "dependences"

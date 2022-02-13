@@ -1,0 +1,4 @@
+    Texture Options
+-------------------------
+- blendu on | off  = set horizontal texture blending (-blendu on)
+- blendv on | off  = set vertical texture blending (-blendv off)

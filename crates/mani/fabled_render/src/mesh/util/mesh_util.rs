@@ -1,5 +1,6 @@
 use crate::mesh::util::NormalInstruction;
-use crate::mesh::Mesh;
+use crate::mesh::{Indices, Mesh};
+
 
 pub fn calculate_bi_tangent(mesh: &mut Mesh) {
     let vertices_data = &mesh.vertices;
@@ -31,19 +32,24 @@ pub fn calculate_bi_tangent(mesh: &mut Mesh) {
 pub fn calculate_normals(mesh: &mut Mesh, instruction: NormalInstruction) {
     let indices = &mesh.indices;
 
+    let triangles = match indices {
+        Indices::U16(indices_u16) => indices_u16.iter().map(|x| *x as u32).collect::<Vec<_>>(),
+        Indices::U32(indices_u32) => indices_u32.to_owned(),
+    };
+
     // 3 indices make a triangle.
-    for triangle in indices.chunks_exact(3) {
-        let ia = triangle[0];
-        let ib = triangle[1];
-        let ic = triangle[2];
+    for triangle in triangles.chunks_exact(3) {
+        let ia = triangle[0] as usize;
+        let ib = triangle[1] as usize;
+        let ic = triangle[2] as usize;
 
-        let aa = &mesh.vertices[ia].position;
-        let ab = &mesh.vertices[ib].position;
-        let ac = &mesh.vertices[ic].position;
+        let aa = mesh.vertices[ia].position;
+        let ab = mesh.vertices[ib].position;
+        let ac = mesh.vertices[ic].position;
 
-        let va = glam::Vec3A::from_slice(aa);
-        let vb = glam::Vec3A::from_slice(ab);
-        let vc = glam::Vec3A::from_slice(ac);
+        let va = glam::Vec3A::from_slice(&aa);
+        let vb = glam::Vec3A::from_slice(&ab);
+        let vc = glam::Vec3A::from_slice(&ac);
 
         let e1 = vb - va;
         let e2 = vc - va;
@@ -74,7 +80,12 @@ pub fn calculate_normals(mesh: &mut Mesh, instruction: NormalInstruction) {
 
 
 pub fn calculate_tangents(mesh: &mut Mesh) {
-    let triangles = &mesh.indices;
+    let indices = &mesh.indices;
+
+    let triangles = match indices {
+        Indices::U16(indices_u16) => indices_u16.iter().map(|x| *x as u32).collect::<Vec<_>>(),
+        Indices::U32(indices_u32) => indices_u32.to_owned(),
+    };
 
     let vertices_data = &mut mesh.vertices;
 
@@ -84,9 +95,9 @@ pub fn calculate_tangents(mesh: &mut Mesh) {
     let mut bi_tangent = vec![glam::Vec3A::ZERO; uniform_len + uniform_len];
 
     for tri in triangles.chunks_exact(3) {
-        let i1 = tri[0];
-        let i2 = tri[1];
-        let i3 = tri[2];
+        let i1 = tri[0] as usize;
+        let i2 = tri[1] as usize;
+        let i3 = tri[2] as usize;
 
         let v1 = glam::Vec3A::from_slice(&vertices_data[i1].position);
         let v2 = glam::Vec3A::from_slice(&vertices_data[i2].position);

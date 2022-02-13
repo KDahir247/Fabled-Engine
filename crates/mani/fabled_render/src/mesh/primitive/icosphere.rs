@@ -195,7 +195,7 @@ impl From<IcoSphere> for Model {
         let mesh = Mesh{
             vertices,
             material_id: 0,
-            indices
+            indices : indices.into()
         };
 
 

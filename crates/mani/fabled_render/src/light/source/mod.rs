@@ -15,10 +15,10 @@ mod data_test {
     #[test]
     fn data_size() {
         let directional_light_size = std::mem::size_of::<DirectionalLight>();
-        println!("{}", directional_light_size);
+        assert_eq!(directional_light_size & (directional_light_size - 1), 0);
 
         let spot_light_size = std::mem::size_of::<SpotLight>();
-        println!("{}", spot_light_size);
+        assert_eq!(spot_light_size & (spot_light_size - 1), 0);
 
         let point_light_size = std::mem::size_of::<PointLight>();
         assert_eq!(point_light_size & (point_light_size - 1), 0);

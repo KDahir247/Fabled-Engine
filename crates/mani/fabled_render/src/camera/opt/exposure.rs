@@ -11,19 +11,17 @@ use crate::camera::{FStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUATION};
 
 // EV = log2 (LS / K)
 // (LS / K) is equivalent to N^2 / t, thus EV = log2 (N^2 / t)
-pub fn calculate_exposure_value(f_stop: FStop) -> f32 {
+pub fn compute_exposure_value(f_stop: FStop) -> f32 {
     let shutter = Shutter::compute_shutter_speed(f_stop);
 
-    let FStop::FullStop(target_stop) = f_stop;
-
-    let f_number = target_stop.get_f_number();
+    let f_number = f_stop.get_f_number();
 
     f32::log2(f_number * f_number / shutter.speed)
 }
 
 // EV100 = log2(N^2 / t) - log2(S / 100.0)
 pub fn calculate_ev_100(f_stop: FStop, iso_speed: ISOSpeed) -> f32 {
-    let ev_s = calculate_exposure_value(f_stop);
+    let ev_s = compute_exposure_value(f_stop);
     ev_s - f32::log2(iso_speed.arithmetic_speed / 100.0)
 }
 

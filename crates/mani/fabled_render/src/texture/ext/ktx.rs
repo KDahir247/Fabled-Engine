@@ -1,5 +1,5 @@
 use crate::texture::_core::convert::TryFrom;
-use crate::texture::container::{ColorType, Extent3d, FlipAxis, Texture};
+use crate::texture::container::{ColorType, Extent3d, FlipAxis, TextureData};
 use crate::texture::ext::KTXDescriptor;
 use crate::texture::KTXError;
 
@@ -13,7 +13,7 @@ pub struct KtxTextureLoader;
 //  have any mip level or the texture mapping for the model will be incorrect.
 
 impl KtxTextureLoader {
-    pub fn default_ktx1() -> Texture {
+    pub fn default_ktx1() -> TextureData {
         let texture = ktx::Texture::new(ktx::sources::Ktx1CreateInfo::default()).unwrap();
 
         let dimensions = Extent3d {
@@ -23,7 +23,7 @@ impl KtxTextureLoader {
         };
 
         // gl_internal : 0x8058 == GL_RGBA8
-        Texture {
+        TextureData {
             data: texture.data().to_vec(),
             size: dimensions,
             sample_count: 1,
@@ -33,7 +33,7 @@ impl KtxTextureLoader {
         }
     }
 
-    pub fn default_ktx2() -> Texture {
+    pub fn default_ktx2() -> TextureData {
         let texture = ktx::Texture::new(ktx::sources::Ktx2CreateInfo::default()).unwrap();
 
         let dimensions = Extent3d {
@@ -43,7 +43,7 @@ impl KtxTextureLoader {
         };
 
         // vk_format 37 == VK_R8G8B8A8_UNORM
-        Texture {
+        TextureData {
             data: texture.data().to_vec(),
             size: dimensions,
             sample_count: 1,
@@ -79,7 +79,7 @@ impl KtxTextureLoader {
     pub fn from_texture(
         mut stream_tex: libktx_rs::Texture,
         ktx_descriptor: &KTXDescriptor,
-    ) -> Result<Texture, KTXError> {
+    ) -> Result<TextureData, KTXError> {
         let format = ktx::TranscodeFormat::try_from(ktx_descriptor.transcode_format as u32)
             .unwrap_or(ktx::TranscodeFormat::Rgba32);
 
@@ -129,7 +129,7 @@ impl KtxTextureLoader {
             _ => panic!("Texture has more then 4 channel and is not supported"),
         };
 
-        Ok(Texture {
+        Ok(TextureData {
             data,
             size: dimensions,
             sample_count: 1,
@@ -142,7 +142,7 @@ impl KtxTextureLoader {
     pub fn from_stream(
         file: std::fs::File,
         ktx_descriptor: &KTXDescriptor,
-    ) -> Result<Texture, KTXError> {
+    ) -> Result<TextureData, KTXError> {
         let stream = ktx::RustKtxStream::new(Box::new(file)).map_err(|err_code| {
             KTXError::KTXError(libktx_rs::KtxError::try_from(err_code).unwrap())
         })?;

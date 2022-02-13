@@ -1,4 +1,11 @@
 use crate::camera::{logarithmic_to_arithmetic_speed, ISOSpeedUnit, ISO_ARITHMETIC_STANDARD};
+// The higher the film speed number (ISO Speed), the greater the film
+// sensitivity to light. Having a low film speed number will result in the film
+// not being sensitivity sensitive to light.
+
+// Having a high film speed number (ISO Speed) will also increase the noise.
+// The higher the film speed number the more noise the image will have.
+// While having a low film speed number will have lower noise to the image.
 
 #[derive(Copy, Clone, Debug)]
 pub struct ISOSpeed {

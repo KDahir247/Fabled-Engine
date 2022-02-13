@@ -4,6 +4,7 @@ mod color_type;
 mod extent2d;
 mod extent3d;
 mod flip_axis;
+mod texture;
 mod texture_access;
 mod texture_aspect;
 mod texture_data;
@@ -11,6 +12,7 @@ mod texture_dimension;
 mod texture_sample_type;
 mod texture_sampler;
 mod texture_view_dimension;
+mod wrap_mode;
 
 pub use border_color::*;
 pub use color_space::*;
@@ -18,6 +20,7 @@ pub use color_type::*;
 pub use extent2d::*;
 pub use extent3d::*;
 pub use flip_axis::*;
+pub use texture::*;
 pub use texture_access::*;
 pub use texture_aspect::*;
 pub use texture_data::*;
@@ -25,6 +28,8 @@ pub use texture_dimension::*;
 pub use texture_sample_type::*;
 pub use texture_sampler::*;
 pub use texture_view_dimension::*;
+pub use wrap_mode::*;
+
 
 #[cfg(test)]
 pub mod data_test {
@@ -53,7 +58,7 @@ pub mod data_test {
         let texture_aspect_size = std::mem::size_of::<TextureAspect>();
         assert_eq!(texture_aspect_size & (texture_aspect_size - 1), 0);
 
-        let texture_data_size = std::mem::size_of::<Texture>();
+        let texture_data_size = std::mem::size_of::<TextureData>();
         assert_eq!(texture_data_size & (texture_data_size - 1), 0);
 
         let texture_dimension_size = std::mem::size_of::<TextureDimension>();
@@ -76,6 +81,9 @@ pub mod data_test {
 
         let color_target_size = std::mem::size_of::<ColorTarget>();
         assert_eq!(color_target_size & (color_target_size - 1), 0);
+
+        let standard_texture_size = std::mem::size_of::<Texture>();
+        assert_eq!(standard_texture_size & (standard_texture_size - 1), 0);
     }
 
     #[test]
@@ -101,7 +109,7 @@ pub mod data_test {
         let texture_aspect_alignment = std::mem::align_of::<TextureAspect>();
         assert_eq!(texture_aspect_alignment & (texture_aspect_alignment - 1), 0);
 
-        let texture_data_alignment = std::mem::align_of::<Texture>();
+        let texture_data_alignment = std::mem::align_of::<TextureData>();
         assert_eq!(texture_data_alignment & (texture_data_alignment - 1), 0);
 
         let texture_dimension_alignment = std::mem::align_of::<TextureDimension>();
@@ -133,5 +141,11 @@ pub mod data_test {
 
         let color_target_alignment = std::mem::align_of::<ColorTarget>();
         assert_eq!(color_target_alignment & (color_target_alignment - 1), 0);
+
+        let standard_texture_alignment = std::mem::align_of::<Texture>();
+        assert_eq!(
+            standard_texture_alignment & (standard_texture_alignment - 1),
+            0
+        );
     }
 }

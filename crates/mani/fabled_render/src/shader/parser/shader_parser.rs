@@ -8,10 +8,10 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
     source: P,
     parse_option: Option<ParseOption>,
 ) -> Result<(naga::Module, naga::valid::ModuleInfo), ShaderError> {
-    let file = source.as_ref();
+    let path = source.as_ref();
 
     // return empty if file extension contains surrogates
-    let file_ext = file
+    let file_ext = path
         .extension()
         .ok_or(ShaderError::InvalidFileExtension)?
         .to_str()
@@ -19,7 +19,8 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
 
     let module = match file_ext {
         "wgsl" => {
-            let input = std::fs::read_to_string(file)?;
+            // todo allocation happens
+            let input = std::fs::read_to_string(path)?;
 
             naga::front::wgsl::parse_str(&input).map_err(ShaderError::WGSLParseError)?
         }
@@ -45,14 +46,14 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
                 options.strict_capabilities = strict_capabilities;
             }
 
-            let input = std::fs::read(file)?;
+            let input = std::fs::read(path)?;
 
             naga::front::spv::parse_u8_slice(&input, &options)
                 .map_err(ShaderError::SPVParseError)?
         }
 
         stage @ "vert" | stage @ "frag" | stage @ "comp" => {
-            let input = std::fs::read_to_string(file)?;
+            let input = std::fs::read_to_string(path)?;
             let mut entry_points = naga::FastHashMap::default();
 
             let target = match stage {

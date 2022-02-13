@@ -1,24 +1,26 @@
-mod blending;
-mod illumination_model;
-mod pbr_standard;
-mod rma;
-mod standard;
-mod tex_option;
-mod tex_type;
-
 pub use blending::*;
-pub use illumination_model::*;
-pub use pbr_standard::*;
+pub use material_param::*;
+pub use material_type::*;
+pub use pbr_material::*;
 pub use rma::*;
-pub use standard::*;
+pub use standard_material::*;
 pub use tex_option::*;
 pub use tex_type::*;
+
+mod blending;
+mod material_param;
+mod material_type;
+mod pbr_material;
+mod rma;
+mod standard_material;
+mod tex_option;
+mod tex_type;
 
 #[cfg(test)]
 mod data_test {
     use crate::material::{
-        IlluminationModel, PBRStandardMaterial, StandardMaterial, SupportRMA, TextureBlending,
-        TextureOptions, TextureType,
+        MaterialParameter, MaterialType, PBRStandardMaterial, StandardMaterial, SupportRMA,
+        TextureBlending, TextureOptions, TextureType,
     };
 
     #[test]
@@ -26,14 +28,11 @@ mod data_test {
         let blending_size = std::mem::size_of::<TextureBlending>();
         assert_eq!(blending_size & (blending_size - 1), 0);
 
-        let illum_model_size = std::mem::size_of::<IlluminationModel>();
-        assert_eq!(illum_model_size & (illum_model_size - 1), 0);
-
         let rma_size = std::mem::size_of::<SupportRMA>();
         assert_eq!(rma_size & (rma_size - 1), 0);
 
         let standard_mat_size = std::mem::size_of::<StandardMaterial>();
-        assert_eq!(standard_mat_size & (standard_mat_size - 1), 0);
+        println!("{}", standard_mat_size);
 
         let pbr_standard_mat_size = std::mem::size_of::<PBRStandardMaterial>();
         assert_eq!(pbr_standard_mat_size & (pbr_standard_mat_size - 1), 0);
@@ -43,15 +42,18 @@ mod data_test {
 
         let texture_ty_size = std::mem::size_of::<TextureType>();
         assert_eq!(texture_ty_size & (texture_ty_size - 1), 0);
+
+        let material_type_size = std::mem::size_of::<MaterialType>();
+        assert_eq!(material_type_size & (material_type_size - 1), 0);
+
+        let material_param_size = std::mem::size_of::<MaterialParameter>();
+        assert_eq!(material_param_size & (material_param_size - 1), 0);
     }
 
     #[test]
     fn data_alignment() {
         let blending_alignment = std::mem::align_of::<TextureBlending>();
         assert_eq!(blending_alignment & (blending_alignment - 1), 0);
-
-        let illum_model_alignment = std::mem::align_of::<IlluminationModel>();
-        assert_eq!(illum_model_alignment & (illum_model_alignment - 1), 0);
 
         let rma_alignment = std::mem::align_of::<SupportRMA>();
         assert_eq!(rma_alignment & (rma_alignment - 1), 0);
@@ -73,5 +75,11 @@ mod data_test {
 
         let texture_ty_alignment = std::mem::align_of::<TextureType>();
         assert_eq!(texture_ty_alignment & (texture_ty_alignment - 1), 0);
+
+        let material_type_alignment = std::mem::align_of::<MaterialType>();
+        assert_eq!(material_type_alignment & (material_type_alignment - 1), 0);
+
+        let material_param_alignment = std::mem::align_of::<MaterialParameter>();
+        assert_eq!(material_param_alignment & (material_param_alignment - 1), 0);
     }
 }

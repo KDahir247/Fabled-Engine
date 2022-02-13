@@ -36,7 +36,7 @@ pub fn celsius_to_fahrenheit(celsius: f32) -> f32 {
 // Convert Fahrenheit to Celsius for temperature measurement T(°)
 // T(°C) = (T(°F) - 32) / (9/5) which is equivalent T(°C) = (T(°F) - 32) / 1.8
 pub fn fahrenheit_to_celsius(fahrenheit: f32) -> f32 {
-    (fahrenheit - 32.0) / 1.8
+    (fahrenheit - 32.0) * 0.555_555_6
 }
 
 #[cfg(test)]

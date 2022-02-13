@@ -4,7 +4,7 @@ use std::path::Path;
 
 #[repr(align(16))]
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Texture {
+pub struct TextureData {
     pub data: Vec<u8>,
     pub size: Extent3d,
     pub sample_count: u32,
@@ -15,7 +15,7 @@ pub struct Texture {
 }
 
 
-impl Texture {
+impl TextureData {
     pub fn write_to<P: AsRef<Path>, T: 'static + image::Pixel<Subpixel = u8>>(
         &self,
         path: P,

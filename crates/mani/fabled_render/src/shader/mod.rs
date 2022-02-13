@@ -5,8 +5,6 @@ mod parser;
 mod shader_validator;
 mod validation_rule;
 
-use crate::shader;
-
 use crate::shader::common::{
     retrieve_test_glsl_shader, retrieve_test_spv_shader, retrieve_test_wgsl_shader,
 };

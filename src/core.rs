@@ -1,4 +1,5 @@
 use lib::component::prelude::*;
+use std::io::Read;
 mod graphic;
 mod setup;
 mod window;
@@ -40,10 +41,7 @@ impl State {
         let event_loop = winit::event_loop::EventLoop::with_user_event();
 
         let window = winit::window::WindowBuilder::new()
-            .with_inner_size(winit::dpi::Size::Physical(winit::dpi::PhysicalSize {
-                width: 1920,
-                height: 1080,
-            }))
+            .with_maximized(true)
             .with_title("Fabled Engine")
             .with_decorations(true)
             .build(&event_loop)
