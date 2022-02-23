@@ -8,4 +8,5 @@ pub enum MaterialPrimitiveType {
     Image = 3,
     Sampler = 4,
     Array = 5,
+    Struct = 6,
 }

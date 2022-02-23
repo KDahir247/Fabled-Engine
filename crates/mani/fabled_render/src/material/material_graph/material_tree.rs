@@ -7,7 +7,7 @@ use std::ops::{Deref, Index, IndexMut};
 pub struct MaterialTree {
     // We can add more meta data the metadata should only occupy 64 bytes
     // we want it the metadata for the shader to only fit one cache line.
-    branches: [MaterialBranch; 6],
+    branches: [MaterialBranch; 7],
 }
 
 impl Index<usize> for MaterialTree {
@@ -25,7 +25,7 @@ impl IndexMut<usize> for MaterialTree {
 }
 
 impl Deref for MaterialTree {
-    type Target = [MaterialBranch; 6];
+    type Target = [MaterialBranch; 7];
 
     fn deref(&self) -> &Self::Target {
         self.branches.borrow()
@@ -48,6 +48,7 @@ impl MaterialTree {
                 MaterialBranch::new(MaterialPrimitiveType::Image),
                 MaterialBranch::new(MaterialPrimitiveType::Sampler),
                 MaterialBranch::new(MaterialPrimitiveType::Array),
+                MaterialBranch::new(MaterialPrimitiveType::Struct),
             ],
         }
     }

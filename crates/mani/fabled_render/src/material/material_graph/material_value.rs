@@ -97,6 +97,11 @@ impl From<&naga::TypeInner> for MaterialValue {
             TypeInner::Sampler { comparison } => {
                 MaterialValue::new(MaterialValueType::Sampler, *comparison as u32)
             }
+            TypeInner::Struct {
+                top_level: true,
+                span,
+                ..
+            } => MaterialValue::new(MaterialValueType::Struct, *span),
             _ => MaterialValue::new(MaterialValueType::None, 0_u32),
         }
     }

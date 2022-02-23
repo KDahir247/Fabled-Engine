@@ -1,10 +1,10 @@
 use crate::material::*;
 use crate::shader::parser::*;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use std::ops::IndexMut;
+use std::ops::{BitAnd, IndexMut};
 
+// todo size issue now.
 #[derive(Debug, Serialize, Deserialize)]
-#[repr(align(32))]
 pub struct MaterialParserMetadata {
     material: MaterialTree,
     map: slotmap::DenseSlotMap<MaterialKey, MaterialNode>,
@@ -47,51 +47,41 @@ impl MaterialParser {
 
         globals_variables
             .into_par_iter()
-            .filter(|module_glob_var| module_glob_var.binding.is_some())
+            .filter(|module_glob_var| {
+                let material_val = MaterialValue::from(&types[module_glob_var.ty].inner);
+
+                let a = material_val.get_primitive_ty().is_some();
+                module_glob_var
+                    .binding
+                    .is_some()
+                    .bitand(material_val.get_primitive_ty().is_some())
+            })
             .for_each(|resource_bounded_var| unsafe {
                 let resource_binding_type_var = &types[resource_bounded_var.ty];
 
+
                 // We can guarantee that unwrap will succeed, since we filter for
                 // binding.is_some()
-                let res_binding = resource_bounded_var.binding.unwrap_unchecked();
+                let res_binding = resource_bounded_var.binding.unwrap();
 
                 let (value_group, value_binding) = (res_binding.group, res_binding.binding);
 
+                let mut material_nodes = Vec::with_capacity(20);
+
                 if let naga::TypeInner::Struct {
-                    top_level: true,
                     members: struct_members,
                     ..
                 } = &resource_binding_type_var.inner
                 {
                     for struct_member in struct_members {
-                        let struct_member_ty = &types[struct_member.ty];
-
                         let struct_member_material_node = MaterialNode {
                             value_group,
                             value_binding,
-                            value_detail: MaterialValue::from(&struct_member_ty.inner),
+                            value_detail: MaterialValue::from(&types[struct_member.ty].inner),
                         };
 
-                        let struct_member_primitive_ty: Option<MaterialPrimitiveType> =
-                            struct_member_material_node.value_detail.get_primitive_ty();
 
-                        if let Some(valid_primitive_ty) = struct_member_primitive_ty {
-                            let primitive_ty_index = valid_primitive_ty as usize;
-
-                            {
-                                // blocking.
-                                let mut write_rw_guard = self.metadata.write();
-
-                                let material_key =
-                                    write_rw_guard.map.insert(struct_member_material_node);
-
-
-                                write_rw_guard
-                                    .material
-                                    .index_mut(primitive_ty_index)
-                                    .add_to_keys(material_key);
-                            }
-                        }
+                        material_nodes.push(struct_member_material_node);
                     }
                 }
 
@@ -103,17 +93,25 @@ impl MaterialParser {
                     value_detail: MaterialValue::from(&resource_binding_type_var.inner),
                 };
 
-                let primitive_ty: Option<MaterialPrimitiveType> =
-                    material_node.value_detail.get_primitive_ty();
+                material_nodes.push(material_node);
 
-                if let Some(valid_primitive_ty) = primitive_ty {
-                    let primitive_ty_index = valid_primitive_ty as usize;
+                for node in material_nodes
+                    .into_iter()
+                    .filter(|x| x.value_detail.value_ty.ne(&MaterialValueType::None))
+                {
+                    // We can guarantee that get_primitive_ty will never return a None since we
+                    // filtered out all None.
+
+                    let material_ty = node.value_detail.get_primitive_ty().unwrap();
+
+                    let primitive_ty_index = material_ty as usize;
 
                     {
                         // blocking.
                         let mut write_rw_guard = self.metadata.write();
 
-                        let material_key = write_rw_guard.map.insert(material_node);
+                        let material_key = write_rw_guard.map.insert(node);
+
                         write_rw_guard
                             .material
                             .index_mut(primitive_ty_index)
@@ -165,18 +163,18 @@ mod material_test {
 
         // ----------------------- WEB GPU -----------------------
 
-        let wgsl_path = std::env::var("WGSL_FILE").unwrap();
-        let wgsl_path = std::path::Path::new(wgsl_path.as_str());
-
-        println!("{:?}", wgsl_path);
-        let mut material_wgsl_parser = MaterialParser::default();
-
-        let wgsl_tree = material_wgsl_parser.parse_material(wgsl_path);
-
-        println!("WGSL TREE:\n {}", wgsl_tree);
+        // let wgsl_path = std::env::var("WGSL_FILE").unwrap();
+        // let wgsl_path = std::path::Path::new(wgsl_path.as_str());
+        //
+        // println!("{:?}", wgsl_path);
+        // let mut material_wgsl_parser = MaterialParser::default();
+        //
+        // let wgsl_tree = material_wgsl_parser.parse_material(wgsl_path);
+        //
+        // println!("WGSL TREE:\n {}", wgsl_tree);
 
         // // ----------------------- SPIR-V -----------------------
-        //
+
         // let spv_path = std::env::var("SPV_FILE").unwrap();
         // let spv_path = std::path::Path::new(spv_path.as_str());
         //
@@ -184,20 +182,20 @@ mod material_test {
         //
         // let spv_tree = material_spv_parser.parse_material(spv_path);
         // println!("SPV TREE:\n {}", spv_tree);
-        //
+
         // println!();
         // // ----------------------- GLSL Vertex -----------------------
-        //
-        // let vertex_path = std::env::var("VERT_FILE").unwrap();
-        // let vertex_path = std::path::Path::new(vertex_path.as_str());
-        //
-        // let mut material_vert_parser = MaterialParser::default();
-        //
-        // let vertex_tree = material_vert_parser.parse_material(vertex_path);
-        //
-        // println!("GLSL VERTEX TREE:\n {}", vertex_tree);
-        //
-        // println!();
+
+        let vertex_path = std::env::var("VERT_FILE").unwrap();
+        let vertex_path = std::path::Path::new(vertex_path.as_str());
+
+        let mut material_vert_parser = MaterialParser::default();
+
+        let vertex_tree = material_vert_parser.parse_material(vertex_path);
+
+        println!("GLSL VERTEX TREE:\n {}", vertex_tree);
+
+        println!();
         // // ----------------------- GLSL Fragment -----------------------
         //
         // let frag_path = std::env::var("FRAG_FILE").unwrap();

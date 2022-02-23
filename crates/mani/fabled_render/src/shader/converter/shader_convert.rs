@@ -94,14 +94,13 @@ mod converter_test {
         .unwrap();
 
         if let ShaderConvertResult::Glsl(data) = glsl_desktop_representation {
-            println!("GLSL Desktop INTERPRETATION\n {}", data);
+            print!("{:?}", data);
         } else {
             panic!(
                 "Glsl Core decode failed and return another data type other than glsl\n{:?}",
                 glsl_desktop_representation
             );
         }
-
         let glsl_core_representation = convert_shader(
             ShaderConvertOption::Glsl {
                 version: Version::Embedded(320),
@@ -114,7 +113,8 @@ mod converter_test {
             println!("GLSL Embedded INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Glsl ES decode failed and return another data type other than glsl\n{:?}",
+                "Glsl ES decode failed and return another data type other
+        than glsl\n{:?}",
                 glsl_core_representation
             );
         }
@@ -131,7 +131,8 @@ mod converter_test {
             println!("SPV INTERPRETATION\n {:?}", v);
         } else {
             panic!(
-                "SPV decode failed and return another data type other than spv\n{:?}",
+                "SPV decode failed and return another data type other than
+        spv\n{:?}",
                 spv_representation
             )
         }

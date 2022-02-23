@@ -29,6 +29,7 @@ mod data_test {
         assert_eq!(parse_option_size & (parse_option_size - 1), 0);
 
         let material_parser_size = std::mem::size_of::<MaterialParser>();
+        println!("{}", material_parser_size);
         assert_eq!(material_parser_size & (material_parser_size - 1), 0);
     }
 

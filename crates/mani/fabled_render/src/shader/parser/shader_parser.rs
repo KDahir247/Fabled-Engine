@@ -10,12 +10,14 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
 ) -> Result<(naga::Module, naga::valid::ModuleInfo), ShaderError> {
     let path = source.as_ref();
 
-    // return empty if file extension contains surrogates
-    let file_ext = path
-        .extension()
-        .ok_or(ShaderError::InvalidFileExtension)?
-        .to_str()
-        .unwrap_or("");
+    // We can guarantee that unwrap or returning a default OStr will be a "" if we
+    // convert it to a &str, so we will bypass the check.
+    let file_ext = unsafe {
+        path.extension()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap_unchecked()
+    };
 
     let module = match file_ext {
         "wgsl" => {
@@ -52,16 +54,17 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
                 .map_err(ShaderError::SPVParseError)?
         }
 
-        stage @ "vert" | stage @ "frag" | stage @ "comp" => {
+        stage @ "vert" | stage @ "frag" | stage @ "comp" => unsafe {
             let input = std::fs::read_to_string(path)?;
+
             let mut entry_points = naga::FastHashMap::default();
 
             let target = match stage {
-                    "vert" => naga::ShaderStage::Vertex,
-                    "frag" => naga::ShaderStage::Fragment,
-                    "comp" => naga::ShaderStage::Compute,
-                    _ => panic!("expect error correct glsl extension (vert, frag, comp) has been re-evaluated as incorrect?"),
-                };
+                "vert" => naga::ShaderStage::Vertex,
+                "frag" => naga::ShaderStage::Fragment,
+                "comp" => naga::ShaderStage::Compute,
+                _ => std::hint::unreachable_unchecked(),
+            };
 
             let mut main_func_entry = "main".to_string();
 
@@ -79,7 +82,7 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
                 },
             )
             .map_err(ShaderError::GLSLParserError)?
-        }
+        },
         _ => naga::Module::default(),
     };
 

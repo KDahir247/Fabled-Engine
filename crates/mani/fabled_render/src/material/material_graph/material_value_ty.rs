@@ -26,6 +26,8 @@ pub enum MaterialValueType {
     Mat4Float,
 
     Sampler,
+
+    Struct,
 }
 
 
@@ -53,6 +55,7 @@ impl From<MaterialValueType> for Option<MaterialPrimitiveType> {
             | MaterialValueType::Mat4Float => Some(MaterialPrimitiveType::Matrix),
 
             MaterialValueType::Sampler => Some(MaterialPrimitiveType::Sampler),
+            MaterialValueType::Struct => Some(MaterialPrimitiveType::Struct),
         }
     }
 }

@@ -14,7 +14,7 @@ mod unit_type;
 
 #[cfg(test)]
 mod data_test {
-    use crate::light::{Attenuation, LightAppearance, LightType, IntensityUnit, TemperatureUnit};
+    use crate::light::{Attenuation, IntensityUnit, LightAppearance, LightType, TemperatureUnit};
 
     #[test]
     fn data_size() {
