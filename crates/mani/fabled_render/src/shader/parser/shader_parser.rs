@@ -9,6 +9,10 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
     parse_option: Option<ParseOption>,
 ) -> Result<(naga::Module, naga::valid::ModuleInfo), ShaderError> {
     let path = source.as_ref();
+    let mut file = std::fs::File::open(path)?;
+
+    let content_capacity = file.metadata()?.len() as usize;
+    let mut file_content_buf = String::with_capacity(content_capacity);
 
     // We can guarantee that unwrap or returning a default OStr will be a "" if we
     // convert it to a &str, so we will bypass the check.
@@ -21,21 +25,23 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
 
     let module = match file_ext {
         "wgsl" => {
-            // todo allocation happens
-            let input = std::fs::read_to_string(path)?;
+            file.read_to_string(&mut file_content_buf);
 
-            naga::front::wgsl::parse_str(&input).map_err(ShaderError::WGSLParseError)?
+            naga::front::wgsl::parse_str(&file_content_buf).map_err(ShaderError::WGSLParseError)?
         }
         "spv" => {
+            let mut file_byte_buf = vec![0; content_capacity];
+
             // when we create filesystem module a more polished implementation will be
             // substituted currently this will be sufficient, since it prevent
             // TOCTTOU (Time-of-check to time-of-use) attack
-            let mut render_module = env!("CARGO_MANIFEST_DIR").to_string();
-            render_module.push_str("\\shader\\shader_dump");
-            std::fs::create_dir_all(render_module.clone())?;
+            let shader_meta_path =
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("\\shader\\shader_dump");
+
+            std::fs::create_dir_all(shader_meta_path.as_path())?;
 
             let mut options = naga::front::spv::Options {
-                flow_graph_dump_prefix: Some(std::path::PathBuf::from(render_module)),
+                flow_graph_dump_prefix: Some(shader_meta_path),
                 ..Default::default()
             };
 
@@ -48,16 +54,22 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
                 options.strict_capabilities = strict_capabilities;
             }
 
-            let input = std::fs::read(path)?;
+            file.read_exact(&mut file_byte_buf)?;
 
-            naga::front::spv::parse_u8_slice(&input, &options)
+            naga::front::spv::parse_u8_slice(&file_byte_buf, &options)
                 .map_err(ShaderError::SPVParseError)?
         }
 
         stage @ "vert" | stage @ "frag" | stage @ "comp" => unsafe {
-            let input = std::fs::read_to_string(path)?;
+            file.read_to_string(&mut file_content_buf);
 
             let mut entry_points = naga::FastHashMap::default();
+
+            let mut main_func_entry = "main".to_string();
+
+            if let Some(ParseOption::Glsl { entry_point }) = parse_option {
+                main_func_entry = entry_point;
+            };
 
             let target = match stage {
                 "vert" => naga::ShaderStage::Vertex,
@@ -66,16 +78,10 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
                 _ => std::hint::unreachable_unchecked(),
             };
 
-            let mut main_func_entry = "main".to_string();
-
-            if let Some(ParseOption::Glsl { entry_point }) = parse_option {
-                main_func_entry = entry_point;
-            };
-
             entry_points.insert(main_func_entry, target);
 
             naga::front::glsl::parse_str(
-                &input,
+                &file_content_buf,
                 &naga::front::glsl::Options {
                     entry_points,
                     defines: Default::default(),
@@ -115,10 +121,9 @@ pub fn encode_shader<P: AsRef<std::path::Path>>(
 pub fn decode_shader<P: AsRef<std::path::Path>>(target: P) -> Result<String, ShaderError> {
     let mut file = std::fs::File::open(target)?;
 
-    let length = file.metadata().unwrap().len() as usize;
+    let length = file.metadata()?.len() as usize;
     let mut buffer = vec![0; length];
     file.read_exact(&mut buffer)?;
-
 
     let data = std::string::String::from_utf8(buffer).unwrap_or_default();
 

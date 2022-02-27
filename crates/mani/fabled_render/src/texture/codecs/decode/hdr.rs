@@ -1,6 +1,7 @@
 use crate::texture::codecs::TextureDescriptor;
 use crate::texture::container::{ColorType, Extent3d, FlipAxis, TextureData};
 use crate::texture::CodecsError;
+use image::Pixel;
 
 #[derive(Default, Clone)]
 pub struct HdrTextureLoader;
@@ -27,9 +28,11 @@ impl HdrTextureLoader {
         let mut hdr_data = Vec::with_capacity(rgb_data.len() * 16);
 
         for rgb in rgb_data {
-            hdr_data.extend_from_slice(&rgb.0[0].to_ne_bytes());
-            hdr_data.extend_from_slice(&rgb.0[1].to_ne_bytes());
-            hdr_data.extend_from_slice(&rgb.0[2].to_ne_bytes());
+            let (red, green, blue, _) = rgb.channels4();
+
+            hdr_data.extend_from_slice(&red.to_ne_bytes());
+            hdr_data.extend_from_slice(&green.to_ne_bytes());
+            hdr_data.extend_from_slice(&blue.to_ne_bytes());
             hdr_data.extend_from_slice(&1.0f32.to_ne_bytes());
         }
 

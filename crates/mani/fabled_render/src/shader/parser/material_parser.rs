@@ -50,7 +50,6 @@ impl MaterialParser {
             .filter(|module_glob_var| {
                 let material_val = MaterialValue::from(&types[module_glob_var.ty].inner);
 
-                let a = material_val.get_primitive_ty().is_some();
                 module_glob_var
                     .binding
                     .is_some()
@@ -59,10 +58,9 @@ impl MaterialParser {
             .for_each(|resource_bounded_var| unsafe {
                 let resource_binding_type_var = &types[resource_bounded_var.ty];
 
-
                 // We can guarantee that unwrap will succeed, since we filter for
                 // binding.is_some()
-                let res_binding = resource_bounded_var.binding.unwrap();
+                let res_binding = resource_bounded_var.binding.unwrap_unchecked();
 
                 let (value_group, value_binding) = (res_binding.group, res_binding.binding);
 
@@ -101,8 +99,7 @@ impl MaterialParser {
                 {
                     // We can guarantee that get_primitive_ty will never return a None since we
                     // filtered out all None.
-
-                    let material_ty = node.value_detail.get_primitive_ty().unwrap();
+                    let material_ty = node.value_detail.get_primitive_ty().unwrap_unchecked();
 
                     let primitive_ty_index = material_ty as usize;
 
@@ -175,27 +172,27 @@ mod material_test {
 
         // // ----------------------- SPIR-V -----------------------
 
-        // let spv_path = std::env::var("SPV_FILE").unwrap();
-        // let spv_path = std::path::Path::new(spv_path.as_str());
-        //
-        // let mut material_spv_parser = MaterialParser::default();
-        //
-        // let spv_tree = material_spv_parser.parse_material(spv_path);
-        // println!("SPV TREE:\n {}", spv_tree);
+        let spv_path = std::env::var("SPV_FILE").unwrap();
+        let spv_path = std::path::Path::new(spv_path.as_str());
 
-        // println!();
-        // // ----------------------- GLSL Vertex -----------------------
+        let mut material_spv_parser = MaterialParser::default();
 
-        let vertex_path = std::env::var("VERT_FILE").unwrap();
-        let vertex_path = std::path::Path::new(vertex_path.as_str());
-
-        let mut material_vert_parser = MaterialParser::default();
-
-        let vertex_tree = material_vert_parser.parse_material(vertex_path);
-
-        println!("GLSL VERTEX TREE:\n {}", vertex_tree);
+        let spv_tree = material_spv_parser.parse_material(spv_path);
+        println!("SPV TREE:\n {}", spv_tree);
 
         println!();
+        // // ----------------------- GLSL Vertex -----------------------
+
+        // let vertex_path = std::env::var("VERT_FILE").unwrap();
+        // let vertex_path = std::path::Path::new(vertex_path.as_str());
+        //
+        // let mut material_vert_parser = MaterialParser::default();
+        //
+        // let vertex_tree = material_vert_parser.parse_material(vertex_path);
+        //
+        // println!("GLSL VERTEX TREE:\n {}", vertex_tree);
+        //
+        // println!();
         // // ----------------------- GLSL Fragment -----------------------
         //
         // let frag_path = std::env::var("FRAG_FILE").unwrap();

@@ -6,7 +6,7 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
     conversion: ShaderConvertOption,
     path: P,
 ) -> Result<ShaderConvertResult, ShaderError> {
-    let (module, module_info) = parse_shader(path, None)?;
+    let (module, module_info) = parse_shader(path.as_ref(), None)?;
 
     let conversion_res = match conversion {
         ShaderConvertOption::Wgsl => {
@@ -47,9 +47,6 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
                     entry_point: entry.name.to_owned(),
                 };
 
-                // Handle invalid version for glsl shader.
-                // Desktop preprocessor version : [330, 400, 410, 420, 430, 440, 450]
-                // Embedded preprocessor version : [300, 310, 320]
                 let mut writer = naga::back::glsl::Writer::new(
                     &mut glsl_buffer,
                     &module,
@@ -58,8 +55,7 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
                 )
                 .map_err(ShaderError::GLSLConvertError)?;
 
-                // if module is invalid, which may happen if the file extension is not know it
-                // will return an empty module. This will handle hard error.
+
                 writer.write().map_err(ShaderError::GLSLConvertError)?;
             }
 
@@ -173,10 +169,15 @@ mod converter_test {
         .unwrap();
 
         if let ShaderConvertResult::Glsl(data) = &glsl_embedded_representation {
-            println!("GLSL Embedded INTERPRETATION\n {}", data);
+            println!(
+                "GLSL Embedded
+        INTERPRETATION\n {}",
+                data
+            );
         } else {
             panic!(
-                "Glsl ES decode failed and return another data type other than glsl\n{:?}",
+                "Glsl ES decode failed and return another data type other
+        than glsl\n{:?}",
                 glsl_embedded_representation
             );
         }
@@ -189,7 +190,8 @@ mod converter_test {
             println!("WEB_GPU INTERPRETATION\n {}", data);
         } else {
             panic!(
-                "Wgsl decode failed and return another data type other than wgsl\n{:?}",
+                "Wgsl decode failed and return another data type other than
+        wgsl\n{:?}",
                 wgsl_representation
             )
         }
