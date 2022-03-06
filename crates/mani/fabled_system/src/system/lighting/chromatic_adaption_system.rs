@@ -91,7 +91,6 @@ pub fn calculate_color_adaption(
                     intermediate_calculation[6] * transposed_chromatic_adaption_matrix[6] + intermediate_calculation[7] * transposed_chromatic_adaption_matrix[7] + intermediate_calculation[8] * transposed_chromatic_adaption_matrix[8],
                 ];
 
-            println!("{:?}", chromatic_adaptation_matrix);
             let adapted_tristimulus = [
                 chromatic_adaptation_matrix[0] * src_tristimulus_x + chromatic_adaptation_matrix[1] * src_tristimulus_y + chromatic_adaptation_matrix[2] * src_tristimulus_z,
                 chromatic_adaptation_matrix[3] * src_tristimulus_x + chromatic_adaptation_matrix[4] * src_tristimulus_y + chromatic_adaptation_matrix[5] * src_tristimulus_z,

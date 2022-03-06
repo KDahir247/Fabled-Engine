@@ -2,6 +2,7 @@ use crate::texture::container::{ColorType, Extent3d};
 use crate::texture::{ColorTarget, TextureError};
 use std::path::Path;
 
+
 #[repr(align(16))]
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TextureData {

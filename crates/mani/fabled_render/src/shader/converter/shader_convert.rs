@@ -19,9 +19,7 @@ pub fn convert_shader<P: AsRef<std::path::Path>>(
         ShaderConvertOption::Spv { option } => {
             let mut spv_option = naga::back::spv::Options::default();
 
-            // capabilities,
             if let SpvOptions::Custom { maj_min } = option {
-                // spv_option.capabilities = capabilities;
                 spv_option.lang_version = maj_min;
             };
 

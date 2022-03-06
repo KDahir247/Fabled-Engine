@@ -3,36 +3,62 @@ use crate::color::space::rgb::Rgb;
 
 const SRGB_POW_TRANSFER_FUNCTION: f32 = 1.0 / 2.4;
 
-#[derive(Default)]
+const RCP_FALLOFF: f32 = 1.0 / 12.92;
+const RCP_LINEAR_FALLOFF: f32 = 1.0 / 1.055;
+
+
+#[derive(Default, Copy, Clone)]
 pub struct SRgb {
     pub red: f32,
     pub green: f32,
     pub blue: f32,
 }
 
-impl ColorSpace for SRgb {
-    type TargetSpace = Rgb;
 
-    fn convert_space_from(rgb: Self::TargetSpace) -> Self {
-        let mut srgb = SRgb::default();
+impl SRgb {
+    pub fn s_rgb_to_linear(&self) -> SRgb {
+        let mut srgb = self.to_owned();
 
-        if rgb.red > 0.0031308 {
-            srgb.red = 1.055 * rgb.red.powf(SRGB_POW_TRANSFER_FUNCTION) - 0.055;
+        if self.red > 0.0031308 {
+            srgb.red = ((self.red + 0.055) * RCP_LINEAR_FALLOFF).powf(2.4);
         } else {
-            srgb.red = 12.92 * rgb.red;
+            srgb.red = self.red * RCP_FALLOFF;
         }
 
-        if rgb.green > 0.0031308 {
-            srgb.green = 1.055 * rgb.green.powf(SRGB_POW_TRANSFER_FUNCTION) - 0.055;
+        if self.green > 0.0031308 {
+            srgb.green = ((self.green + 0.055) * RCP_LINEAR_FALLOFF).powf(2.4);
         } else {
-            srgb.green = 12.92 * rgb.green;
+            srgb.green = self.green * RCP_FALLOFF;
         }
 
-        if rgb.blue > 0.0031308 {
-            srgb.blue = 1.055 * rgb.blue.powf(SRGB_POW_TRANSFER_FUNCTION) - 0.055
+        if self.blue > 0.0031308 {
+            srgb.blue = ((self.blue + 0.055) * RCP_LINEAR_FALLOFF).powf(2.4);
         } else {
-            srgb.blue = 12.92 * rgb.blue;
+            srgb.blue = self.blue * RCP_FALLOFF;
         }
+
+        srgb
+    }
+
+    pub fn linear_to_s_rgb(&self) -> SRgb {
+        let mut srgb = self.to_owned();
+
+        if self.red > 0.0031308 {
+            srgb.red = 1.055 * self.red.powf(SRGB_POW_TRANSFER_FUNCTION) - 0.055;
+        } else {
+            srgb.red = 12.92 * self.red;
+        }
+
+        if self.green > 0.0031308 {
+            srgb.green = 1.055 * self.green.powf(SRGB_POW_TRANSFER_FUNCTION) - 0.055;
+        } else {
+            srgb.green = 12.92 * self.green;
+        }
+
+        if self.blue > 0.0031308 {
+        } else {
+        }
+
 
         srgb
     }
