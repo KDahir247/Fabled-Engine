@@ -1,9 +1,15 @@
 # Fabled Engine
+
+Personal blog for ideas and development of Fabled Engine and other major personal project can be found at
+[Blog Site](https://kdahir247.github.io/Fabled_Blog/ "Fabled Blog")
+
 <br/>
 <br/>
 Any issues, enhancement, features, or bugs report are always welcome in Issues.
 <br/>
 <br/>
+
+
 
 # The fbx branch is where frequent development and up to date development will occur
 
