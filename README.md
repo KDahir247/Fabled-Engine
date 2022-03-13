@@ -1,7 +1,7 @@
 # Fabled Engine
 
 Personal blog for ideas and development of Fabled Engine and other major personal project can be found at
-[Blog Site](https://kdahir247.github.io/Fabled_Blog/ "Fabled Blog")
+[Development Blog Site](https://kdahir247.github.io/Fabled_Blog/ "Fabled Blog")
 
 <br/>
 <br/>
