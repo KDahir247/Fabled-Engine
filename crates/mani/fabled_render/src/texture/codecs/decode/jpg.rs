@@ -70,6 +70,7 @@ mod jpg_loader_codecs {
             }
         }
 
+
         //-------------------------------------------------------
         let texture = load_test_textures("tiff").pop().unwrap();
 

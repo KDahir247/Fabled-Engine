@@ -1,4 +1,4 @@
-use crate::color::saturate;
+use fabled_math::FloatExtension;
 
 pub fn screen_referred_to_rgbe(screen_referred_color: [f32; 3]) -> [f32; 4] {
     let [red, green, blue] = screen_referred_color;
@@ -42,9 +42,10 @@ pub fn rgbe_to_screen_referred(rgbe: [f32; 4]) -> [f32; 3] {
 
 
 pub fn linear_to_rgb_m(linear: [f32; 3]) -> [f32; 4] {
+    // linear to gamma
     let mut rgbm = [linear[0].sqrt(), linear[1].sqrt(), linear[2].sqrt(), 1.0];
 
-    let range_rcp = 6.0.recip();
+    let range_rcp = 6.0f32.recip();
 
     let [red, green, blue, mut multiply] = [
         rgbm[0] * range_rcp,
@@ -72,6 +73,7 @@ pub fn rgb_m_to_linear(rgbm: [f32; 4]) -> [f32; 3] {
     let [red, green, blue, multiple] = rgbm;
     let intermediate_step = 6.0 * multiple;
 
+    // powi = gamma to linear (x * x)
     [
         (red * intermediate_step).powi(2),
         green * intermediate_step.powi(2),

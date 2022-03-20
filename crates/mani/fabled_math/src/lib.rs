@@ -1,9 +1,10 @@
+mod arithmetic;
 mod easing;
 mod geometric;
 mod linear;
 mod transformation;
-mod arithmetic;
 
+pub use arithmetic::*;
 pub use easing::*;
 pub use geometric::*;
 pub use linear::*;
