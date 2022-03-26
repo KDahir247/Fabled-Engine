@@ -31,6 +31,7 @@ pub fn ev100_compensation(ev100: f32, exposure_compensation: f32) -> f32 {
     ev100 - exposure_compensation
 }
 
+// todo this is what we pass to the shader. color.rgb *= exposure.
 // H is the photometric exposure, expressed in lux seconds
 // q is the lens and vignetting attenuation factor (usually 0.65^11)
 // t is the exposure time ("shutter speed") in seconds
