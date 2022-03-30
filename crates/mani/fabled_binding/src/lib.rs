@@ -1,5 +1,5 @@
 #![feature(fn_traits)]
-
+#![feature(unboxed_closures)]
 extern crate core;
 
 mod container;

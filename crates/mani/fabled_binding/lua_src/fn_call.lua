@@ -4,10 +4,11 @@
 --- DateTime: 2022-03-26 4:21 p.m.
 ---
 
--- a should be the result 7 * 2
-a = times_two(7)
+-- a should be the result 8 * 2
+a = times_two(8)
 
--- b should be the result of 7 * 2 + 2
+-- b should be the result of 8 * 2 + 2
 b = add_two(a)
+
 
 print(b)

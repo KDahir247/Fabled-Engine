@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 mlua = {version = "*", features = ["lua54", "vendored", "async"]}
 thiserror = "1.0.30"
+anyhow = "1.0.56"
