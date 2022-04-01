@@ -2,15 +2,15 @@
 // "static" in a sense where there is only one instance, but we don't want to
 // make it global
 
-use crate::{LuaOption, LuaSafetySate, StdLib, System};
-use mlua::{FromLuaMulti, ToLuaMulti};
+use crate::{GenerationalMultiplier, LuaOption, StdLib, System};
+use mlua::{FromLuaMulti, Function, ToLuaMulti};
 use std::env::Args;
 use std::fmt::Debug;
 use std::future::Future;
 
 pub struct LuaInstance {
     context: mlua::Lua,
-    safety_state: LuaSafetySate,
+    gc_mode: mlua::GCMode,
 }
 
 impl Default for LuaInstance {
@@ -21,11 +21,17 @@ impl Default for LuaInstance {
 
 impl LuaInstance {
     pub unsafe fn new_unsafe(lua_lib: StdLib, lua_option: LuaOption) -> Self {
-        let lua = mlua::Lua::unsafe_new_with(lua_lib.into(), lua_option.into());
-        Self {
-            context: lua,
-            safety_state: LuaSafetySate::Unsafe,
-        }
+        let instance = Self {
+            context: mlua::Lua::unsafe_new_with(lua_lib.into(), lua_option.into()),
+            gc_mode: mlua::GCMode::Generational,
+        };
+
+        instance.gc_gen(
+            GenerationalMultiplier::new::<20>(),
+            GenerationalMultiplier::new::<100>(),
+        );
+
+        instance
     }
 
     pub fn new(lua_lib: StdLib, lua_option: LuaOption) -> Self {
@@ -34,12 +40,18 @@ impl LuaInstance {
         //    mlua::Lua::new_with(lua_lib.into(),
         // lua_option.into()).unwrap_or(mlua::Lua::new());
 
-        let lua = mlua::Lua::new();
 
-        Self {
-            context: lua,
-            safety_state: LuaSafetySate::Safe,
-        }
+        let instance = Self {
+            context: mlua::Lua::new(),
+            gc_mode: mlua::GCMode::Generational,
+        };
+
+        instance.gc_gen(
+            GenerationalMultiplier::new::<20>(),
+            GenerationalMultiplier::new::<100>(),
+        );
+
+        instance
     }
 }
 
@@ -51,15 +63,14 @@ impl<'lua> LuaInstance {
     >(
         &'lua self,
         function: T,
-        lua_fn_name: &str,
-    ) -> mlua::Result<()> {
+    ) -> Function<'lua> {
         let lua_func = self
             .context
-            .create_function(move |x, parameter: A| Ok(function.call(parameter)))?;
+            .create_function(move |_, parameter: A| Ok(function.call(parameter)))
+            .unwrap();
 
-        self.context.globals().raw_set(lua_fn_name, lua_func)?;
 
-        Ok(())
+        lua_func
     }
 
     pub fn create_mut_function<
@@ -69,47 +80,51 @@ impl<'lua> LuaInstance {
     >(
         &'lua self,
         mut function: T,
-        lua_fn_name: &str,
-    ) -> mlua::Result<()> {
+    ) -> Function<'lua> {
         let mut_lua_fn = self
             .context
-            .create_function_mut(move |x, parameter: A| Ok(function.call_mut(parameter)))?;
+            .create_function_mut(move |_, parameter: A| Ok(function.call_mut(parameter)))
+            .unwrap();
 
 
-        self.context.globals().raw_set(lua_fn_name, mut_lua_fn)?;
+        mut_lua_fn
+    }
 
+    pub fn bind_fn<T: mlua::ToLua<'lua>>(
+        &'lua self,
+        func: T,
+        lua_fn_name: &str,
+    ) -> mlua::Result<()> {
+        self.context.globals().raw_set(lua_fn_name, func)?;
 
         Ok(())
     }
 
+    pub fn parallelize(
+        &'lua self,
+        lua_fn: mlua::Function<'lua>,
+    ) -> mlua::Result<mlua::Thread<'lua>> {
+        self.context.create_thread(lua_fn)
+    }
+}
 
-    // pub fn create_async_function<
-    //     A: 'static + mlua::FromLuaMulti<'lua>,
-    //     R: 'static + mlua::ToLuaMulti<'lua>,
-    //     T: 'static + System<'static, A, R> + Fn<A, Output = impl Future<Output =
-    // R>>, >(
-    //     &'lua self,
-    //     function: T,
-    //     lua_fn_name: &str,
-    // ) -> mlua::Result<()> {
-    //     let async_lua_fn = self
-    //         .context
-    //         .create_async_function(move |x, parameter: A|
-    // Ok(function.call(parameter)))?;
-    //
-    //     self.context.globals().raw_set(lua_fn_name, async_lua_fn)?;
-    //
-    //
-    //     Ok(())
-    // }
-
-    // create async fn
+impl LuaInstance {
+    pub fn gc_gen(
+        &self,
+        minor_value: GenerationalMultiplier<20, 200>,
+        major_value: GenerationalMultiplier<100, 1000>,
+    ) -> mlua::GCMode {
+        self.context.gc_gen(
+            std::os::raw::c_int::from(minor_value.multiplier),
+            std::os::raw::c_int::from(major_value.multiplier),
+        )
+    }
 }
 
 
 #[cfg(test)]
 mod test {
-    use crate::{LuaInstance, System};
+    use crate::{GenerationalMultiplier, LuaInstance, System};
     use std::sync::Arc;
 
     fn times_two(x: usize) -> usize {
@@ -129,12 +144,17 @@ mod test {
         y
     }
 
+    fn add_10000(x: i32) -> i32 {
+        x + 10000
+    }
+
     #[test]
     fn rust_fn_call_test() {
         let lua = LuaInstance::default();
 
-        lua.create_function(times_two, "times_two").unwrap();
-        lua.create_function(add_two, "add_two").unwrap();
+        lua.bind_fn(lua.create_function(times_two), "times_two");
+
+        lua.bind_fn(lua.create_function(add_two), "add_two");
 
         lua.context
             .load(&std::fs::read_to_string("./lua_src/fn_call.lua").unwrap())
@@ -146,7 +166,7 @@ mod test {
     fn rust_multi_parameter_fn_test() {
         let lua = LuaInstance::default();
 
-        lua.create_function(power_of, "power_of").unwrap();
+        lua.bind_fn(lua.create_function(power_of), "power_of");
 
         lua.context
             .load(&std::fs::read_to_string("./lua_src/multi_param_fn_call.lua").unwrap())
@@ -159,7 +179,8 @@ mod test {
     fn rust_mut_fn_test() {
         let lua = LuaInstance::default();
 
-        lua.create_mut_function(modify_x, "modify_x").unwrap();
+
+        lua.bind_fn(lua.create_mut_function(modify_x), "modify_x");
 
         lua.context
             .load(&std::fs::read_to_string("./lua_src/mut_fn_call.lua").unwrap())
@@ -169,7 +190,18 @@ mod test {
 
 
     #[test]
-    fn rust_mut_fn_call_test() {
+    fn rust_thread_fn_call_test() {
         let lua = LuaInstance::default();
+
+        let lua_fn = lua.create_function(add_10000);
+
+        let lua_thread = lua.parallelize(lua_fn).unwrap();
+
+        lua.bind_fn(lua_thread, "add_10000");
+
+        lua.context
+            .load(&std::fs::read_to_string("./lua_src/thread_call.lua").unwrap())
+            .exec()
+            .unwrap();
     }
 }

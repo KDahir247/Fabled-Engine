@@ -1,4 +1,4 @@
-pub(crate) unsafe trait System<'w, Params, Ret> {
+pub unsafe trait System<'w, Params, Ret> {
     unsafe fn execute(self) -> Box<Self>;
 }
 
