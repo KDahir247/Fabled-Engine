@@ -1,3 +1,4 @@
+mod binding;
 mod clip;
 mod codecs;
 mod config;
@@ -6,6 +7,7 @@ mod error;
 mod mixer;
 mod source;
 
+pub use binding::*;
 pub use clip::*;
 pub use codecs::*;
 pub use config::*;

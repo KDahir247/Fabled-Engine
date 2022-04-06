@@ -1,15 +1,15 @@
-pub unsafe trait System<'w, Params, Ret> {
-    unsafe fn execute(self) -> Box<Self>;
+pub unsafe trait System<Params, Ret> {
+    fn execute(self) -> Box<Self>;
 }
 
 
 macro_rules! impl_execute {
     ($($xs:ident),+ $(,)?) => {
-        unsafe impl<'w, $($xs),+, F, R> System<'w, ($($xs,)+), R> for F
+        unsafe impl< $($xs),+, F, R> System< ($($xs,)+), R> for F
         where
             F: FnMut($($xs),+) -> R,
         {
-            unsafe fn execute(self) -> Box<F> {
+            fn execute(self) -> Box<F> {
                 Box::new(self)
             }
 

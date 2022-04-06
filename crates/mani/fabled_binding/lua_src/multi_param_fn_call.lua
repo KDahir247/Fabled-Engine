@@ -4,6 +4,7 @@
 --- DateTime: 2022-03-30 4:53 a.m.
 ---
 
-result = power_of(5.5, 2.23)
+local result = power_of(5.5, 2.23)
 
 print(result)
+

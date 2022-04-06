@@ -5,7 +5,7 @@ pub trait True {}
 impl True for Predicate<true> {}
 
 #[non_exhaustive]
-pub struct GenerationalMultiplier<const LOW: i16, const HIGH: i16> {
+pub struct GCMultiplier<const LOW: i16, const HIGH: i16> {
     pub multiplier: i16,
 }
 
@@ -13,7 +13,7 @@ const fn in_range(v: i16, low: i16, high: i16) -> bool {
     v >= low && v <= high
 }
 
-impl<const LOW: i16, const HIGH: i16> GenerationalMultiplier<LOW, HIGH>
+impl<const LOW: i16, const HIGH: i16> GCMultiplier<LOW, HIGH>
 where
     Predicate<{ LOW < HIGH }>: True,
 {

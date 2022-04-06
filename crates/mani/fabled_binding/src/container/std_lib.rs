@@ -1,78 +1,27 @@
-use std::ops::{
-    BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Shl, ShlAssign, Shr, ShrAssign,
-};
-#[non_exhaustive]
-pub struct StdLib(u32);
+pub struct StdLib;
 
 impl StdLib {
-    pub const COROUTINE: StdLib = StdLib(1);
+    pub const COROUTINE: mlua::StdLib = mlua::StdLib::COROUTINE;
 
-    pub const TABLE: StdLib = StdLib(1 << 1);
+    pub const TABLE: mlua::StdLib = mlua::StdLib::TABLE;
 
-    pub const IO: StdLib = StdLib(1 << 2);
+    pub const IO: mlua::StdLib = mlua::StdLib::IO;
 
-    pub const OS: StdLib = StdLib(1 << 3);
+    pub const OS: mlua::StdLib = mlua::StdLib::OS;
 
-    pub const STRING: StdLib = StdLib(1 << 3);
+    pub const STRING: mlua::StdLib = mlua::StdLib::STRING;
 
-    pub const UTF8: StdLib = StdLib(1 << 5);
+    pub const UTF8: mlua::StdLib = mlua::StdLib::UTF8;
 
-    pub const MATH: StdLib = StdLib(1 << 7);
+    pub const MATH: mlua::StdLib = mlua::StdLib::MATH;
 
-    pub const PACKAGE: StdLib = StdLib(1 << 8);
+    pub const PACKAGE: mlua::StdLib = mlua::StdLib::PACKAGE;
 
-    pub const DEBUG: StdLib = StdLib(1 << 31);
+    pub const DEBUG: mlua::StdLib = mlua::StdLib::DEBUG;
 
-    pub const NONE: StdLib = StdLib(0);
+    pub const NONE: mlua::StdLib = mlua::StdLib::NONE;
 
-    pub const ALL: StdLib = StdLib(u32::MAX);
-    pub const ALL_SAFE: StdLib = StdLib((1 << 30) - 1);
-}
+    pub const ALL: mlua::StdLib = mlua::StdLib::ALL;
 
-impl BitXor for StdLib {
-    type Output = StdLib;
-
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        StdLib(self.0 ^ rhs.0)
-    }
-}
-
-impl BitXorAssign for StdLib {
-    fn bitxor_assign(&mut self, rhs: Self) {
-        *self = StdLib(self.0 ^ rhs.0)
-    }
-}
-
-impl BitOr for StdLib {
-    type Output = StdLib;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        StdLib(self.0 | rhs.0)
-    }
-}
-
-impl BitOrAssign for StdLib {
-    fn bitor_assign(&mut self, rhs: Self) {
-        *self = StdLib(self.0 | rhs.0)
-    }
-}
-
-impl BitAnd for StdLib {
-    type Output = StdLib;
-
-    fn bitand(self, rhs: Self) -> Self::Output {
-        StdLib(self.0 & rhs.0)
-    }
-}
-
-impl BitAndAssign for StdLib {
-    fn bitand_assign(&mut self, rhs: Self) {
-        *self = StdLib(self.0 & rhs.0)
-    }
-}
-
-impl From<StdLib> for mlua::StdLib {
-    fn from(lua_std_lib: StdLib) -> Self {
-        mlua::StdLib::try_from(lua_std_lib).unwrap_or(mlua::StdLib::ALL_SAFE)
-    }
+    pub const ALL_SAFE: mlua::StdLib = mlua::StdLib::ALL_SAFE;
 }

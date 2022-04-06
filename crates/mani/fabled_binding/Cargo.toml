@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mlua = {version = "*", features = ["lua54", "vendored", "async"]}
+mlua = {version = "0.7.4", features = ["lua54", "vendored", "async"]}
 thiserror = "1.0.30"
 anyhow = "1.0.56"
+futures-timer = "3.0.2"
+actix-rt = "2.7.0"
