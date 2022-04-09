@@ -6,7 +6,7 @@ use std::fmt::Debug;
 use std::future::Future;
 
 #[repr(align(32))]
-pub struct LuaInstance(mlua::Lua);
+pub struct LuaInstance(pub mlua::Lua);
 
 impl Default for LuaInstance {
     fn default() -> Self {

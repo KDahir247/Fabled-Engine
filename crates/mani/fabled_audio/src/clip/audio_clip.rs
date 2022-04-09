@@ -4,7 +4,7 @@ use std::io::Read;
 
 #[derive(Debug)]
 pub struct AudioClip<D> {
-    pub audio_data: parking_lot::Mutex<std::vec::IntoIter<D>>,
+    pub audio_data: std::vec::IntoIter<D>,
     pub duration: Option<std::time::Duration>,
     pub current_frame_len: Option<usize>,
     pub sample: u32,
@@ -14,7 +14,7 @@ pub struct AudioClip<D> {
 impl<D> Default for AudioClip<D> {
     fn default() -> Self {
         Self {
-            audio_data: parking_lot::Mutex::new(vec![].into_iter()),
+            audio_data: vec![].into_iter(),
             channel: 0,
             sample: 0,
             duration: None,
@@ -41,7 +41,7 @@ where
             sample: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
-            audio_data: parking_lot::Mutex::new(audio_clip.collect::<Vec<_>>().into_iter()),
+            audio_data: audio_clip.collect::<Vec<_>>().into_iter(),
         })
     }
 
@@ -68,7 +68,7 @@ where
             sample: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
-            audio_data: parking_lot::Mutex::new(audio_clip.collect::<Vec<_>>().into_iter()),
+            audio_data: audio_clip.collect::<Vec<_>>().into_iter(),
         })
     }
 
@@ -81,7 +81,7 @@ where
         play_on_awake: bool,
     ) -> AudioClip<D> {
         let audio_clip = Self {
-            audio_data: parking_lot::Mutex::new(data.into_iter()),
+            audio_data: data.into_iter(),
             channel,
             sample,
             duration,
@@ -95,9 +95,7 @@ where
             sample: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
-            audio_data: parking_lot::Mutex::new(
-                audio_clip.convert_samples().collect::<Vec<_>>().into_iter(),
-            ),
+            audio_data: audio_clip.convert_samples().collect::<Vec<_>>().into_iter(),
         }
     }
 }
@@ -122,8 +120,7 @@ impl<D> Iterator for AudioClip<D> {
     type Item = D;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let mut lock = self.audio_data.lock();
-        lock.next()
+        self.audio_data.next()
     }
 }
 
@@ -199,7 +196,7 @@ mod audio_clip_test {
 
         assert!(empty_clip.next().is_none());
 
-        let lock = empty_clip.audio_data.lock();
+        let lock = empty_clip.audio_data;
         assert!(lock.len().eq(&0));
     }
 

@@ -44,7 +44,6 @@ mod raw_test {
 
         let file = std::fs::File::open(path).unwrap();
 
-
         let clip: AudioClip<f32> = AudioClip::from_file(file, true).unwrap();
 
         let previous_channel = clip.channels();
