@@ -61,7 +61,7 @@ mod tests {
 
     #[test]
     fn single_audio() {
-        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
+        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/Joyride.wav"].join("");
         let file = std::fs::File::open(path).unwrap();
         //---------------------- Creating the Clip ------------------
         let standard_output = StandardOutput::default();
@@ -70,7 +70,8 @@ mod tests {
 
         let raw_clip = RawClip::new(audio_clip);
 
-        standard_output.play_omni(raw_clip, 1.);
+        standard_output.play_omni(raw_clip, 0.);
+
 
         std::thread::sleep(std::time::Duration::from_secs(5000));
     }

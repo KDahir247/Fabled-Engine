@@ -68,12 +68,10 @@ where
     pub fn play_omni(&self, clip: RawClip<D>, volume: f32) {
         let dyn_clip = clip.dyn_clip;
 
-        let channels = dyn_clip.channels();
 
-        let channel_volume =
-            rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channels as usize]);
+        self.sink.set_volume(volume);
 
-        self.composer.add(channel_volume);
+        self.composer.add(dyn_clip);
     }
 
 
@@ -82,12 +80,9 @@ where
 
         let dyn_clip = clip.dyn_clip;
 
-        let channel_count = dyn_clip.channels();
+        self.sink.set_volume(volume);
 
-        let channel_volume =
-            rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channel_count as usize]);
-
-        self.composer.add(channel_volume);
+        self.composer.add(dyn_clip);
     }
 
     pub fn set_global_volume(&self, volume: f32) {

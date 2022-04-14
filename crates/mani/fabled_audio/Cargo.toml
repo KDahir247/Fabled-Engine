@@ -10,6 +10,7 @@ thiserror = "1.0.29"
 rodio = {version = "0.14.0", features = ["default"]}
 cpal = {version = "0.13.4"}
 ambisonic = {version = "0.4.1" }
+panning = "0.1.1"
 
 hound = {version = "3.4.0"}
 

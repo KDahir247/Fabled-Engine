@@ -1,7 +1,19 @@
+#[derive(Clone)]
 pub struct RawClip<T>
 where
     T: rodio::Sample, {
     pub dyn_clip: Box<dyn rodio::Source<Item = T> + Send>,
+}
+
+impl<T: 'static> Default for RawClip<T>
+where
+    T: rodio::Sample + Send,
+{
+    fn default() -> Self {
+        Self {
+            dyn_clip: Box::new(rodio::source::Zero::new(2, 44100)),
+        }
+    }
 }
 
 impl<T> RawClip<T>
@@ -21,6 +33,13 @@ pub struct RawAmbisonicClip {
     pub dyn_clip: Box<dyn ambisonic::rodio::Source<Item = f32> + Send>,
 }
 
+impl Default for RawAmbisonicClip {
+    fn default() -> Self {
+        Self {
+            dyn_clip: Box::new(ambisonic::rodio::source::Zero::new(2, 44100)),
+        }
+    }
+}
 
 impl RawAmbisonicClip {
     pub fn new<T: 'static>(ambisonic_audio_clip: T) -> Self

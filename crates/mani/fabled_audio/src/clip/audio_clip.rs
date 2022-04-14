@@ -1,14 +1,15 @@
 use crate::{AudioDecodingError, RawAmbisonicClip, RawClip};
-use rodio::Source;
-use std::io::Read;
+use rodio::{Decoder, Source};
+use std::io::{Cursor, Read};
 
 #[derive(Debug)]
 pub struct AudioClip<D> {
     pub audio_data: std::vec::IntoIter<D>,
     pub duration: Option<std::time::Duration>,
     pub current_frame_len: Option<usize>,
-    pub sample: u32,
+    pub sample_rate: u32,
     pub channel: u16,
+    // maybe pan
 }
 
 impl<D> Default for AudioClip<D> {
@@ -16,7 +17,7 @@ impl<D> Default for AudioClip<D> {
         Self {
             audio_data: vec![].into_iter(),
             channel: 0,
-            sample: 0,
+            sample_rate: 0,
             duration: None,
             current_frame_len: None,
         }
@@ -27,7 +28,10 @@ impl<D> AudioClip<D>
 where
     D: rodio::Sample,
 {
-    pub fn from_raw(buffer: Vec<u8>, play_on_awake: bool) -> Result<Self, AudioDecodingError> {
+    pub fn from_raw(
+        buffer: Vec<u8>,
+        play_on_awake: bool,
+    ) -> Result<AudioClip<D>, AudioDecodingError> {
         let audio_decoder = rodio::Decoder::new(std::io::Cursor::new(buffer))
             .map_err(AudioDecodingError::DecoderError)?;
 
@@ -38,14 +42,17 @@ where
 
         Ok(Self {
             channel: audio_clip.channels(),
-            sample: audio_clip.sample_rate(),
+            sample_rate: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
             audio_data: audio_clip.collect::<Vec<_>>().into_iter(),
         })
     }
 
-    pub fn from_file(file: std::fs::File, play_on_awake: bool) -> Result<Self, AudioDecodingError> {
+    pub fn from_file(
+        file: std::fs::File,
+        play_on_awake: bool,
+    ) -> Result<AudioClip<D>, AudioDecodingError> {
         let mut file = file;
 
         let meta_data = file.metadata()?;
@@ -54,8 +61,10 @@ where
 
         file.read_exact(&mut audio_buffer)?;
 
+        // vorbis and mp3 total duration is None
         let audio_decoder = rodio::Decoder::new(std::io::Cursor::new(audio_buffer))
             .map_err(AudioDecodingError::DecoderError)?;
+
 
         let audio_clip = audio_decoder
             .pausable(!play_on_awake)
@@ -65,7 +74,7 @@ where
 
         Ok(Self {
             channel: audio_clip.channels(),
-            sample: audio_clip.sample_rate(),
+            sample_rate: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
             audio_data: audio_clip.collect::<Vec<_>>().into_iter(),
@@ -83,19 +92,20 @@ where
         let audio_clip = Self {
             audio_data: data.into_iter(),
             channel,
-            sample,
+            sample_rate: sample,
             duration,
             current_frame_len: None,
         }
         .pausable(!play_on_awake)
-        .stoppable();
+        .stoppable()
+        .convert_samples();
 
         Self {
             channel: audio_clip.channels(),
-            sample: audio_clip.sample_rate(),
+            sample_rate: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
-            audio_data: audio_clip.convert_samples().collect::<Vec<_>>().into_iter(),
+            audio_data: audio_clip.collect::<Vec<_>>().into_iter(),
         }
     }
 }
@@ -137,7 +147,7 @@ where
     }
 
     fn sample_rate(&self) -> u32 {
-        self.sample
+        self.sample_rate
     }
 
     fn total_duration(&self) -> Option<std::time::Duration> {
@@ -159,7 +169,7 @@ where
     }
 
     fn sample_rate(&self) -> u32 {
-        self.sample
+        self.sample_rate
     }
 
     fn total_duration(&self) -> Option<std::time::Duration> {
@@ -178,7 +188,7 @@ mod audio_clip_test {
     fn default_clip_test() {
         let mut empty_clip: AudioClip<u16> = AudioClip::default();
 
-        assert!(empty_clip.sample.eq(&0));
+        assert!(empty_clip.sample_rate.eq(&0));
         assert!(rodio::Source::sample_rate(&empty_clip).eq(&0));
         assert!(ambisonic::rodio::Source::sample_rate(&empty_clip).eq(&0));
 
