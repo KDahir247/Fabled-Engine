@@ -27,7 +27,7 @@ impl mlua::UserData for RawAmbisonicClip {
                 .dyn_clip
                 .total_duration()
                 .unwrap_or_default();
-            let table = lua.create_table_with_capacity(3, 0).unwrap_or_default();
+            let table = lua.create_table_with_capacity(3, 0).unwrap();
 
             unsafe {
                 table

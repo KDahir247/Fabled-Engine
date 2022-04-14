@@ -1,4 +1,3 @@
-#[derive(Clone)]
 pub struct RawClip<T>
 where
     T: rodio::Sample, {

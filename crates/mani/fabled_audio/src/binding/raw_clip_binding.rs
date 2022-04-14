@@ -27,7 +27,7 @@ impl mlua::UserData for RawClip<f32> {
 
         _fields.add_field_method_get("duration", |lua, raw_clip| {
             let duration = raw_clip.dyn_clip.total_duration().unwrap_or_default();
-            let table = lua.create_table_with_capacity(3, 0).unwrap_or_default();
+            let table = lua.create_table_with_capacity(3, 0).unwrap();
 
             unsafe {
                 table
