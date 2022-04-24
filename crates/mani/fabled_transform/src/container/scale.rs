@@ -4,7 +4,3 @@ use crate::ScaleType;
 pub struct Scale {
     pub value: ScaleType,
 }
-
-impl shipyard::Component for Scale {
-    type Tracking = shipyard::track::All;
-}

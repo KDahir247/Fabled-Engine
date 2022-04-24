@@ -10,7 +10,11 @@ clip = audio_clip(".\\src\\audio\\Joyride.wav", true)
 
 print(clip.samples)
 
+
+print(clip[1])
+
 print(clip)
+print(#clip)
 local standard_clip = clip:standard();
 
 local low_pass = standard_clip:low_pass(4);
@@ -19,5 +23,4 @@ print(low_pass)
 
 print(low_pass.sample_rate)
 
---local source=  clip:play(1.0)
 

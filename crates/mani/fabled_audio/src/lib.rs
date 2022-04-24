@@ -64,13 +64,13 @@ mod tests {
         let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/Joyride.wav"].join("");
         let file = std::fs::File::open(path).unwrap();
         //---------------------- Creating the Clip ------------------
-        let standard_output = StandardOutput::default();
+        let standard_output = AmbisonicOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(file, true).unwrap();
 
-        let raw_clip = RawClip::new(audio_clip);
+        let raw_clip = RawAmbisonicClip::new(audio_clip);
 
-        standard_output.play_omni(raw_clip, 0.);
+        standard_output.play_omni(raw_clip, 1.);
 
 
         std::thread::sleep(std::time::Duration::from_secs(5000));

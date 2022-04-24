@@ -9,7 +9,7 @@ pub struct AudioClip<D> {
     pub current_frame_len: Option<usize>,
     pub sample_rate: u32,
     pub channel: u16,
-    // maybe pan
+    // todo maybe pan
 }
 
 impl<D> Default for AudioClip<D> {
@@ -32,8 +32,8 @@ where
         buffer: Vec<u8>,
         play_on_awake: bool,
     ) -> Result<AudioClip<D>, AudioDecodingError> {
-        let audio_decoder = rodio::Decoder::new(std::io::Cursor::new(buffer))
-            .map_err(AudioDecodingError::DecoderError)?;
+        let audio_decoder =
+            Decoder::new(Cursor::new(buffer)).map_err(AudioDecodingError::DecoderError)?;
 
         let audio_clip = audio_decoder
             .pausable(!play_on_awake)
@@ -62,15 +62,14 @@ where
         file.read_exact(&mut audio_buffer)?;
 
         // vorbis and mp3 total duration is None
-        let audio_decoder = rodio::Decoder::new(std::io::Cursor::new(audio_buffer))
-            .map_err(AudioDecodingError::DecoderError)?;
+        let audio_decoder =
+            Decoder::new(Cursor::new(audio_buffer)).map_err(AudioDecodingError::DecoderError)?;
 
 
         let audio_clip = audio_decoder
             .pausable(!play_on_awake)
             .stoppable()
             .convert_samples::<D>();
-
 
         Ok(Self {
             channel: audio_clip.channels(),
@@ -134,7 +133,7 @@ impl<D> Iterator for AudioClip<D> {
     }
 }
 
-impl<D> rodio::Source for AudioClip<D>
+impl<D> Source for AudioClip<D>
 where
     D: rodio::Sample,
 {

@@ -7,14 +7,14 @@ impl mlua::UserData for RawClip<f32> {
         _fields.add_field_method_get("channel", |_, raw_clip| Ok(raw_clip.dyn_clip.channels()));
 
         _fields.add_field_method_get("samples", |_, raw_clip| {
-            let clip_len_millisec = raw_clip
+            let clip_len_milli_sec = raw_clip
                 .dyn_clip
                 .total_duration()
                 .unwrap_or_default()
                 .as_millis() as u64;
 
             // should multiply by channels
-            Ok(clip_len_millisec * raw_clip.dyn_clip.sample_rate() as u64 / 1000)
+            Ok(clip_len_milli_sec * raw_clip.dyn_clip.sample_rate() as u64 / 1000)
         });
 
         _fields.add_field_method_get("sample_rate", |_, raw_clip| {
@@ -25,6 +25,7 @@ impl mlua::UserData for RawClip<f32> {
             Ok(raw_clip.dyn_clip.current_frame_len().unwrap_or_default())
         });
 
+        // todo currently mp3 and vorbis will result in 0 for duration (mp3 and ogg)
         _fields.add_field_method_get("duration", |lua, raw_clip| {
             let duration = raw_clip.dyn_clip.total_duration().unwrap_or_default();
             let table = lua.create_table_with_capacity(3, 0).unwrap();
@@ -97,5 +98,7 @@ impl mlua::UserData for RawClip<f32> {
 
             Ok(moved_raw_clip.speed(factor))
         });
+
+        _methods.add_function("is_ambisonic", |_, ()| Ok(false))
     }
 }

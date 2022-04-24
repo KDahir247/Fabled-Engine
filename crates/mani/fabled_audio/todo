@@ -5,3 +5,7 @@ from correct output devices.
 add is_playing to raw_clip, raw_ambisonic_clip, audio_clip
 add loopable to raw_clip, raw_ambisonic_clip, audio_clip
 add pan to raw_clip, raw_ambisonic_clip, audio_clip
+switch audio volume to take in volume as db
+camera listener will have a affine3d when it is implemented.
+OutputSource and ambisonicOutput source will set the spatial sink orientation
+on the affine3d of the camera listener.

@@ -68,7 +68,6 @@ where
     pub fn play_omni(&self, clip: RawClip<D>, volume: f32) {
         let dyn_clip = clip.dyn_clip;
 
-
         self.sink.set_volume(volume);
 
         self.composer.add(dyn_clip);

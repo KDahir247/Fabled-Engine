@@ -16,10 +16,11 @@ mod scale;
 mod scale_ty;
 mod translation;
 
-
 #[cfg(test)]
 mod data_test {
-    use crate::{Child, Frozen, LocalToWorld, Parent, Rotation, Scale, ScaleType, Translation};
+    use crate::{
+        All, Child, Frozen, LocalToWorld, Parent, Rotation, Scale, ScaleType, Translation,
+    };
 
     #[test]
     fn data_size() {

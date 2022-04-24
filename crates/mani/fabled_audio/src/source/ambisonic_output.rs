@@ -1,9 +1,9 @@
-use crate::{OutputConfig, RawAmbisonicClip, SpatialAmbisonicSource};
+use crate::{AudioListener, OutputConfig, RawAmbisonicClip, SpatialAmbisonicSource};
 use ambisonic::rodio::Source;
 
 pub struct AmbisonicOutput {
     #[allow(dead_code)]
-    sink: ambisonic::rodio::Sink,
+    sink: ambisonic::rodio::SpatialSink,
     #[allow(dead_code)]
     output_stream: ambisonic::rodio::OutputStream,
     composer: std::sync::Arc<ambisonic::BmixerComposer>,
@@ -11,12 +11,12 @@ pub struct AmbisonicOutput {
 
 impl Default for AmbisonicOutput {
     fn default() -> Self {
-        Self::new().unwrap()
+        Self::new([0.0; 3], AudioListener::default()).unwrap()
     }
 }
 
 impl AmbisonicOutput {
-    fn new() -> Option<Self> {
+    fn new(init_pos: [f32; 3], audio_listener: AudioListener) -> Option<Self> {
         let OutputConfig {
             output_device,
             output_config,
@@ -29,7 +29,13 @@ impl AmbisonicOutput {
                 let (output_stream, output_handle) =
                     ambisonic::rodio::OutputStream::try_from_device(&device).unwrap();
 
-                let sink = ambisonic::rodio::Sink::try_new(&output_handle).unwrap();
+                let sink = ambisonic::rodio::SpatialSink::try_new(
+                    &output_handle,
+                    init_pos,
+                    audio_listener.stereo_left_position,
+                    audio_listener.stereo_right_position,
+                )
+                .unwrap();
 
                 match ambisonic::PlaybackConfiguration::default() {
                     ambisonic::PlaybackConfiguration::Stereo(cfg) => {
@@ -97,7 +103,7 @@ impl AmbisonicOutput {
 
 #[cfg(test)]
 mod ambisonic_output_test {
-    use crate::{AmbisonicOutput, RawAmbisonicClip};
+    use crate::{AmbisonicOutput, AudioListener, RawAmbisonicClip};
     use std::io::Read;
 
     fn retrieve_audio_buffer() -> Vec<u8> {
@@ -113,7 +119,7 @@ mod ambisonic_output_test {
     fn creation_test() {
         let _ambisonic_output = AmbisonicOutput::default();
 
-        let another_ambisonic_output = AmbisonicOutput::new();
+        let another_ambisonic_output = AmbisonicOutput::new([0.0; 3], AudioListener::default());
         assert!(another_ambisonic_output.is_some());
     }
 

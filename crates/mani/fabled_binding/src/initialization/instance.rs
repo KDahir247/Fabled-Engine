@@ -6,7 +6,7 @@ use std::fmt::Debug;
 use std::future::Future;
 
 #[repr(align(32))]
-pub struct LuaInstance(pub mlua::Lua);
+pub struct LuaInstance(mlua::Lua);
 
 impl Default for LuaInstance {
     fn default() -> Self {
@@ -20,7 +20,7 @@ impl LuaInstance {
             0: mlua::Lua::unsafe_new_with(lua_lib, lua_option.into()),
         };
 
-        instance.0.set_app_data(mlua::GCMode::Generational);
+        instance.0.set_app_data(GCMode::Generational);
 
         set_warning_lint(&instance.0);
 
@@ -51,7 +51,7 @@ impl LuaInstance {
 
         let mut instance = Self { 0: lua };
 
-        instance.0.set_app_data(mlua::GCMode::Generational);
+        instance.0.set_app_data(GCMode::Generational);
 
         set_warning_lint(&instance.0);
 
@@ -82,8 +82,8 @@ impl LuaInstance {
 
 impl<'lua> LuaInstance {
     pub fn create_function<
-        A: mlua::FromLuaMulti<'lua>,
-        R: mlua::ToLuaMulti<'lua>,
+        A: FromLuaMulti<'lua>,
+        R: ToLuaMulti<'lua>,
         T: 'static + System<A, R> + Fn<A, Output = R>,
     >(
         &'lua self,
@@ -99,8 +99,8 @@ impl<'lua> LuaInstance {
     }
 
     pub fn create_mut_function<
-        A: mlua::FromLuaMulti<'lua>,
-        R: mlua::ToLuaMulti<'lua>,
+        A: FromLuaMulti<'lua>,
+        R: ToLuaMulti<'lua>,
         T: 'static + System<A, R> + FnMut<A, Output = R>,
     >(
         &'lua self,
@@ -117,8 +117,8 @@ impl<'lua> LuaInstance {
 
 
     pub fn create_async_function<
-        A: mlua::FromLuaMulti<'lua>,
-        R: mlua::ToLuaMulti<'lua>,
+        A: FromLuaMulti<'lua>,
+        R: ToLuaMulti<'lua>,
         FR: 'lua + Future<Output = mlua::Result<R>>,
         F: 'static + System<A, FR> + Fn<A, Output = FR>,
     >(
@@ -143,10 +143,7 @@ impl<'lua> LuaInstance {
         Ok(())
     }
 
-    pub fn parallelize(
-        &'lua self,
-        lua_fn: mlua::Function<'lua>,
-    ) -> mlua::Result<mlua::Thread<'lua>> {
+    pub fn parallelize(&'lua self, lua_fn: Function<'lua>) -> mlua::Result<mlua::Thread<'lua>> {
         self.0.create_thread(lua_fn)
     }
 }
@@ -157,7 +154,7 @@ impl LuaInstance {
         minor_value: GCMultiplier<10, 200>,
         major_value: GCMultiplier<50, 1000>,
     ) {
-        let mut gc_mode = unsafe { self.0.app_data_mut::<mlua::GCMode>().unwrap_unchecked() };
+        let mut gc_mode = unsafe { self.0.app_data_mut::<GCMode>().unwrap_unchecked() };
 
         *gc_mode = self.0.gc_gen(
             std::os::raw::c_int::from(minor_value.multiplier),
@@ -172,7 +169,7 @@ impl LuaInstance {
         step_multiplier: GCMultiplier<100, 1000>,
         step_size: GCMultiplier<12, 14>,
     ) {
-        let mut gc_mode = unsafe { self.0.app_data_mut::<mlua::GCMode>().unwrap_unchecked() };
+        let mut gc_mode = unsafe { self.0.app_data_mut::<GCMode>().unwrap_unchecked() };
 
         *gc_mode = self.0.gc_inc(
             std::os::raw::c_int::from(pause_value.multiplier),
@@ -254,11 +251,19 @@ impl LuaInstance {
     }
 }
 
+impl LuaInstance {
+    pub fn run_script<P: AsRef<std::path::Path>>(&self, path: P) -> mlua::Result<()> {
+        let file_content = std::fs::read_to_string(path).unwrap();
+
+        self.0.load(&file_content).exec()
+    }
+}
+
 // todo not complete requires fabled_logger
 fn set_error_lint(lua_err: mlua::Error) {
     let binding_err: LuaBindingError = lua_err.into();
 
-    println!("{}", binding_err);
+    println!("{:?}", binding_err);
 }
 
 fn set_warning_lint(lua: &mlua::Lua) {

@@ -7,10 +7,10 @@ impl mlua::UserData for AudioClip<f32> {
         _fields.add_field_method_get("channel", |_, audio_clip| Ok(audio_clip.channel));
 
         _fields.add_field_method_get("samples", |_, audio_clip| {
-            let clip_length_sec = audio_clip.duration.unwrap_or_default().as_millis() as u64;
+            let clip_length_milli_sec = audio_clip.duration.unwrap_or_default().as_millis() as u64;
 
             // should multiply by channels
-            Ok(clip_length_sec * audio_clip.sample_rate as u64 / 1000)
+            Ok(clip_length_milli_sec * audio_clip.sample_rate as u64 / 1000)
         });
 
         _fields.add_field_method_get("sample_rate", |_, audio_clip| Ok(audio_clip.sample_rate));
@@ -44,57 +44,50 @@ impl mlua::UserData for AudioClip<f32> {
         });
     }
 
-    // todo remove
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(_methods: &mut M) {
-        _methods.add_method("play", |_, audio, (volume): (f32)| {
-            let clip = AudioClip {
-                audio_data: audio.audio_data.clone(),
-                duration: audio.duration,
-                current_frame_len: audio.current_frame_len,
-                sample_rate: audio.sample_rate,
-                channel: audio.channel,
-            };
-
-            let raw_clip = RawClip::from(clip);
-
-            let stand_output = StandardOutput::default();
-
-            stand_output.play_omni(raw_clip, volume);
-
-            std::thread::sleep(std::time::Duration::from_secs(10));
-            Ok(stand_output)
-        });
-
-
-        _methods.add_method("standard", |_, audio_clip, ()| {
-            let clip = AudioClip {
-                audio_data: audio_clip.audio_data.clone(),
-                duration: audio_clip.duration,
-                current_frame_len: audio_clip.current_frame_len,
-                sample_rate: audio_clip.sample_rate,
-                channel: audio_clip.channel,
-            };
+        _methods.add_method_mut("standard", |_, audio_clip, ()| {
+            let clip = std::mem::take(audio_clip);
 
             Ok(RawClip::from(clip))
         });
 
-        _methods.add_method("ambisonic", |_, audio_clip, ()| {
-            let clip = AudioClip {
-                audio_data: audio_clip.audio_data.clone(),
-                duration: audio_clip.duration,
-                current_frame_len: audio_clip.current_frame_len,
-                sample_rate: audio_clip.sample_rate,
-                channel: audio_clip.channel,
-            };
+
+        _methods.add_method_mut("ambisonic", |_, audio_clip, ()| {
+            let clip = std::mem::take(audio_clip);
 
 
             Ok(RawAmbisonicClip::from(clip))
         });
 
-        _methods.add_meta_function(MetaMethod::ToString, |_, ()| Ok("Audio Clip"));
+        _methods.add_meta_function(MetaMethod::ToString, |_, ()| Ok("Native Audio Clip"));
+
+        _methods.add_meta_method(MetaMethod::Len, |_, audio_clip, ()| {
+            Ok(audio_clip.audio_data.len())
+        });
+
+        _methods.add_meta_method(
+            MetaMethod::Index,
+            |lua_context, audio_clip, (index): (usize)| {
+                // lua array index start at 1 while rust start at 0. (remapping)
+                let lua_offset_index = index - 1;
+
+                let buffer_slice = audio_clip.audio_data.as_slice();
+
+                let mut index_res: mlua::Result<f32> = Err(mlua::Error::RuntimeError {
+                    0: "indexing outside array length".to_string(),
+                });
+
+                if lua_offset_index < buffer_slice.len() {
+                    index_res = Ok(buffer_slice[lua_offset_index])
+                }
+
+                index_res
+            },
+        );
     }
 }
 
+// todo remove.
 fn audio_clip(path: String, play_on_awake: bool) -> AudioClip<f32> {
     let file = std::fs::File::open(path).unwrap();
 
@@ -117,9 +110,7 @@ mod audio_binding_test {
         lua_instance.bind_fn(clip, "audio_clip").unwrap();
 
         lua_instance
-            .0
-            .load(&std::fs::read_to_string("./lua_src/create_play_audio.lua").unwrap())
-            .exec()
+            .run_script("./lua_src/create_play_audio.lua")
             .unwrap();
     }
 }

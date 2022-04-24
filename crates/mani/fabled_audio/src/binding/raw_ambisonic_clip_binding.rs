@@ -9,13 +9,13 @@ impl mlua::UserData for RawAmbisonicClip {
         });
 
         _fields.add_field_method_get("samples", |_, raw_ambisonic_clip| {
-            let clip_len_millisec = raw_ambisonic_clip
+            let clip_len_milli_sec = raw_ambisonic_clip
                 .dyn_clip
                 .total_duration()
                 .unwrap_or_default()
                 .as_millis() as u64;
 
-            Ok(clip_len_millisec * raw_ambisonic_clip.dyn_clip.sample_rate() as u64 / 1000)
+            Ok(clip_len_milli_sec * raw_ambisonic_clip.dyn_clip.sample_rate() as u64 / 1000)
         });
 
         _fields.add_field_method_get("sample_rate", |_, raw_ambisonic_clip| {
@@ -88,5 +88,7 @@ impl mlua::UserData for RawAmbisonicClip {
 
             Ok(moved_ambisonic_clip.speed(factor))
         });
+
+        _methods.add_function("is_ambisonic", |_, ()| Ok(true))
     }
 }
