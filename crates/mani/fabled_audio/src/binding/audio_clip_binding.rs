@@ -1,6 +1,5 @@
-use crate::{AmbisonicOutput, AudioClip, RawAmbisonicClip, RawClip, StandardOutput};
-use mlua::{Lua, MetaMethod, MultiValue, UserDataFields, UserDataMethods};
-use rodio::Source;
+use crate::{AudioClip, RawAmbisonicClip, RawClip};
+use mlua::{MetaMethod, UserDataFields, UserDataMethods};
 
 impl mlua::UserData for AudioClip<f32> {
     fn add_fields<'lua, F: UserDataFields<'lua, Self>>(_fields: &mut F) {
@@ -67,15 +66,16 @@ impl mlua::UserData for AudioClip<f32> {
 
         _methods.add_meta_method(
             MetaMethod::Index,
-            |lua_context, audio_clip, (index): (usize)| {
+            |_lua_context, audio_clip, index: usize| {
                 // lua array index start at 1 while rust start at 0. (remapping)
                 let lua_offset_index = index - 1;
 
                 let buffer_slice = audio_clip.audio_data.as_slice();
 
-                let mut index_res: mlua::Result<f32> = Err(mlua::Error::RuntimeError {
-                    0: "indexing outside array length".to_string(),
-                });
+                let mut index_res: mlua::Result<f32> = Err(mlua::Error::RuntimeError(
+                    "indexing outside array length".to_string(),
+                ));
+
 
                 if lua_offset_index < buffer_slice.len() {
                     index_res = Ok(buffer_slice[lua_offset_index])
@@ -87,30 +87,26 @@ impl mlua::UserData for AudioClip<f32> {
     }
 }
 
-// todo remove.
-fn audio_clip(path: String, play_on_awake: bool) -> AudioClip<f32> {
-    let file = std::fs::File::open(path).unwrap();
-
-    AudioClip::from_file(file, play_on_awake).unwrap()
-}
 
 #[cfg(test)]
-mod audio_binding_test {
-    use crate::binding::audio_clip_binding::audio_clip;
+mod audio_clip_binding_test {
     use crate::AudioClip;
     use fabled_binding::LuaInstance;
 
+    fn audio_clip(path: String, play_on_awake: bool) -> AudioClip<f32> {
+        let file = std::fs::File::open(path).unwrap();
+
+        AudioClip::from_file(file, play_on_awake).unwrap()
+    }
 
     #[test]
-    fn audio_test() {
+    fn native_audio_test() {
         let lua_instance = LuaInstance::default();
 
         let clip = lua_instance.create_function(audio_clip);
 
         lua_instance.bind_fn(clip, "audio_clip").unwrap();
 
-        lua_instance
-            .run_script("./lua_src/create_play_audio.lua")
-            .unwrap();
+        lua_instance.run_script("./lua_src/audio_clip.lua").unwrap();
     }
 }

@@ -18,10 +18,8 @@ pub use source::*;
 
 
 #[cfg(test)]
-mod tests {
-    use crate::{
-        AmbisonicCollection, AmbisonicOutput, AudioClip, RawAmbisonicClip, RawClip, StandardOutput,
-    };
+mod audio_test {
+    use crate::{AmbisonicCollection, AmbisonicOutput, AudioClip, RawAmbisonicClip};
 
 
     #[test]

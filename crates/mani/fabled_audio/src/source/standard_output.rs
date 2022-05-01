@@ -13,7 +13,7 @@ where
     D: rodio::Sample + Send + std::fmt::Debug,
 {
     fn default() -> Self {
-        Self::new([0.; 3], AudioListener::default()).unwrap()
+        Self::new(AudioListener::default()).unwrap()
     }
 }
 
@@ -21,7 +21,7 @@ impl<D: 'static> StandardOutput<D>
 where
     D: rodio::Sample + Send + std::fmt::Debug,
 {
-    pub fn new(init_pos: [f32; 3], audio_listener: AudioListener) -> Option<Self> {
+    pub fn new(audio_listener: AudioListener) -> Option<Self> {
         let OutputConfig {
             output_device,
             output_config,
@@ -37,13 +37,14 @@ where
                     rodio::OutputStream::try_from_device(&device).unwrap();
 
                 let AudioListener {
+                    position,
                     stereo_left_position,
                     stereo_right_position,
                 } = audio_listener;
 
                 let sink = rodio::SpatialSink::try_new(
                     &output_handle,
-                    init_pos,
+                    position,
                     stereo_left_position,
                     stereo_right_position,
                 )
@@ -136,7 +137,7 @@ mod standard_output_test {
         let _standard_output: StandardOutput<f32> = StandardOutput::default();
 
         let another_standard_output: Option<StandardOutput<f32>> =
-            StandardOutput::new([0.0; 3], AudioListener::default());
+            StandardOutput::new(AudioListener::default());
 
         assert!(another_standard_output.is_some());
     }

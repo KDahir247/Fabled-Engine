@@ -9,7 +9,7 @@ pub struct GCMultiplier<const LOW: i16, const HIGH: i16> {
     pub multiplier: i16,
 }
 
-const fn in_range(v: i16, low: i16, high: i16) -> bool {
+pub const fn in_range(v: i16, low: i16, high: i16) -> bool {
     v >= low && v <= high
 }
 

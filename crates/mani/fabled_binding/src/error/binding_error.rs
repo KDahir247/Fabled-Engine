@@ -1,5 +1,4 @@
 use mlua::Error;
-use std::fmt::Formatter;
 use std::sync::Arc;
 use thiserror::Error;
 

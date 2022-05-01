@@ -2,7 +2,7 @@ use crate::{AudioDecodingError, RawAmbisonicClip, RawClip};
 use rodio::{Decoder, Source};
 use std::io::{Cursor, Read};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AudioClip<D> {
     pub audio_data: std::vec::IntoIter<D>,
     pub duration: Option<std::time::Duration>,

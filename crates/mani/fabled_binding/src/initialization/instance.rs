@@ -1,8 +1,5 @@
 use crate::{ByteType, GCMultiplier, LuaBindingError, LuaOption, MemorySize, StdLib, System};
-use mlua::{ExternalError, FromLuaMulti, Function, GCMode, ToLuaMulti};
-use std::env::Args;
-use std::error::Error;
-use std::fmt::Debug;
+use mlua::{FromLuaMulti, Function, GCMode, ToLuaMulti};
 use std::future::Future;
 
 #[repr(align(32))]
@@ -15,10 +12,9 @@ impl Default for LuaInstance {
 }
 
 impl LuaInstance {
+    /// # Safety
     pub unsafe fn new_unsafe(lua_lib: mlua::StdLib, lua_option: LuaOption) -> Self {
-        let mut instance = Self {
-            0: mlua::Lua::unsafe_new_with(lua_lib, lua_option.into()),
-        };
+        let instance = Self(mlua::Lua::unsafe_new_with(lua_lib, lua_option.into()));
 
         instance.0.set_app_data(GCMode::Generational);
 
@@ -49,7 +45,7 @@ impl LuaInstance {
     pub fn new(lua_lib: mlua::StdLib, lua_option: LuaOption) -> Self {
         let lua = mlua::Lua::new_with(lua_lib, lua_option.into()).unwrap_or(mlua::Lua::new());
 
-        let mut instance = Self { 0: lua };
+        let instance = Self(lua);
 
         instance.0.set_app_data(GCMode::Generational);
 
@@ -179,10 +175,7 @@ impl LuaInstance {
     }
 
     pub fn gc_collect(&self) {
-        const GC_COLLECT_WARNING: &str = "lua shouldn't directly be possibly to run out of stack space. The only way this error is triggered is if a lua function contains excessive arguments or callback return excessive return value";
-        self.0
-            .gc_collect()
-            .unwrap_or_else(|err| set_error_lint(err))
+        self.0.gc_collect().unwrap_or_else(set_error_lint)
     }
 
     pub fn gc_stop(&self) {
@@ -205,7 +198,7 @@ impl LuaInstance {
         if gc_pause.ne(&pause_factor) {
             self.0
                 .set_named_registry_value("gc_pause", self.0.gc_set_pause(pause_factor))
-                .unwrap_or_else(|err| set_error_lint(err));
+                .unwrap_or_else(set_error_lint);
         }
     }
 
@@ -224,7 +217,7 @@ impl LuaInstance {
                     "gc_step_multiplier",
                     self.0.gc_set_step_multiplier(step_multiplier),
                 )
-                .unwrap_or_else(|err| set_error_lint(err));
+                .unwrap_or_else(set_error_lint);
         }
     }
 
@@ -247,7 +240,7 @@ impl LuaInstance {
                         previous_memory_limit
                     }),
             )
-            .unwrap_or_else(|err| set_error_lint(err));
+            .unwrap_or_else(set_error_lint);
     }
 }
 
@@ -268,24 +261,22 @@ fn set_error_lint(lua_err: mlua::Error) {
 
 fn set_warning_lint(lua: &mlua::Lua) {
     // todo not complete requires fabled_logger
-    lua.set_warning_function(|_lua, warning_msg, continued| {
+    lua.set_warning_function(|_lua, warning_msg, _continued| {
         println!("{:?}", warning_msg);
 
 
         Ok(())
     });
 
-    lua.set_hook(mlua::HookTriggers::every_nth_instruction(500), |lua, debug|{
+    lua.set_hook(mlua::HookTriggers::every_nth_instruction(500), |lua, _debug|{
         lua.warning("Description : lua script cognitive complexity is high! \n Current Size : 600. \n Solution : separate monolithic lua script to other or new lua script", true )
     }).unwrap()
 }
 
 #[cfg(test)]
 mod test {
-    use crate::ByteType::Byte;
-    use crate::{ByteType, GCMultiplier, LuaInstance, MemorySize, System};
-    use std::sync::Arc;
 
+    use crate::LuaInstance;
     fn times_two(x: usize) -> usize {
         x * 2
     }
@@ -316,9 +307,11 @@ mod test {
     fn rust_fn_call_test() {
         let lua = LuaInstance::default();
 
-        lua.bind_fn(lua.create_function(times_two), "times_two");
+        lua.bind_fn(lua.create_function(times_two), "times_two")
+            .unwrap();
 
-        lua.bind_fn(lua.create_function(add_two), "add_two");
+        lua.bind_fn(lua.create_function(add_two), "add_two")
+            .unwrap();
 
         lua.0
             .load(&std::fs::read_to_string("./lua_src/fn_call.lua").unwrap())
@@ -330,7 +323,8 @@ mod test {
     fn rust_multi_parameter_fn_test() {
         let lua = LuaInstance::default();
 
-        lua.bind_fn(lua.create_function(power_of), "power_of");
+        lua.bind_fn(lua.create_function(power_of), "power_of")
+            .unwrap();
 
         lua.0
             .load(&std::fs::read_to_string("./lua_src/multi_param_fn_call.lua").unwrap())
@@ -343,7 +337,8 @@ mod test {
     fn rust_mut_fn_test() {
         let lua = LuaInstance::default();
 
-        lua.bind_fn(lua.create_mut_function(modify_x), "modify_x");
+        lua.bind_fn(lua.create_mut_function(modify_x), "modify_x")
+            .unwrap();
 
         lua.0
             .load(&std::fs::read_to_string("./lua_src/mut_fn_call.lua").unwrap())
@@ -361,7 +356,7 @@ mod test {
 
         let lua_thread = lua.parallelize(lua_fn).unwrap();
 
-        lua.bind_fn(lua_thread, "add_10000");
+        lua.bind_fn(lua_thread, "add_10000").unwrap();
 
         lua.0
             .load(&std::fs::read_to_string("./lua_src/thread_call.lua").unwrap())
@@ -372,7 +367,7 @@ mod test {
 
     #[test]
     fn rust_name_registry_test() {
-        let mut lua = LuaInstance::default();
+        let lua = LuaInstance::default();
 
         lua.gc_set_step_multiplier(5);
     }
@@ -383,7 +378,7 @@ mod test {
 
         let sleep_fn = lua.create_async_function(sleep);
 
-        lua.bind_fn(sleep_fn, "sleep");
+        lua.bind_fn(sleep_fn, "sleep").unwrap();
 
         let res: mlua::Result<String> = lua.0.load("return sleep(...)").call_async(2500).await;
 

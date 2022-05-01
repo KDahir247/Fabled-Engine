@@ -1,6 +1,6 @@
 use crate::RawAmbisonicClip;
 use ambisonic::rodio::Source;
-use mlua::{UserDataFields, UserDataMethods};
+use mlua::{MetaMethod, UserDataFields, UserDataMethods};
 
 impl mlua::UserData for RawAmbisonicClip {
     fn add_fields<'lua, F: UserDataFields<'lua, Self>>(_fields: &mut F) {
@@ -47,7 +47,9 @@ impl mlua::UserData for RawAmbisonicClip {
 
 
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(_methods: &mut M) {
-        _methods.add_method_mut("low_pass", |_, raw_ambisonic_clip, (frequency): u32| {
+        _methods.add_meta_function(MetaMethod::ToString, |_, ()| Ok("Ambisonic Audio Clip"));
+
+        _methods.add_method_mut("low_pass", |_, raw_ambisonic_clip, frequency: u32| {
             let moved_raw_ambisonic_clip = std::mem::take(raw_ambisonic_clip);
 
             Ok(moved_raw_ambisonic_clip.low_pass(frequency))
@@ -83,7 +85,7 @@ impl mlua::UserData for RawAmbisonicClip {
             Ok(moved_raw_ambisonic_clip.repeat())
         });
 
-        _methods.add_method_mut("speed", |_, raw_ambisonic_clip, (factor): (f32)| {
+        _methods.add_method_mut("speed", |_, raw_ambisonic_clip, factor: f32| {
             let moved_ambisonic_clip = std::mem::take(raw_ambisonic_clip);
 
             Ok(moved_ambisonic_clip.speed(factor))

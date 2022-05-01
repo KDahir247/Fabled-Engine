@@ -110,6 +110,8 @@ Positive X is Right
 // Division is an expensive operation use reciprocal
 // for passes should i store the required data in a pass file and decode it when doing the render passes?
 // when releasing use cargo run --release -- -C opt-level=3 -C target-cpu=skylark -C target-feature=+sse3,+avx
+// for llvm ir core project use cargo llvm-lines --bin Fabled_Engine
+// for llvm ir for crate use cargo llvm-lines -p file:///C:/Users/Typic/Documents/GitHub/Fabled-Engine/crates/mani/fabled_audio
 
 first scale then rotate then translate.
 

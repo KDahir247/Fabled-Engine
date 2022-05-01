@@ -48,7 +48,7 @@ impl mlua::UserData for RawClip<f32> {
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(_methods: &mut M) {
         _methods.add_meta_function(MetaMethod::ToString, |_, ()| Ok("Standard Audio Clip"));
 
-        _methods.add_method_mut("low_pass", |_, raw_clip, (frequency): u32| {
+        _methods.add_method_mut("low_pass", |_, raw_clip, frequency: u32| {
             let moved_raw_clip = std::mem::take(raw_clip);
 
             Ok(moved_raw_clip.low_pass(frequency))
@@ -93,12 +93,49 @@ impl mlua::UserData for RawClip<f32> {
             Ok(moved_raw_clip.repeat())
         });
 
-        _methods.add_method_mut("speed", |_, raw_clip, (factor): (f32)| {
+        _methods.add_method_mut("speed", |_, raw_clip, factor: f32| {
             let moved_raw_clip = std::mem::take(raw_clip);
 
             Ok(moved_raw_clip.speed(factor))
         });
 
         _methods.add_function("is_ambisonic", |_, ()| Ok(false))
+    }
+}
+
+
+#[cfg(test)]
+mod raw_audio_clip_binding_test {
+    use crate::{AudioClip, RawClip};
+    use fabled_binding::LuaInstance;
+
+    fn raw_audio_clip(path: String, play_on_awake: bool) -> RawClip<f32> {
+        let file = std::fs::File::open(path).unwrap();
+
+        let native_audio_clip = AudioClip::from_file(file, play_on_awake).unwrap();
+
+        RawClip::from(native_audio_clip)
+    }
+
+    fn native_audio_clip(path: String, play_on_awake: bool) -> AudioClip<f32> {
+        let file = std::fs::File::open(path).unwrap();
+
+        AudioClip::from_file(file, play_on_awake).unwrap()
+    }
+
+
+    #[test]
+    fn audio_test() {
+        let lua_instance = LuaInstance::default();
+
+        let audio_clip = lua_instance.create_function(native_audio_clip);
+
+        let raw_clip = lua_instance.create_function(raw_audio_clip);
+
+        lua_instance.bind_fn(audio_clip, "audio_clip").unwrap();
+
+        lua_instance.bind_fn(raw_clip, "raw_audio_clip").unwrap();
+
+        lua_instance.run_script("./lua_src/raw_clip.lua").unwrap();
     }
 }

@@ -3,7 +3,9 @@ use mlua::{MetaMethod, UserDataFields, UserDataMethods};
 
 impl mlua::UserData for AudioListener {
     fn add_fields<'lua, F: UserDataFields<'lua, Self>>(_fields: &mut F) {
-        _fields.add_field_method_get("left_ear", |lua_context, audio_listener| {
+        _fields.add_field_method_get("position", |_, audio_listener| Ok(audio_listener.position));
+
+        _fields.add_field_method_get("left_ear", |_, audio_listener| {
             Ok(audio_listener.stereo_left_position)
         });
 
@@ -11,21 +13,20 @@ impl mlua::UserData for AudioListener {
             Ok(audio_listener.stereo_right_position)
         });
 
-        _fields.add_field_method_set(
-            "left_ear",
-            |_, audio_listener, (left_ear_pos): ([f32; 3])| {
-                audio_listener.stereo_left_position = left_ear_pos;
-                Ok(())
-            },
-        );
+        _fields.add_field_method_set("position", |_, audio_listener, position: [f32; 3]| {
+            audio_listener.position = position;
+            Ok(())
+        });
 
-        _fields.add_field_method_set(
-            "right_ear",
-            |_, audio_listener, (right_ear_pos): ([f32; 3])| {
-                audio_listener.stereo_right_position = right_ear_pos;
-                Ok(())
-            },
-        )
+        _fields.add_field_method_set("left_ear", |_, audio_listener, left_ear_pos: [f32; 3]| {
+            audio_listener.stereo_left_position = left_ear_pos;
+            Ok(())
+        });
+
+        _fields.add_field_method_set("right_ear", |_, audio_listener, right_ear_pos: [f32; 3]| {
+            audio_listener.stereo_right_position = right_ear_pos;
+            Ok(())
+        })
     }
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(_methods: &mut M) {
         _methods.add_meta_function(MetaMethod::ToString, |_, ()| Ok("Audio Listener"))
@@ -33,17 +34,14 @@ impl mlua::UserData for AudioListener {
 }
 
 
-// todo remove.
-fn audio_listener(_nil: ()) -> AudioListener {
-    AudioListener::default()
-}
-
 #[cfg(test)]
-mod audio_binding_test {
-    use crate::binding::audio_listener_binding::audio_listener;
-    use crate::AudioClip;
+mod audio_listener_binding_test {
+    use crate::AudioListener;
     use fabled_binding::LuaInstance;
 
+    fn audio_listener(_nil: ()) -> AudioListener {
+        AudioListener::default()
+    }
 
     #[test]
     fn audio_test() {

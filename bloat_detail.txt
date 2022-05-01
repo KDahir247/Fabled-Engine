@@ -1,0 +1,721 @@
+--------------------
+|Release mode bloat|
+--------------------
+
+
+Crate bloat
+____________
+ File  .text     Size Crate
+19.8%  24.4%   1.1MiB wgpu_core
+12.0%  14.7% 704.2KiB spirv_cross
+10.0%  12.2% 587.6KiB std
+ 6.4%   7.9% 377.7KiB naga
+ 5.7%   7.0% 336.0KiB libktx_rs_sys
+ 4.7%   5.8% 277.7KiB inplace_it
+ 4.4%   5.5% 261.5KiB wgpu
+ 2.2%   2.7% 128.2KiB
+ 2.0%   2.4% 117.4KiB hashbrown
+ 1.3%   1.6%  78.9KiB gfx_backend_vulkan
+ 1.3%   1.6%  78.1KiB gfx_backend_dx12
+ 1.2%   1.4%  67.8KiB shipyard
+ 1.1%   1.3%  63.4KiB gfx_backend_dx11
+ 1.1%   1.3%  62.5KiB basist
+ 0.9%   1.1%  53.4KiB gpu_descriptor
+ 0.9%   1.1%  51.0KiB winit
+ 0.5%   0.6%  30.2KiB lib
+ 0.5%   0.6%  28.0KiB Fabled_Engine
+ 0.5%   0.6%  27.0KiB tobj
+ 0.4%   0.5%  21.6KiB gpu_alloc
+ 0.3%   0.4%  16.8KiB parking_lot
+ 0.3%   0.3%  15.4KiB ash
+ 0.2%   0.3%  14.4KiB smallvec
+ 0.2%   0.3%  12.9KiB rayon_core
+ 0.2%   0.2%  10.5KiB crossbeam_channel
+ 0.2%   0.2%   9.9KiB gfx_hal
+ 0.1%   0.1%   6.9KiB rayon
+ 0.1%   0.1%   6.3KiB [Unknown]
+ 0.1%   0.1%   5.7KiB wgpu_types
+ 0.1%   0.1%   5.5KiB anyhow
+ 0.1%   0.1%   5.3KiB arrayvec
+ 0.1%   0.1%   4.4KiB enum$<naga
+ 0.1%   0.1%   4.2KiB enum$<core
+ 0.1%   0.1%   3.7KiB crossbeam_epoch
+ 0.1%   0.1%   3.5KiB crossbeam_deque
+ 0.1%   0.1%   3.2KiB petgraph
+ 0.1%   0.1%   3.0KiB parking_lot_core
+ 0.0%   0.1%   2.8KiB libloading
+ 0.0%   0.0%   1.9KiB lambda_00c10adaa1f42bbfdd875a77dc521d89>
+ 0.0%   0.0%   1.8KiB lambda_91919237c0fb6ea2c4ca94dd66b912f3>
+ 0.0%   0.0%   1.8KiB lambda_7a4b59d9433f5873386783aaf04b1eb3>
+ 0.0%   0.0%   1.6KiB lambda_5da1f70380ef346641cb6dd6c6d8c007>
+ 0.0%   0.0%   1.6KiB indexmap
+ 0.0%   0.0%   1.5KiB lambda_daee3895d7e8633a04bafa8bafaf75ec>
+ 0.0%   0.0%   1.5KiB bit_set
+ 0.0%   0.0%   1.5KiB lambda_7e73c07d9a42a972b2d83494cb62ceda>
+ 0.0%   0.0%   1.4KiB lambda_2291bb7fea56dd42a135a9b2a92dc2d2>
+ 0.0%   0.0%   1.4KiB ahash
+ 0.0%   0.0%   1.4KiB libktx_rs
+ 0.0%   0.0%   1.3KiB lambda_edf163f968ae5b58b49e1d0a6040308d>
+ 0.0%   0.0%   1.1KiB lambda_cd0eb5df54df8f68dbcc21363ba6b971>
+ 0.0%   0.0%    1000B lambda_2d98b4aa35744b1d1471c097d7177cec>
+ 0.0%   0.0%     939B enum$<spirv_cross
+ 0.0%   0.0%     694B lambda_c208c2cd41e2b887befbf9456495cec0>
+ 0.0%   0.0%     689B lambda_bdc7a7f9776e326ce665d8a0323af6f7>
+ 0.0%   0.0%     683B lambda_e9e741572c4b009fb722395f9143c6cb>
+ 0.0%   0.0%     675B lambda_2d905cf462645e1812e5732a5c5ed6d2>
+ 0.0%   0.0%     671B range_alloc
+ 0.0%   0.0%     663B lambda_cd5070c0b4f54235eba519ac05eaa2d4>
+ 0.0%   0.0%     633B lambda_2839a98cc1cd7f1281f1bc68f3689f3a>
+ 0.0%   0.0%     608B thunderdome
+ 0.0%   0.0%     595B gpu_alloc_types
+ 0.0%   0.0%     549B lambda_e611ac959f1885f6d92a974c26cc7509>
+ 0.0%   0.0%     531B lambda_2a449937e9b386303cb42db6236164bd>
+ 0.0%   0.0%     412B getrandom
+ 0.0%   0.0%     404B enum$<parking_lot_core
+ 0.0%   0.0%     377B lambda_53ed9388043f8bd402af2783cc86bd09>
+ 0.0%   0.0%     271B lambda_4dcf7c37d59d80dc33f0db71621b1478>
+ 0.0%   0.0%     264B lambda_8507ed11caabcee7fbd6c31ec37e905b>
+ 0.0%   0.0%     264B `spirv_cross
+ 0.0%   0.0%     256B enum$<std
+ 0.0%   0.0%     246B enum$<winit
+ 0.0%   0.0%     243B gfx_auxil
+ 0.0%   0.0%     210B lambda_7a60174d79bf27496e6413945620d5f9>
+ 0.0%   0.0%     196B gpu_descriptor_types
+ 0.0%   0.0%     195B fabled_render
+ 0.0%   0.0%     170B lambda_069669845ee35798c24a88d977a53c6e>
+ 0.0%   0.0%     170B lambda_739e7e9fa1b9c4b68144f69db479b4f4>
+ 0.0%   0.0%     118B `std
+ 0.0%   0.0%      94B enum$<gfx_hal
+ 0.0%   0.0%      64B spirv_headers
+ 0.0%   0.0%      30B `__scrt_common_main_seh'
+ 0.0%   0.0%      28B futures_executor
+81.5% 100.0%   4.7MiB .text section size, the file size is 5.7MiB
+
+_________________________________________________________________
+
+
+
+function bloat
+____________
+ File  .text    Size               Crate Name
+ 1.5%   1.9% 89.3KiB           wgpu_core wgpu_core::hub::impl$74::drop<wgpu_core::hub::IdentityManagerFactory>
+ 1.5%   1.8% 87.9KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::command_encoder_run_render_pass_impl<wgpu_core::hub::IdentityManagerFactory,enum$<gfx_backend_vulkan::Backend> >
+ 1.1%   1.3% 62.0KiB           wgpu_core wgpu_core::hub::impl$74::drop<wgpu_core::hub::IdentityManagerFactory>
+ 0.7%   0.9% 42.2KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::queue_submit<wgpu_core::hub::IdentityManagerFactory,enum$<gfx_backend_dx11::Backend> >
+ 0.7%   0.9% 41.2KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::command_encoder_run_render_pass_impl<wgpu_core::hub::IdentityManagerFactory,enum$<gfx_backend_dx11::Backend> >
+ 0.7%   0.8% 40.6KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::queue_submit<wgpu_core::hub::IdentityManagerFactory,enum$<gfx_backend_vulkan::Backend> >
+ 0.7%   0.8% 40.4KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::command_encoder_run_render_pass_impl<wgpu_core::hub::IdentityManagerFactory,enum$<gfx_backend_dx12::Backend> >
+ 0.7%   0.8% 39.2KiB                wgpu wgpu::backend::direct::impl$3::device_create_render_pipeline
+ 0.6%   0.7% 35.9KiB                naga naga::front::spv::Parser<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<u32> > >::next_block<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<u32> > >
+ 0.6%   0.7% 33.7KiB           wgpu_core wgpu_core::hub::Hub<enum$<gfx_backend_vulkan::Backend>,wgpu_core::hub::IdentityManagerFactory>::clear<enum$<gfx_backend_vulkan::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.6%   0.7% 33.1KiB         spirv_cross ?emit_instruction@CompilerGLSL@spirv_cross@@MEAAXAEBUInstruction@2@@Z
+ 0.6%   0.7% 32.9KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::queue_submit<wgpu_core::hub::IdentityManagerFactory,enum$<gfx_backend_dx12::Backend> >
+ 0.6%   0.7% 32.8KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::enumerate_adapters<wgpu_core::hub::IdentityManagerFactory>
+ 0.6%   0.7% 32.6KiB           wgpu_core wgpu_core::hub::Hub<enum$<gfx_backend_dx11::Backend>,wgpu_core::hub::IdentityManagerFactory>::clear<enum$<gfx_backend_dx11::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.5%   0.7% 31.4KiB           wgpu_core wgpu_core::hub::Hub<enum$<gfx_backend_dx12::Backend>,wgpu_core::hub::IdentityManagerFactory>::clear<enum$<gfx_backend_dx12::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.5%   0.6% 29.9KiB                 lib lib::system::render_system::begin_render_pass_system
+ 0.5%   0.6% 29.0KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_dx12::Backend> >::create_bind_group<enum$<gfx_backend_dx12::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.4%   0.5% 24.1KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_dx11::Backend> >::create_bind_group<enum$<gfx_backend_dx11::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.4%   0.5% 23.7KiB                naga naga::front::wgsl::Parser::parse
+ 0.4%   0.5% 22.7KiB          inplace_it inplace_it::alloc_array::inplace_or_alloc_from_iter<core::iter::adapters::cloned::Cloned<core::iter::adapters::flatten::FlatMap<core::slice::iter::Iter<wgpu_core::command::bind::EntryPayload>,ref$<alloc::vec::Vec<u32,alloc...
+ 0.4%   0.5% 21.7KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::adapter_request_device<wgpu_core::hub::IdentityManagerFactory,enum$<gfx_backend_dx12::Backend> >
+ 0.4%   0.4% 20.7KiB                wgpu wgpu::Queue::write_texture
+ 0.3%   0.4% 20.4KiB                wgpu wgpu::backend::direct::impl$3::adapter_request_device
+ 0.3%   0.4% 20.1KiB       libktx_rs_sys ZSTD_compressBlock_btopt_dictMatchState
+ 0.3%   0.4% 19.8KiB       libktx_rs_sys ZSTD_compressBlock_btultra_dictMatchState
+ 0.3%   0.4% 19.5KiB  gfx_backend_vulkan gfx_backend_vulkan::physical_device::impl$5::open
+ 0.3%   0.4% 19.3KiB           wgpu_core wgpu_core::hub::Global<wgpu_core::hub::IdentityManagerFactory>::new<wgpu_core::hub::IdentityManagerFactory>
+ 0.3%   0.4% 19.3KiB                wgpu wgpu::backend::direct::impl$3::device_create_shader_module
+ 0.3%   0.4% 18.3KiB                wgpu wgpu::backend::direct::impl$3::device_create_buffer
+ 0.3%   0.4% 18.1KiB                naga naga::back::spv::writer::Writer::write
+ 0.3%   0.4% 18.0KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_vulkan::Backend> >::create_bind_group<enum$<gfx_backend_vulkan::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.3%   0.4% 17.6KiB           wgpu_core wgpu_core::instance::Adapter<enum$<gfx_backend_dx11::Backend> >::create_device<enum$<gfx_backend_dx11::Backend> >
+ 0.3%   0.4% 17.4KiB       libktx_rs_sys ZSTD_compressBlock_btultra_extDict
+ 0.3%   0.4% 17.3KiB       libktx_rs_sys ZSTD_compressBlock_btopt_extDict
+ 0.3%   0.4% 17.2KiB                tobj tobj::load_obj<ref$<std::path::PathBuf> >
+ 0.3%   0.3% 16.4KiB                 std core::future::from_generator::impl$1::poll<Fabled_Engine::core::setup::run::async_fn_env$0>
+ 0.3%   0.3% 15.6KiB                wgpu wgpu::backend::direct::impl$3::device_create_swap_chain
+ 0.3%   0.3% 15.1KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_vulkan::Backend> >::create_pipeline_layout<enum$<gfx_backend_vulkan::Backend> >
+ 0.3%   0.3% 14.9KiB               winit winit::platform_impl::platform::event_loop::public_window_callback_inner::closure$0<tuple$<> >
+ 0.3%   0.3% 14.8KiB                naga naga::back::spv::writer::Writer::cache_expression_value
+ 0.2%   0.3% 14.7KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_vulkan::Backend> >::triage_submissions<enum$<gfx_backend_vulkan::Backend> >
+ 0.2%   0.3% 14.6KiB                wgpu wgpu::backend::direct::impl$3::texture_create_view
+ 0.2%   0.3% 14.3KiB    gfx_backend_dx12 gfx_backend_dx12::device::impl$2::create_graphics_pipeline
+ 0.2%   0.3% 14.1KiB           wgpu_core wgpu_core::device::descriptor::DescriptorAllocator<enum$<gfx_backend_vulkan::Backend> >::allocate<enum$<gfx_backend_vulkan::Backend> >
+ 0.2%   0.3% 14.1KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_vulkan::Backend> >::triage_submissions<enum$<gfx_backend_vulkan::Backend> >
+ 0.2%   0.3% 14.1KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_vulkan::Backend> >::triage_submissions<enum$<gfx_backend_vulkan::Backend> >
+ 0.2%   0.3% 14.1KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_dx11::Backend> >::maintain<enum$<gfx_backend_dx11::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.2%   0.3% 14.0KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_vulkan::Backend> >::maintain<enum$<gfx_backend_vulkan::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.2%   0.3% 13.8KiB       libktx_rs_sys ZSTD_compressBlock_btopt
+ 0.2%   0.3% 13.8KiB       libktx_rs_sys ZSTD_compressBlock_btultra2
+ 0.2%   0.3% 13.8KiB       libktx_rs_sys ZSTD_compressBlock_btultra
+ 0.2%   0.3% 13.7KiB    gfx_backend_dx12 gfx_backend_dx12::device::impl$2::create_pipeline_layout<core::iter::adapters::map::Map<core::slice::iter::Iter<wgpu_core::id::Id<wgpu_core::binding_model::BindGroupLayout<enum$<gfx_backend_empty::Backend> > > >,wgpu_core:...
+ 0.2%   0.3% 13.7KiB                naga naga::valid::Validator::validate_function
+ 0.2%   0.3% 13.7KiB                     ZSTD_initStats_ultra
+ 0.2%   0.3% 13.6KiB                naga naga::back::spv::writer::Writer::write_block
+ 0.2%   0.3% 13.2KiB                naga naga::valid::Validator::validate
+ 0.2%   0.3% 13.1KiB                naga naga::front::wgsl::Parser::parse_statement
+ 0.2%   0.3% 12.9KiB                 std alloc::sync::Arc<wgpu::backend::direct::Context>::drop_slow<wgpu::backend::direct::Context>
+ 0.2%   0.3% 12.5KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_dx12::Backend> >::maintain<enum$<gfx_backend_dx12::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.2%   0.3% 12.3KiB       libktx_rs_sys ZSTD_compressBlock_doubleFast_dictMatchState
+ 0.2%   0.3% 12.1KiB                wgpu wgpu::Device::create_texture
+ 0.2%   0.3% 12.0KiB          inplace_it inplace_it::alloc_array::inplace_or_alloc_from_iter<core::iter::adapters::cloned::Cloned<core::iter::adapters::take::Take<core::slice::iter::Iter<u32> > >,tuple$<>,gfx_backend_vulkan::command::impl$0::bind_descriptor_sets:...
+ 0.2%   0.2% 11.8KiB    gfx_backend_dx11 gfx_backend_dx11::device::impl$5::create_graphics_pipeline
+ 0.2%   0.2% 11.8KiB  gfx_backend_vulkan gfx_backend_vulkan::device::impl$2::create_render_pass<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<core::slice::iter::Iter<tuple$<gfx_hal::pass::Attachment,enum$<gfx...
+ 0.2%   0.2% 11.6KiB                naga naga::front::wgsl::Parser::parse_function_call_inner
+ 0.2%   0.2% 11.5KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_vulkan::Backend> >::create_compatible_render_pass<enum$<gfx_backend_vulkan::Backend> >
+ 0.2%   0.2% 11.3KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_dx12::Backend> >::triage_suspected<enum$<gfx_backend_dx12::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.2%   0.2% 11.3KiB       Fabled_Engine Fabled_Engine::main
+ 0.2%   0.2% 11.2KiB                 std core::ptr::drop_in_place<wgpu_core::hub::Hubs<wgpu_core::hub::IdentityManagerFactory> >
+ 0.2%   0.2% 11.2KiB                wgpu wgpu::util::device::impl$0::create_buffer_init
+ 0.2%   0.2% 11.2KiB                 std alloc::sync::Arc<wgpu::backend::direct::Context>::drop_slow<wgpu::backend::direct::Context>
+ 0.2%   0.2% 10.9KiB      gpu_descriptor gpu_descriptor::allocator::DescriptorBucket<gfx_backend_vulkan::native::DescriptorPool>::free<gfx_backend_vulkan::native::DescriptorPool,gfx_backend_vulkan::native::DescriptorSetLayout,gfx_backend_vulkan::native::Descripto...
+ 0.2%   0.2% 10.7KiB                wgpu wgpu::Queue::write_buffer
+ 0.2%   0.2% 10.5KiB    gfx_backend_dx11 gfx_backend_dx11::shader::compile_spirv_entrypoint
+ 0.2%   0.2% 10.5KiB         spirv_cross ?emit_texture_size_variants@CompilerHLSL@spirv_cross@@AEAAX_KPEBD_N1@Z
+ 0.2%   0.2% 10.4KiB         spirv_cross ?emit_block_chain@CompilerGLSL@spirv_cross@@IEAAXAEAUSPIRBlock@2@@Z
+ 0.2%   0.2% 10.2KiB                naga naga::back::spv::writer::Writer::write_function
+ 0.2%   0.2% 10.2KiB      gpu_descriptor gpu_descriptor::allocator::DescriptorBucket<gfx_backend_vulkan::native::DescriptorPool>::free<gfx_backend_vulkan::native::DescriptorPool,gfx_backend_vulkan::native::DescriptorSetLayout,gfx_backend_vulkan::native::Descripto...
+ 0.2%   0.2% 10.0KiB                naga naga::front::spv::Parser<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<u32> > >::parse_function<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<u32> > >
+ 0.2%   0.2% 10.0KiB                naga naga::valid::analyzer::FunctionInfo::process_expression
+ 0.2%   0.2%  9.9KiB         spirv_cross ?emit_instruction@CompilerHLSL@spirv_cross@@EEAAXAEBUInstruction@2@@Z
+ 0.2%   0.2%  9.9KiB       libktx_rs_sys ZSTD_compressBlock_doubleFast
+ 0.2%   0.2%  9.8KiB         spirv_cross ?parse@Parser@spirv_cross@@AEAAXAEBUInstruction@2@@Z
+ 0.2%   0.2%  9.8KiB       libktx_rs_sys ZSTD_compressBlock_fast_dictMatchState
+ 0.2%   0.2%  9.7KiB           gpu_alloc gpu_alloc::usage::MemoryForUsage::new
+ 0.2%   0.2%  9.7KiB         spirv_cross ?replace_illegal_names@CompilerGLSL@spirv_cross@@MEAAXXZ
+ 0.2%   0.2%  9.6KiB            shipyard shipyard::scheduler::builder::WorkloadBuilder::add_to_world
+ 0.2%   0.2%  9.5KiB  gfx_backend_vulkan gfx_backend_vulkan::pool::impl$0::free<alloc::vec::into_iter::IntoIter<gfx_backend_vulkan::command::CommandBuffer,alloc::alloc::Global> >
+ 0.2%   0.2%  9.5KiB  gfx_backend_vulkan gfx_backend_vulkan::pool::impl$0::free<alloc::vec::into_iter::IntoIter<gfx_backend_vulkan::command::CommandBuffer,alloc::alloc::Global> >
+ 0.2%   0.2%  9.5KiB       Fabled_Engine Fabled_Engine::core::setup::setup_world_builder
+ 0.2%   0.2%  9.3KiB          inplace_it inplace_it::alloc_array::inplace_or_alloc_from_iter<core::iter::adapters::map::Map<core::slice::iter::Iter<gfx_hal::pso::descriptor::DescriptorSetLayoutBinding>,gfx_backend_vulkan::device::impl$2::create_descriptor_set_lay...
+ 0.2%   0.2%  9.1KiB           wgpu_core wgpu_core::track::TrackerSet::merge_extend
+ 0.1%   0.2%  8.5KiB                wgpu wgpu::Device::create_sampler
+ 0.1%   0.2%  8.3KiB    gfx_backend_dx12 gfx_backend_dx12::Device::extract_entry_point
+ 0.1%   0.2%  8.3KiB          inplace_it inplace_it::alloc_array::inplace_or_alloc_from_iter<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::slice::iter::Iter<wgpu_types::PushConstantRange>,wgpu_core::device::impl$3::create_pipeline_layout::cl...
+ 0.1%   0.2%  8.0KiB              basist basist::convert_etc1s_to_pvrtc2_rgba
+ 0.1%   0.2%  8.0KiB                naga naga::front::spv::Parser<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<u32> > >::parse<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<u32> > >
+ 0.1%   0.2%  7.9KiB basis_universal_sys ?transcode_slice@basisu_lowlevel_etc1s_transcoder@basist@@QEAA_NPEAXIIPEBEIW4block_format@2@I_N_N4IIIIPEAUbasisu_transcoder_state@2@30I@Z
+ 0.1%   0.2%  7.6KiB         spirv_cross ?constant_expression_vector@CompilerGLSL@spirv_cross@@MEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBUSPIRConstant@2@I@Z
+ 0.1%   0.2%  7.5KiB                wgpu wgpu::Device::create_bind_group
+ 0.1%   0.2%  7.2KiB            shipyard shipyard::scheduler::into_workload_system::impl$6::into_workload_system::closure$0<shipyard::view::UniqueView<lib::component::render_component::RenderData>,shipyard::view::UniqueView<lib::component::camera_component::Camer...
+ 0.1%   0.2%  7.2KiB                naga naga::front::wgsl::ExpressionContext::resolve_type
+ 0.1%   0.1%  7.1KiB           wgpu_core wgpu_core::validation::Interface::check_stage
+ 0.1%   0.1%  7.1KiB           wgpu_core wgpu_core::device::alloc::MemoryAllocator<enum$<gfx_backend_dx12::Backend> >::allocate<enum$<gfx_backend_dx12::Backend> >
+ 0.1%   0.1%  7.1KiB         spirv_cross ?access_chain_internal@CompilerGLSL@spirv_cross@@IEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@IPEBIIIPEAUAccessChainMeta@2@@Z
+ 0.1%   0.1%  7.0KiB basis_universal_sys ?decode_palettes@basisu_lowlevel_etc1s_transcoder@basist@@QEAA_NIPEBEII0I@Z
+ 0.1%   0.1%  7.0KiB      gpu_descriptor gpu_descriptor::allocator::DescriptorBucket<gfx_backend_vulkan::native::DescriptorPool>::free<gfx_backend_vulkan::native::DescriptorPool,gfx_backend_vulkan::native::DescriptorSetLayout,gfx_backend_vulkan::native::Descripto...
+ 0.1%   0.1%  7.0KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_dx12::Backend> >::create_compatible_render_pass<enum$<gfx_backend_dx12::Backend> >
+ 0.1%   0.1%  6.9KiB    gfx_backend_dx12 gfx_backend_dx12::device::impl$2::create_render_pass<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<core::slice::iter::Iter<tuple$<gfx_hal::pass::Attachment,enum$<gfx_h...
+ 0.1%   0.1%  6.8KiB               winit winit::platform_impl::platform::event_loop::impl$2::run_return::closure$0<tuple$<>,Fabled_Engine::core::window::impl$1::handle::closure_env$0>
+ 0.1%   0.1%  6.8KiB         spirv_cross ?emit_header@CompilerGLSL@spirv_cross@@MEAAXXZ
+ 0.1%   0.1%  6.8KiB       libktx_rs_sys ZSTD_compressBlock_fast
+ 0.1%   0.1%  6.7KiB         spirv_cross ?emit_resources@CompilerHLSL@spirv_cross@@AEAAXXZ
+ 0.1%   0.1%  6.7KiB           wgpu_core wgpu_core::device::alloc::MemoryAllocator<enum$<gfx_backend_dx11::Backend> >::allocate<enum$<gfx_backend_dx11::Backend> >
+ 0.1%   0.1%  6.7KiB                     ZSTD_compressBlock_doubleFast_extDict_generic
+ 0.1%   0.1%  6.6KiB         spirv_cross ?layout_for_variable@CompilerGLSL@spirv_cross@@IEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBUSPIRVariable@2@@Z
+ 0.1%   0.1%  6.6KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_dx11::Backend> >::create_bind_group_layout<enum$<gfx_backend_dx11::Backend> >
+ 0.1%   0.1%  6.5KiB           wgpu_core wgpu_core::device::alloc::MemoryAllocator<enum$<gfx_backend_vulkan::Backend> >::allocate<enum$<gfx_backend_vulkan::Backend> >
+ 0.1%   0.1%  6.4KiB                wgpu wgpu::backend::direct::impl$3::swap_chain_present
+ 0.1%   0.1%  6.4KiB                 std core::ops::function::impls::impl$1::call_mut<tuple$<ref$<tobj::Material> >,lib::system::model_system::load_model_system::closure$0::closure_env$0>
+ 0.1%   0.1%  6.2KiB    gfx_backend_dx11 gfx_backend_dx11::impl$28::begin_render_pass<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<core::iter::adapters::map::Map<core::iter::adapters::zip::Zip<core::iter::adapters::zip::Zip<core::slice::i...
+ 0.1%   0.1%  6.2KiB                naga naga::valid::Validator::validate_block_impl
+ 0.1%   0.1%  6.2KiB basis_universal_sys ?transcode_uastc_to_bc7@basist@@YA_NAEBUunpacked_uastc_block@1@AEAUbc7_optimization_results@1@@Z
+ 0.1%   0.1%  6.2KiB         spirv_cross ?builtin_to_glsl@CompilerGLSL@spirv_cross@@MEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@W4BuiltIn@spv@@W4StorageClass@6@@Z
+ 0.1%   0.1%  6.2KiB       libktx_rs_sys vk2dfd
+ 0.1%   0.1%  5.9KiB  gfx_backend_vulkan gfx_backend_vulkan::device::impl$2::create_graphics_pipeline
+ 0.1%   0.1%  5.9KiB                naga naga::front::spv::flow::FlowGraph::naga_traverse
+ 0.1%   0.1%  5.8KiB basis_universal_sys ?transcode_image@basisu_lowlevel_etc1s_transcoder@basist@@QEAA_NW4transcoder_texture_format@2@PEAXIPEBEIIIIIIIIIII_N3IPEAUbasisu_transcoder_state@2@I@Z
+ 0.1%   0.1%  5.8KiB           wgpu_core wgpu_core::device::Device<enum$<gfx_backend_vulkan::Backend> >::create_bind_group_layout<enum$<gfx_backend_vulkan::Backend> >
+ 0.1%   0.1%  5.7KiB         spirv_cross ?emit_header@CompilerGLSL@spirv_cross@@MEAAXXZ
+ 0.1%   0.1%  5.7KiB       Fabled_Engine Fabled_Engine::core::graphic::Graphic::run
+ 0.1%   0.1%  5.6KiB         spirv_cross ?to_function_args@CompilerGLSL@spirv_cross@@MEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBUTextureFunctionArguments@12@PEA_N@Z
+ 0.1%   0.1%  5.6KiB                wgpu wgpu::Device::create_bind_group_layout
+ 0.1%   0.1%  5.6KiB            shipyard shipyard::scheduler::into_workload_system::impl$5::into_workload_system::closure$0<shipyard::view::UniqueView<lib::component::render_component::RenderData>,shipyard::view::UniqueViewMut<lib::component::camera_component::Ca...
+ 0.1%   0.1%  5.4KiB              basist basist::fixup_pvrtc1_4_modulation_rgba
+ 0.1%   0.1%  5.4KiB         spirv_cross ?emit_extension_workarounds@CompilerGLSL@spirv_cross@@IEAAXW4ExecutionModel@spv@@@Z
+ 0.1%   0.1%  5.3KiB              basist basist::fixup_pvrtc1_4_modulation_rgba
+ 0.1%   0.1%  5.2KiB         spirv_cross ?write_access_chain@CompilerHLSL@spirv_cross@@AEAAXAEBUSPIRAccessChain@2@IAEBV?$SmallVector@I$07@2@@Z
+ 0.1%   0.1%  5.1KiB                     ZSTD_compressBlock_fast_extDict_generic
+ 0.1%   0.1%  5.1KiB         spirv_cross ?read_access_chain@CompilerHLSL@spirv_cross@@AEAAXPEAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV34@AEBUSPIRAccessChain@2@@Z
+ 0.1%   0.1%  5.1KiB  gfx_backend_vulkan gfx_backend_vulkan::command::impl$1::begin_render_pass<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<core::iter::adapters::map::Map<core::iter::adapters::zip::Zip<core::iter::adapters::zip::Zip<core...
+ 0.1%   0.1%  5.1KiB    gfx_backend_dx12 gfx_backend_dx12::command::impl$9::begin_render_pass<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<core::iter::adapters::map::Map<core::iter::adapters::zip::Zip<core::iter::adapters::zip::Zip<core::...
+ 0.1%   0.1%  5.1KiB             gfx_hal gfx_hal::format::impl$355::fmt
+ 0.1%   0.1%  5.1KiB         spirv_cross ?emit_function_prototype@CompilerHLSL@spirv_cross@@EEAAXAEAUSPIRFunction@2@AEBVBitset@2@@Z
+ 0.1%   0.1%  5.1KiB         spirv_cross ?emit_subgroup_op@CompilerHLSL@spirv_cross@@EEAAXAEBUInstruction@2@@Z
+ 0.1%   0.1%  5.0KiB basis_universal_sys ?transcode_uastc_to_etc1@basist@@YA_NAEBUuastc_block@1@PEAXI@Z
+ 0.1%   0.1%  5.0KiB                 std core::ptr::drop_in_place<slice$<enum$<wgpu_core::hub::Element<wgpu_core::device::Device<enum$<gfx_backend_dx12::Backend> > > > > >
+ 0.1%   0.1%  4.9KiB                 std core::ptr::drop_in_place<slice$<enum$<wgpu_core::hub::Element<wgpu_core::device::Device<enum$<gfx_backend_dx11::Backend> > > > > >
+ 0.1%   0.1%  4.9KiB                 std core::ptr::drop_in_place<slice$<enum$<wgpu_core::hub::Element<wgpu_core::device::Device<enum$<gfx_backend_dx11::Backend> > > > > >
+ 0.1%   0.1%  4.9KiB              basist basist::fixup_pvrtc1_4_modulation_rgb
+ 0.1%   0.1%  4.9KiB              basist basist::convert_etc1s_to_astc_4x4
+ 0.1%   0.1%  4.9KiB                wgpu wgpu::Device::create_pipeline_layout
+ 0.1%   0.1%  4.7KiB               winit winit::platform_impl::platform::event_loop::thread_event_target_callback<tuple$<> >
+ 0.1%   0.1%  4.7KiB                 std core::ptr::drop_in_place<slice$<enum$<wgpu_core::hub::Element<wgpu_core::device::Device<enum$<gfx_backend_dx12::Backend> > > > > >
+ 0.1%   0.1%  4.7KiB                 std core::ptr::drop_in_place<slice$<enum$<wgpu_core::hub::Element<wgpu_core::device::Device<enum$<gfx_backend_vulkan::Backend> > > > > >
+ 0.1%   0.1%  4.7KiB                     HUF_decompress4X2_usingDTable_internal
+ 0.1%   0.1%  4.7KiB         spirv_cross ?emit_output_variable_initializer@CompilerGLSL@spirv_cross@@IEAAXAEBUSPIRVariable@2@@Z
+ 0.1%   0.1%  4.7KiB                 std std::sync::once::impl$4::call_once::closure$0<rayon_core::registry::set_global_registry::closure_env$0<rayon_core::registry::global_registry::closure_env$0> >
+ 0.1%   0.1%  4.7KiB         spirv_cross ?analyze_variable_scope@Compiler@spirv_cross@@IEAAXAEAUSPIRFunction@2@AEAUAnalyzeVariableScopeAccessHandler@12@@Z
+ 0.1%   0.1%  4.7KiB                wgpu wgpu::backend::direct::Context::format_pretty_any
+ 0.1%   0.1%  4.5KiB basis_universal_sys ?unpack_uastc@basist@@YA_NAEBUuastc_block@1@AEAUunpacked_uastc_block@1@_N2@Z
+ 0.1%   0.1%  4.5KiB         parking_lot parking_lot::raw_rwlock::RawRwLock::lock_exclusive_slow
+ 0.1%   0.1%  4.5KiB            shipyard shipyard::scheduler::into_workload_system::impl$7::into_workload_try_system::closure$0<shipyard::view::UniqueView<lib::component::render_component::RenderData>,shipyard::view::UniqueView<lib::component::camera_component::C...
+ 0.1%   0.1%  4.5KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_dx11::Backend> >::cleanup<enum$<gfx_backend_dx11::Backend> >
+ 0.1%   0.1%  4.4KiB                 std core::slice::sort::recurse<u32,core::slice::impl$0::sort_unstable_by_key::closure_env$0<u32,u32,gpu_alloc::usage::one_usage::closure_env$0> >
+ 0.1%   0.1%  4.4KiB         spirv_cross ?emit_texture_size_variants@CompilerHLSL@spirv_cross@@AEAAX_KPEBD_N1@Z
+ 0.1%   0.1%  4.4KiB                 std core::num::flt2dec::strategy::dragon::format_shortest
+ 0.1%   0.1%  4.4KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_dx11::Backend> >::cleanup<enum$<gfx_backend_dx11::Backend> >
+ 0.1%   0.1%  4.4KiB                 std core::ops::function::impls::impl$0::call<tuple$<shipyard::view::UniqueView<lib::component::render_component::RenderData>,shipyard::view::UniqueView<lib::component::camera_component::Camera>,shipyard::view::EntitiesViewMut,...
+ 0.1%   0.1%  4.3KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_dx12::Backend> >::cleanup<enum$<gfx_backend_dx12::Backend> >
+ 0.1%   0.1%  4.3KiB                 std core::ptr::drop_in_place<wgpu_core::device::Device<enum$<gfx_backend_dx12::Backend> > >
+ 0.1%   0.1%  4.3KiB         spirv_cross ?load_flattened_struct@CompilerGLSL@spirv_cross@@IEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV34@AEBUSPIRType@2@@Z
+ 0.1%   0.1%  4.2KiB                wgpu wgpu::impl$41::drop
+ 0.1%   0.1%  4.2KiB            shipyard shipyard::scheduler::into_workload_system::impl$5::into_workload_system::closure$0<shipyard::view::UniqueView<lib::component::window_component::Window>,shipyard::view::UniqueViewMut<lib::component::render_component::Render...
+ 0.1%   0.1%  4.2KiB         spirv_cross ?flattened_access_chain_offset@CompilerGLSL@spirv_cross@@IEAA?AU?$pair@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@I@std@@AEBUSPIRType@2@PEBIIIIPEA_NPEAI3_N@Z
+ 0.1%   0.1%  4.2KiB         spirv_cross ?constant_op_expression@CompilerGLSL@spirv_cross@@IEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBUSPIRConstantOp@2@@Z
+ 0.1%   0.1%  4.2KiB                 std std::_Partition_by_median_guess_unchecked<spirv_cross::SPIRVariable * *,<lambda_e611ac959f1885f6d92a974c26cc7509> >
+ 0.1%   0.1%  4.2KiB                naga naga::front::wgsl::Parser::parse_const_expression_impl
+ 0.1%   0.1%  4.2KiB                 std core::ptr::drop_in_place<slice$<enum$<wgpu_core::hub::Element<wgpu_core::device::Device<enum$<gfx_backend_vulkan::Backend> > > > > >
+ 0.1%   0.1%  4.1KiB         spirv_cross ?to_texture_op@CompilerGLSL@spirv_cross@@MEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBUInstruction@2@_NPEA_NAEAV?$SmallVector@I$07@2@@Z
+ 0.1%   0.1%  4.1KiB                     ZSTD_decompressSequencesLong_default
+ 0.1%   0.1%  4.1KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_dx12::Backend> >::cleanup<enum$<gfx_backend_dx12::Backend> >
+ 0.1%   0.1%  4.1KiB                     ZSTD_HcFindBestMatch_dedicatedDictSearch_selectMLS
+ 0.1%   0.1%  4.1KiB           wgpu_core wgpu_core::device::alloc::MemoryBlock<enum$<gfx_backend_dx11::Backend> >::bind_image<enum$<gfx_backend_dx11::Backend> >
+ 0.1%   0.1%  4.0KiB           wgpu_core wgpu_core::validation::Interface::new
+ 0.1%   0.1%  4.0KiB                 std core::fmt::impl$52::fmt<enum$<spirv_headers::Capability> >
+ 0.1%   0.1%  4.0KiB         spirv_cross ?emit_resources@CompilerGLSL@spirv_cross@@IEAAXXZ
+ 0.1%   0.1%  4.0KiB         spirv_cross ?type_to_glsl@CompilerGLSL@spirv_cross@@MEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBUSPIRType@2@I@Z
+ 0.1%   0.1%  4.0KiB              basist basist::fixup_pvrtc1_4_modulation_rgb
+ 0.1%   0.1%  4.0KiB           wgpu_core wgpu_core::device::life::LifetimeTracker<enum$<gfx_backend_vulkan::Backend> >::handle_mapping<enum$<gfx_backend_vulkan::Backend>,wgpu_core::hub::IdentityManagerFactory>
+ 0.1%   0.1%  4.0KiB         spirv_cross ?emit_declared_builtin_block@CompilerGLSL@spirv_cross@@IEAAXW4StorageClass@spv@@W4ExecutionModel@4@@Z
+ 0.1%   0.1%  4.0KiB                naga naga::front::spv::Parser<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<u32> > >::parse_type_struct<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<u32> > >
+ 0.1%   0.1%  3.9KiB          enum$<naga enum$<naga::front::wgsl::Error>::as_parse_error
+ 0.1%   0.1%  3.9KiB         spirv_cross ?emit_trinary_func_op_bitextract@CompilerGLSL@spirv_cross@@IEAAXIIIIIPEBDW4BaseType@SPIRType@2@111@Z
+ 0.1%   0.1%  3.9KiB                naga naga::front::wgsl::Parser::parse_primary_expression
+ 0.1%   0.1%  3.9KiB         spirv_cross ?convert_double_to_string@CompilerGLSL@spirv_cross@@IEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBUSPIRConstant@2@II@Z
+ 0.1%   0.1%  3.9KiB                naga naga::front::wgsl::Parser::parse_type_decl_impl
+ 0.1%   0.1%  3.8KiB basis_universal_sys ?encode_bc1@basist@@YAXPEAXPEBEI@Z
+ 0.1%   0.1%  3.8KiB basis_universal_sys ?transcode_slice@basisu_lowlevel_uastc_transcoder@basist@@QEAA_NPEAXIIPEBEIW4block_format@2@I_N3IIIPEAUbasisu_transcoder_state@2@IHHI@Z
+ 0.1%   0.1%  3.8KiB         spirv_cross ?emit_atomic@CompilerHLSL@spirv_cross@@AEAAXPEBIIW4Op@spv@@@Z
+39.6%  48.6%  2.3MiB                     And 7613 smaller methods. Use -n N to show more.
+81.5% 100.0%  4.7MiB                     .text section size, the file size is 5.7MiB
+
+
+
+Crate compile time enabled multithread build
+____________
+  Time Crate
+27.39s winapi
+18.74s wgpu
+15.26s ash
+14.56s syn
+14.41s wgpu_core
+14.02s naga
+13.23s miniz_oxide
+12.32s futures_macro
+12.01s memchr
+11.58s rayon
+11.54s proc_macro_hack
+10.94s serde_derive
+10.72s libc
+10.35s futures_util
+10.34s serde
+10.32s proc_macro_nested
+10.18s cc
+10.10s futures_task
+10.06s gltf_json
+10.00s crossbeam_utils
+ 9.90s proc_macro2
+ 9.66s pp_rs
+ 9.38s log
+ 9.36s num_rational
+ 8.98s ahash
+ 8.78s windows_x86_64_msvc
+ 8.70s libm
+ 8.61s naga
+ 8.58s anyhow
+ 8.53s crc32fast
+ 8.13s parking_lot_core
+ 8.12s parking_lot_core
+ 8.04s ryu
+ 7.79s lib
+ 7.70s serde_json
+ 7.63s Fabled_Engine
+ 7.60s miniz_oxide
+ 7.48s winit
+ 7.44s ahash
+ 7.33s image
+ 7.23s deflate
+ 7.08s futures
+ 6.95s num_integer
+ 6.77s tokio
+ 6.63s shipyard
+ 6.42s futures_channel
+ 6.36s memoffset
+ 6.30s thiserror_impl
+ 6.18s tinyvec
+ 6.01s gif
+ 5.99s scoped_threadpool
+ 5.92s ntapi
+ 5.86s shipyard_proc
+ 5.86s actix_macros
+ 5.83s gpu_alloc
+ 5.79s pkg_config
+ 5.77s shipyard
+ 5.57s luajit_src
+ 5.50s cpal
+ 5.47s lua_src
+ 5.39s fabled_render
+ 5.38s bytemuck_derive
+ 5.31s superluminal_perf_sys
+ 5.20s gltf_derive
+ 5.16s claxon
+ 5.16s rayon_core
+ 5.09s glob
+ 5.08s autocfg
+ 5.08s string_interner
+ 5.00s gpu_descriptor
+ 4.86s windows_sys
+ 4.80s gltf
+ 4.80s gfx_backend_dx12
+ 4.76s gfx_hal
+ 4.74s byteorder
+ 4.57s version_check
+ 4.52s futures_timer
+ 4.48s indexmap
+ 4.45s num_iter
+ 4.42s jobserver
+ 4.38s num_traits
+ 4.24s gfx_backend_dx11
+ 4.22s base64
+ 4.20s base64
+ 4.16s futures_core
+ 4.11s crossbeam_epoch
+ 4.08s wgpu_types
+ 3.88s bytes
+ 3.82s slotmap
+ 3.80s weezl
+ 3.68s glam
+ 3.67s hound
+ 3.67s libktx_rs_sys
+ 3.62s getrandom
+ 3.61s petgraph
+ 3.60s gpu_alloc_types
+ 3.51s mlua
+ 3.48s basis_universal_sys
+ 3.27s fabled_fbx
+ 3.24s spirv_cross
+ 3.23s fabled_audio
+ 3.15s inplace_it
+ 3.11s fbxcel
+ 3.04s gfx_backend_vulkan
+ 3.03s spirv_headers
+ 3.01s bit_vec
+ 2.99s once_cell
+ 2.96s fbxcel_dom
+ 2.95s fixedbitset
+ 2.89s cfg_aliases
+ 2.86s thunderdome
+ 2.79s profiling
+ 2.77s indextree
+ 2.63s gpu_descriptor_types
+ 2.59s fabled_gltf
+ 2.56s instant
+ 2.54s libflate
+ 2.54s png
+ 2.53s iovec
+ 2.49s mint
+ 2.46s copyless
+ 2.43s rand_chacha
+ 2.43s inflections
+ 2.42s bytes
+ 2.41s adler32
+ 2.22s jpeg_decoder
+ 2.19s panning
+ 2.17s build_script_main
+ 2.14s fabled_obj
+ 2.13s actix_rt
+ 2.11s tiff
+ 2.11s rand_distr
+ 2.10s slab
+ 2.10s minimp3_sys
+ 2.01s futures_io
+ 2.00s crossbeam_channel
+ 1.92s lewton
+ 1.90s quote
+ 1.88s rand
+ 1.87s color_quant
+ 1.85s tokio_io
+ 1.84s pin_utils
+ 1.82s libflate_lz77
+ 1.81s adler
+ 1.80s ppv_lite86
+ 1.80s futures_sink
+ 1.77s ron
+ 1.77s arrayvec
+ 1.64s hashbrown
+ 1.60s itoa
+ 1.60s rle_decode_fast
+ 1.59s rodio
+ 1.57s rustc_hash
+ 1.55s libktx_rs
+ 1.54s fabled_binding
+ 1.53s rodio
+ 1.41s bstr
+ 1.39s gfx_backend_empty
+ 1.36s basis_universal
+ 1.27s rand_core
+ 1.20s fxhash
+ 1.19s mio
+ 1.19s bit_set
+ 1.17s d3d12
+ 1.16s range_alloc
+ 1.14s tobj
+ 1.13s hashbrown
+ 1.11s rgb
+ 1.10s slice_deque
+ 1.09s termcolor
+ 1.08s num_cpus
+ 1.05s minimp3
+ 1.04s ogg
+ 1.04s ambisonic
+ 1.01s raw_window_handle
+ 0.90s tinyvec_macros
+ 0.90s codespan_reporting
+ 0.89s miow
+ 0.83s unicode_xid
+ 0.83s bytemuck
+ 0.74s parking_lot
+ 0.74s bitflags
+ 0.73s parking_lot
+ 0.71s unicode_width
+ 0.70s wio
+ 0.69s winapi_util
+ 0.68s libloading
+ 0.68s rose_tree
+ 0.64s cfg_if
+ 0.64s scopeguard
+ 0.63s lock_api
+ 0.62s gfx_auxil
+ 0.59s smallvec
+ 0.57s lazy_static
+ 0.56s crossbeam_deque
+ 0.55s fabled_core
+ 0.47s futures_executor
+ 0.45s thiserror
+ 0.42s either
+ 0.41s fabled_transform
+ 0.41s pin_project_lite
+ 0.40s superluminal_perf
+ 0.36s fabled_math
+ 0.23s futures
+
+ Crates compile time disable multithread build
+ ____________
+ 39.74s wgpu
+16.76s naga
+14.18s gltf_json
+13.40s syn
+13.38s image
+13.29s ash
+13.20s Fabled_Engine
+12.55s winapi
+12.41s naga
+11.81s lib
+ 9.17s wgpu_core
+ 9.02s serde_derive
+ 6.73s tokio
+ 6.45s gltf
+ 6.01s shipyard
+ 5.83s serde
+ 5.40s fabled_render
+ 4.91s shipyard
+ 4.69s gfx_backend_dx12
+ 4.32s thiserror_impl
+ 4.22s futures_util
+ 4.07s mlua
+ 4.02s fbxcel_dom
+ 3.93s gfx_backend_dx11
+ 3.87s gfx_hal
+ 3.77s winit
+ 3.71s gfx_backend_vulkan
+ 3.51s cc
+ 3.45s proc_macro2
+ 3.38s rayon_core
+ 3.17s rayon
+ 3.13s serde_json
+ 3.09s glam
+ 3.09s parking_lot_core
+ 3.05s parking_lot_core
+ 2.57s ntapi
+ 2.54s proc_macro_hack
+ 2.50s fabled_fbx
+ 2.38s deflate
+ 2.29s futures_macro
+ 2.19s lewton
+ 2.16s windows_sys
+ 2.13s shipyard_proc
+ 2.10s anyhow
+ 2.10s mio
+ 2.08s cpal
+ 2.03s futures
+ 1.98s ron
+ 1.97s jpeg_decoder
+ 1.88s log
+ 1.85s actix_rt
+ 1.84s fbxcel
+ 1.82s miniz_oxide
+ 1.76s crossbeam_epoch
+ 1.75s wgpu_types
+ 1.73s miniz_oxide
+ 1.71s rodio
+ 1.68s rodio
+ 1.68s libm
+ 1.64s libflate
+ 1.63s actix_macros
+ 1.63s memchr
+ 1.62s petgraph
+ 1.53s num_rational
+ 1.51s pp_rs
+ 1.49s num_traits
+ 1.46s spirv_cross
+ 1.45s tiff
+ 1.44s slotmap
+ 1.44s spirv_headers
+ 1.40s crc32fast
+ 1.38s fabled_obj
+ 1.36s codespan_reporting
+ 1.35s ryu
+ 1.35s ahash
+ 1.33s autocfg
+ 1.33s crossbeam_utils
+ 1.29s bytemuck_derive
+ 1.22s ahash
+ 1.22s rand
+ 1.21s png
+ 1.17s rand_chacha
+ 1.16s ambisonic
+ 1.14s tinyvec
+ 1.14s d3d12
+ 1.12s indexmap
+ 1.10s pkg_config
+ 1.08s gltf_derive
+ 1.07s scoped_threadpool
+ 1.04s glob
+ 1.04s libc
+ 1.01s superluminal_perf_sys
+ 1.00s minimp3_sys
+ 0.98s num_integer
+ 0.97s tokio_io
+ 0.95s jobserver
+ 0.94s rand_distr
+ 0.93s libktx_rs_sys
+ 0.93s weezl
+ 0.92s tobj
+ 0.90s proc_macro_nested
+ 0.89s crossbeam_channel
+ 0.89s bytes
+ 0.88s build_script_main
+ 0.87s termcolor
+ 0.87s inplace_it
+ 0.87s base64
+ 0.85s fabled_binding
+ 0.84s iovec
+ 0.84s inflections
+ 0.84s version_check
+ 0.83s gif
+ 0.82s parking_lot
+ 0.82s slice_deque
+ 0.82s futures_task
+ 0.82s mint
+ 0.82s gpu_alloc
+ 0.81s futures_channel
+ 0.81s basis_universal_sys
+ 0.80s parking_lot
+ 0.80s futures_timer
+ 0.79s bstr
+ 0.79s miow
+ 0.78s bytes
+ 0.78s claxon
+ 0.75s gfx_backend_empty
+ 0.75s ogg
+ 0.75s hashbrown
+ 0.75s cfg_if
+ 0.74s futures_core
+ 0.72s quote
+ 0.69s byteorder
+ 0.67s hound
+ 0.67s libloading
+ 0.66s memoffset
+ 0.63s color_quant
+ 0.62s hashbrown
+ 0.62s libktx_rs
+ 0.60s futures_executor
+ 0.59s basis_universal
+ 0.59s windows_x86_64_msvc
+ 0.58s fabled_audio
+ 0.58s base64
+ 0.57s unicode_xid
+ 0.57s fixedbitset
+ 0.56s libflate_lz77
+ 0.55s ppv_lite86
+ 0.55s bit_vec
+ 0.52s num_iter
+ 0.49s fabled_transform
+ 0.49s luajit_src
+ 0.49s once_cell
+ 0.46s string_interner
+ 0.44s rand_core
+ 0.42s smallvec
+ 0.42s fabled_math
+ 0.42s futures_io
+ 0.42s winapi_util
+ 0.41s minimp3
+ 0.40s gpu_alloc_types
+ 0.40s lock_api
+ 0.40s indextree
+ 0.40s arrayvec
+ 0.39s fabled_core
+ 0.37s adler
+ 0.37s lua_src
+ 0.37s rgb
+ 0.36s getrandom
+ 0.36s wio
+ 0.33s num_cpus
+ 0.32s crossbeam_deque
+ 0.30s adler32
+ 0.29s thunderdome
+ 0.28s itoa
+ 0.28s rle_decode_fast
+ 0.28s gpu_descriptor_types
+ 0.28s either
+ 0.27s gpu_descriptor
+ 0.27s bytemuck
+ 0.26s slab
+ 0.25s gfx_auxil
+ 0.25s rose_tree
+ 0.23s scopeguard
+ 0.23s bit_set
+ 0.23s fxhash
+ 0.22s raw_window_handle
+ 0.21s range_alloc
+ 0.21s cfg_aliases
+ 0.21s lazy_static
+ 0.20s tinyvec_macros
+ 0.20s thiserror
+ 0.20s copyless
+ 0.20s rustc_hash
+ 0.19s instant
+ 0.19s futures
+ 0.18s futures_sink
+ 0.18s bitflags
+ 0.18s superluminal_perf
+ 0.18s unicode_width
+ 0.18s pin_project_lite
+ 0.17s fabled_gltf
+ 0.17s panning
+ 0.17s profiling
+ 0.17s pin_utils
+
+
