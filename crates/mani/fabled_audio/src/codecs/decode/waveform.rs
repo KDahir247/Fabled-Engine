@@ -41,7 +41,7 @@ impl WavReader {
 #[cfg(test)]
 mod wav_decoding_test {
     use crate::WavReader;
-    use rodio::Source;
+    use ambisonic::rodio::Source;
 
     #[test]
     fn decoding_file() {
@@ -61,7 +61,7 @@ mod wav_decoding_test {
 
         let file = std::fs::File::open(wav_path.as_str()).unwrap();
 
-        let rodio_decoder = rodio::Decoder::new_wav(file).unwrap();
+        let rodio_decoder = ambisonic::rodio::Decoder::new_wav(file).unwrap();
         let wav_reader = WavReader::default();
         let audio_spec = wav_reader.read_wav(wav_path.as_str()).unwrap();
 

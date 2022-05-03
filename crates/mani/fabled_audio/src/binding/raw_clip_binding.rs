@@ -1,6 +1,5 @@
 use crate::RawClip;
 use mlua::{MetaMethod, UserDataFields, UserDataMethods};
-use rodio::Source;
 
 impl mlua::UserData for RawClip<f32> {
     fn add_fields<'lua, F: UserDataFields<'lua, Self>>(_fields: &mut F) {

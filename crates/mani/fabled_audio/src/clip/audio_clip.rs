@@ -1,5 +1,5 @@
 use crate::{AudioDecodingError, RawAmbisonicClip, RawClip};
-use rodio::{Decoder, Source};
+use ambisonic::rodio::Source;
 use std::io::{Cursor, Read};
 
 #[derive(Debug, Clone)]
@@ -26,14 +26,14 @@ impl<D> Default for AudioClip<D> {
 
 impl<D> AudioClip<D>
 where
-    D: rodio::Sample,
+    D: ambisonic::rodio::Sample,
 {
     pub fn from_raw(
         buffer: Vec<u8>,
         play_on_awake: bool,
     ) -> Result<AudioClip<D>, AudioDecodingError> {
-        let audio_decoder =
-            Decoder::new(Cursor::new(buffer)).map_err(AudioDecodingError::DecoderError)?;
+        let audio_decoder = ambisonic::rodio::Decoder::new(Cursor::new(buffer))
+            .map_err(AudioDecodingError::DecoderError)?;
 
         let audio_clip = audio_decoder
             .pausable(!play_on_awake)
@@ -62,8 +62,8 @@ where
         file.read_exact(&mut audio_buffer)?;
 
         // vorbis and mp3 total duration is None
-        let audio_decoder =
-            Decoder::new(Cursor::new(audio_buffer)).map_err(AudioDecodingError::DecoderError)?;
+        let audio_decoder = ambisonic::rodio::Decoder::new(Cursor::new(audio_buffer))
+            .map_err(AudioDecodingError::DecoderError)?;
 
 
         let audio_clip = audio_decoder
@@ -111,7 +111,7 @@ where
 
 impl<D: 'static> From<AudioClip<D>> for RawClip<D>
 where
-    D: rodio::Sample + Send,
+    D: ambisonic::rodio::Sample + Send,
 {
     fn from(audio_clip: AudioClip<D>) -> Self {
         RawClip::new(audio_clip)
@@ -135,28 +135,6 @@ impl<D> Iterator for AudioClip<D> {
 
 impl<D> Source for AudioClip<D>
 where
-    D: rodio::Sample,
-{
-    fn current_frame_len(&self) -> Option<usize> {
-        self.current_frame_len
-    }
-
-    fn channels(&self) -> u16 {
-        self.channel
-    }
-
-    fn sample_rate(&self) -> u32 {
-        self.sample_rate
-    }
-
-    fn total_duration(&self) -> Option<std::time::Duration> {
-        self.duration
-    }
-}
-
-
-impl<D> ambisonic::rodio::Source for AudioClip<D>
-where
     D: ambisonic::rodio::Sample,
 {
     fn current_frame_len(&self) -> Option<usize> {
@@ -176,7 +154,6 @@ where
     }
 }
 
-
 #[cfg(test)]
 mod audio_clip_test {
     use crate::{AudioClip, RawAmbisonicClip, RawClip};
@@ -188,19 +165,15 @@ mod audio_clip_test {
         let mut empty_clip: AudioClip<u16> = AudioClip::default();
 
         assert!(empty_clip.sample_rate.eq(&0));
-        assert!(rodio::Source::sample_rate(&empty_clip).eq(&0));
         assert!(ambisonic::rodio::Source::sample_rate(&empty_clip).eq(&0));
 
         assert!(empty_clip.duration.is_none());
-        assert!(rodio::Source::total_duration(&empty_clip).is_none());
         assert!(ambisonic::rodio::Source::total_duration(&empty_clip).is_none());
 
         assert!(empty_clip.channel.eq(&0));
-        assert!(rodio::Source::channels(&empty_clip).eq(&0));
         assert!(ambisonic::rodio::Source::channels(&empty_clip).eq(&0));
 
         assert!(empty_clip.current_frame_len.is_none());
-        assert!(rodio::Source::current_frame_len(&empty_clip).is_none());
         assert!(ambisonic::rodio::Source::current_frame_len(&empty_clip).is_none());
 
         assert!(empty_clip.next().is_none());

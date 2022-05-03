@@ -3,7 +3,7 @@ use thiserror::*;
 #[derive(Debug, Error)]
 pub enum AudioDecodingError {
     #[error("Unrecognized audio format type.\nThe support audio format are flac, mp3, ogg, wav")]
-    DecoderError(rodio::decoder::DecoderError),
+    DecoderError(ambisonic::rodio::decoder::DecoderError),
 
     #[error("Wav Error has occurred. See https://docs.rs/hound/3.4.0/hound/enum.Error.html.\nMessage : {:?}", .0)]
     WavError(hound::Error),

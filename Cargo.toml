@@ -8,8 +8,8 @@ edition = "2018"
 lto = true
 debug = true
 opt-level = 3
-codegen-units = 3
 panic = "abort"
+strip = "true"
 
 [lib]
 name = "lib"
@@ -18,10 +18,6 @@ path = "crates/mani/lib/src/lib.rs"
 [workspace]
 members = ["crates/mani/*"]
 
-
-#[dependencies.superluminal-perf]
-#version = "*"
-#optional = true
 
 [dependencies.env_logger]
 version = "*"
@@ -32,7 +28,6 @@ version = "*"
 optional = true
 
 [features]
-#profiler = ["superluminal-perf"]
 logger = ["log" ,"env_logger"]
 
 [dependencies]

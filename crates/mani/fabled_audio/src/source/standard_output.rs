@@ -1,16 +1,17 @@
 use crate::{AudioListener, OutputConfig, RawClip};
+use cpal::Device;
 
 pub struct StandardOutput<D> {
     #[allow(dead_code)]
-    sink: rodio::SpatialSink,
+    sink: ambisonic::rodio::SpatialSink,
     #[allow(dead_code)]
-    output_stream: rodio::OutputStream,
-    composer: std::sync::Arc<rodio::dynamic_mixer::DynamicMixerController<D>>,
+    output_stream: ambisonic::rodio::OutputStream,
+    composer: std::sync::Arc<ambisonic::rodio::dynamic_mixer::DynamicMixerController<D>>,
 }
 
 impl<D: 'static> Default for StandardOutput<D>
 where
-    D: rodio::Sample + Send + std::fmt::Debug,
+    D: ambisonic::rodio::Sample + Send + std::fmt::Debug,
 {
     fn default() -> Self {
         Self::new(AudioListener::default()).unwrap()
@@ -19,7 +20,7 @@ where
 
 impl<D: 'static> StandardOutput<D>
 where
-    D: rodio::Sample + Send + std::fmt::Debug,
+    D: ambisonic::rodio::Sample + Send + std::fmt::Debug,
 {
     pub fn new(audio_listener: AudioListener) -> Option<Self> {
         let OutputConfig {
@@ -27,14 +28,16 @@ where
             output_config,
         } = OutputConfig::default();
 
-
-        match (output_device, output_config) {
-            (Some(device), Some(output)) => {
-                let (dyn_controller, dyn_mixer) =
-                    rodio::dynamic_mixer::mixer(output.channel_count, output.sample_rate);
+        match output_device {
+            None => None,
+            Some(device) => {
+                let (dyn_controller, dyn_mixer) = ambisonic::rodio::dynamic_mixer::mixer(
+                    output_config.channel_count,
+                    output_config.sample_rate,
+                );
 
                 let (output_stream, output_handle) =
-                    rodio::OutputStream::try_from_device(&device).unwrap();
+                    ambisonic::rodio::OutputStream::try_from_device(&device).unwrap();
 
                 let AudioListener {
                     position,
@@ -42,7 +45,7 @@ where
                     stereo_right_position,
                 } = audio_listener;
 
-                let sink = rodio::SpatialSink::try_new(
+                let sink = ambisonic::rodio::SpatialSink::try_new(
                     &output_handle,
                     position,
                     stereo_left_position,
@@ -50,7 +53,10 @@ where
                 )
                 .unwrap();
 
-                let zeroed = rodio::source::Zero::new(output.channel_count, output.sample_rate);
+                let zeroed = ambisonic::rodio::source::Zero::new(
+                    output_config.channel_count,
+                    output_config.sample_rate,
+                );
 
                 dyn_controller.add(zeroed);
 
@@ -62,7 +68,6 @@ where
                     composer: dyn_controller,
                 })
             }
-            _ => None,
         }
     }
 

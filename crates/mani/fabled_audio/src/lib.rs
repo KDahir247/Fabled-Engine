@@ -1,3 +1,5 @@
+#![feature(try_blocks)]
+
 mod binding;
 mod clip;
 mod codecs;
@@ -15,7 +17,6 @@ pub use container::*;
 pub use error::*;
 pub use mixer::*;
 pub use source::*;
-
 
 #[cfg(test)]
 mod audio_test {

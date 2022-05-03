@@ -8,7 +8,7 @@ pub struct AudioListener {
 impl Default for AudioListener {
     fn default() -> Self {
         Self {
-            position: [0.0, 0.0, 0.0],
+            position: [0.0; 3],
             stereo_left_position: [-1.0, 0.0, 0.0],
             stereo_right_position: [1.0, 0.0, 0.0],
         }

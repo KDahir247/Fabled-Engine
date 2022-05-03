@@ -1,5 +1,5 @@
 use crate::{FadeFilter, RawClip};
-use rodio::Source;
+use ambisonic::rodio::source::*;
 
 impl RawClip<f32> {
     pub fn low_pass(self, frequency: u32) -> RawClip<f32> {
@@ -9,7 +9,7 @@ impl RawClip<f32> {
 
 impl<T> RawClip<T>
 where
-    T: rodio::Sample + Send + Sync + 'static,
+    T: ambisonic::rodio::Sample + Send + Sync + 'static,
 {
     pub fn buffered(self) -> RawClip<T> {
         RawClip::new(self.dyn_clip.buffered())
@@ -92,7 +92,7 @@ where
         access: F,
     ) -> RawClip<T>
     where
-        F: FnMut(&mut Box<dyn rodio::Source<Item = T> + Send>) + Send, {
+        F: FnMut(&mut Box<dyn Source<Item = T> + Send>) + Send, {
         let nano_seconds = micro_seconds * 1000;
 
         let access = self

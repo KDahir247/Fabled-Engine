@@ -10,3 +10,5 @@ camera listener will have a affine3d when it is implemented.
 OutputSource and ambisonicOutput source will set the spatial sink orientation
 on the affine3d of the camera listener.
 added a decibel file for audio that will convert db to linear and other helpers.
+remove self and be explicit eg. -> Self to -> StructName
+remove rayon.

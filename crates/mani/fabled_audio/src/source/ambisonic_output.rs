@@ -1,6 +1,7 @@
 use crate::{AudioListener, OutputConfig, RawAmbisonicClip, SpatialAmbisonicSource};
 use ambisonic::rodio::Source;
 
+
 pub struct AmbisonicOutput {
     #[allow(dead_code)]
     sink: ambisonic::rodio::SpatialSink,
@@ -11,44 +12,40 @@ pub struct AmbisonicOutput {
 
 impl Default for AmbisonicOutput {
     fn default() -> Self {
-        Self::new([0.0; 3], AudioListener::default()).unwrap()
+        Self::new(AudioListener::default()).unwrap()
     }
 }
 
 impl AmbisonicOutput {
-    fn new(init_pos: [f32; 3], audio_listener: AudioListener) -> Option<Self> {
+    fn new(audio_listener: AudioListener) -> Option<AmbisonicOutput> {
         let OutputConfig {
             output_device,
             output_config,
         } = OutputConfig::default();
 
-        match (output_device, output_config) {
-            (Some(device), Some(config)) => {
-                let (b_mixer, b_controller) = ambisonic::bmixer(config.sample_rate);
+
+        match output_device {
+            None => None,
+            Some(device) => {
+                let (b_mixer, b_controller) = ambisonic::bmixer(output_config.sample_rate);
 
                 let (output_stream, output_handle) =
                     ambisonic::rodio::OutputStream::try_from_device(&device).unwrap();
 
+
                 let sink = ambisonic::rodio::SpatialSink::try_new(
                     &output_handle,
-                    init_pos,
+                    audio_listener.position,
                     audio_listener.stereo_left_position,
                     audio_listener.stereo_right_position,
                 )
                 .unwrap();
 
-                match ambisonic::PlaybackConfiguration::default() {
-                    ambisonic::PlaybackConfiguration::Stereo(cfg) => {
-                        let output = ambisonic::BstreamStereoRenderer::new(b_mixer, cfg);
+                let stereo_cfg = ambisonic::StereoConfig::default();
 
-                        sink.append(output);
-                    }
-                    ambisonic::PlaybackConfiguration::Hrtf(cfg) => {
-                        let output = ambisonic::BstreamHrtfRenderer::new(b_mixer, cfg);
+                let output = ambisonic::BstreamStereoRenderer::new(b_mixer, stereo_cfg);
 
-                        sink.append(output);
-                    }
-                }
+                sink.append(output);
 
                 Some(Self {
                     sink,
@@ -56,7 +53,6 @@ impl AmbisonicOutput {
                     composer: b_controller,
                 })
             }
-            _ => None,
         }
     }
 
@@ -64,14 +60,11 @@ impl AmbisonicOutput {
     pub fn play_omni(&self, clip: RawAmbisonicClip, volume: f32) -> SpatialAmbisonicSource {
         let dyn_clip = clip.dyn_clip;
 
-        let channels = dyn_clip.channels();
-
-        let channel_volume =
-            ambisonic::rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channels as usize]);
+        self.set_global_volume(volume);
 
         let sound_controller = self
             .composer
-            .play(channel_volume, ambisonic::BstreamConfig::default());
+            .play(dyn_clip, ambisonic::BstreamConfig::default());
 
         SpatialAmbisonicSource::new(sound_controller)
     }
@@ -119,7 +112,7 @@ mod ambisonic_output_test {
     fn creation_test() {
         let _ambisonic_output = AmbisonicOutput::default();
 
-        let another_ambisonic_output = AmbisonicOutput::new([0.0; 3], AudioListener::default());
+        let another_ambisonic_output = AmbisonicOutput::new(AudioListener::default());
         assert!(another_ambisonic_output.is_some());
     }
 

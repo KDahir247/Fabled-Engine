@@ -1,27 +1,29 @@
+// todo remove the usage of Box<dyn> we need both RawClip and RawAmbisonicClip
+
 pub struct RawClip<T>
 where
-    T: rodio::Sample, {
-    pub dyn_clip: Box<dyn rodio::Source<Item = T> + Send>,
+    T: ambisonic::rodio::Sample, {
+    pub dyn_clip: Box<dyn ambisonic::rodio::Source<Item = T> + Send>,
 }
 
 impl<T: 'static> Default for RawClip<T>
 where
-    T: rodio::Sample + Send,
+    T: ambisonic::rodio::Sample + Send,
 {
     fn default() -> Self {
         Self {
-            dyn_clip: Box::new(rodio::source::Zero::new(2, 44100)),
+            dyn_clip: Box::new(ambisonic::rodio::source::Zero::new(2, 44100)),
         }
     }
 }
 
 impl<T> RawClip<T>
 where
-    T: rodio::Sample,
+    T: ambisonic::rodio::Sample,
 {
     pub fn new<U: 'static>(audio_clip: U) -> Self
     where
-        U: rodio::Source<Item = T> + Send, {
+        U: ambisonic::rodio::Source<Item = T> + Send, {
         Self {
             dyn_clip: Box::new(audio_clip),
         }
@@ -40,6 +42,7 @@ impl Default for RawAmbisonicClip {
     }
 }
 
+// todo make a better solution
 impl RawAmbisonicClip {
     pub fn new<T: 'static>(ambisonic_audio_clip: T) -> Self
     where

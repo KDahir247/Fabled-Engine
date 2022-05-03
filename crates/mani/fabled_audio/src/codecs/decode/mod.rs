@@ -8,78 +8,31 @@ pub use mpeg::*;
 pub use vorbis::*;
 pub use waveform::*;
 
-use bitflags::bitflags;
 
-bitflags! {
-    pub struct FlacReaderOptions : u8{
+pub struct FlacReaderOptions(u8);
 
-        const METADATA_ONLY  = 2;
-        const READ_VORBIS_COMMENT  = 4;
-    }
+impl FlacReaderOptions {
+    pub const METADATA_ONLY: FlacReaderOptions = FlacReaderOptions(2);
+    pub const READ_VORBIS_COMMENT: FlacReaderOptions = FlacReaderOptions(4);
+    pub const ALL: FlacReaderOptions = FlacReaderOptions(6);
 }
 
+impl FlacReaderOptions {
+    pub fn inner(&self) -> &u8 {
+        &self.0
+    }
+}
 
 impl From<FlacReaderOptions> for claxon::FlacReaderOptions {
     fn from(option_bit: FlacReaderOptions) -> Self {
-        let option_bit = option_bit.bits;
-
-        let meta_data_bit = FlacReaderOptions::METADATA_ONLY.bits;
-
-        let vorbis_comment_bit = FlacReaderOptions::READ_VORBIS_COMMENT.bits;
+        let option_bit = option_bit.inner();
 
         Self {
-            metadata_only: (option_bit & meta_data_bit) == 2,
-            read_vorbis_comment: (option_bit & vorbis_comment_bit) == 4,
+            metadata_only: (option_bit & 2) == 2,
+            read_vorbis_comment: (option_bit & 4) == 4,
         }
     }
 }
-
-
-#[cfg(test)]
-mod flac_options_test {
-    use crate::FlacReaderOptions;
-
-    #[test]
-    fn bit_set() {
-        let flac_option_bit_1 = FlacReaderOptions::from_bits(2).unwrap();
-        assert_eq!(flac_option_bit_1, FlacReaderOptions::METADATA_ONLY);
-
-        let flac_option_bit_2 = FlacReaderOptions::from_bits(4).unwrap();
-        assert_eq!(flac_option_bit_2, FlacReaderOptions::READ_VORBIS_COMMENT);
-
-        let flac_option_bit_3 = FlacReaderOptions::from_bits(6).unwrap();
-        assert!(flac_option_bit_3.is_all());
-    }
-
-
-    #[test]
-    fn bit_conversion() {
-        let flac_empty_bit = FlacReaderOptions::empty();
-        let flac_empty_option: claxon::FlacReaderOptions = flac_empty_bit.into();
-
-        assert!(!flac_empty_option.read_vorbis_comment);
-        assert!(!flac_empty_option.metadata_only);
-
-        let flac_meta_bit = FlacReaderOptions::from_bits(2).unwrap();
-        let flac_meta_option: claxon::FlacReaderOptions = flac_meta_bit.into();
-
-        assert!(!flac_meta_option.read_vorbis_comment);
-        assert!(flac_meta_option.metadata_only);
-
-        let flac_read_bit = FlacReaderOptions::from_bits(4).unwrap();
-        let flac_read_option: claxon::FlacReaderOptions = flac_read_bit.into();
-
-        assert!(flac_read_option.read_vorbis_comment);
-        assert!(!flac_read_option.metadata_only);
-
-        let flac_all_bit = FlacReaderOptions::from_bits(6).unwrap();
-        let flac_all_option: claxon::FlacReaderOptions = flac_all_bit.into();
-
-        assert!(flac_all_option.read_vorbis_comment);
-        assert!(flac_all_option.metadata_only);
-    }
-}
-
 
 #[cfg(test)]
 mod data_test {

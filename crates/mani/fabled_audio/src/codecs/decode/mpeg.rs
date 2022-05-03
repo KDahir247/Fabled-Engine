@@ -41,7 +41,7 @@ impl Mp3Reader {
 #[cfg(test)]
 mod mp3_decoding_test {
     use crate::Mp3Reader;
-    use rodio::Source;
+    use ambisonic::rodio::Source;
 
     #[test]
     fn decoding_file() {
@@ -59,7 +59,7 @@ mod mp3_decoding_test {
 
         let file = std::fs::File::open(mp3_path.as_str()).unwrap();
 
-        let rodio_decoder = rodio::Decoder::new_mp3(file).unwrap();
+        let rodio_decoder = ambisonic::rodio::Decoder::new_mp3(file).unwrap();
         let mp3_reader = Mp3Reader::default();
         let audio_spec = mp3_reader.read_mp3(mp3_path.as_str()).unwrap();
 

@@ -1,6 +1,6 @@
 use crate::{SampleFormat, SupportedBufferSize};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Default, Copy, Debug, PartialEq, Eq)]
 pub struct DeviceConfig {
     pub sample_rate: u32,
     pub channel_count: u16,
