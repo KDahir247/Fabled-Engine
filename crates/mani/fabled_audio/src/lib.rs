@@ -60,7 +60,7 @@ mod audio_test {
 
     #[test]
     fn single_audio() {
-        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/Joyride.wav"].join("");
+        let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
         let file = std::fs::File::open(path).unwrap();
         //---------------------- Creating the Clip ------------------
         let standard_output = AmbisonicOutput::default();
@@ -72,6 +72,6 @@ mod audio_test {
         standard_output.play_omni(raw_clip, 1.);
 
 
-        std::thread::sleep(std::time::Duration::from_secs(5000));
+        std::thread::sleep(std::time::Duration::from_secs(500));
     }
 }

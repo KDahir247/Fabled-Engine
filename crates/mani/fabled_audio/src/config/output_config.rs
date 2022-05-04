@@ -1,7 +1,8 @@
+// There will only be one OutputConfig, so all mostly all if not all function
+// will be cold. OutputConfig will be added to ECS Unique
+
 use crate::DeviceConfig;
-
 use cpal::traits::{DeviceTrait, HostTrait};
-
 
 pub struct OutputConfig {
     pub output_device: Option<cpal::Device>,
@@ -9,6 +10,7 @@ pub struct OutputConfig {
 }
 
 impl Default for OutputConfig {
+    #[cold]
     fn default() -> Self {
         let default_host = cpal::default_host();
 
@@ -16,21 +18,19 @@ impl Default for OutputConfig {
 
         let output_cfg = match &output_device {
             Some(device) => {
-                // todo unwrap will cause a error and this error is a user error not a bug.
-                let supported_output_config = device
-                    .supported_output_configs()
-                    .unwrap()
-                    .max_by(|x, y| x.max_sample_rate().cmp(&y.max_sample_rate()))
+                let supported_output_configs = device.supported_output_configs().unwrap();
+
+                let optimal_output_config_range = supported_output_configs
+                    .max_by(|curr, next| curr.max_sample_rate().cmp(&next.max_sample_rate()))
                     .unwrap();
 
-
-                let desired_config_max = supported_output_config.with_max_sample_rate();
+                let desired_config = optimal_output_config_range.with_max_sample_rate();
 
                 DeviceConfig {
-                    sample_rate: desired_config_max.sample_rate().0,
-                    channel_count: desired_config_max.channels(),
-                    buffer_size: desired_config_max.buffer_size().into(),
-                    sample_format: desired_config_max.sample_format().into(),
+                    sample_rate: desired_config.sample_rate().0,
+                    channel_count: desired_config.channels(),
+                    buffer_size: desired_config.buffer_size().into(),
+                    sample_format: desired_config.sample_format().into(),
                 }
             }
             None => DeviceConfig::default(),
@@ -44,74 +44,47 @@ impl Default for OutputConfig {
 }
 
 impl OutputConfig {
+    #[cold]
     pub fn retrieve_from_host() -> Vec<OutputConfig> {
-        todo!()
+        let available_hosts = cpal::available_hosts();
 
-        // let available_hosts = cpal::available_hosts();
-        //
-        // let output_configs =
-        // std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(
-        //     available_hosts.len(),
-        // )));
-        //
-        // available_hosts.par_iter().for_each(|host_id| {
-        //     let host = cpal::host_from_id(*host_id);
-        //
-        //     match host {
-        //         Ok(host) => {
-        //             let output_device = host.default_output_device();
-        //
-        //             if let Some(device) = output_device {
-        //                 let output_config =
-        // device.supported_output_configs().map_or(
-        // None,                     |supported_output_config| {
-        //                         let optimal_output_config_range =
-        // supported_output_config
-        // .max_by_key(|config_predicate| {
-        // config_predicate.max_sample_rate().0
-        // });
-        //
-        //                         if let Some(desired_config) =
-        // optimal_output_config_range {                             let
-        // desired_config_max = desired_config.with_max_sample_rate();
-        //
-        //                             Some(DeviceConfig {
-        //                                 sample_rate:
-        // desired_config_max.sample_rate().0,
-        // channel_count: desired_config_max.channels(),
-        // sample_format: desired_config_max.sample_format().into(),
-        //                                 buffer_size:
-        // desired_config_max.buffer_size().into(),
-        // })                         } else {
-        //                             None
-        //                         }
-        //                     },
-        //                 );
-        //
-        //                 let output_config_guard = output_configs.clone();
-        //
-        //                 let output_device_detail = OutputConfig {
-        //                     output_device: Some(device),
-        //                     output_config : output_config.unwrap(),
-        //                 };
-        //
-        //
-        // output_config_guard.lock().push(output_device_detail);
-        //             }
-        //         }
-        //         Err(err) => {
-        //             println!("Host is Unavailable.\nMessage : {:?}", err);
-        //         }
-        //     }
-        // });
-        //
-        // let mut output_config_guard = output_configs.lock();
-        //
-        // let result = std::mem::take(output_config_guard.deref_mut());
-        // result
+        let mut output_configs: Vec<OutputConfig> = Vec::with_capacity(available_hosts.len());
+
+        for host_id in available_hosts {
+            let host = cpal::host_from_id(host_id);
+
+            if let Ok(valid_host) = host {
+                // should be at least one device right.. monitor audio?
+                let output_device = valid_host.default_output_device().unwrap();
+
+                let supported_output_config = output_device.supported_output_configs().unwrap();
+
+                let optimal_output_config_range = supported_output_config
+                    .max_by(|curr, next| curr.max_sample_rate().cmp(&next.max_sample_rate()));
+
+                if let Some(desired_config_range) = optimal_output_config_range {
+                    let desired_config = desired_config_range.with_max_sample_rate();
+
+                    let output_config = OutputConfig {
+                        output_device: Some(output_device),
+                        output_config: DeviceConfig {
+                            sample_rate: desired_config.sample_rate().0,
+                            channel_count: desired_config.channels(),
+                            buffer_size: desired_config.buffer_size().into(),
+                            sample_format: desired_config.sample_format().into(),
+                        },
+                    };
+
+                    output_configs.push(output_config);
+                }
+            }
+        }
+
+        output_configs
     }
 
 
+    #[cold]
     pub fn retrieve_from_devices() -> Vec<OutputConfig> {
         todo!()
 
@@ -173,8 +146,10 @@ mod output_config_test {
     #[test]
     fn single_best_output() {
         let output_config = OutputConfig::default();
-        print!("{:?} ", output_config.output_device.unwrap().name());
-        print!("{:?}", output_config.output_config);
+        println!("{:?} ", output_config.output_device.unwrap().name());
+        println!("{:?}", output_config.output_config);
+
+        println!("{:?}", cpal::available_hosts());
     }
 
     #[test]

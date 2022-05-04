@@ -2,549 +2,605 @@
  Copies = Number of instantiations of the function (and the percentage of the total). For a generic function
  Function name = Name of function
 
- Fabled_Engine Audio
- ___________________
-   Lines         Copies      Function name
-   -----         ------      -------------
-   28395 (100%)  930 (100%)  (TOTAL)
-    1411 (5.0%)   28 (3.0%)  core::option::Option<T>::map
-    1376 (4.8%)   16 (1.7%)  core::iter::traits::iterator::Iterator::advance_by
-    1268 (4.5%)    4 (0.4%)  <rodio::conversions::sample_rate::SampleRateConverter<I> as core::iter::traits::iterator::Iterator>::next
-    1141 (4.0%)    4 (0.4%)  ambisonic::bstream::bstream
-     928 (3.3%)    4 (0.4%)  rodio::conversions::sample_rate::SampleRateConverter<I>::new
-     704 (2.5%)    4 (0.4%)  <rodio::conversions::sample_rate::SampleRateConverter<I> as core::iter::traits::iterator::Iterator>::size_hint::{{closure}}
-     645 (2.3%)   15 (1.6%)  core::iter::traits::iterator::Iterator::nth
-     608 (2.1%)    4 (0.4%)  <rodio::conversions::channels::ChannelCountConverter<I> as core::iter::traits::iterator::Iterator>::next
-     537 (1.9%)    4 (0.4%)  <rodio::source::uniform::UniformSourceIterator<I,D> as core::iter::traits::iterator::Iterator>::next
-     510 (1.8%)    5 (0.5%)  <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::size_hint
-     435 (1.5%)    5 (0.5%)  <alloc::vec::Vec<T> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<T,I>>::from_iter
-     352 (1.2%)    4 (0.4%)  <rodio::source::uniform::Take<I> as core::iter::traits::iterator::Iterator>::size_hint
-     330 (1.2%)    5 (0.5%)  alloc::vec::Vec<T,A>::extend_desugared
-     326 (1.1%)    4 (0.4%)  rodio::source::uniform::UniformSourceIterator<I,D>::bootstrap
-     324 (1.1%)    4 (0.4%)  <rodio::conversions::channels::ChannelCountConverter<I> as core::iter::traits::iterator::Iterator>::size_hint
-     299 (1.1%)   16 (1.7%)  core::option::Option<T>::unwrap
-     292 (1.0%)    4 (0.4%)  rodio::conversions::sample_rate::SampleRateConverter<I>::next_input_frame
-     253 (0.9%)   11 (1.2%)  fabled_audio::clip::raw_clip::RawAmbisonicClip::new
-     245 (0.9%)    1 (0.1%)  fabled_audio::codecs::encode::waveform::WavWriter::new
-     236 (0.8%)    4 (0.4%)  <rodio::conversions::sample_rate::SampleRateConverter<I> as core::iter::traits::iterator::Iterator>::size_hint
-     229 (0.8%)    4 (0.4%)  rodio::source::uniform::UniformSourceIterator<I,D>::new
-     209 (0.7%)    2 (0.2%)  ambisonic::bmixer::BmixerComposer::play
-     209 (0.7%)    1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::new
-     195 (0.7%)   15 (1.6%)  alloc::boxed::Box<T>::new
-     192 (0.7%)    4 (0.4%)  rodio::conversions::channels::ChannelCountConverter<I>::new
-     184 (0.6%)    1 (0.1%)  rodio::sink::Sink::append
-     178 (0.6%)    5 (0.5%)  core::result::Result<T,E>::unwrap
-     176 (0.6%)    4 (0.4%)  <rodio::conversions::channels::ChannelCountConverter<I> as core::iter::traits::iterator::Iterator>::size_hint::{{closure}}
-     176 (0.6%)    4 (0.4%)  <rodio::source::uniform::Take<I> as core::iter::traits::iterator::Iterator>::next
-     174 (0.6%)    6 (0.6%)  core::fmt::ArgumentV1::new
-     172 (0.6%)    2 (0.2%)  std::sync::poison::map_result
-     158 (0.6%)    2 (0.2%)  rodio::source::periodic::periodic
-     153 (0.5%)    5 (0.5%)  core::mem::replace
-     152 (0.5%)    1 (0.1%)  <fabled_audio::error::decoder_error::AudioDecodingError as core::fmt::Debug>::fmt
-     150 (0.5%)    3 (0.3%)  std::sync::mutex::Mutex<T>::new
-     148 (0.5%)    2 (0.2%)  rodio::source::delay::delay
-     146 (0.5%)    1 (0.1%)  <rodio::source::take::TakeDuration<I> as core::iter::traits::iterator::Iterator>::next
-     144 (0.5%)    2 (0.2%)  core::cmp::max_by
-     140 (0.5%)    5 (0.5%)  <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::next
-     140 (0.5%)    1 (0.1%)  rodio::source::buffered::Buffered<I>::next_frame
-     139 (0.5%)    1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as core::iter::traits::iterator::Iterator>::next
-     138 (0.5%)    1 (0.1%)  rodio::source::buffered::extract
-     128 (0.5%)    1 (0.1%)  <fabled_audio::error::decoder_error::AudioDecodingError as core::fmt::Display>::fmt
-     123 (0.4%)    5 (0.5%)  core::option::Option<T>::as_mut
-     123 (0.4%)    5 (0.5%)  core::option::Option<T>::as_ref
-     120 (0.4%)    2 (0.2%)  <alloc::sync::Weak<T> as core::ops::drop::Drop>::drop
-     114 (0.4%)    2 (0.2%)  alloc::sync::Arc<T>::new
-     114 (0.4%)    1 (0.1%)  <rodio::source::blt::BltFilter<I> as core::iter::traits::iterator::Iterator>::next
-     114 (0.4%)    1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as core::iter::traits::iterator::Iterator>::next
-     114 (0.4%)    1 (0.1%)  rodio::spatial_sink::SpatialSink::append
-     112 (0.4%)    4 (0.4%)  <rodio::source::uniform::UniformSourceIterator<I,D> as core::iter::traits::iterator::Iterator>::size_hint
-     108 (0.4%)    2 (0.2%)  core::option::Option<T>::ok_or
-     107 (0.4%)    1 (0.1%)  rodio::queue::SourcesQueueInput<S>::append_with_signal
-     103 (0.4%)    2 (0.2%)  <core::result::Result<T,E> as core::ops::try_trait::Try>::branch
-     103 (0.4%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::take_duration
-     102 (0.4%)    1 (0.1%)  rodio::source::channel_volume::ChannelVolume<I>::new
-     100 (0.4%)    5 (0.5%)  core::ptr::read
-     100 (0.4%)    2 (0.2%)  <rodio::source::delay::Delay<I> as core::iter::traits::iterator::Iterator>::size_hint
-      98 (0.3%)    1 (0.1%)  <fabled_audio::error::encoder_error::AudioEncodingError as core::fmt::Debug>::fmt
-      97 (0.3%)    1 (0.1%)  alloc::alloc::Global::alloc_impl
-      96 (0.3%)    4 (0.4%)  rodio::conversions::sample_rate::SampleRateConverter<I>::into_inner
-      94 (0.3%)    1 (0.1%)  rodio::source::spatial::Spatial<I>::set_positions
-      93 (0.3%)    9 (1.0%)  <&T as core::fmt::Debug>::fmt
-      92 (0.3%)    1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as core::iter::traits::iterator::Iterator>::size_hint
-      91 (0.3%)    1 (0.1%)  <fabled_audio::error::encoder_error::AudioEncodingError as core::fmt::Display>::fmt
-      90 (0.3%)    5 (0.5%)  core::iter::adapters::take::Take<I>::new
-      90 (0.3%)    1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::current_frame_len
-      88 (0.3%)    2 (0.2%)  alloc::sync::Weak<T>::inner
-      86 (0.3%)    1 (0.1%)  <rodio::source::buffered::Buffered<I> as core::iter::traits::iterator::Iterator>::next
-      84 (0.3%)    1 (0.1%)  <fabled_audio::config::output_config::OutputConfig as core::default::Default>::default
-      83 (0.3%)    1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as rodio::source::Source>::total_duration
-      80 (0.3%)    6 (0.6%)  core::ops::function::FnOnce::call_once
-      80 (0.3%)    2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as core::iter::traits::iterator::Iterator>::next
-      80 (0.3%)    2 (0.2%)  alloc::alloc::box_free
-      79 (0.3%)    1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as rodio::source::Source>::current_frame_len
-      78 (0.3%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::delay
-      78 (0.3%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::fade_in
-      77 (0.3%)    1 (0.1%)  core::option::Option<T>::filter
-      76 (0.3%)    2 (0.2%)  <rodio::source::delay::Delay<I> as core::iter::traits::iterator::Iterator>::next
-      74 (0.3%)    1 (0.1%)  core::iter::traits::iterator::Iterator::fold
-      74 (0.3%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::reverb
-      73 (0.3%)    1 (0.1%)  <rodio::source::speed::Speed<I> as rodio::source::Source>::total_duration
-      73 (0.3%)    1 (0.1%)  core::iter::traits::iterator::Iterator::reduce
-      73 (0.3%)    1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::play_omni
-      69 (0.2%)    1 (0.1%)  rodio::source::pausable::Pausable<I>::set_paused
-      68 (0.2%)    1 (0.1%)  <rodio::source::pausable::Pausable<I> as core::iter::traits::iterator::Iterator>::next
-      66 (0.2%)    3 (0.3%)  <alloc::sync::Arc<T> as core::clone::Clone>::clone
-      65 (0.2%)    5 (0.5%)  <alloc::vec::Vec<T> as core::iter::traits::collect::FromIterator<T>>::from_iter
-      65 (0.2%)    5 (0.5%)  core::iter::traits::iterator::Iterator::take
-      65 (0.2%)    1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::play_at
-      62 (0.2%)    1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::set_position
-      61 (0.2%)    1 (0.1%)  rodio::queue::SourcesQueueInput<S>::append
-      60 (0.2%)    5 (0.5%)  <alloc::vec::Vec<T,A> as alloc::vec::spec_extend::SpecExtend<T,I>>::spec_extend
-      60 (0.2%)    4 (0.4%)  <rodio::conversions::sample::DataConverter<I,O> as core::iter::traits::iterator::Iterator>::next
-      60 (0.2%)    3 (0.3%)  <rodio::source::amplify::Amplify<I> as core::iter::traits::iterator::Iterator>::next
-      60 (0.2%)    1 (0.1%)  <fabled_audio::container::audio_spec::AudioSpecification as core::fmt::Debug>::fmt
-      60 (0.2%)    1 (0.1%)  rodio::source::spatial::Spatial<I>::new
-      60 (0.2%)    1 (0.1%)  rodio::source::take::take_duration
-      58 (0.2%)    2 (0.2%)  core::alloc::layout::Layout::for_value_raw
-      58 (0.2%)    1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::total_duration
-      56 (0.2%)    1 (0.1%)  rodio::source::mix::mix
-      55 (0.2%)    5 (0.5%)  <&mut I as core::iter::traits::iterator::Iterator>::next
-      55 (0.2%)    1 (0.1%)  rodio::sink::Sink::append::{{closure}}
-      54 (0.2%)    5 (0.5%)  core::mem::maybe_uninit::MaybeUninit<T>::assume_init
-      54 (0.2%)    3 (0.3%)  core::iter::traits::iterator::Iterator::size_hint
-      54 (0.2%)    1 (0.1%)  <core::time::Duration as core::cmp::Ord>::cmp
-      54 (0.2%)    1 (0.1%)  <rodio::source::fadein::FadeIn<I> as core::iter::traits::iterator::Iterator>::next
-      54 (0.2%)    1 (0.1%)  <rodio::source::repeat::Repeat<I> as core::iter::traits::iterator::Iterator>::next
-      53 (0.2%)    5 (0.5%)  core::option::Option<T>::take
-      53 (0.2%)    1 (0.1%)  core::fmt::Arguments::new_v1
-      52 (0.2%)    4 (0.4%)  <rodio::source::uniform::UniformSourceIterator<I,D> as rodio::source::Source>::current_frame_len
-      52 (0.2%)    1 (0.1%)  rodio::source::fadein::fadein
-      51 (0.2%)    1 (0.1%)  <fabled_audio::container::device_config::DeviceConfig as core::fmt::Debug>::fmt
-      50 (0.2%)    2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::total_duration::{{closure}}
-      50 (0.2%)    2 (0.2%)  std::sync::mutex::MutexGuard<T>::new::{{closure}}
-      50 (0.2%)    1 (0.1%)  <rodio::source::buffered::Buffered<I> as rodio::source::Source>::current_frame_len
-      49 (0.2%)    5 (0.5%)  core::cell::UnsafeCell<T>::new
-      48 (0.2%)    1 (0.1%)  core::fmt::builders::DebugList::entries
-      47 (0.2%)    6 (0.6%)  <T as core::convert::Into<U>>::into
-      47 (0.2%)    3 (0.3%)  rodio::source::amplify::amplify
-      47 (0.2%)    1 (0.1%)  <fabled_audio::container::supported_buffer::SupportedBufferSize as core::fmt::Debug>::fmt
-      47 (0.2%)    1 (0.1%)  core::time::Duration::new
-      46 (0.2%)    2 (0.2%)  <alloc::sync::Arc<T> as core::ops::drop::Drop>::drop
-      46 (0.2%)    1 (0.1%)  <fabled_audio::error::decoder_error::AudioDecodingError as std::error::Error>::source
-      46 (0.2%)    1 (0.1%)  <fabled_audio::error::encoder_error::AudioEncodingError as std::error::Error>::source
-      46 (0.2%)    1 (0.1%)  <fabled_audio::error::output_error::SpatialOutputError as core::fmt::Debug>::fmt
-      45 (0.2%)    5 (0.5%)  <I as core::iter::traits::collect::IntoIterator>::into_iter
-      45 (0.2%)    5 (0.5%)  <alloc::vec::Vec<T> as alloc::vec::spec_from_iter::SpecFromIter<T,I>>::from_iter
-      45 (0.2%)    5 (0.5%)  core::iter::traits::iterator::Iterator::collect
-      45 (0.2%)    5 (0.5%)  core::ptr::write
-      45 (0.2%)    3 (0.3%)  <rodio::source::amplify::Amplify<I> as core::iter::traits::iterator::Iterator>::next::{{closure}}
-      45 (0.2%)    1 (0.1%)  <fabled_audio::error::output_error::SpatialOutputError as core::fmt::Display>::fmt
-      45 (0.2%)    1 (0.1%)  alloc::vec::Vec<T,A>::push
-      44 (0.2%)    2 (0.2%)  std::sync::poison::PoisonError<T>::new
-      44 (0.2%)    1 (0.1%)  <rodio::source::repeat::Repeat<I> as rodio::source::Source>::current_frame_len
-      44 (0.2%)    1 (0.1%)  core::option::Option<T>::get_or_insert_with
-      44 (0.2%)    1 (0.1%)  rodio::source::blt::low_pass
-      44 (0.2%)    1 (0.1%)  rodio::spatial_sink::SpatialSink::append::{{closure}}
-      43 (0.2%)    1 (0.1%)  <rodio::source::done::Done<I> as core::iter::traits::iterator::Iterator>::next
-      43 (0.2%)    1 (0.1%)  core::num::<impl u64>::checked_add
-      43 (0.2%)    1 (0.1%)  core::num::<impl u64>::overflowing_add
-      43 (0.2%)    1 (0.1%)  rodio::source::pausable::pausable
-      42 (0.1%)    1 (0.1%)  <fabled_audio::container::audio_listener::AudioListener as core::fmt::Debug>::fmt
-      42 (0.1%)    1 (0.1%)  alloc::alloc::exchange_malloc
-      42 (0.1%)    1 (0.1%)  rodio::source::buffered::buffered
-      42 (0.1%)    1 (0.1%)  std::sync::poison::Flag::borrow
-      40 (0.1%)    4 (0.4%)  rodio::conversions::sample::DataConverter<I,O>::new
-      40 (0.1%)    2 (0.2%)  <rodio::source::delay::Delay<I> as core::iter::traits::iterator::Iterator>::size_hint::{{closure}}
-      40 (0.1%)    2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::current_frame_len
-      40 (0.1%)    2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::current_frame_len::{{closure}}
-      39 (0.1%)    1 (0.1%)  alloc::raw_vec::handle_reserve
-      39 (0.1%)    1 (0.1%)  rodio::source::Source::reverb
-      38 (0.1%)    1 (0.1%)  <fabled_audio::container::audio_listener::AudioListener as core::default::Default>::default
-      38 (0.1%)    1 (0.1%)  rodio::source::blt::BltApplier::apply
-      35 (0.1%)    5 (0.5%)  <&mut I as core::iter::traits::iterator::Iterator>::size_hint
-      35 (0.1%)    1 (0.1%)  core::option::Option<T>::unwrap_unchecked
-      34 (0.1%)    3 (0.3%)  core::mem::manually_drop::ManuallyDrop<T>::new
-      34 (0.1%)    3 (0.3%)  rodio::source::Source::amplify
-      34 (0.1%)    2 (0.2%)  rodio::source::Source::periodic_access
-      33 (0.1%)    5 (0.5%)  core::mem::manually_drop::ManuallyDrop<T>::into_inner
-      33 (0.1%)    3 (0.3%)  <rodio::source::amplify::Amplify<I> as rodio::source::Source>::current_frame_len
-      33 (0.1%)    1 (0.1%)  rodio::source::take::TakeDuration<I>::get_duration_per_sample
-      32 (0.1%)    4 (0.4%)  <rodio::conversions::sample::DataConverter<I,O> as core::iter::traits::iterator::Iterator>::next::{{closure}}
-      32 (0.1%)    4 (0.4%)  <rodio::source::uniform::UniformSourceIterator<I,D> as rodio::source::Source>::total_duration
-      32 (0.1%)    4 (0.4%)  rodio::source::uniform::UniformSourceIterator<I,D>::bootstrap::{{closure}}
-      32 (0.1%)    2 (0.2%)  std::sync::mutex::MutexGuard<T>::new
-      32 (0.1%)    1 (0.1%)  fabled_audio::codecs::decode::<impl core::convert::From<fabled_audio::codecs::decode::FlacReaderOptions> for claxon::FlacReaderOptions>::from
-      32 (0.1%)    1 (0.1%)  fabled_audio::container::supported_buffer::<impl core::convert::From<fabled_audio::container::supported_buffer::SupportedBufferSize> for cpal::BufferSize>::from
-      31 (0.1%)    1 (0.1%)  fabled_audio::clip::audio_collection::AmbisonicCollection::append
-      30 (0.1%)    7 (0.8%)  core::cell::UnsafeCell<T>::get
-      30 (0.1%)    3 (0.3%)  <&T as core::fmt::Display>::fmt
-      30 (0.1%)    3 (0.3%)  core::fmt::ArgumentV1::new_debug
-      30 (0.1%)    3 (0.3%)  core::fmt::ArgumentV1::new_display
-      30 (0.1%)    2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::total_duration
-      30 (0.1%)    2 (0.2%)  <std::sync::mutex::MutexGuard<T> as core::ops::drop::Drop>::drop
-      30 (0.1%)    1 (0.1%)  <core::option::Option<T> as core::ops::try_trait::Try>::branch
-      30 (0.1%)    1 (0.1%)  <cpal::SampleRate as core::cmp::Ord>::cmp
-      30 (0.1%)    1 (0.1%)  <fabled_audio::container::sample_format::SampleFormat as core::fmt::Debug>::fmt
-      30 (0.1%)    1 (0.1%)  rodio::source::repeat::repeat
-      29 (0.1%)    2 (0.2%)  rodio::source::Source::delay
-      29 (0.1%)    1 (0.1%)  <fabled_audio::container::supported_buffer::SupportedBufferSize as core::convert::From<&cpal::SupportedBufferSize>>::from
-      29 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-      29 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
-      29 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
-      29 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>>
-      29 (0.1%)    1 (0.1%)  fabled_audio::clip::audio_collection::AmbisonicCollection::new
-      29 (0.1%)    1 (0.1%)  std::sync::poison::Flag::done
-      28 (0.1%)    4 (0.4%)  <rodio::conversions::sample::DataConverter<I,O> as core::iter::traits::iterator::Iterator>::size_hint
-      28 (0.1%)    4 (0.4%)  rodio::conversions::channels::ChannelCountConverter<I>::into_inner
-      28 (0.1%)    2 (0.2%)  alloc::boxed::Box<T,A>::leak
-      28 (0.1%)    2 (0.2%)  alloc::sync::Arc<T>::drop_slow
-      28 (0.1%)    1 (0.1%)  <rodio::source::repeat::Repeat<I> as rodio::source::Source>::channels
-      28 (0.1%)    1 (0.1%)  <rodio::source::repeat::Repeat<I> as rodio::source::Source>::sample_rate
-      27 (0.1%)    3 (0.3%)  <std::sync::mutex::MutexGuard<T> as core::ops::deref::DerefMut>::deref_mut
-      27 (0.1%)    1 (0.1%)  <alloc::alloc::Global as core::alloc::Allocator>::deallocate
-      27 (0.1%)    1 (0.1%)  <fabled_audio::container::fade_filter::FadeFilter as core::fmt::Debug>::fmt
-      27 (0.1%)    1 (0.1%)  <rodio::source::buffered::Buffered<I> as rodio::source::Source>::channels
-      27 (0.1%)    1 (0.1%)  <rodio::source::buffered::Buffered<I> as rodio::source::Source>::sample_rate
-      27 (0.1%)    1 (0.1%)  rodio::sink::Sink::set_volume
-      27 (0.1%)    1 (0.1%)  rodio::source::take::DurationFilter::apply
-      24 (0.1%)    5 (0.5%)  core::mem::maybe_uninit::MaybeUninit<T>::as_mut_ptr
-      24 (0.1%)    4 (0.4%)  rodio::conversions::sample::DataConverter<I,O>::into_inner
-      24 (0.1%)    2 (0.2%)  <std::sync::poison::PoisonError<T> as core::fmt::Debug>::fmt
-      24 (0.1%)    2 (0.2%)  core::ptr::mut_ptr::<impl *mut T>::offset
-      24 (0.1%)    1 (0.1%)  core::cmp::impls::<impl core::cmp::Ord for u32>::cmp
-      24 (0.1%)    1 (0.1%)  core::cmp::impls::<impl core::cmp::Ord for u64>::cmp
-      24 (0.1%)    1 (0.1%)  rodio::sink::Sink::volume
-      23 (0.1%)    1 (0.1%)  core::iter::traits::iterator::Iterator::max_by
-      23 (0.1%)    1 (0.1%)  core::option::Option<T>::unwrap_or_default
-      23 (0.1%)    1 (0.1%)  cpal::SupportedStreamConfigRange::with_max_sample_rate
-      23 (0.1%)    1 (0.1%)  fabled_audio::clip::raw_clip::RawClip<T>::new
-      22 (0.1%)    2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as rodio::source::Source>::current_frame_len
-      22 (0.1%)    1 (0.1%)  <core::result::Result<T,F> as core::ops::try_trait::FromResidual<core::result::Result<core::convert::Infallible,E>>>::from_residual
-      22 (0.1%)    1 (0.1%)  <fabled_audio::clip::raw_clip::RawAmbisonicClip as core::default::Default>::default
-      22 (0.1%)    1 (0.1%)  <fabled_audio::container::device_config::DeviceConfig as core::default::Default>::default
-      22 (0.1%)    1 (0.1%)  <rodio::source::buffered::Buffered<I> as core::clone::Clone>::clone
-      22 (0.1%)    1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as core::iter::traits::iterator::Iterator>::next
-      22 (0.1%)    1 (0.1%)  core::sync::atomic::fence
-      22 (0.1%)    1 (0.1%)  rodio::conversions::sample_rate::SampleRateConverter<I>::new::gcd
-      21 (0.1%)    3 (0.3%)  <rodio::source::amplify::Amplify<I> as core::iter::traits::iterator::Iterator>::size_hint
-      21 (0.1%)    3 (0.3%)  <rodio::source::amplify::Amplify<I> as rodio::source::Source>::channels
-      21 (0.1%)    3 (0.3%)  <rodio::source::amplify::Amplify<I> as rodio::source::Source>::sample_rate
-      21 (0.1%)    3 (0.3%)  <rodio::source::amplify::Amplify<I> as rodio::source::Source>::total_duration
-      21 (0.1%)    1 (0.1%)  <[T] as core::fmt::Debug>::fmt
-      21 (0.1%)    1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as core::iter::traits::iterator::Iterator>::next::{{closure}}
-      21 (0.1%)    1 (0.1%)  fabled_audio::clip::audio_collection::AmbisonicCollection::retrieve_output
-      21 (0.1%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::amplify
-      21 (0.1%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::low_pass
-      21 (0.1%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::speed
-      21 (0.1%)    1 (0.1%)  fabled_audio::mixer::standard_mixer::<impl fabled_audio::clip::raw_clip::RawClip<f32>>::low_pass
-      20 (0.1%)    5 (0.5%)  core::iter::traits::iterator::Iterator::by_ref
-      20 (0.1%)    1 (0.1%)  <alloc::boxed::Box<I,A> as core::iter::traits::iterator::Iterator>::nth
-      20 (0.1%)    1 (0.1%)  <fabled_audio::config::output_config::OutputConfig as core::default::Default>::default::{{closure}}
-      20 (0.1%)    1 (0.1%)  core::alloc::layout::Layout::from_size_align_unchecked
-      20 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<fabled_audio::error::encoder_error::AudioEncodingError>
-      19 (0.1%)    1 (0.1%)  <f32 as rodio::conversions::sample::Sample>::lerp
-      19 (0.1%)    1 (0.1%)  core::cmp::Ord::max
-      19 (0.1%)    1 (0.1%)  core::cmp::max
-      19 (0.1%)    1 (0.1%)  core::iter::traits::iterator::Iterator::max_by::fold::{{closure}}
-      19 (0.1%)    1 (0.1%)  core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &mut F>::call_once
-      19 (0.1%)    1 (0.1%)  core::sync::atomic::AtomicBool::store
-      19 (0.1%)    1 (0.1%)  core::time::Duration::from_millis
-      18 (0.1%)    3 (0.3%)  <rodio::source::uniform::UniformSourceIterator<I,D> as rodio::source::Source>::channels
-      18 (0.1%)    3 (0.3%)  <rodio::source::uniform::UniformSourceIterator<I,D> as rodio::source::Source>::sample_rate
-      18 (0.1%)    2 (0.2%)  <std::sync::mutex::MutexGuard<T> as core::ops::deref::Deref>::deref
-      18 (0.1%)    2 (0.2%)  core::ptr::mut_ptr::<impl *mut T>::add
-      18 (0.1%)    2 (0.2%)  std::sync::mutex::Mutex<T>::lock
-      18 (0.1%)    1 (0.1%)  <rodio::source::buffered::Buffered<I> as core::iter::traits::iterator::Iterator>::size_hint
-      18 (0.1%)    1 (0.1%)  <rodio::source::repeat::Repeat<I> as core::iter::traits::iterator::Iterator>::size_hint
-      18 (0.1%)    1 (0.1%)  core::array::<impl core::fmt::Debug for [T; N]>::fmt
-      18 (0.1%)    1 (0.1%)  core::panicking::assert_failed
-      18 (0.1%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::buffered
-      18 (0.1%)    1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::repeat
-      18 (0.1%)    1 (0.1%)  std::panicking::panic_count::count_is_zero
-      17 (0.1%)    5 (0.5%)  core::mem::maybe_uninit::MaybeUninit<T>::uninit
-      17 (0.1%)    1 (0.1%)  <fabled_audio::container::sample_format::SampleFormat as core::convert::From<cpal::samples_formats::SampleFormat>>::from
-      17 (0.1%)    1 (0.1%)  rodio::source::done::Done<I>::new
-      17 (0.1%)    1 (0.1%)  rodio::source::speed::speed
-      16 (0.1%)    2 (0.2%)  <core::ptr::non_null::NonNull<T> as core::convert::From<&mut T>>::from
-      16 (0.1%)    2 (0.2%)  alloc::rc::is_dangling
-      16 (0.1%)    2 (0.2%)  alloc::sync::Arc<T>::get_mut_unchecked
-      16 (0.1%)    2 (0.2%)  core::mem::align_of_val_raw
-      16 (0.1%)    2 (0.2%)  core::mem::size_of_val_raw
-      16 (0.1%)    2 (0.2%)  core::ptr::unique::Unique<T>::cast
-      16 (0.1%)    1 (0.1%)  <alloc::alloc::Global as core::alloc::Allocator>::allocate
-      16 (0.1%)    1 (0.1%)  alloc::alloc::dealloc
-      16 (0.1%)    1 (0.1%)  alloc::raw_vec::RawVec<T,A>::capacity
-      16 (0.1%)    1 (0.1%)  core::option::Option<T>::is_some
-      16 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-      16 (0.1%)    1 (0.1%)  cpal::BufferSize::Fixed
-      16 (0.1%)    1 (0.1%)  fabled_audio::container::sample_format::<impl core::convert::From<fabled_audio::container::sample_format::SampleFormat> for hound::SampleFormat>::from
-      16 (0.1%)    1 (0.1%)  fabled_audio::container::supported_buffer::SupportedBufferSize::Fixed
-      15 (0.1%)    1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as core::iter::traits::iterator::Iterator>::next
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<core::option::Option<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>,f32>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<core::option::Option<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>,f32>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<core::option::Option<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>,f32>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<core::option::Option<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>>,f32>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::buffered::FrameData<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::channel_volume::ChannelVolume<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::done::Done<rodio::source::samples_converter::SamplesConverter<rodio::source::periodic::PeriodicAccess<rodio::source::stoppable::Stoppable<rodio::source::amplify::Am
- plify<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<am
- bisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>>,rodio::sink::Sink::append<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>::{{closure}}>,f32>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::mix::Mix<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>,rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::periodic::PeriodicAccess<rodio::source::stoppable::Stoppable<rodio::source::amplify::Amplify<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAcce
- ss<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{
- {closure}}>>>>,rodio::sink::Sink::append<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>::{{closure}}>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::repeat::Repeat<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<rodio::spatial_sink::SpatialSink>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<std::sync::mutex::Mutex<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
-      15 (0.1%)    1 (0.1%)  core::ptr::drop_in_place<std::sync::mutex::Mutex<core::option::Option<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-      15 (0.1%)    1 (0.1%)  core::slice::index::<impl core::ops::index::Index<I> for [T]>::index
-      15 (0.1%)    1 (0.1%)  core::sync::atomic::AtomicBool::new
-      15 (0.1%)    1 (0.1%)  core::sync::atomic::AtomicUsize::fetch_add
-      15 (0.1%)    1 (0.1%)  core::sync::atomic::AtomicUsize::fetch_sub
-      15 (0.1%)    1 (0.1%)  fabled_audio::container::sample_format::SampleFormat::sample_size
-      15 (0.1%)    1 (0.1%)  rodio::source::Source::fade_in
-      15 (0.1%)    1 (0.1%)  rodio::source::Source::take_duration
-      15 (0.1%)    1 (0.1%)  std::f32::<impl f32>::signum
-      14 (0.0%)    2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::channels
-      14 (0.0%)    2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::sample_rate
-      14 (0.0%)    2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as core::iter::traits::iterator::Iterator>::size_hint
-      14 (0.0%)    2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as rodio::source::Source>::channels
-      14 (0.0%)    2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as rodio::source::Source>::sample_rate
-      14 (0.0%)    2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as rodio::source::Source>::total_duration
-      14 (0.0%)    2 (0.2%)  alloc::sync::Arc<T>::from_inner
-      14 (0.0%)    1 (0.1%)  rodio::source::channel_volume::ChannelVolume<I>::set_volume
-      13 (0.0%)    1 (0.1%)  <alloc::boxed::Box<dyn rodio::source::Source+Item = S+core::marker::Send> as rodio::source::Source>::total_duration
-      13 (0.0%)    1 (0.1%)  <ambisonic::bmixer::BstreamMixer as rodio::source::Source>::current_frame_len
-      13 (0.0%)    1 (0.1%)  <fabled_audio::container::audio_spec::AudioSpecification as core::default::Default>::default
-      13 (0.0%)    1 (0.1%)  <rodio::source::fadein::FadeIn<I> as core::iter::traits::iterator::Iterator>::next::{{closure}}
-      13 (0.0%)    1 (0.1%)  alloc::alloc::alloc
-      13 (0.0%)    1 (0.1%)  alloc::alloc::alloc_zeroed
-      13 (0.0%)    1 (0.1%)  alloc::raw_vec::RawVec<T,A>::reserve_for_push
-      13 (0.0%)    1 (0.1%)  core::array::<impl core::ops::index::Index<I> for [T; N]>::index
-      13 (0.0%)    1 (0.1%)  core::sync::atomic::AtomicBool::load
-      13 (0.0%)    1 (0.1%)  core::time::Duration::as_millis
-      13 (0.0%)    1 (0.1%)  rodio::source::Source::mix
-      12 (0.0%)    2 (0.2%)  core::mem::drop
-      12 (0.0%)    2 (0.2%)  core::ptr::unique::Unique<T>::as_ptr
-      12 (0.0%)    2 (0.2%)  core::ptr::unique::Unique<T>::as_ref
-      12 (0.0%)    1 (0.1%)  <rodio::source::speed::Speed<I> as rodio::source::Source>::sample_rate
-      12 (0.0%)    1 (0.1%)  core::f32::<impl f32>::min
-      12 (0.0%)    1 (0.1%)  core::num::<impl u32>::saturating_sub
-      12 (0.0%)    1 (0.1%)  core::num::<impl usize>::saturating_add
-      12 (0.0%)    1 (0.1%)  core::num::<impl usize>::saturating_sub
-      12 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<hound::Error>
-      12 (0.0%)    1 (0.1%)  core::sync::atomic::AtomicUsize::load
-      12 (0.0%)    1 (0.1%)  fabled_audio::clip::audio_clip::<impl core::convert::From<fabled_audio::clip::audio_clip::AudioClip<f32>> for fabled_audio::clip::raw_clip::RawAmbisonicClip>::from
-      12 (0.0%)    1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::set_velocity
-      12 (0.0%)    1 (0.1%)  rodio::source::Source::low_pass
-      12 (0.0%)    1 (0.1%)  rodio::source::Source::pausable
-      12 (0.0%)    1 (0.1%)  rodio::source::Source::speed
-      12 (0.0%)    1 (0.1%)  rodio::source::stoppable::stoppable
-      12 (0.0%)    1 (0.1%)  rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{closure#0}]>>>>, [closure@rodio::sink::Sink::append<rodio::source::periodic::Periodi
- cAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>, [closure@rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{closure#0}]>>::{closure#0}]>, f32>>"* @"_ZN5alloc5boxed12Box$LT$T$GT$3new17h4f771819c502f9fbE
-      12 (0.0%)    1 (0.1%)  std::f32::<impl f32>::copysign
-      11 (0.0%)    1 (0.1%)  <ambisonic::renderer::BstreamStereoRenderer<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <core::ops::range::RangeFull as core::slice::index::SliceIndex<[T]>>::index
-      11 (0.0%)    1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as core::iter::traits::iterator::Iterator>::next
-      11 (0.0%)    1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::blt::BltFilter<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::done::Done<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::fadein::FadeIn<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::pausable::Pausable<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::spatial::Spatial<I> as core::iter::traits::iterator::Iterator>::next
-      11 (0.0%)    1 (0.1%)  <rodio::source::spatial::Spatial<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::speed::Speed<I> as core::iter::traits::iterator::Iterator>::next
-      11 (0.0%)    1 (0.1%)  <rodio::source::speed::Speed<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as rodio::source::Source>::current_frame_len
-      11 (0.0%)    1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::current_frame_len::{{closure}}
-      11 (0.0%)    1 (0.1%)  core::mem::forget
-      11 (0.0%)    1 (0.1%)  core::sync::atomic::AtomicUsize::new
-      11 (0.0%)    1 (0.1%)  rodio::source::take::TakeDuration<I>::clear_filter
-      11 (0.0%)    1 (0.1%)  rodio::source::take::TakeDuration<I>::set_filter_fadeout
-      10 (0.0%)    2 (0.2%)  <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::Deref>::deref
-      10 (0.0%)    1 (0.1%)  <&u8 as core::ops::bit::BitAnd<u8>>::bitand
-      10 (0.0%)    1 (0.1%)  <fabled_audio::container::supported_buffer::SupportedBufferSize as core::default::Default>::default
-      10 (0.0%)    1 (0.1%)  alloc::vec::Vec<T>::new
-      10 (0.0%)    1 (0.1%)  core::alloc::layout::Layout::align
-      10 (0.0%)    1 (0.1%)  core::alloc::layout::Layout::dangling
-      10 (0.0%)    1 (0.1%)  core::mem::valid_align::ValidAlign::as_nonzero
-      10 (0.0%)    1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::set_global_volume
-      10 (0.0%)    1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::new
-      10 (0.0%)    1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::set_doppler
-      10 (0.0%)    1 (0.1%)  rodio::source::samples_converter::SamplesConverter<I,D>::new
-      10 (0.0%)    1 (0.1%)  rodio::spatial_sink::SpatialSink::set_volume
-      10 (0.0%)    1 (0.1%)  std::sync::poison::Flag::get
-       9 (0.0%)    1 (0.1%)  <ambisonic::bmixer::BstreamMixer as rodio::source::Source>::sample_rate
-       9 (0.0%)    1 (0.1%)  <fabled_audio::codecs::encode::waveform::WavWriter as core::default::Default>::default
-       9 (0.0%)    1 (0.1%)  <fabled_audio::error::decoder_error::AudioDecodingError as core::convert::From<std::io::error::Error>>::from
-       9 (0.0%)    1 (0.1%)  <fabled_audio::error::encoder_error::AudioEncodingError as core::convert::From<std::io::error::Error>>::from
-       9 (0.0%)    1 (0.1%)  <fabled_audio::source::ambisonic_output::AmbisonicOutput as core::default::Default>::default
-       9 (0.0%)    1 (0.1%)  core::ptr::non_null::NonNull<T>::cast
-       9 (0.0%)    1 (0.1%)  rodio::source::Source::buffered
-       9 (0.0%)    1 (0.1%)  rodio::source::Source::repeat_infinite
-       9 (0.0%)    1 (0.1%)  rodio::source::amplify::Amplify<I>::set_factor
-       9 (0.0%)    1 (0.1%)  std::f32::<impl f32>::sqrt
-       8 (0.0%)    1 (0.1%)  <f32 as rodio::conversions::sample::Sample>::amplify
-       8 (0.0%)    1 (0.1%)  <f32 as rodio::conversions::sample::Sample>::saturating_add
-       8 (0.0%)    1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as rodio::source::Source>::total_duration
-       8 (0.0%)    1 (0.1%)  <rodio::source::buffered::Buffered<I> as rodio::source::Source>::total_duration
-       8 (0.0%)    1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as rodio::source::Source>::channels
-       8 (0.0%)    1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as core::iter::traits::iterator::Iterator>::next::{{closure}}
-       8 (0.0%)    1 (0.1%)  <u8 as core::ops::bit::BitAnd>::bitand
-       8 (0.0%)    1 (0.1%)  core::mem::valid_align::ValidAlign::new_unchecked
-       8 (0.0%)    1 (0.1%)  rodio::source::Source::convert_samples
-       8 (0.0%)    1 (0.1%)  rodio::source::Source::stoppable
-       8 (0.0%)    1 (0.1%)  std::sys::windows::locks::mutex::Mutex::lock
-       8 (0.0%)    1 (0.1%)  std::sys::windows::locks::mutex::Mutex::unlock
-       7 (0.0%)    1 (0.1%)  <alloc::sync::Arc<T> as core::ops::deref::Deref>::deref
-       7 (0.0%)    1 (0.1%)  <ambisonic::renderer::BstreamStereoRenderer<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <ambisonic::renderer::BstreamStereoRenderer<I> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::blt::BltFilter<I> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::blt::BltFilter<I> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::blt::BltFilter<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::blt::BltFilter<I> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::done::Done<I> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::done::Done<I> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::done::Done<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::done::Done<I> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::fadein::FadeIn<I> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::fadein::FadeIn<I> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::fadein::FadeIn<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::fadein::FadeIn<I> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::pausable::Pausable<I> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::pausable::Pausable<I> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::pausable::Pausable<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::pausable::Pausable<I> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::spatial::Spatial<I> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::spatial::Spatial<I> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::spatial::Spatial<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::spatial::Spatial<I> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::speed::Speed<I> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::speed::Speed<I> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as core::iter::traits::iterator::Iterator>::size_hint
-       7 (0.0%)    1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as rodio::source::Source>::total_duration
-       7 (0.0%)    1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::channels
-       7 (0.0%)    1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::sample_rate
-       7 (0.0%)    1 (0.1%)  core::num::nonzero::NonZeroUsize::new_unchecked
-       7 (0.0%)    1 (0.1%)  core::option::Option<T>::is_none
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<ambisonic::bstream::SoundController>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<fabled_audio::clip::audio_clip::AudioClip<f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::amplify::Amplify<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::blt::BltFilter<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::delay::Delay<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::fadein::FadeIn<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::samples_converter::SamplesConverter<rodio::source::periodic::PeriodicAccess<rodio::source::stoppable::Stoppable<rodio::source::amplify::Amplify<rodio::source::pausa
- ble::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::Bstream
- StereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>>,rodio::sink::Sink::append<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>::{{closure}}>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::speed::Speed<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::stoppable::Stoppable<rodio::source::amplify::Amplify<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::take::TakeDuration<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::UniformSourceIterator<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::UniformSourceIterator<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::UniformSourceIterator<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::UniformSourceIterator<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>,f32>>
-       7 (0.0%)    1 (0.1%)  core::ptr::non_null::NonNull<T>::as_ref
-       7 (0.0%)    1 (0.1%)  core::time::Duration::subsec_millis
-       7 (0.0%)    1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::get_global_volume
-       7 (0.0%)    1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::pause
-       7 (0.0%)    1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::resume
-       7 (0.0%)    1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::stop
-       7 (0.0%)    1 (0.1%)  rodio::spatial_sink::SpatialSink::volume
-       7 (0.0%)    1 (0.1%)  std::sys::windows::locks::mutex::raw
-       7 (0.0%)    1 (0.1%)  std::sys_common::mutex::MovableMutex::raw_lock
-       7 (0.0%)    1 (0.1%)  std::sys_common::mutex::MovableMutex::raw_unlock
-       6 (0.0%)    1 (0.1%)  <ambisonic::bmixer::BstreamMixer as rodio::source::Source>::total_duration
-       6 (0.0%)    1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as rodio::source::Source>::channels
-       6 (0.0%)    1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as rodio::source::Source>::sample_rate
-       6 (0.0%)    1 (0.1%)  <rodio::source::repeat::Repeat<I> as rodio::source::Source>::total_duration
-       6 (0.0%)    1 (0.1%)  alloc::sync::Arc<T>::inner
-       6 (0.0%)    1 (0.1%)  core::alloc::layout::Layout::size
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<alloc::sync::Arc<std::sync::mutex::Mutex<rodio::spatial_sink::SoundPositions>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<alloc::sync::Weak<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<alloc::sync::Weak<std::sync::mutex::Mutex<rodio::spatial_sink::SoundPositions>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<core::cell::UnsafeCell<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<core::cell::UnsafeCell<core::option::Option<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::sink::Sink::append<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>::{{closure}}>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<std::sync::mutex::MutexGuard<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<std::sync::mutex::MutexGuard<core::option::Option<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<std::sync::poison::PoisonError<std::sync::mutex::MutexGuard<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
-       6 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<std::sync::poison::PoisonError<std::sync::mutex::MutexGuard<core::option::Option<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
-       6 (0.0%)    1 (0.1%)  core::time::Duration::as_secs
-       6 (0.0%)    1 (0.1%)  core::time::Duration::subsec_nanos
-       6 (0.0%)    1 (0.1%)  rodio::source::stoppable::Stoppable<I>::stop
-       5 (0.0%)    1 (0.1%)  <T as core::convert::From<T>>::from
-       5 (0.0%)    1 (0.1%)  <core::option::Option<T> as core::ops::try_trait::FromResidual>::from_residual
-       5 (0.0%)    1 (0.1%)  <fabled_audio::container::fade_filter::FadeFilter as core::default::Default>::default
-       5 (0.0%)    1 (0.1%)  core::convert::num::<impl core::convert::From<u16> for usize>::from
-       5 (0.0%)    1 (0.1%)  core::f32::<impl f32>::is_nan
-       5 (0.0%)    1 (0.1%)  core::iter::traits::iterator::Iterator::max_by::fold
-       5 (0.0%)    1 (0.1%)  core::ptr::invalid_mut
-       5 (0.0%)    1 (0.1%)  core::ptr::non_null::NonNull<T>::as_ptr
-       5 (0.0%)    1 (0.1%)  rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{closure#0}]>>"* @"_ZN5rodio6source7amplify16Amplify$LT$I$GT$9inner_mut17h3415d86beb72c87aE
-       5 (0.0%)    1 (0.1%)  rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{closure#0}]>>>"* @"_ZN5rodio6source9stoppable18Stoppable$LT$I$GT$9inner_mut17h59c07c7793ed67fcE
-       4 (0.0%)    1 (0.1%)  <ambisonic::renderer::BstreamStereoRenderer<I> as rodio::source::Source>::channels
-       4 (0.0%)    1 (0.1%)  <fabled_audio::container::sample_format::SampleFormat as core::default::Default>::default
-       4 (0.0%)    1 (0.1%)  core::num::nonzero::NonZeroUsize::get
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&[f32; 3]>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&claxon::error::Error>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&cpal::error::BuildStreamError>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&cpal::error::PlayStreamError>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&f32>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&fabled_audio::container::sample_format::SampleFormat>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&fabled_audio::container::supported_buffer::SupportedBufferSize>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&hound::Error>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&lewton::VorbisError>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&minimp3::error::Error>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&rodio::decoder::DecoderError>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&std::io::error::Error>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&u16>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<&u32>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::source::zero::Zero<f32>>
-       4 (0.0%)    1 (0.1%)  core::ptr::drop_in_place<rodio::stream::PlayError>
-       4 (0.0%)    1 (0.1%)  fabled_audio::codecs::decode::FlacReaderOptions::inner
-       4 (0.0%)    1 (0.1%)  std::panicking::panicking
-       3 (0.0%)    1 (0.1%)  std::thread::panicking
-       2 (0.0%)    1 (0.1%)  <fabled_audio::config::input_config::InputConfig as core::default::Default>::default
-       2 (0.0%)    1 (0.1%)  fabled_audio::config::input_config::InputConfig::retrieve_from_devices
-       2 (0.0%)    1 (0.1%)  fabled_audio::config::input_config::InputConfig::retrieve_from_host
-       2 (0.0%)    1 (0.1%)  fabled_audio::config::output_config::OutputConfig::retrieve_from_devices
-       2 (0.0%)    1 (0.1%)  fabled_audio::config::output_config::OutputConfig::retrieve_from_host
-       1 (0.0%)    1 (0.1%)  <f32 as rodio::conversions::sample::Sample>::zero_value
-       1 (0.0%)    1 (0.1%)  <u16 as core::default::Default>::default
-       1 (0.0%)    1 (0.1%)  <u32 as core::default::Default>::default
-       1 (0.0%)    1 (0.1%)  core::hint::unreachable_unchecked
-       1 (0.0%)    1 (0.1%)  core::mem::size_of
+  Lines         Copies       Function name
+   -----         ------       -------------
+   30603 (100%)  1021 (100%)  (TOTAL)
+    1411 (4.6%)    28 (2.7%)  core::option::Option<T>::map
+    1376 (4.5%)    16 (1.6%)  core::iter::traits::iterator::Iterator::advance_by
+    1268 (4.1%)     4 (0.4%)  <rodio::conversions::sample_rate::SampleRateConverter<I> as core::iter::traits::iterator::Iterator>::next
+    1141 (3.7%)     4 (0.4%)  ambisonic::bstream::bstream
+     928 (3.0%)     4 (0.4%)  rodio::conversions::sample_rate::SampleRateConverter<I>::new
+     704 (2.3%)     4 (0.4%)  <rodio::conversions::sample_rate::SampleRateConverter<I> as core::iter::traits::iterator::Iterator>::size_hint::{{closure}}
+     645 (2.1%)    15 (1.5%)  core::iter::traits::iterator::Iterator::nth
+     608 (2.0%)     4 (0.4%)  <rodio::conversions::channels::ChannelCountConverter<I> as core::iter::traits::iterator::Iterator>::next
+     537 (1.8%)     4 (0.4%)  <rodio::source::uniform::UniformSourceIterator<I,D> as core::iter::traits::iterator::Iterator>::next
+     510 (1.7%)     5 (0.5%)  <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::size_hint
+     435 (1.4%)     5 (0.5%)  <alloc::vec::Vec<T> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<T,I>>::from_iter
+     352 (1.2%)     4 (0.4%)  <rodio::source::uniform::Take<I> as core::iter::traits::iterator::Iterator>::size_hint
+     330 (1.1%)     5 (0.5%)  alloc::vec::Vec<T,A>::extend_desugared
+     329 (1.1%)    17 (1.7%)  core::option::Option<T>::unwrap
+     326 (1.1%)     4 (0.4%)  rodio::source::uniform::UniformSourceIterator<I,D>::bootstrap
+     324 (1.1%)     4 (0.4%)  <rodio::conversions::channels::ChannelCountConverter<I> as core::iter::traits::iterator::Iterator>::size_hint
+     292 (1.0%)     4 (0.4%)  rodio::conversions::sample_rate::SampleRateConverter<I>::next_input_frame
+     253 (0.8%)    11 (1.1%)  fabled_audio::clip::raw_clip::RawAmbisonicClip::new
+     245 (0.8%)     1 (0.1%)  fabled_audio::codecs::encode::waveform::WavWriter::new
+     236 (0.8%)     4 (0.4%)  <rodio::conversions::sample_rate::SampleRateConverter<I> as core::iter::traits::iterator::Iterator>::size_hint
+     229 (0.7%)     4 (0.4%)  rodio::source::uniform::UniformSourceIterator<I,D>::new
+     209 (0.7%)     2 (0.2%)  ambisonic::bmixer::BmixerComposer::play
+     209 (0.7%)     1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::new
+     203 (0.7%)     3 (0.3%)  core::cmp::max_by
+     195 (0.6%)    15 (1.5%)  alloc::boxed::Box<T>::new
+     192 (0.6%)     4 (0.4%)  rodio::conversions::channels::ChannelCountConverter<I>::new
+     184 (0.6%)     1 (0.1%)  rodio::sink::Sink::append
+     179 (0.6%)     1 (0.1%)  fabled_audio::config::output_config::OutputConfig::retrieve_from_host
+     178 (0.6%)     5 (0.5%)  core::result::Result<T,E>::unwrap
+     176 (0.6%)     4 (0.4%)  <rodio::conversions::channels::ChannelCountConverter<I> as core::iter::traits::iterator::Iterator>::size_hint::{{closure}}
+     176 (0.6%)     4 (0.4%)  <rodio::source::uniform::Take<I> as core::iter::traits::iterator::Iterator>::next
+     174 (0.6%)     6 (0.6%)  core::fmt::ArgumentV1::new
+     172 (0.6%)     2 (0.2%)  std::sync::poison::map_result
+     162 (0.5%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::grow_amortized
+     158 (0.5%)     2 (0.2%)  rodio::source::periodic::periodic
+     153 (0.5%)     5 (0.5%)  core::mem::replace
+     152 (0.5%)     1 (0.1%)  <fabled_audio::error::decoder_error::AudioDecodingError as core::fmt::Debug>::fmt
+     150 (0.5%)     3 (0.3%)  std::sync::mutex::Mutex<T>::new
+     148 (0.5%)     2 (0.2%)  core::iter::traits::iterator::Iterator::fold
+     148 (0.5%)     2 (0.2%)  rodio::source::delay::delay
+     146 (0.5%)     2 (0.2%)  core::iter::traits::iterator::Iterator::reduce
+     146 (0.5%)     1 (0.1%)  <rodio::source::take::TakeDuration<I> as core::iter::traits::iterator::Iterator>::next
+     145 (0.5%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::allocate_in
+     140 (0.5%)     5 (0.5%)  <core::iter::adapters::take::Take<I> as core::iter::traits::iterator::Iterator>::next
+     140 (0.5%)     1 (0.1%)  rodio::source::buffered::Buffered<I>::next_frame
+     139 (0.5%)     1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as core::iter::traits::iterator::Iterator>::next
+     138 (0.5%)     1 (0.1%)  rodio::source::buffered::extract
+     128 (0.4%)     1 (0.1%)  <fabled_audio::error::decoder_error::AudioDecodingError as core::fmt::Display>::fmt
+     123 (0.4%)     5 (0.5%)  core::option::Option<T>::as_mut
+     123 (0.4%)     5 (0.5%)  core::option::Option<T>::as_ref
+     120 (0.4%)     2 (0.2%)  <alloc::sync::Weak<T> as core::ops::drop::Drop>::drop
+     115 (0.4%)     6 (0.6%)  core::ptr::read
+     114 (0.4%)     2 (0.2%)  alloc::sync::Arc<T>::new
+     114 (0.4%)     1 (0.1%)  <rodio::source::blt::BltFilter<I> as core::iter::traits::iterator::Iterator>::next
+     114 (0.4%)     1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as core::iter::traits::iterator::Iterator>::next
+     114 (0.4%)     1 (0.1%)  rodio::spatial_sink::SpatialSink::append
+     112 (0.4%)     4 (0.4%)  <rodio::source::uniform::UniformSourceIterator<I,D> as core::iter::traits::iterator::Iterator>::size_hint
+     108 (0.4%)     2 (0.2%)  core::option::Option<T>::ok_or
+     107 (0.3%)     1 (0.1%)  rodio::queue::SourcesQueueInput<S>::append_with_signal
+     103 (0.3%)     2 (0.2%)  <core::result::Result<T,E> as core::ops::try_trait::Try>::branch
+     103 (0.3%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::take_duration
+     102 (0.3%)     1 (0.1%)  rodio::source::channel_volume::ChannelVolume<I>::new
+     100 (0.3%)     2 (0.2%)  <rodio::source::delay::Delay<I> as core::iter::traits::iterator::Iterator>::size_hint
+      98 (0.3%)     1 (0.1%)  <fabled_audio::error::encoder_error::AudioEncodingError as core::fmt::Debug>::fmt
+      97 (0.3%)     1 (0.1%)  alloc::alloc::Global::alloc_impl
+      96 (0.3%)     4 (0.4%)  rodio::conversions::sample_rate::SampleRateConverter<I>::into_inner
+      94 (0.3%)     1 (0.1%)  rodio::source::spatial::Spatial<I>::set_positions
+      93 (0.3%)     9 (0.9%)  <&T as core::fmt::Debug>::fmt
+      92 (0.3%)     1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as core::iter::traits::iterator::Iterator>::size_hint
+      91 (0.3%)     1 (0.1%)  <fabled_audio::error::encoder_error::AudioEncodingError as core::fmt::Display>::fmt
+      90 (0.3%)     5 (0.5%)  core::iter::adapters::take::Take<I>::new
+      90 (0.3%)     2 (0.2%)  alloc::vec::Vec<T,A>::push
+      90 (0.3%)     1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::current_frame_len
+      89 (0.3%)     1 (0.1%)  <fabled_audio::config::output_config::OutputConfig as core::default::Default>::default
+      88 (0.3%)     2 (0.2%)  alloc::sync::Weak<T>::inner
+      86 (0.3%)     1 (0.1%)  <rodio::source::buffered::Buffered<I> as core::iter::traits::iterator::Iterator>::next
+      83 (0.3%)     1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as rodio::source::Source>::total_duration
+      80 (0.3%)     6 (0.6%)  core::ops::function::FnOnce::call_once
+      80 (0.3%)     2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as core::iter::traits::iterator::Iterator>::next
+      80 (0.3%)     2 (0.2%)  alloc::alloc::box_free
+      79 (0.3%)     1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as rodio::source::Source>::current_frame_len
+      78 (0.3%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::delay
+      78 (0.3%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::fade_in
+      77 (0.3%)     1 (0.1%)  core::option::Option<T>::filter
+      76 (0.2%)     2 (0.2%)  <rodio::source::delay::Delay<I> as core::iter::traits::iterator::Iterator>::next
+      74 (0.2%)     1 (0.1%)  <alloc::vec::Vec<T,A> as core::iter::traits::collect::IntoIterator>::into_iter
+      74 (0.2%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::reverb
+      73 (0.2%)     1 (0.1%)  <rodio::source::speed::Speed<I> as rodio::source::Source>::total_duration
+      73 (0.2%)     1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::play_omni
+      69 (0.2%)     1 (0.1%)  rodio::source::pausable::Pausable<I>::set_paused
+      68 (0.2%)     1 (0.1%)  <rodio::source::pausable::Pausable<I> as core::iter::traits::iterator::Iterator>::next
+      66 (0.2%)     3 (0.3%)  <alloc::sync::Arc<T> as core::clone::Clone>::clone
+      65 (0.2%)     5 (0.5%)  <alloc::vec::Vec<T> as core::iter::traits::collect::FromIterator<T>>::from_iter
+      65 (0.2%)     5 (0.5%)  core::iter::traits::iterator::Iterator::take
+      65 (0.2%)     1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::play_at
+      62 (0.2%)     1 (0.1%)  core::ptr::drop_in_place<[fabled_audio::config::output_config::OutputConfig]>
+      62 (0.2%)     1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::set_position
+      61 (0.2%)     1 (0.1%)  rodio::queue::SourcesQueueInput<S>::append
+      60 (0.2%)     6 (0.6%)  core::mem::maybe_uninit::MaybeUninit<T>::assume_init
+      60 (0.2%)     5 (0.5%)  <alloc::vec::Vec<T,A> as alloc::vec::spec_extend::SpecExtend<T,I>>::spec_extend
+      60 (0.2%)     4 (0.4%)  <rodio::conversions::sample::DataConverter<I,O> as core::iter::traits::iterator::Iterator>::next
+      60 (0.2%)     3 (0.3%)  <rodio::source::amplify::Amplify<I> as core::iter::traits::iterator::Iterator>::next
+      60 (0.2%)     1 (0.1%)  <fabled_audio::container::audio_spec::AudioSpecification as core::fmt::Debug>::fmt
+      60 (0.2%)     1 (0.1%)  rodio::source::spatial::Spatial<I>::new
+      60 (0.2%)     1 (0.1%)  rodio::source::take::take_duration
+      59 (0.2%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::current_memory
+      58 (0.2%)     2 (0.2%)  core::alloc::layout::Layout::for_value_raw
+      58 (0.2%)     1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::total_duration
+      58 (0.2%)     1 (0.1%)  core::iter::traits::exact_size::ExactSizeIterator::len
+      56 (0.2%)     1 (0.1%)  core::alloc::layout::Layout::array
+      56 (0.2%)     1 (0.1%)  rodio::source::mix::mix
+      55 (0.2%)     5 (0.5%)  <&mut I as core::iter::traits::iterator::Iterator>::next
+      55 (0.2%)     1 (0.1%)  rodio::sink::Sink::append::{{closure}}
+      54 (0.2%)     3 (0.3%)  core::iter::traits::iterator::Iterator::size_hint
+      54 (0.2%)     1 (0.1%)  <alloc::vec::into_iter::IntoIter<T,A> as core::iter::traits::iterator::Iterator>::next
+      54 (0.2%)     1 (0.1%)  <core::time::Duration as core::cmp::Ord>::cmp
+      54 (0.2%)     1 (0.1%)  <rodio::source::fadein::FadeIn<I> as core::iter::traits::iterator::Iterator>::next
+      54 (0.2%)     1 (0.1%)  <rodio::source::repeat::Repeat<I> as core::iter::traits::iterator::Iterator>::next
+      53 (0.2%)     6 (0.6%)  core::ptr::write
+      53 (0.2%)     5 (0.5%)  core::option::Option<T>::take
+      53 (0.2%)     1 (0.1%)  core::fmt::Arguments::new_v1
+      52 (0.2%)     4 (0.4%)  <rodio::source::uniform::UniformSourceIterator<I,D> as rodio::source::Source>::current_frame_len
+      52 (0.2%)     1 (0.1%)  rodio::source::fadein::fadein
+      51 (0.2%)     1 (0.1%)  <fabled_audio::container::device_config::DeviceConfig as core::fmt::Debug>::fmt
+      50 (0.2%)     2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::total_duration::{{closure}}
+      50 (0.2%)     2 (0.2%)  std::sync::mutex::MutexGuard<T>::new::{{closure}}
+      50 (0.2%)     1 (0.1%)  <rodio::source::buffered::Buffered<I> as rodio::source::Source>::current_frame_len
+      49 (0.2%)     5 (0.5%)  core::cell::UnsafeCell<T>::new
+      49 (0.2%)     5 (0.5%)  core::mem::manually_drop::ManuallyDrop<T>::new
+      49 (0.2%)     1 (0.1%)  <alloc::vec::into_iter::IntoIter<T,A> as core::iter::traits::iterator::Iterator>::size_hint
+      48 (0.2%)     4 (0.4%)  core::ptr::mut_ptr::<impl *mut T>::offset
+      48 (0.2%)     3 (0.3%)  alloc::raw_vec::RawVec<T,A>::capacity
+      48 (0.2%)     1 (0.1%)  core::fmt::builders::DebugList::entries
+      47 (0.2%)     6 (0.6%)  <T as core::convert::Into<U>>::into
+      47 (0.2%)     3 (0.3%)  rodio::source::amplify::amplify
+      47 (0.2%)     1 (0.1%)  <fabled_audio::container::supported_buffer::SupportedBufferSize as core::fmt::Debug>::fmt
+      47 (0.2%)     1 (0.1%)  core::time::Duration::new
+      46 (0.2%)     2 (0.2%)  <alloc::sync::Arc<T> as core::ops::drop::Drop>::drop
+      46 (0.2%)     2 (0.2%)  core::iter::traits::iterator::Iterator::max_by
+      46 (0.2%)     1 (0.1%)  <fabled_audio::error::decoder_error::AudioDecodingError as std::error::Error>::source
+      46 (0.2%)     1 (0.1%)  <fabled_audio::error::encoder_error::AudioEncodingError as std::error::Error>::source
+      46 (0.2%)     1 (0.1%)  <fabled_audio::error::output_error::SpatialOutputError as core::fmt::Debug>::fmt
+      45 (0.1%)     5 (0.5%)  <I as core::iter::traits::collect::IntoIterator>::into_iter
+      45 (0.1%)     5 (0.5%)  <alloc::vec::Vec<T> as alloc::vec::spec_from_iter::SpecFromIter<T,I>>::from_iter
+      45 (0.1%)     5 (0.5%)  core::iter::traits::iterator::Iterator::collect
+      45 (0.1%)     3 (0.3%)  <rodio::source::amplify::Amplify<I> as core::iter::traits::iterator::Iterator>::next::{{closure}}
+      45 (0.1%)     1 (0.1%)  <fabled_audio::error::output_error::SpatialOutputError as core::fmt::Display>::fmt
+      44 (0.1%)     2 (0.2%)  std::sync::poison::PoisonError<T>::new
+      44 (0.1%)     1 (0.1%)  <rodio::source::repeat::Repeat<I> as rodio::source::Source>::current_frame_len
+      44 (0.1%)     1 (0.1%)  core::option::Option<T>::get_or_insert_with
+      44 (0.1%)     1 (0.1%)  rodio::source::blt::low_pass
+      44 (0.1%)     1 (0.1%)  rodio::spatial_sink::SpatialSink::append::{{closure}}
+      43 (0.1%)     1 (0.1%)  <rodio::source::done::Done<I> as core::iter::traits::iterator::Iterator>::next
+      43 (0.1%)     1 (0.1%)  core::num::<impl u64>::checked_add
+      43 (0.1%)     1 (0.1%)  core::num::<impl u64>::overflowing_add
+      43 (0.1%)     1 (0.1%)  core::num::<impl usize>::checked_add
+      43 (0.1%)     1 (0.1%)  core::num::<impl usize>::checked_mul
+      43 (0.1%)     1 (0.1%)  core::num::<impl usize>::overflowing_add
+      43 (0.1%)     1 (0.1%)  core::num::<impl usize>::overflowing_mul
+      43 (0.1%)     1 (0.1%)  rodio::source::pausable::pausable
+      42 (0.1%)     1 (0.1%)  <fabled_audio::container::audio_listener::AudioListener as core::fmt::Debug>::fmt
+      42 (0.1%)     1 (0.1%)  alloc::alloc::exchange_malloc
+      42 (0.1%)     1 (0.1%)  rodio::source::buffered::buffered
+      42 (0.1%)     1 (0.1%)  std::sync::poison::Flag::borrow
+      40 (0.1%)     4 (0.4%)  rodio::conversions::sample::DataConverter<I,O>::new
+      40 (0.1%)     2 (0.2%)  <rodio::source::delay::Delay<I> as core::iter::traits::iterator::Iterator>::size_hint::{{closure}}
+      40 (0.1%)     2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::current_frame_len
+      40 (0.1%)     2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::current_frame_len::{{closure}}
+      39 (0.1%)     1 (0.1%)  alloc::raw_vec::handle_reserve
+      39 (0.1%)     1 (0.1%)  rodio::source::Source::reverb
+      38 (0.1%)     2 (0.2%)  core::iter::traits::iterator::Iterator::max_by::fold::{{closure}}
+      38 (0.1%)     2 (0.2%)  core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &mut F>::call_once
+      38 (0.1%)     1 (0.1%)  <fabled_audio::container::audio_listener::AudioListener as core::default::Default>::default
+      38 (0.1%)     1 (0.1%)  rodio::source::blt::BltApplier::apply
+      37 (0.1%)     1 (0.1%)  <alloc::raw_vec::RawVec<T,A> as core::ops::drop::Drop>::drop
+      36 (0.1%)     6 (0.6%)  core::mem::manually_drop::ManuallyDrop<T>::into_inner
+      36 (0.1%)     4 (0.4%)  core::ptr::mut_ptr::<impl *mut T>::add
+      36 (0.1%)     1 (0.1%)  <<alloc::vec::into_iter::IntoIter<T,A> as core::ops::drop::Drop>::drop::DropGuard<T,A> as core::ops::drop::Drop>::drop
+      35 (0.1%)     5 (0.5%)  <&mut I as core::iter::traits::iterator::Iterator>::size_hint
+      35 (0.1%)     1 (0.1%)  core::option::Option<T>::unwrap_unchecked
+      35 (0.1%)     1 (0.1%)  core::ptr::const_ptr::<impl *const T>::offset_from
+      34 (0.1%)     3 (0.3%)  rodio::source::Source::amplify
+      34 (0.1%)     2 (0.2%)  rodio::source::Source::periodic_access
+      33 (0.1%)     3 (0.3%)  <rodio::source::amplify::Amplify<I> as rodio::source::Source>::current_frame_len
+      33 (0.1%)     1 (0.1%)  rodio::source::take::TakeDuration<I>::get_duration_per_sample
+      32 (0.1%)     4 (0.4%)  <rodio::conversions::sample::DataConverter<I,O> as core::iter::traits::iterator::Iterator>::next::{{closure}}
+      32 (0.1%)     4 (0.4%)  <rodio::source::uniform::UniformSourceIterator<I,D> as rodio::source::Source>::total_duration
+      32 (0.1%)     4 (0.4%)  rodio::source::uniform::UniformSourceIterator<I,D>::bootstrap::{{closure}}
+      32 (0.1%)     3 (0.3%)  core::ptr::non_null::NonNull<T>::cast
+      32 (0.1%)     2 (0.2%)  std::sync::mutex::MutexGuard<T>::new
+      32 (0.1%)     1 (0.1%)  fabled_audio::codecs::decode::<impl core::convert::From<fabled_audio::codecs::decode::FlacReaderOptions> for claxon::FlacReaderOptions>::from
+      32 (0.1%)     1 (0.1%)  fabled_audio::container::supported_buffer::<impl core::convert::From<fabled_audio::container::supported_buffer::SupportedBufferSize> for cpal::BufferSize>::from
+      31 (0.1%)     1 (0.1%)  alloc::raw_vec::alloc_guard
+      31 (0.1%)     1 (0.1%)  fabled_audio::clip::audio_collection::AmbisonicCollection::append
+      30 (0.1%)     7 (0.7%)  core::cell::UnsafeCell<T>::get
+      30 (0.1%)     3 (0.3%)  <&T as core::fmt::Display>::fmt
+      30 (0.1%)     3 (0.3%)  core::fmt::ArgumentV1::new_debug
+      30 (0.1%)     3 (0.3%)  core::fmt::ArgumentV1::new_display
+      30 (0.1%)     2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::total_duration
+      30 (0.1%)     2 (0.2%)  <std::sync::mutex::MutexGuard<T> as core::ops::drop::Drop>::drop
+      30 (0.1%)     1 (0.1%)  <core::option::Option<T> as core::ops::try_trait::Try>::branch
+      30 (0.1%)     1 (0.1%)  <cpal::SampleRate as core::cmp::Ord>::cmp
+      30 (0.1%)     1 (0.1%)  <fabled_audio::container::sample_format::SampleFormat as core::fmt::Debug>::fmt
+      30 (0.1%)     1 (0.1%)  rodio::source::repeat::repeat
+      29 (0.1%)     6 (0.6%)  core::mem::maybe_uninit::MaybeUninit<T>::as_mut_ptr
+      29 (0.1%)     2 (0.2%)  rodio::source::Source::delay
+      29 (0.1%)     1 (0.1%)  <fabled_audio::container::supported_buffer::SupportedBufferSize as core::convert::From<&cpal::SupportedBufferSize>>::from
+      29 (0.1%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+      29 (0.1%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
+      29 (0.1%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
+      29 (0.1%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>>
+      29 (0.1%)     1 (0.1%)  core::ptr::metadata::from_raw_parts_mut
+      29 (0.1%)     1 (0.1%)  fabled_audio::clip::audio_collection::AmbisonicCollection::new
+      29 (0.1%)     1 (0.1%)  std::sync::poison::Flag::done
+      28 (0.1%)     4 (0.4%)  <rodio::conversions::sample::DataConverter<I,O> as core::iter::traits::iterator::Iterator>::size_hint
+      28 (0.1%)     4 (0.4%)  rodio::conversions::channels::ChannelCountConverter<I>::into_inner
+      28 (0.1%)     2 (0.2%)  alloc::boxed::Box<T,A>::leak
+      28 (0.1%)     2 (0.2%)  alloc::sync::Arc<T>::drop_slow
+      28 (0.1%)     1 (0.1%)  <rodio::source::repeat::Repeat<I> as rodio::source::Source>::channels
+      28 (0.1%)     1 (0.1%)  <rodio::source::repeat::Repeat<I> as rodio::source::Source>::sample_rate
+      27 (0.1%)     3 (0.3%)  <std::sync::mutex::MutexGuard<T> as core::ops::deref::DerefMut>::deref_mut
+      27 (0.1%)     1 (0.1%)  <alloc::alloc::Global as core::alloc::Allocator>::deallocate
+      27 (0.1%)     1 (0.1%)  <fabled_audio::container::fade_filter::FadeFilter as core::fmt::Debug>::fmt
+      27 (0.1%)     1 (0.1%)  <rodio::source::buffered::Buffered<I> as rodio::source::Source>::channels
+      27 (0.1%)     1 (0.1%)  <rodio::source::buffered::Buffered<I> as rodio::source::Source>::sample_rate
+      27 (0.1%)     1 (0.1%)  rodio::sink::Sink::set_volume
+      27 (0.1%)     1 (0.1%)  rodio::source::take::DurationFilter::apply
+      26 (0.1%)     2 (0.2%)  alloc::raw_vec::RawVec<T,A>::reserve_for_push
+      26 (0.1%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::from_raw_parts_in
+      24 (0.1%)     4 (0.4%)  rodio::conversions::sample::DataConverter<I,O>::into_inner
+      24 (0.1%)     3 (0.3%)  core::ptr::unique::Unique<T>::cast
+      24 (0.1%)     2 (0.2%)  <std::sync::poison::PoisonError<T> as core::fmt::Debug>::fmt
+      24 (0.1%)     1 (0.1%)  core::cmp::impls::<impl core::cmp::Ord for u32>::cmp
+      24 (0.1%)     1 (0.1%)  core::cmp::impls::<impl core::cmp::Ord for u64>::cmp
+      24 (0.1%)     1 (0.1%)  rodio::sink::Sink::volume
+      23 (0.1%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::set_ptr_and_cap
+      23 (0.1%)     1 (0.1%)  core::option::Option<T>::unwrap_or_default
+      23 (0.1%)     1 (0.1%)  cpal::SupportedStreamConfigRange::with_max_sample_rate
+      23 (0.1%)     1 (0.1%)  fabled_audio::clip::raw_clip::RawClip<T>::new
+      22 (0.1%)     2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as rodio::source::Source>::current_frame_len
+      22 (0.1%)     1 (0.1%)  <core::result::Result<T,F> as core::ops::try_trait::FromResidual<core::result::Result<core::convert::Infallible,E>>>::from_residual
+      22 (0.1%)     1 (0.1%)  <fabled_audio::clip::raw_clip::RawAmbisonicClip as core::default::Default>::default
+      22 (0.1%)     1 (0.1%)  <fabled_audio::container::device_config::DeviceConfig as core::default::Default>::default
+      22 (0.1%)     1 (0.1%)  <rodio::source::buffered::Buffered<I> as core::clone::Clone>::clone
+      22 (0.1%)     1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as core::iter::traits::iterator::Iterator>::next
+      22 (0.1%)     1 (0.1%)  core::sync::atomic::fence
+      22 (0.1%)     1 (0.1%)  rodio::conversions::sample_rate::SampleRateConverter<I>::new::gcd
+      21 (0.1%)     3 (0.3%)  <rodio::source::amplify::Amplify<I> as core::iter::traits::iterator::Iterator>::size_hint
+      21 (0.1%)     3 (0.3%)  <rodio::source::amplify::Amplify<I> as rodio::source::Source>::channels
+      21 (0.1%)     3 (0.3%)  <rodio::source::amplify::Amplify<I> as rodio::source::Source>::sample_rate
+      21 (0.1%)     3 (0.3%)  <rodio::source::amplify::Amplify<I> as rodio::source::Source>::total_duration
+      21 (0.1%)     1 (0.1%)  <[T] as core::fmt::Debug>::fmt
+      21 (0.1%)     1 (0.1%)  <alloc::vec::into_iter::IntoIter<T,A> as core::ops::drop::Drop>::drop
+      21 (0.1%)     1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as core::iter::traits::iterator::Iterator>::next::{{closure}}
+      21 (0.1%)     1 (0.1%)  fabled_audio::clip::audio_collection::AmbisonicCollection::retrieve_output
+      21 (0.1%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::amplify
+      21 (0.1%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::low_pass
+      21 (0.1%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::speed
+      21 (0.1%)     1 (0.1%)  fabled_audio::mixer::standard_mixer::<impl fabled_audio::clip::raw_clip::RawClip<f32>>::low_pass
+      20 (0.1%)     6 (0.6%)  core::mem::maybe_uninit::MaybeUninit<T>::uninit
+      20 (0.1%)     5 (0.5%)  core::iter::traits::iterator::Iterator::by_ref
+      20 (0.1%)     1 (0.1%)  <alloc::boxed::Box<I,A> as core::iter::traits::iterator::Iterator>::nth
+      20 (0.1%)     1 (0.1%)  <fabled_audio::config::output_config::OutputConfig as core::default::Default>::default::{{closure}}
+      20 (0.1%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::new_in
+      20 (0.1%)     1 (0.1%)  core::alloc::layout::Layout::from_size_align_unchecked
+      20 (0.1%)     1 (0.1%)  core::ptr::drop_in_place<fabled_audio::error::encoder_error::AudioEncodingError>
+      20 (0.1%)     1 (0.1%)  fabled_audio::config::output_config::OutputConfig::retrieve_from_host::{{closure}}
+      19 (0.1%)     1 (0.1%)  <f32 as rodio::conversions::sample::Sample>::lerp
+      19 (0.1%)     1 (0.1%)  core::cmp::Ord::max
+      19 (0.1%)     1 (0.1%)  core::cmp::max
+      19 (0.1%)     1 (0.1%)  core::sync::atomic::AtomicBool::store
+      19 (0.1%)     1 (0.1%)  core::time::Duration::from_millis
+      18 (0.1%)     3 (0.3%)  <rodio::source::uniform::UniformSourceIterator<I,D> as rodio::source::Source>::channels
+      18 (0.1%)     3 (0.3%)  <rodio::source::uniform::UniformSourceIterator<I,D> as rodio::source::Source>::sample_rate
+      18 (0.1%)     3 (0.3%)  core::ptr::unique::Unique<T>::as_ptr
+      18 (0.1%)     2 (0.2%)  <std::sync::mutex::MutexGuard<T> as core::ops::deref::Deref>::deref
+      18 (0.1%)     2 (0.2%)  std::sync::mutex::Mutex<T>::lock
+      18 (0.1%)     1 (0.1%)  <rodio::source::buffered::Buffered<I> as core::iter::traits::iterator::Iterator>::size_hint
+      18 (0.1%)     1 (0.1%)  <rodio::source::repeat::Repeat<I> as core::iter::traits::iterator::Iterator>::size_hint
+      18 (0.1%)     1 (0.1%)  core::array::<impl core::fmt::Debug for [T; N]>::fmt
+      18 (0.1%)     1 (0.1%)  core::panicking::assert_failed
+      18 (0.1%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::buffered
+      18 (0.1%)     1 (0.1%)  fabled_audio::mixer::ambisonic_mixer::<impl fabled_audio::clip::raw_clip::RawAmbisonicClip>::repeat
+      18 (0.1%)     1 (0.1%)  std::panicking::panic_count::count_is_zero
+      17 (0.1%)     1 (0.1%)  <fabled_audio::container::sample_format::SampleFormat as core::convert::From<cpal::samples_formats::SampleFormat>>::from
+      17 (0.1%)     1 (0.1%)  alloc::vec::Vec<T,A>::with_capacity_in
+      17 (0.1%)     1 (0.1%)  rodio::source::done::Done<I>::new
+      17 (0.1%)     1 (0.1%)  rodio::source::speed::speed
+      16 (0.1%)     2 (0.2%)  <core::ptr::non_null::NonNull<T> as core::convert::From<&mut T>>::from
+      16 (0.1%)     2 (0.2%)  alloc::rc::is_dangling
+      16 (0.1%)     2 (0.2%)  alloc::sync::Arc<T>::get_mut_unchecked
+      16 (0.1%)     2 (0.2%)  core::mem::align_of_val_raw
+      16 (0.1%)     2 (0.2%)  core::mem::size_of_val_raw
+      16 (0.1%)     1 (0.1%)  <alloc::alloc::Global as core::alloc::Allocator>::allocate
+      16 (0.1%)     1 (0.1%)  <alloc::alloc::Global as core::alloc::Allocator>::allocate_zeroed
+      16 (0.1%)     1 (0.1%)  alloc::alloc::dealloc
+      16 (0.1%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::with_capacity_in
+      16 (0.1%)     1 (0.1%)  core::option::Option<T>::is_some
+      16 (0.1%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+      16 (0.1%)     1 (0.1%)  cpal::BufferSize::Fixed
+      16 (0.1%)     1 (0.1%)  fabled_audio::container::sample_format::<impl core::convert::From<fabled_audio::container::sample_format::SampleFormat> for hound::SampleFormat>::from
+      16 (0.1%)     1 (0.1%)  fabled_audio::container::supported_buffer::SupportedBufferSize::Fixed
+      15 (0.0%)     3 (0.3%)  <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::Deref>::deref
+      15 (0.0%)     1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as core::iter::traits::iterator::Iterator>::next
+      15 (0.0%)     1 (0.1%)  alloc::vec::Vec<T,A>::as_mut_ptr
+      15 (0.0%)     1 (0.1%)  alloc::vec::into_iter::IntoIter<T,A>::as_raw_mut_slice
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<core::option::Option<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>,f32>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<core::option::Option<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>,f32>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<core::option::Option<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>,f32>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<core::option::Option<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>>,f32>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::buffered::FrameData<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::channel_volume::ChannelVolume<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::done::Done<rodio::source::samples_converter::SamplesConverter<rodio::source::periodic::PeriodicAccess<rodio::source::stoppable::Stoppable<rodio::source::amplify::A
+ mplify<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<a
+ mbisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>>,rodio::sink::Sink::append<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>::{{closure}}>,f32>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::mix::Mix<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>,rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::periodic::PeriodicAccess<rodio::source::stoppable::Stoppable<rodio::source::amplify::Amplify<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAcc
+ ess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::
+ {{closure}}>>>>,rodio::sink::Sink::append<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>::{{closure}}>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::repeat::Repeat<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::spatial_sink::SpatialSink>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<std::sync::mutex::Mutex<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<std::sync::mutex::Mutex<core::option::Option<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+      15 (0.0%)     1 (0.1%)  core::ptr::slice_from_raw_parts_mut
+      15 (0.0%)     1 (0.1%)  core::slice::index::<impl core::ops::index::Index<I> for [T]>::index
+      15 (0.0%)     1 (0.1%)  core::sync::atomic::AtomicBool::new
+      15 (0.0%)     1 (0.1%)  core::sync::atomic::AtomicUsize::fetch_add
+      15 (0.0%)     1 (0.1%)  core::sync::atomic::AtomicUsize::fetch_sub
+      15 (0.0%)     1 (0.1%)  fabled_audio::container::sample_format::SampleFormat::sample_size
+      15 (0.0%)     1 (0.1%)  rodio::source::Source::fade_in
+      15 (0.0%)     1 (0.1%)  rodio::source::Source::take_duration
+      15 (0.0%)     1 (0.1%)  std::f32::<impl f32>::signum
+      14 (0.0%)     2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::channels
+      14 (0.0%)     2 (0.2%)  <rodio::source::delay::Delay<I> as rodio::source::Source>::sample_rate
+      14 (0.0%)     2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as core::iter::traits::iterator::Iterator>::size_hint
+      14 (0.0%)     2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as rodio::source::Source>::channels
+      14 (0.0%)     2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as rodio::source::Source>::sample_rate
+      14 (0.0%)     2 (0.2%)  <rodio::source::periodic::PeriodicAccess<I,F> as rodio::source::Source>::total_duration
+      14 (0.0%)     2 (0.2%)  alloc::sync::Arc<T>::from_inner
+      14 (0.0%)     1 (0.1%)  <alloc::vec::Vec<T,A> as core::ops::drop::Drop>::drop
+      14 (0.0%)     1 (0.1%)  core::intrinsics::write_bytes
+      14 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<alloc::vec::Vec<fabled_audio::config::output_config::OutputConfig>>
+      14 (0.0%)     1 (0.1%)  rodio::source::channel_volume::ChannelVolume<I>::set_volume
+      13 (0.0%)     1 (0.1%)  <alloc::boxed::Box<dyn rodio::source::Source+Item = S+core::marker::Send> as rodio::source::Source>::total_duration
+      13 (0.0%)     1 (0.1%)  <ambisonic::bmixer::BstreamMixer as rodio::source::Source>::current_frame_len
+      13 (0.0%)     1 (0.1%)  <fabled_audio::container::audio_spec::AudioSpecification as core::default::Default>::default
+      13 (0.0%)     1 (0.1%)  <rodio::source::fadein::FadeIn<I> as core::iter::traits::iterator::Iterator>::next::{{closure}}
+      13 (0.0%)     1 (0.1%)  alloc::alloc::alloc
+      13 (0.0%)     1 (0.1%)  alloc::alloc::alloc_zeroed
+      13 (0.0%)     1 (0.1%)  core::array::<impl core::ops::index::Index<I> for [T; N]>::index
+      13 (0.0%)     1 (0.1%)  core::sync::atomic::AtomicBool::load
+      13 (0.0%)     1 (0.1%)  core::time::Duration::as_millis
+      13 (0.0%)     1 (0.1%)  rodio::source::Source::mix
+      12 (0.0%)     2 (0.2%)  core::mem::drop
+      12 (0.0%)     2 (0.2%)  core::ptr::unique::Unique<T>::as_ref
+      12 (0.0%)     1 (0.1%)  <rodio::source::speed::Speed<I> as rodio::source::Source>::sample_rate
+      12 (0.0%)     1 (0.1%)  core::f32::<impl f32>::min
+      12 (0.0%)     1 (0.1%)  core::num::<impl u32>::saturating_sub
+      12 (0.0%)     1 (0.1%)  core::num::<impl usize>::saturating_add
+      12 (0.0%)     1 (0.1%)  core::num::<impl usize>::saturating_sub
+      12 (0.0%)     1 (0.1%)  core::ptr::const_ptr::<impl *const T>::offset
+      12 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<hound::Error>
+      12 (0.0%)     1 (0.1%)  core::ptr::mut_ptr::<impl *mut T>::write_bytes
+      12 (0.0%)     1 (0.1%)  core::sync::atomic::AtomicUsize::load
+      12 (0.0%)     1 (0.1%)  fabled_audio::clip::audio_clip::<impl core::convert::From<fabled_audio::clip::audio_clip::AudioClip<f32>> for fabled_audio::clip::raw_clip::RawAmbisonicClip>::from
+      12 (0.0%)     1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::set_velocity
+      12 (0.0%)     1 (0.1%)  rodio::source::Source::low_pass
+      12 (0.0%)     1 (0.1%)  rodio::source::Source::pausable
+      12 (0.0%)     1 (0.1%)  rodio::source::Source::speed
+      12 (0.0%)     1 (0.1%)  rodio::source::stoppable::stoppable
+      12 (0.0%)     1 (0.1%)  rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{closure#0}]>>>>, [closure@rodio::sink::Sink::append<rodio::source::periodic::Period
+ icAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>, [closure@rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{closure#0}]>>::{closure#0}]>, f32>>"* @"_ZN5alloc5boxed12Box$LT$T$GT$3new17h4f771819c502f9fbE
+      12 (0.0%)     1 (0.1%)  std::f32::<impl f32>::copysign
+      11 (0.0%)     1 (0.1%)  <ambisonic::renderer::BstreamStereoRenderer<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <core::ops::range::RangeFull as core::slice::index::SliceIndex<[T]>>::index
+      11 (0.0%)     1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as core::iter::traits::iterator::Iterator>::next
+      11 (0.0%)     1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::blt::BltFilter<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::done::Done<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::fadein::FadeIn<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::pausable::Pausable<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::spatial::Spatial<I> as core::iter::traits::iterator::Iterator>::next
+      11 (0.0%)     1 (0.1%)  <rodio::source::spatial::Spatial<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::speed::Speed<I> as core::iter::traits::iterator::Iterator>::next
+      11 (0.0%)     1 (0.1%)  <rodio::source::speed::Speed<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as rodio::source::Source>::current_frame_len
+      11 (0.0%)     1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::current_frame_len::{{closure}}
+      11 (0.0%)     1 (0.1%)  core::mem::forget
+      11 (0.0%)     1 (0.1%)  core::sync::atomic::AtomicUsize::new
+      11 (0.0%)     1 (0.1%)  rodio::source::take::TakeDuration<I>::clear_filter
+      11 (0.0%)     1 (0.1%)  rodio::source::take::TakeDuration<I>::set_filter_fadeout
+      10 (0.0%)     2 (0.2%)  core::iter::traits::iterator::Iterator::max_by::fold
+      10 (0.0%)     2 (0.2%)  core::ptr::invalid_mut
+      10 (0.0%)     2 (0.2%)  core::ptr::non_null::NonNull<T>::as_ptr
+      10 (0.0%)     1 (0.1%)  <&u8 as core::ops::bit::BitAnd<u8>>::bitand
+      10 (0.0%)     1 (0.1%)  <fabled_audio::container::supported_buffer::SupportedBufferSize as core::default::Default>::default
+      10 (0.0%)     1 (0.1%)  alloc::vec::Vec<T>::new
+      10 (0.0%)     1 (0.1%)  core::alloc::layout::Layout::align
+      10 (0.0%)     1 (0.1%)  core::alloc::layout::Layout::dangling
+      10 (0.0%)     1 (0.1%)  core::mem::valid_align::ValidAlign::as_nonzero
+      10 (0.0%)     1 (0.1%)  core::ptr::non_null::NonNull<T>::dangling
+      10 (0.0%)     1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::set_global_volume
+      10 (0.0%)     1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::new
+      10 (0.0%)     1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::set_doppler
+      10 (0.0%)     1 (0.1%)  rodio::source::samples_converter::SamplesConverter<I,D>::new
+      10 (0.0%)     1 (0.1%)  rodio::spatial_sink::SpatialSink::set_volume
+      10 (0.0%)     1 (0.1%)  std::sync::poison::Flag::get
+       9 (0.0%)     1 (0.1%)  <ambisonic::bmixer::BstreamMixer as rodio::source::Source>::sample_rate
+       9 (0.0%)     1 (0.1%)  <fabled_audio::codecs::encode::waveform::WavWriter as core::default::Default>::default
+       9 (0.0%)     1 (0.1%)  <fabled_audio::error::decoder_error::AudioDecodingError as core::convert::From<std::io::error::Error>>::from
+       9 (0.0%)     1 (0.1%)  <fabled_audio::error::encoder_error::AudioEncodingError as core::convert::From<std::io::error::Error>>::from
+       9 (0.0%)     1 (0.1%)  <fabled_audio::source::ambisonic_output::AmbisonicOutput as core::default::Default>::default
+       9 (0.0%)     1 (0.1%)  core::mem::maybe_uninit::MaybeUninit<T>::zeroed
+       9 (0.0%)     1 (0.1%)  core::ptr::mut_ptr::<impl *mut T>::is_null
+       9 (0.0%)     1 (0.1%)  core::ptr::unique::Unique<T>::new_unchecked
+       9 (0.0%)     1 (0.1%)  rodio::source::Source::buffered
+       9 (0.0%)     1 (0.1%)  rodio::source::Source::repeat_infinite
+       9 (0.0%)     1 (0.1%)  rodio::source::amplify::Amplify<I>::set_factor
+       9 (0.0%)     1 (0.1%)  std::f32::<impl f32>::sqrt
+       8 (0.0%)     1 (0.1%)  <f32 as rodio::conversions::sample::Sample>::amplify
+       8 (0.0%)     1 (0.1%)  <f32 as rodio::conversions::sample::Sample>::saturating_add
+       8 (0.0%)     1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as rodio::source::Source>::total_duration
+       8 (0.0%)     1 (0.1%)  <rodio::source::buffered::Buffered<I> as rodio::source::Source>::total_duration
+       8 (0.0%)     1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as rodio::source::Source>::channels
+       8 (0.0%)     1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as core::iter::traits::iterator::Iterator>::next::{{closure}}
+       8 (0.0%)     1 (0.1%)  <u8 as core::ops::bit::BitAnd>::bitand
+       8 (0.0%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::ptr
+       8 (0.0%)     1 (0.1%)  core::mem::valid_align::ValidAlign::new_unchecked
+       8 (0.0%)     1 (0.1%)  core::num::<impl usize>::wrapping_sub
+       8 (0.0%)     1 (0.1%)  core::ptr::non_null::NonNull<T>::new_unchecked
+       8 (0.0%)     1 (0.1%)  rodio::source::Source::convert_samples
+       8 (0.0%)     1 (0.1%)  rodio::source::Source::stoppable
+       8 (0.0%)     1 (0.1%)  std::sys::windows::locks::mutex::Mutex::lock
+       8 (0.0%)     1 (0.1%)  std::sys::windows::locks::mutex::Mutex::unlock
+       7 (0.0%)     1 (0.1%)  <&mut I as core::iter::traits::exact_size::ExactSizeIterator>::len
+       7 (0.0%)     1 (0.1%)  <alloc::sync::Arc<T> as core::ops::deref::Deref>::deref
+       7 (0.0%)     1 (0.1%)  <ambisonic::renderer::BstreamStereoRenderer<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <ambisonic::renderer::BstreamStereoRenderer<I> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <core::ptr::unique::Unique<T> as core::convert::From<core::ptr::non_null::NonNull<T>>>::from
+       7 (0.0%)     1 (0.1%)  <rodio::source::blt::BltFilter<I> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::blt::BltFilter<I> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::blt::BltFilter<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::blt::BltFilter<I> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::channel_volume::ChannelVolume<I> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <rodio::source::done::Done<I> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::done::Done<I> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::done::Done<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::done::Done<I> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <rodio::source::fadein::FadeIn<I> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::fadein::FadeIn<I> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::fadein::FadeIn<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::fadein::FadeIn<I> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::mix::Mix<I1,I2> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::pausable::Pausable<I> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::pausable::Pausable<I> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::pausable::Pausable<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::pausable::Pausable<I> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::samples_converter::SamplesConverter<I,D> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <rodio::source::spatial::Spatial<I> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::spatial::Spatial<I> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::spatial::Spatial<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::spatial::Spatial<I> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <rodio::source::speed::Speed<I> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::speed::Speed<I> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as core::iter::traits::iterator::Iterator>::size_hint
+       7 (0.0%)     1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  <rodio::source::stoppable::Stoppable<I> as rodio::source::Source>::total_duration
+       7 (0.0%)     1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::channels
+       7 (0.0%)     1 (0.1%)  <rodio::source::take::TakeDuration<I> as rodio::source::Source>::sample_rate
+       7 (0.0%)     1 (0.1%)  alloc::vec::Vec<T,A>::allocator
+       7 (0.0%)     1 (0.1%)  core::num::nonzero::NonZeroUsize::new_unchecked
+       7 (0.0%)     1 (0.1%)  core::option::Option<T>::is_none
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<ambisonic::bstream::SoundController>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<fabled_audio::clip::audio_clip::AudioClip<f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<fabled_audio::config::output_config::OutputConfig>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::conversions::sample::DataConverter<rodio::conversions::channels::ChannelCountConverter<rodio::conversions::sample_rate::SampleRateConverter<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::amplify::Amplify<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::blt::BltFilter<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::delay::Delay<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::fadein::FadeIn<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::samples_converter::SamplesConverter<rodio::source::periodic::PeriodicAccess<rodio::source::stoppable::Stoppable<rodio::source::amplify::Amplify<rodio::source::paus
+ able::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::Bstrea
+ mStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>>,rodio::sink::Sink::append<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>::{{closure}}>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::speed::Speed<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::stoppable::Stoppable<rodio::source::amplify::Amplify<rodio::source::pausable::Pausable<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::take::TakeDuration<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::Take<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::Take<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::Take<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::Take<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::UniformSourceIterator<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::UniformSourceIterator<rodio::source::amplify::Amplify<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::UniformSourceIterator<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::uniform::UniformSourceIterator<rodio::source::delay::Delay<rodio::source::amplify::Amplify<rodio::source::buffered::Buffered<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>,f32>>
+       7 (0.0%)     1 (0.1%)  core::ptr::non_null::NonNull<T>::as_ref
+       7 (0.0%)     1 (0.1%)  core::time::Duration::subsec_millis
+       7 (0.0%)     1 (0.1%)  fabled_audio::source::ambisonic_output::AmbisonicOutput::get_global_volume
+       7 (0.0%)     1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::pause
+       7 (0.0%)     1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::resume
+       7 (0.0%)     1 (0.1%)  fabled_audio::source::spatial_source::SpatialAmbisonicSource::stop
+       7 (0.0%)     1 (0.1%)  rodio::spatial_sink::SpatialSink::volume
+       7 (0.0%)     1 (0.1%)  std::sys::windows::locks::mutex::raw
+       7 (0.0%)     1 (0.1%)  std::sys_common::mutex::MovableMutex::raw_lock
+       7 (0.0%)     1 (0.1%)  std::sys_common::mutex::MovableMutex::raw_unlock
+       6 (0.0%)     1 (0.1%)  <ambisonic::bmixer::BstreamMixer as rodio::source::Source>::total_duration
+       6 (0.0%)     1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as rodio::source::Source>::channels
+       6 (0.0%)     1 (0.1%)  <fabled_audio::clip::audio_clip::AudioClip<D> as rodio::source::Source>::sample_rate
+       6 (0.0%)     1 (0.1%)  <rodio::source::repeat::Repeat<I> as rodio::source::Source>::total_duration
+       6 (0.0%)     1 (0.1%)  alloc::sync::Arc<T>::inner
+       6 (0.0%)     1 (0.1%)  alloc::vec::Vec<T,A>::len
+       6 (0.0%)     1 (0.1%)  alloc::vec::Vec<T>::with_capacity
+       6 (0.0%)     1 (0.1%)  core::alloc::layout::Layout::size
+       6 (0.0%)     1 (0.1%)  core::mem::zeroed
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<<alloc::vec::into_iter::IntoIter<T,A> as core::ops::drop::Drop>::drop::DropGuard<cpal::platform::platform_impl::HostId,alloc::alloc::Global>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<alloc::raw_vec::RawVec<fabled_audio::config::output_config::OutputConfig>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<alloc::sync::Arc<std::sync::mutex::Mutex<rodio::spatial_sink::SoundPositions>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<alloc::sync::Weak<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<alloc::sync::Weak<std::sync::mutex::Mutex<rodio::spatial_sink::SoundPositions>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<alloc::vec::into_iter::IntoIter<cpal::platform::platform_impl::HostId>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<core::cell::UnsafeCell<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<core::cell::UnsafeCell<core::option::Option<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::sink::Sink::append<rodio::source::periodic::PeriodicAccess<rodio::source::spatial::Spatial<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>,rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>>::{{closure}}>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{{closure}}>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<std::sync::mutex::MutexGuard<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<std::sync::mutex::MutexGuard<core::option::Option<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<std::sync::poison::PoisonError<std::sync::mutex::MutexGuard<alloc::sync::Arc<rodio::source::buffered::Frame<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>>
+       6 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<std::sync::poison::PoisonError<std::sync::mutex::MutexGuard<core::option::Option<alloc::boxed::Box<dyn rodio::source::Source+Item = f32+core::marker::Send>>>>>
+       6 (0.0%)     1 (0.1%)  core::time::Duration::as_secs
+       6 (0.0%)     1 (0.1%)  core::time::Duration::subsec_nanos
+       6 (0.0%)     1 (0.1%)  rodio::source::stoppable::Stoppable<I>::stop
+       5 (0.0%)     1 (0.1%)  <T as core::convert::From<T>>::from
+       5 (0.0%)     1 (0.1%)  <core::mem::manually_drop::ManuallyDrop<T> as core::ops::deref::DerefMut>::deref_mut
+       5 (0.0%)     1 (0.1%)  <core::option::Option<T> as core::ops::try_trait::FromResidual>::from_residual
+       5 (0.0%)     1 (0.1%)  <fabled_audio::container::fade_filter::FadeFilter as core::default::Default>::default
+       5 (0.0%)     1 (0.1%)  alloc::raw_vec::RawVec<T,A>::allocator
+       5 (0.0%)     1 (0.1%)  core::convert::num::<impl core::convert::From<u16> for usize>::from
+       5 (0.0%)     1 (0.1%)  core::f32::<impl f32>::is_nan
+       5 (0.0%)     1 (0.1%)  core::ptr::const_ptr::<impl *const T>::addr
+       5 (0.0%)     1 (0.1%)  core::ptr::mut_ptr::<impl *mut T>::cast
+       5 (0.0%)     1 (0.1%)  core::ptr::unique::Unique<T>::dangling
+       5 (0.0%)     1 (0.1%)  rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{closure#0}]>>"* @"_ZN5rodio6source7amplify16Amplify$LT$I$GT$9inner_mut17h3415d86beb72c87aE
+       5 (0.0%)     1 (0.1%)  rodio::spatial_sink::SpatialSink::append<ambisonic::renderer::BstreamStereoRenderer<ambisonic::bmixer::BstreamMixer>>::{closure#0}]>>>"* @"_ZN5rodio6source9stoppable18Stoppable$LT$I$GT$9inner_mut17h59c07c7793ed67fcE
+       4 (0.0%)     1 (0.1%)  <ambisonic::renderer::BstreamStereoRenderer<I> as rodio::source::Source>::channels
+       4 (0.0%)     1 (0.1%)  <fabled_audio::container::sample_format::SampleFormat as core::default::Default>::default
+       4 (0.0%)     1 (0.1%)  core::num::nonzero::NonZeroUsize::get
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&[f32; 3]>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&claxon::error::Error>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&cpal::error::BuildStreamError>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&cpal::error::PlayStreamError>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&f32>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&fabled_audio::container::sample_format::SampleFormat>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&fabled_audio::container::supported_buffer::SupportedBufferSize>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&hound::Error>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&lewton::VorbisError>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&minimp3::error::Error>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&rodio::decoder::DecoderError>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&std::io::error::Error>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&u16>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<&u32>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::source::zero::Zero<f32>>
+       4 (0.0%)     1 (0.1%)  core::ptr::drop_in_place<rodio::stream::PlayError>
+       4 (0.0%)     1 (0.1%)  fabled_audio::codecs::decode::FlacReaderOptions::inner
+       4 (0.0%)     1 (0.1%)  std::panicking::panicking
+       3 (0.0%)     3 (0.3%)  core::mem::size_of
+       3 (0.0%)     1 (0.1%)  core::ptr::null_mut
+       3 (0.0%)     1 (0.1%)  std::thread::panicking
+       2 (0.0%)     1 (0.1%)  <fabled_audio::config::input_config::InputConfig as core::default::Default>::default
+       2 (0.0%)     1 (0.1%)  fabled_audio::config::input_config::InputConfig::retrieve_from_devices
+       2 (0.0%)     1 (0.1%)  fabled_audio::config::input_config::InputConfig::retrieve_from_host
+       2 (0.0%)     1 (0.1%)  fabled_audio::config::output_config::OutputConfig::retrieve_from_devices
+       1 (0.0%)     1 (0.1%)  <f32 as rodio::conversions::sample::Sample>::zero_value
+       1 (0.0%)     1 (0.1%)  <u16 as core::default::Default>::default
+       1 (0.0%)     1 (0.1%)  <u32 as core::default::Default>::default
+       1 (0.0%)     1 (0.1%)  core::hint::unreachable_unchecked
+       1 (0.0%)     1 (0.1%)  core::mem::align_of
