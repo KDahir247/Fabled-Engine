@@ -1,5 +1,6 @@
 // todo remove the usage of Box<dyn> we need both RawClip and RawAmbisonicClip
-
+// todo remove complete implementation and just use audio clip. What does this
+// container solve?
 pub struct RawClip<T>
 where
     T: ambisonic::rodio::Sample, {

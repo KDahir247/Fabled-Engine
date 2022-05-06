@@ -1,7 +1,6 @@
 use crate::{AudioListener, OutputConfig, RawAmbisonicClip, SpatialAmbisonicSource};
 use ambisonic::rodio::Source;
 
-
 pub struct AmbisonicOutput {
     #[allow(dead_code)]
     sink: ambisonic::rodio::SpatialSink,
