@@ -23,7 +23,7 @@ mod standard_output_binding_test {
     }
 
     fn create_audio_source(_: ()) -> StandardOutput<f32> {
-        StandardOutput::new(AudioListener::default()).unwrap()
+        StandardOutput::new(AudioListener::default())
     }
 
     #[test]

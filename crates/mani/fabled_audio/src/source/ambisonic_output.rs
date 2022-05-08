@@ -11,47 +11,49 @@ pub struct AmbisonicOutput {
 
 impl Default for AmbisonicOutput {
     fn default() -> Self {
-        Self::new(AudioListener::default()).unwrap()
+        Self::new(AudioListener::default())
     }
 }
 
 impl AmbisonicOutput {
-    fn new(audio_listener: AudioListener) -> Option<AmbisonicOutput> {
+    fn new(audio_listener: AudioListener) -> AmbisonicOutput {
         let OutputConfig {
             output_device,
             output_config,
         } = OutputConfig::default();
 
+        assert_eq!(
+            output_config.len(),
+            1,
+            "there should be only one device config on call to default"
+        );
 
-        match output_device {
-            None => None,
-            Some(device) => {
-                let (b_mixer, b_controller) = ambisonic::bmixer(output_config.sample_rate);
+        let output_config = output_config[0];
 
-                let (output_stream, output_handle) =
-                    ambisonic::rodio::OutputStream::try_from_device(&device).unwrap();
+        let (b_mixer, b_controller) = ambisonic::bmixer(output_config.sample_rate);
+
+        let (output_stream, output_handle) =
+            ambisonic::rodio::OutputStream::try_from_device(&output_device).unwrap();
 
 
-                let sink = ambisonic::rodio::SpatialSink::try_new(
-                    &output_handle,
-                    audio_listener.position,
-                    audio_listener.stereo_left_position,
-                    audio_listener.stereo_right_position,
-                )
-                .unwrap();
+        let sink = ambisonic::rodio::SpatialSink::try_new(
+            &output_handle,
+            audio_listener.position,
+            audio_listener.stereo_left_position,
+            audio_listener.stereo_right_position,
+        )
+        .unwrap();
 
-                let stereo_cfg = ambisonic::StereoConfig::default();
+        let stereo_cfg = ambisonic::StereoConfig::default();
 
-                let output = ambisonic::BstreamStereoRenderer::new(b_mixer, stereo_cfg);
+        let output = ambisonic::BstreamStereoRenderer::new(b_mixer, stereo_cfg);
 
-                sink.append(output);
+        sink.append(output);
 
-                Some(Self {
-                    sink,
-                    output_stream,
-                    composer: b_controller,
-                })
-            }
+        Self {
+            sink,
+            output_stream,
+            composer: b_controller,
         }
     }
 
@@ -95,7 +97,7 @@ impl AmbisonicOutput {
 
 #[cfg(test)]
 mod ambisonic_output_test {
-    use crate::{AmbisonicOutput, AudioListener, RawAmbisonicClip};
+    use crate::{AmbisonicOutput, RawAmbisonicClip};
     use std::io::Read;
 
     fn retrieve_audio_buffer() -> Vec<u8> {
@@ -106,15 +108,6 @@ mod ambisonic_output_test {
 
         audio_buffer
     }
-
-    #[test]
-    fn creation_test() {
-        let _ambisonic_output = AmbisonicOutput::default();
-
-        let another_ambisonic_output = AmbisonicOutput::new(AudioListener::default());
-        assert!(another_ambisonic_output.is_some());
-    }
-
 
     #[test]
     fn volume_test() {

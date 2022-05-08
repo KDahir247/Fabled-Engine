@@ -4,6 +4,7 @@
 use crate::DeviceConfig;
 use cpal::traits::{DeviceTrait, HostTrait};
 
+
 pub struct InputConfig {
     pub input_device: Option<cpal::Device>,
     pub input_config: DeviceConfig,
@@ -49,76 +50,56 @@ impl Default for InputConfig {
 impl InputConfig {
     #[cold]
     pub fn retrieve_from_host() -> Vec<InputConfig> {
-        todo!()
+        let available_hosts: Vec<cpal::HostId> = cpal::available_hosts();
 
-        // let available_hosts = cpal::available_hosts();
-        //
-        // let input_configs =
-        // std::sync::Arc::new(parking_lot::Mutex::new(Vec::with_capacity(
-        //     available_hosts.len(),
-        // )));
-        //
-        // available_hosts.par_iter().for_each(|host_id| {
-        //     let host = cpal::host_from_id(*host_id);
-        //
-        //     match host {
-        //         Ok(host) => {
-        //             let input_device = host.default_input_device();
-        //
-        //             if let Some(device) = input_device {
-        //                 let input_config =
-        // device.supported_input_configs().map_or(
-        // None,                     |supported_input_config| {
-        //                         let optimal_input_config_range =
-        //
-        // supported_input_config.max_by_key(|config_predicate| {
-        //                                 config_predicate.max_sample_rate().0
-        //                             });
-        //
-        //                         if let Some(desired_config) =
-        // optimal_input_config_range {                             let
-        // desired_config_max = desired_config.with_max_sample_rate();
-        //
-        //                             Some(DeviceConfig {
-        //                                 sample_rate:
-        // desired_config_max.sample_rate().0,
-        // channel_count: desired_config_max.channels(),
-        // sample_format: desired_config_max.sample_format().into(),
-        //                                 buffer_size:
-        // desired_config_max.buffer_size().into(),
-        // })                         } else {
-        //                             None
-        //                         }
-        //                     },
-        //                 );
-        //
-        //                 let input_config_guard = input_configs.clone();
-        //
-        //                 let input_device_detail = InputConfig {
-        //                     input_device: Some(device),
-        //                     input_config,
-        //                 };
-        //
-        //                 input_config_guard.lock().push(input_device_detail);
-        //             }
-        //         }
-        //         Err(err) => {
-        //             println!("Host is Unavailable.\nMessage : {:?}", err);
-        //         }
-        //     }
-        // });
-        //
-        // let mut input_config_guard = input_configs.lock();
-        //
-        // let result = std::mem::take(input_config_guard.deref_mut());
-        //
-        // result
+        let mut input_configs: Vec<InputConfig> = Vec::with_capacity(available_hosts.len() + 5);
+
+        available_hosts
+            .iter()
+            .filter_map(|&host_id: &cpal::HostId| cpal::host_from_id(host_id).ok())
+            .for_each(|valid_host: cpal::Host| {
+                let input_device: Option<cpal::Device> = valid_host.default_input_device();
+
+                if let Some(valid_device) = input_device {
+                    let supported_input_config: cpal::SupportedInputConfigs =
+                        valid_device.supported_input_configs().unwrap();
+
+                    let optimal_input_config_range: Option<cpal::SupportedStreamConfigRange> =
+                        supported_input_config
+                            .max_by(|curr, next| curr.cmp_default_heuristics(next));
+
+                    if let Some(valid_config_range) = optimal_input_config_range {
+                        let desired_input_config = valid_config_range.with_max_sample_rate();
+
+                        let input_config = InputConfig {
+                            input_device: Some(valid_device),
+                            input_config: DeviceConfig {
+                                sample_rate: desired_input_config.sample_rate().0,
+                                channel_count: desired_input_config.channels(),
+                                buffer_size: desired_input_config.buffer_size().into(),
+                                sample_format: desired_input_config.sample_format().into(),
+                            },
+                        };
+
+                        input_configs.push(input_config);
+                    }
+                }
+            });
+
+        input_configs
     }
 
     #[cold]
     pub fn retrieve_from_devices() -> Vec<InputConfig> {
-        todo!()
+        let host: cpal::Host = cpal::default_host();
 
+        let input_devices: Result<cpal::InputDevices<cpal::Devices>, cpal::DevicesError> =
+            host.input_devices();
+
+        let input_configs: Vec<InputConfig> = Vec::with_capacity(10);
+
+
+        todo!()
         // let host = cpal::default_host();
         //
         // let input_devices = host.devices().unwrap();

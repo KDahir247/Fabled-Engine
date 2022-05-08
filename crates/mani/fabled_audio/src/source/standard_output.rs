@@ -1,5 +1,4 @@
 use crate::{AudioListener, OutputConfig, RawClip};
-use cpal::Device;
 
 pub struct StandardOutput<D> {
     #[allow(dead_code)]
@@ -14,7 +13,7 @@ where
     D: ambisonic::rodio::Sample + Send + std::fmt::Debug,
 {
     fn default() -> Self {
-        Self::new(AudioListener::default()).unwrap()
+        Self::new(AudioListener::default())
     }
 }
 
@@ -22,52 +21,55 @@ impl<D: 'static> StandardOutput<D>
 where
     D: ambisonic::rodio::Sample + Send + std::fmt::Debug,
 {
-    pub fn new(audio_listener: AudioListener) -> Option<Self> {
+    pub fn new(audio_listener: AudioListener) -> Self {
         let OutputConfig {
             output_device,
             output_config,
         } = OutputConfig::default();
 
-        match output_device {
-            None => None,
-            Some(device) => {
-                let (dyn_controller, dyn_mixer) = ambisonic::rodio::dynamic_mixer::mixer(
-                    output_config.channel_count,
-                    output_config.sample_rate,
-                );
+        assert_eq!(
+            output_config.len(),
+            1,
+            "there should be only one device config on call to default"
+        );
 
-                let (output_stream, output_handle) =
-                    ambisonic::rodio::OutputStream::try_from_device(&device).unwrap();
+        let output_config = output_config[0];
 
-                let AudioListener {
-                    position,
-                    stereo_left_position,
-                    stereo_right_position,
-                } = audio_listener;
+        let (dyn_controller, dyn_mixer) = ambisonic::rodio::dynamic_mixer::mixer(
+            output_config.channel_count,
+            output_config.sample_rate,
+        );
 
-                let sink = ambisonic::rodio::SpatialSink::try_new(
-                    &output_handle,
-                    position,
-                    stereo_left_position,
-                    stereo_right_position,
-                )
-                .unwrap();
+        let (output_stream, output_handle) =
+            ambisonic::rodio::OutputStream::try_from_device(&output_device).unwrap();
 
-                let zeroed = ambisonic::rodio::source::Zero::new(
-                    output_config.channel_count,
-                    output_config.sample_rate,
-                );
+        let AudioListener {
+            position,
+            stereo_left_position,
+            stereo_right_position,
+        } = audio_listener;
 
-                dyn_controller.add(zeroed);
+        let sink = ambisonic::rodio::SpatialSink::try_new(
+            &output_handle,
+            position,
+            stereo_left_position,
+            stereo_right_position,
+        )
+        .unwrap();
 
-                sink.append(dyn_mixer);
+        let zeroed = ambisonic::rodio::source::Zero::new(
+            output_config.channel_count,
+            output_config.sample_rate,
+        );
 
-                Some(Self {
-                    sink,
-                    output_stream,
-                    composer: dyn_controller,
-                })
-            }
+        dyn_controller.add(zeroed);
+
+        sink.append(dyn_mixer);
+
+        Self {
+            sink,
+            output_stream,
+            composer: dyn_controller,
         }
     }
 
@@ -125,7 +127,7 @@ where
 
 #[cfg(test)]
 mod standard_output_test {
-    use crate::{AudioListener, RawClip, StandardOutput};
+    use crate::{RawClip, StandardOutput};
     use std::io::Read;
 
     fn retrieve_audio_buffer() -> Vec<u8> {
@@ -137,15 +139,6 @@ mod standard_output_test {
         audio_buffer
     }
 
-    #[test]
-    fn creation_test() {
-        let _standard_output: StandardOutput<f32> = StandardOutput::default();
-
-        let another_standard_output: Option<StandardOutput<f32>> =
-            StandardOutput::new(AudioListener::default());
-
-        assert!(another_standard_output.is_some());
-    }
 
     #[test]
     fn volume_test() {
