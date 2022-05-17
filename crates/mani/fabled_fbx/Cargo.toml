@@ -7,4 +7,4 @@ edition = "2018"
 
 [dependencies]
 fbxcel = "0.7.0"
-fbxcel-dom = "0.0.6"
+fbxcel-dom = "0.0.7"
