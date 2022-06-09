@@ -2,7 +2,6 @@ use crate::camera::{ClippingPlane, Oblique, Orthographic, Projection, ViewPort};
 use fabled_transform::{Rotation, Translation};
 
 use fabled_math::Matrix4x4;
-
 #[derive(Copy, Clone, Default, Debug)]
 pub struct MatrixDescriptor {
     pub projection: Matrix4x4,
@@ -15,9 +14,9 @@ pub fn project(
     viewport: &ViewPort,
     matrix_descriptor: MatrixDescriptor,
 ) -> [f32; 3] {
-    let model = glam::Mat4::from_cols_array(&matrix_descriptor.model.inner);
-    let projection = glam::Mat4::from_cols_array(&matrix_descriptor.projection.inner);
-    let view = glam::Mat4::from_cols_array(&matrix_descriptor.view.inner);
+    let model = glam::Mat4::from_cols_array(&matrix_descriptor.model.value);
+    let projection = glam::Mat4::from_cols_array(&matrix_descriptor.projection.value);
+    let view = glam::Mat4::from_cols_array(&matrix_descriptor.view.value);
 
     let t_mvp_target_vector =
         projection * view * model * glam::Vec4::new(target[0], target[1], target[2], 1.0);
@@ -39,9 +38,9 @@ pub fn unproject(
     viewport: &ViewPort,
     matrix_descriptor: MatrixDescriptor,
 ) -> [f32; 3] {
-    let model = glam::Mat4::from_cols_array(&matrix_descriptor.model.inner);
-    let projection = glam::Mat4::from_cols_array(&matrix_descriptor.projection.inner);
-    let view = glam::Mat4::from_cols_array(&matrix_descriptor.view.inner);
+    let model = glam::Mat4::from_cols_array(&matrix_descriptor.model.value);
+    let projection = glam::Mat4::from_cols_array(&matrix_descriptor.projection.value);
+    let view = glam::Mat4::from_cols_array(&matrix_descriptor.view.value);
 
     let matrix = (projection * (view * model)).inverse();
 
@@ -128,7 +127,7 @@ pub fn compute_arc_ball_matrix(
 }
 
 pub fn compute_inverse_view_matrix(view_matrix: Matrix4x4) -> Matrix4x4 {
-    let view_matrix = glam::Mat4::from_cols_array(&view_matrix.inner);
+    let view_matrix = glam::Mat4::from_cols_array(&view_matrix.value);
 
     view_matrix.inverse().to_cols_array().into()
 }
@@ -187,7 +186,7 @@ pub fn compute_projection_matrix(projection: Projection, clipping_plane : Clippi
 #[rustfmt::skip]
 pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique : Oblique, clipping_plane: ClippingPlane) -> Matrix4x4{
     
-    let projection = compute_projection_matrix(Projection::Orthographic(orthographic), clipping_plane).inner;
+    let projection = compute_projection_matrix(Projection::Orthographic(orthographic), clipping_plane).value;
     
     let size = oblique.vertical_position / orthographic.top;
     
@@ -206,7 +205,7 @@ pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique : 
 }
 
 pub fn compute_inverse_projection_matrix(projection_matrix: Matrix4x4) -> Matrix4x4 {
-    let projection = glam::Mat4::from_cols_array(&projection_matrix.inner);
+    let projection = glam::Mat4::from_cols_array(&projection_matrix.value);
 
     projection.inverse().to_cols_array().into()
 }
@@ -357,13 +356,13 @@ mod camera_matrix_test {
 
         let (view_matrix, _) = compute_view_projection(rotation, translation);
 
-        let inv_view = glam::Mat4::from_cols_array(&view_matrix.inner)
+        let inv_view = glam::Mat4::from_cols_array(&view_matrix.value)
             .inverse()
             .to_cols_array();
 
         let inverse_view = compute_inverse_view_matrix(view_matrix);
 
-        assert!(inv_view.eq(&inverse_view.inner));
+        assert!(inv_view.eq(&inverse_view.value));
     }
 
     #[test]
@@ -407,22 +406,22 @@ mod camera_matrix_test {
             0.00000, -1.00020, -1.00000, 0.00000, 0.00000, -0.10001, 0.00000,
         ];
 
-        assert!((projection_matrix.inner[0] - proven_projection_matrix[0]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[1] - proven_projection_matrix[1]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[2] - proven_projection_matrix[2]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[3] - proven_projection_matrix[3]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[4] - proven_projection_matrix[4]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[5] - proven_projection_matrix[5]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[6] - proven_projection_matrix[6]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[7] - proven_projection_matrix[7]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[8] - proven_projection_matrix[8]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[9] - proven_projection_matrix[9]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[10] - proven_projection_matrix[10]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[11] - proven_projection_matrix[11]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[12] - proven_projection_matrix[12]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[13] - proven_projection_matrix[13]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[14] - proven_projection_matrix[14]).abs() < THRESHOLD);
-        assert!((projection_matrix.inner[15] - proven_projection_matrix[15]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[0] - proven_projection_matrix[0]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[1] - proven_projection_matrix[1]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[2] - proven_projection_matrix[2]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[3] - proven_projection_matrix[3]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[4] - proven_projection_matrix[4]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[5] - proven_projection_matrix[5]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[6] - proven_projection_matrix[6]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[7] - proven_projection_matrix[7]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[8] - proven_projection_matrix[8]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[9] - proven_projection_matrix[9]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[10] - proven_projection_matrix[10]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[11] - proven_projection_matrix[11]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[12] - proven_projection_matrix[12]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[13] - proven_projection_matrix[13]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[14] - proven_projection_matrix[14]).abs() < THRESHOLD);
+        assert!((projection_matrix.value[15] - proven_projection_matrix[15]).abs() < THRESHOLD);
     }
 
     #[test]
@@ -437,11 +436,11 @@ mod camera_matrix_test {
 
         let (_, projection_matrix) = compute_view_projection(rotation, translation);
 
-        let inv_proj = glam::Mat4::from_cols_array(&projection_matrix.inner)
+        let inv_proj = glam::Mat4::from_cols_array(&projection_matrix.value)
             .inverse()
             .to_cols_array();
 
-        let inverse_projection_matrix = compute_inverse_projection_matrix(projection_matrix).inner;
+        let inverse_projection_matrix = compute_inverse_projection_matrix(projection_matrix).value;
 
         assert!(inverse_projection_matrix.eq(&inv_proj));
     }
@@ -492,7 +491,7 @@ mod camera_matrix_test {
         let clipping_plane = ClippingPlane::default();
 
         let projection =
-            compute_oblique_projection_matrix(orthographic_detail, oblique_detail, clipping_plane).inner;
+            compute_oblique_projection_matrix(orthographic_detail, oblique_detail, clipping_plane).value;
         
 
         println!("{} {}", proven_oblique_matrix[10], projection[10]);
