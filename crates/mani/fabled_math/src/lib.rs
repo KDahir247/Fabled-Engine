@@ -19,9 +19,6 @@ pub use transformation::*;
 // temp solution.
 #[allow(improper_ctypes)]
 extern "C" {
-    #[link_name = "llvm.acos.v4f32"]
-    fn acos(x: std::simd::f32x4) -> std::simd::f32x4;
-
     #[link_name = "llvm.cos.v4f32"]
     fn cos_v4f32(x: std::simd::f32x4) -> std::simd::f32x4;
     #[link_name = "llvm.sin.v4f32"]
@@ -367,11 +364,4 @@ where {
     pub fn rol<const OFFSET: usize>(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
         simd_vector.rotate_lanes_left::<OFFSET>()
     }
-}
-
-
-#[test]
-fn a() {
-    let a = unsafe { acos(std::simd::f32x4::splat(0.5f32)) };
-    println!("{:?}", a);
 }
