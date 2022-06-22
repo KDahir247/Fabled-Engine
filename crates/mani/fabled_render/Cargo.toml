@@ -31,7 +31,7 @@ ron = "0.6.0"
 
 # Mesh
 # Remove later since fabled_math will have all the mathematical calculation and function.
-glam = {version = "0.20.1", features = ["bytemuck"]}
+glam = {version = "0.21.1", features = ["bytemuck"]}
 
 # EXT
 gltf = {version = "1.0.0", features = ["KHR_lights_punctual", "KHR_materials_ior"]}
