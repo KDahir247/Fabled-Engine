@@ -1,4 +1,4 @@
-use crate::{AudioListener, OutputConfig, RawAmbisonicClip, SpatialAmbisonicSource};
+use crate::{AudioListener, OutputConfig, RawAmbisonicClip, RawClip, SpatialAmbisonicSource};
 use ambisonic::rodio::Source;
 
 pub struct AmbisonicOutput {
@@ -58,7 +58,7 @@ impl AmbisonicOutput {
     }
 
 
-    pub fn play_omni(&self, clip: RawAmbisonicClip, volume: f32) -> SpatialAmbisonicSource {
+    pub fn play_omni(&self, clip: RawClip<f32>, volume: f32) -> SpatialAmbisonicSource {
         let dyn_clip = clip.dyn_clip;
 
         self.set_global_volume(volume);
