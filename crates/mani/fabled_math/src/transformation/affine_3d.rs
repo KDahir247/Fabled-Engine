@@ -1,25 +1,18 @@
-use crate::{Matrix3x3, Vector3};
-
-#[derive(Default)]
-pub struct Affine3 {
-    pub translation: Vector3,
-    pub matrix3: Matrix3x3,
-}
-
-
+// use crate::{Matrix3x3, Vector3};
+//
+// #[derive(Default)]
+// pub struct Affine3 {
+//     pub translation: Vector3,
+//     pub matrix3: Matrix3x3,
+// }
+//
+//
 // impl Affine3 {
 //     // euler is in radians
 //     #[rustfmt::skip]
 //     pub fn new(translation: Vector3, euler: Vector3) -> Self {
 //
-//         const HALF : std::simd::Simd<f32, 4> =  std::simd::Simd::splat(2.0);
-//         let intermediate_step: std::simd::Simd<f32, 4> = euler.value * HALF;
 //
-//         // [euler_x * 0.5, euler_y * 0.5, euler_z  * 0.5]
-//         let array_representation : [f32; 4] = intermediate_step.to_array();
-//
-//         // we need to get sin and cos and then do a swizzle (3(0),3(0),sin,
-// cos);
 //
 //         let x = glam::Quat::from_rotation_x(euler[0]);
 //         let y = glam::Quat::from_rotation_y(euler[1]);
@@ -53,12 +46,12 @@ pub struct Affine3 {
 // }
 //
 //
-// #[cfg(test)]
-// mod affine3d_test {
-//     use crate::Affine3;
-//
-//     #[test]
-//     fn affine_creation_test() {
-//         let affine3d = Affine3::new([0.0; 3], [13.5, 45.0, 90.0]);
-//     }
-// }
+// // #[cfg(test)]
+// // mod affine3d_test {
+// //     use crate::Affine3;
+// //
+// //     #[test]
+// //     fn affine_creation_test() {
+// //         let affine3d = Affine3::new([0.0; 3], [13.5, 45.0, 90.0]);
+// //     }
+// // }

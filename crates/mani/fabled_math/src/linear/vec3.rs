@@ -5,6 +5,7 @@ use std::ops::{
 };
 use std::simd::Which::*;
 
+#[derive(Copy, Clone)]
 pub struct Vector3 {
     pub value: std::simd::f32x4,
 }

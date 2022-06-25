@@ -44,6 +44,12 @@ impl Vector4 {
             value: std::simd::f32x4::from_array([x, y, z, w]),
         }
     }
+
+    pub const fn splat(val: f32) -> Vector4 {
+        Vector4 {
+            value: std::simd::f32x4::splat(val),
+        }
+    }
 }
 
 impl Display for Vector4 {

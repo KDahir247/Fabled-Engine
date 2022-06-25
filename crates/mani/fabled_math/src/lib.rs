@@ -2,6 +2,8 @@
 #![feature(link_llvm_intrinsics)]
 #![feature(simd_ffi)]
 
+extern crate core;
+
 mod arithmetic;
 mod boolean;
 mod easing;
@@ -9,6 +11,7 @@ mod geometric;
 mod linear;
 mod transformation;
 
+use crate::math::{cross, ror};
 pub use arithmetic::*;
 pub use boolean::*;
 pub use easing::*;
@@ -57,7 +60,7 @@ where {
         simd_vector.abs()
     }
 
-    pub fn face_forward<const SIZE: usize>(
+    pub fn face_forward(
         normal_vector: std::simd::f32x4,
         incident_vector: std::simd::f32x4,
         geo_normal_vector: std::simd::f32x4,
@@ -156,10 +159,20 @@ where {
         simd_vector.cast::<i32>().reduce_or()
     }
 
-    // cross
-    pub fn cross(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        // test
-        todo!()
+    // todo optimize
+    pub fn cross(
+        simd_vector: std::simd::f32x4,
+        simd_vector1: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        let a: [f32; 4] = simd_vector.to_array();
+        let b: [f32; 4] = simd_vector1.to_array();
+
+        std::simd::f32x4::from_array([
+            (a[1] * b[2] - a[2] * b[1]),
+            (a[2] * b[0] - a[0] * b[2]),
+            (a[0] * b[1] - a[1] * b[0]),
+            0.0,
+        ])
     }
 
     pub fn unlerp(
@@ -211,6 +224,13 @@ where {
 
     pub fn component_sum(simd_vector: std::simd::f32x4) -> f32 {
         simd_vector.reduce_sum()
+    }
+
+    pub fn copysign(
+        simd_vector: std::simd::f32x4,
+        sign_vector: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        simd_vector.copysign(sign_vector)
     }
 
     pub fn degrees(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
@@ -282,11 +302,11 @@ where {
         simd_vector.mul_add(mul_vector, add_vector)
     }
 
-    pub fn rcp<const SIZE: usize>(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+    pub fn rcp(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
         std::simd::f32x4::splat(1.0) / simd_vector
     }
 
-    pub fn is_finite<const SIZE: usize>(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
+    pub fn is_finite(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
         simd_vector.is_finite()
     }
 
@@ -314,7 +334,7 @@ where {
         incident_vector - intermediate_step * normal_vector
     }
 
-    pub fn refract<const SIZE: usize>(
+    pub fn refract(
         incident_vector: std::simd::f32x4,
         normal_vector: std::simd::f32x4,
         eta: f32,
@@ -364,4 +384,17 @@ where {
     pub fn rol<const OFFSET: usize>(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
         simd_vector.rotate_lanes_left::<OFFSET>()
     }
+}
+
+
+#[test]
+pub fn cross_test() {
+    let vector = Vector3::set(1.0, 2.0, 3.0);
+    let vector_1 = Vector3::set(1.0, 5.0, 7.0);
+
+    println!("{:?}", cross(vector.value, vector_1.value));
+
+    println!("rotate on right {:?}", ror::<2>(vector.value));
+
+    panic!()
 }

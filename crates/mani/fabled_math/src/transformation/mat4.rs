@@ -1,23 +1,30 @@
-#[derive(Copy, Clone, Debug, PartialEq, bytemuck::Pod, bytemuck::Zeroable)]
-#[repr(C)]
 pub struct Matrix4x4 {
-    pub inner: [f32; 16],
+    pub value: std::simd::Simd<f32, 16>,
 }
 
-
+#[rustfmt::skip]
 impl Default for Matrix4x4 {
     fn default() -> Self {
         Self {
-            inner: [
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-            ],
+            value: [
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+            ]
+            .into(),
         }
     }
 }
 
-
 impl From<[f32; 16]> for Matrix4x4 {
     fn from(matrix: [f32; 16]) -> Self {
-        Self { inner: matrix }
+        Self {
+            value: matrix.into(),
+        }
     }
+}
+
+pub struct SOAMatrix4x4<const N: usize> {
+    pub value: [Matrix4x4; N],
 }

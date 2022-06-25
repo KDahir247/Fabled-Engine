@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 pub struct Matrix3x3 {
     pub value: std::simd::Simd<f32, 16>,
 }
@@ -51,13 +53,26 @@ impl From<[f32; 9]> for Matrix3x3 {
     }
 }
 
-pub struct SOAMatrix3x3<const N: usize> {
-    pub value: [Matrix3x3; N],
+impl Display for Matrix3x3 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let array_representation: [f32; 16] = *self.value.as_array();
+
+        write!(
+            f,
+            "Matrix3x3\n[\n\t{}, {}, {}\n\t{}, {}, {},\n\t{}, {}, {}\n]",
+            array_representation[0],
+            array_representation[1],
+            array_representation[2],
+            array_representation[4],
+            array_representation[5],
+            array_representation[6],
+            array_representation[8],
+            array_representation[9],
+            array_representation[10]
+        )
+    }
 }
 
-#[test]
-fn a() {
-    let a = Matrix3x3::from([1.0, 8.0, 14.0, 4.0, 8.0, 6.0, 1.0, 3.0, 7.0]);
-
-    println!("{}", std::mem::align_of_val(&a))
+pub struct SOAMatrix3x3<const N: usize> {
+    pub value: [Matrix3x3; N],
 }
