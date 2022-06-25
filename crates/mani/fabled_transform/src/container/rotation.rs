@@ -16,7 +16,3 @@ impl From<[f32; 4]> for Rotation {
         Self { value: rot }
     }
 }
-
-impl shipyard::Component for Rotation {
-    type Tracking = shipyard::track::All;
-}

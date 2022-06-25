@@ -12,6 +12,7 @@ mod texture_dimension;
 mod texture_sample_type;
 mod texture_sampler;
 mod texture_view_dimension;
+mod wrap_mode;
 
 pub use border_color::*;
 pub use color_space::*;
@@ -27,6 +28,8 @@ pub use texture_dimension::*;
 pub use texture_sample_type::*;
 pub use texture_sampler::*;
 pub use texture_view_dimension::*;
+pub use wrap_mode::*;
+
 
 #[cfg(test)]
 pub mod data_test {

@@ -1,30 +1,9 @@
-use crate::material::{EmptyTarget, MaterialTarget};
+use crate::material::MaterialValue;
 use serde::*;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MaterialNode {
-    pub ty: MaterialTarget,
+    pub value_detail: MaterialValue,
     pub value_group: u32,
     pub value_binding: u32,
-}
-
-impl From<MaterialNode> for EmptyNode {
-    fn from(_: MaterialNode) -> Self {
-        Self {
-            ty: EmptyTarget::None,
-        }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
-pub struct EmptyNode {
-    pub ty: EmptyTarget,
-}
-
-impl Default for EmptyNode {
-    fn default() -> Self {
-        Self {
-            ty: EmptyTarget::None,
-        }
-    }
 }

@@ -20,12 +20,14 @@ impl SpatialAmbisonicSource {
     }
 
     pub fn set_position(&mut self, mut target_position: [f32; 3]) {
-        let sum = target_position[0] + target_position[1] + target_position[2];
+        let [pos_x, pos_y, pos_z] = target_position;
+
+        let sum = pos_x + pos_y + pos_z;
 
         if sum == 0.0 {
-            let offset_x = target_position[0] + target_position[0].signum() * f32::EPSILON;
-            let offset_y = target_position[1] + target_position[1].signum() * f32::EPSILON;
-            let offset_z = target_position[2] + target_position[2].signum() * f32::EPSILON;
+            let offset_x = pos_x + pos_x.signum() * f32::EPSILON;
+            let offset_y = pos_y + pos_y.signum() * f32::EPSILON;
+            let offset_z = pos_z + pos_z.signum() * f32::EPSILON;
 
             target_position = [offset_x, offset_y, offset_z];
         }

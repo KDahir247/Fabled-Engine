@@ -1,22 +1,23 @@
 use crate::{AudioDecodingError, RawAmbisonicClip, RawClip};
-use rodio::Source;
-use std::io::Read;
+use ambisonic::rodio::Source;
+use std::io::{Cursor, Read};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AudioClip<D> {
-    pub audio_data: parking_lot::Mutex<std::vec::IntoIter<D>>,
+    pub audio_data: std::vec::IntoIter<D>,
     pub duration: Option<std::time::Duration>,
     pub current_frame_len: Option<usize>,
-    pub sample: u32,
+    pub sample_rate: u32,
     pub channel: u16,
+    // todo maybe pan
 }
 
 impl<D> Default for AudioClip<D> {
     fn default() -> Self {
         Self {
-            audio_data: parking_lot::Mutex::new(vec![].into_iter()),
+            audio_data: vec![].into_iter(),
             channel: 0,
-            sample: 0,
+            sample_rate: 0,
             duration: None,
             current_frame_len: None,
         }
@@ -25,10 +26,13 @@ impl<D> Default for AudioClip<D> {
 
 impl<D> AudioClip<D>
 where
-    D: rodio::Sample,
+    D: ambisonic::rodio::Sample,
 {
-    pub fn from_raw(buffer: Vec<u8>, play_on_awake: bool) -> Result<Self, AudioDecodingError> {
-        let audio_decoder = rodio::Decoder::new(std::io::Cursor::new(buffer))
+    pub fn from_raw(
+        buffer: Vec<u8>,
+        play_on_awake: bool,
+    ) -> Result<AudioClip<D>, AudioDecodingError> {
+        let audio_decoder = ambisonic::rodio::Decoder::new(Cursor::new(buffer))
             .map_err(AudioDecodingError::DecoderError)?;
 
         let audio_clip = audio_decoder
@@ -38,14 +42,17 @@ where
 
         Ok(Self {
             channel: audio_clip.channels(),
-            sample: audio_clip.sample_rate(),
+            sample_rate: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
-            audio_data: parking_lot::Mutex::new(audio_clip.collect::<Vec<_>>().into_iter()),
+            audio_data: audio_clip.collect::<Vec<_>>().into_iter(),
         })
     }
 
-    pub fn from_file(file: std::fs::File, play_on_awake: bool) -> Result<Self, AudioDecodingError> {
+    pub fn from_file(
+        file: std::fs::File,
+        play_on_awake: bool,
+    ) -> Result<AudioClip<D>, AudioDecodingError> {
         let mut file = file;
 
         let meta_data = file.metadata()?;
@@ -54,21 +61,22 @@ where
 
         file.read_exact(&mut audio_buffer)?;
 
-        let audio_decoder = rodio::Decoder::new(std::io::Cursor::new(audio_buffer))
+        // vorbis and mp3 total duration is None
+        let audio_decoder = ambisonic::rodio::Decoder::new(Cursor::new(audio_buffer))
             .map_err(AudioDecodingError::DecoderError)?;
+
 
         let audio_clip = audio_decoder
             .pausable(!play_on_awake)
             .stoppable()
             .convert_samples::<D>();
 
-
         Ok(Self {
             channel: audio_clip.channels(),
-            sample: audio_clip.sample_rate(),
+            sample_rate: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
-            audio_data: parking_lot::Mutex::new(audio_clip.collect::<Vec<_>>().into_iter()),
+            audio_data: audio_clip.collect::<Vec<_>>().into_iter(),
         })
     }
 
@@ -81,30 +89,29 @@ where
         play_on_awake: bool,
     ) -> AudioClip<D> {
         let audio_clip = Self {
-            audio_data: parking_lot::Mutex::new(data.into_iter()),
+            audio_data: data.into_iter(),
             channel,
-            sample,
+            sample_rate: sample,
             duration,
             current_frame_len: None,
         }
         .pausable(!play_on_awake)
-        .stoppable();
+        .stoppable()
+        .convert_samples();
 
         Self {
             channel: audio_clip.channels(),
-            sample: audio_clip.sample_rate(),
+            sample_rate: audio_clip.sample_rate(),
             duration: audio_clip.total_duration(),
             current_frame_len: audio_clip.current_frame_len(),
-            audio_data: parking_lot::Mutex::new(
-                audio_clip.convert_samples().collect::<Vec<_>>().into_iter(),
-            ),
+            audio_data: audio_clip.collect::<Vec<_>>().into_iter(),
         }
     }
 }
 
 impl<D: 'static> From<AudioClip<D>> for RawClip<D>
 where
-    D: rodio::Sample + Send,
+    D: ambisonic::rodio::Sample + Send,
 {
     fn from(audio_clip: AudioClip<D>) -> Self {
         RawClip::new(audio_clip)
@@ -122,34 +129,11 @@ impl<D> Iterator for AudioClip<D> {
     type Item = D;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let mut lock = self.audio_data.lock();
-        lock.next()
+        self.audio_data.next()
     }
 }
 
-impl<D> rodio::Source for AudioClip<D>
-where
-    D: rodio::Sample,
-{
-    fn current_frame_len(&self) -> Option<usize> {
-        self.current_frame_len
-    }
-
-    fn channels(&self) -> u16 {
-        self.channel
-    }
-
-    fn sample_rate(&self) -> u32 {
-        self.sample
-    }
-
-    fn total_duration(&self) -> Option<std::time::Duration> {
-        self.duration
-    }
-}
-
-
-impl<D> ambisonic::rodio::Source for AudioClip<D>
+impl<D> Source for AudioClip<D>
 where
     D: ambisonic::rodio::Sample,
 {
@@ -162,14 +146,13 @@ where
     }
 
     fn sample_rate(&self) -> u32 {
-        self.sample
+        self.sample_rate
     }
 
     fn total_duration(&self) -> Option<std::time::Duration> {
         self.duration
     }
 }
-
 
 #[cfg(test)]
 mod audio_clip_test {
@@ -181,25 +164,21 @@ mod audio_clip_test {
     fn default_clip_test() {
         let mut empty_clip: AudioClip<u16> = AudioClip::default();
 
-        assert!(empty_clip.sample.eq(&0));
-        assert!(rodio::Source::sample_rate(&empty_clip).eq(&0));
+        assert!(empty_clip.sample_rate.eq(&0));
         assert!(ambisonic::rodio::Source::sample_rate(&empty_clip).eq(&0));
 
         assert!(empty_clip.duration.is_none());
-        assert!(rodio::Source::total_duration(&empty_clip).is_none());
         assert!(ambisonic::rodio::Source::total_duration(&empty_clip).is_none());
 
         assert!(empty_clip.channel.eq(&0));
-        assert!(rodio::Source::channels(&empty_clip).eq(&0));
         assert!(ambisonic::rodio::Source::channels(&empty_clip).eq(&0));
 
         assert!(empty_clip.current_frame_len.is_none());
-        assert!(rodio::Source::current_frame_len(&empty_clip).is_none());
         assert!(ambisonic::rodio::Source::current_frame_len(&empty_clip).is_none());
 
         assert!(empty_clip.next().is_none());
 
-        let lock = empty_clip.audio_data.lock();
+        let lock = empty_clip.audio_data;
         assert!(lock.len().eq(&0));
     }
 

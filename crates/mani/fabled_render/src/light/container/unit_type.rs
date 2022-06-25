@@ -1,7 +1,7 @@
 use crate::camera::ISOSpeed;
 
 #[derive(Copy, Clone, Debug)]
-pub enum LightUnit {
+pub enum IntensityUnit {
     Lumen,
     Candela,
     Lux,
@@ -12,7 +12,7 @@ pub enum LightUnit {
 }
 
 
-impl Default for LightUnit {
+impl Default for IntensityUnit {
     fn default() -> Self {
         Self::Lumen
     }

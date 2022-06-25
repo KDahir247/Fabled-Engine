@@ -4,12 +4,15 @@ version = "0.1.0"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-[profile.release]
-lto = true
+[profile.dev]
 debug = true
-opt-level = 3
-codegen-units = 3
-panic = "abort"
+
+#[profile.release]
+#debug = false
+#lto = true
+#opt-level = 3
+#panic = "abort"
+#strip = "true"
 
 [lib]
 name = "lib"
@@ -18,10 +21,6 @@ path = "crates/mani/lib/src/lib.rs"
 [workspace]
 members = ["crates/mani/*"]
 
-
-#[dependencies.superluminal-perf]
-#version = "*"
-#optional = true
 
 [dependencies.env_logger]
 version = "*"
@@ -32,13 +31,14 @@ version = "*"
 optional = true
 
 [features]
-#profiler = ["superluminal-perf"]
 logger = ["log" ,"env_logger"]
 
 [dependencies]
 fabled_gltf = {path = "crates/mani/fabled_gltf", version = "*"}
 fabled_render = {path = "crates/mani/fabled_render", version = "*"}
 fabled_audio = {path = "crates/mani/fabled_audio", version = "*"}
+#fabled_fbx = {path = "crates/mani/fabled_fbx", version = "*"}
+fabled_obj = {path = "crates/mani/fabled_obj", version = "*"}
 
 # todo others remove
 image = "*"

@@ -9,7 +9,6 @@ let grid : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
                                          vec3<f32>(1.0, -1.0, 0.0)
                                          );
 
-
 [[block]]
 struct Uniforms{
     u_view_position : vec4<f32>;
@@ -21,6 +20,7 @@ struct Uniforms{
 
 [[group(0), binding(0)]]
 var<uniform> uniform : Uniforms;
+
 
 struct VertexOutput{
         [[builtin(position)]] v_position : vec4<f32>;

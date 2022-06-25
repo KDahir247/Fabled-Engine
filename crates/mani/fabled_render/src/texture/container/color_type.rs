@@ -23,6 +23,22 @@ pub enum ColorType {
     Nil,
 }
 
+impl ColorType {
+    pub fn channel_count(&self) -> u8 {
+        match self {
+            ColorType::L8 | ColorType::L16 => 1,
+
+            ColorType::La8 | ColorType::La16 => 2,
+
+            ColorType::Rgb8 | ColorType::Rgb16 | ColorType::Bgr8 => 3,
+
+            ColorType::Rgba8 | ColorType::Rgba16 | ColorType::Bgra8 => 4,
+            ColorType::Nil => 0,
+        }
+    }
+}
+
+
 impl From<image::ColorType> for ColorType {
     fn from(color_type: image::ColorType) -> Self {
         match color_type {
@@ -40,6 +56,7 @@ impl From<image::ColorType> for ColorType {
         }
     }
 }
+
 
 #[repr(align(64))]
 #[derive(Debug, Clone, Eq, PartialEq)]

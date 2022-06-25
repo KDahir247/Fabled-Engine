@@ -3,7 +3,7 @@ mod output_config;
 
 pub use input_config::*;
 pub use output_config::*;
-
+// todo redo both input and output config
 
 #[cfg(test)]
 mod data_test {

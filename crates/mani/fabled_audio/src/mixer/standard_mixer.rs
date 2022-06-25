@@ -1,5 +1,5 @@
 use crate::{FadeFilter, RawClip};
-use rodio::Source;
+use ambisonic::rodio::source::*;
 
 impl RawClip<f32> {
     pub fn low_pass(self, frequency: u32) -> RawClip<f32> {
@@ -9,7 +9,7 @@ impl RawClip<f32> {
 
 impl<T> RawClip<T>
 where
-    T: rodio::Sample + Send + Sync + 'static,
+    T: ambisonic::rodio::Sample + Send + Sync + 'static,
 {
     pub fn buffered(self) -> RawClip<T> {
         RawClip::new(self.dyn_clip.buffered())
@@ -20,11 +20,11 @@ where
     }
 
     pub fn take_duration(self, seconds: u64, micro_seconds: u32, filter: FadeFilter) -> RawClip<T> {
-        let micro_seconds = micro_seconds * 1000;
+        let nano_seconds = micro_seconds * 1000;
 
         let mut take = self
             .dyn_clip
-            .take_duration(std::time::Duration::new(seconds, micro_seconds));
+            .take_duration(std::time::Duration::new(seconds, nano_seconds));
 
         take.clear_filter();
 
@@ -36,21 +36,21 @@ where
     }
 
     pub fn delay(self, seconds: u64, micro_seconds: u32) -> RawClip<T> {
-        let micro_seconds = micro_seconds * 1000;
+        let nano_seconds = micro_seconds * 1000;
 
         let delay = self
             .dyn_clip
-            .delay(std::time::Duration::new(seconds, micro_seconds));
+            .delay(std::time::Duration::new(seconds, nano_seconds));
 
         RawClip::new(delay)
     }
 
     pub fn fade_in(self, seconds: u64, micro_seconds: u32) -> RawClip<T> {
-        let micro_seconds = micro_seconds * 1000;
+        let nano_seconds = micro_seconds * 1000;
 
         let fade = self
             .dyn_clip
-            .fade_in(std::time::Duration::new(seconds, micro_seconds));
+            .fade_in(std::time::Duration::new(seconds, nano_seconds));
 
         RawClip::new(fade)
     }
@@ -65,22 +65,22 @@ where
         micro_seconds: u32,
         raw_clip: RawClip<T>,
     ) -> RawClip<T> {
-        let micro_seconds = micro_seconds * 1000;
+        let nano_seconds = micro_seconds * 1000;
 
         let cross_fade = self.dyn_clip.take_crossfade_with(
             raw_clip.dyn_clip,
-            std::time::Duration::new(seconds, micro_seconds),
+            std::time::Duration::new(seconds, nano_seconds),
         );
         RawClip::new(cross_fade)
     }
 
     pub fn reverb(self, seconds: u64, micro_seconds: u32, amplitude: f32) -> RawClip<T> {
-        let micro_seconds = micro_seconds * 1000;
+        let nano_seconds = micro_seconds * 1000;
 
         let reverb = self
             .dyn_clip
             .buffered()
-            .reverb(std::time::Duration::new(seconds, micro_seconds), amplitude);
+            .reverb(std::time::Duration::new(seconds, nano_seconds), amplitude);
 
         RawClip::new(reverb)
     }
@@ -92,12 +92,12 @@ where
         access: F,
     ) -> RawClip<T>
     where
-        F: FnMut(&mut Box<dyn rodio::Source<Item = T> + Send>) + Send, {
-        let micro_seconds = micro_seconds * 1000;
+        F: FnMut(&mut Box<dyn Source<Item = T> + Send>) + Send, {
+        let nano_seconds = micro_seconds * 1000;
 
         let access = self
             .dyn_clip
-            .periodic_access(std::time::Duration::new(seconds, micro_seconds), access);
+            .periodic_access(std::time::Duration::new(seconds, nano_seconds), access);
 
         RawClip::new(access)
     }

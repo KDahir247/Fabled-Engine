@@ -38,7 +38,7 @@ impl OggReader {
 #[cfg(test)]
 mod ogg_decoder_test {
     use crate::OggReader;
-    use rodio::Source;
+    use ambisonic::rodio::Source;
 
     #[test]
     fn decode_file() {
@@ -58,7 +58,7 @@ mod ogg_decoder_test {
         let file = std::fs::File::open(ogg_path.as_str()).unwrap();
 
         let ogg_reader = OggReader::default();
-        let rodio_decoder = rodio::Decoder::new_vorbis(file).unwrap();
+        let rodio_decoder = ambisonic::rodio::Decoder::new_vorbis(file).unwrap();
         let audio_spec = ogg_reader.read_ogg(ogg_path.as_str()).unwrap();
 
         assert_eq!(audio_spec.channel_count, rodio_decoder.channels());

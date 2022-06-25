@@ -158,11 +158,18 @@ fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32>{
 
     let result = (diffuse_reflection + specular_reflection);
 
+   // let lumenweight = vec3<f32>(0.3, 0.59, 0.11);
+   // let grey = vec3<f32>(dot(lumenweight, result.xyz));
+   //
+   // let final_res = mix(grey, result, vec3<f32>(0.5));
+
+    let final_res = result.xyz / (vec3<f32>(1.0) + result.xyz);
+
     // Dont need gamma correction since using sRGB buffer
     // let gamma : f32 = 2.0; //Range for  2.0 to 2.5
     // let corrected_result = pow(result.rgb,vec3<f32>(1.0 / gamma));
 
     let a = calculate_smooth_attenuation(in.world_position, light.position);
 
-   return vec4<f32>(result.xyz * object_color.xyz, 1.0);
+   return vec4<f32>(final_res.xyz * object_color.xyz, 1.0);
 }

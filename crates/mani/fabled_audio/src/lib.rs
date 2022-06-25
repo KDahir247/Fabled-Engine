@@ -1,3 +1,6 @@
+#![feature(try_blocks)]
+
+mod binding;
 mod clip;
 mod codecs;
 mod config;
@@ -6,6 +9,7 @@ mod error;
 mod mixer;
 mod source;
 
+pub use binding::*;
 pub use clip::*;
 pub use codecs::*;
 pub use config::*;
@@ -14,12 +18,9 @@ pub use error::*;
 pub use mixer::*;
 pub use source::*;
 
-
 #[cfg(test)]
-mod tests {
-    use crate::{
-        AmbisonicCollection, AmbisonicOutput, AudioClip, RawAmbisonicClip, RawClip, StandardOutput,
-    };
+mod audio_test {
+    use crate::{AmbisonicCollection, AmbisonicOutput, AudioClip, RawAmbisonicClip};
 
 
     #[test]
@@ -62,14 +63,15 @@ mod tests {
         let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
         let file = std::fs::File::open(path).unwrap();
         //---------------------- Creating the Clip ------------------
-        let standard_output = StandardOutput::default();
+        let standard_output = AmbisonicOutput::default();
 
         let audio_clip: AudioClip<f32> = AudioClip::from_file(file, true).unwrap();
 
-        let raw_clip = RawClip::from(audio_clip);
+        let raw_clip = RawAmbisonicClip::new(audio_clip);
 
-        standard_output.play_omni(raw_clip, 3.);
+        standard_output.play_omni(raw_clip, 1.);
 
-        std::thread::sleep(std::time::Duration::from_secs(5));
+
+        std::thread::sleep(std::time::Duration::from_secs(500));
     }
 }

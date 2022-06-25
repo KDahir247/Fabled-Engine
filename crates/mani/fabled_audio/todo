@@ -2,3 +2,13 @@ Handle case where the user switch from different output devices. Currently when 
 still play from the desktop and vis versa. I got to create a way were i get a call-back or notification and play the audio from the
 from correct output devices.
 
+add is_playing to raw_clip, raw_ambisonic_clip, audio_clip
+add loopable to raw_clip, raw_ambisonic_clip, audio_clip
+add pan to raw_clip, raw_ambisonic_clip, audio_clip
+switch audio volume to take in volume as db
+camera listener will have a affine3d when it is implemented.
+OutputSource and ambisonicOutput source will set the spatial sink orientation
+on the affine3d of the camera listener.
+added a decibel file for audio that will convert db to linear and other helpers.
+remove self and be explicit eg. -> Self to -> StructName
+remove rayon.

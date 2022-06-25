@@ -6,7 +6,6 @@ mod standard_output;
 pub use ambisonic_output::*;
 pub use spatial_source::*;
 pub use standard_output::*;
-
 #[cfg(test)]
 mod data_test {
     use crate::{AmbisonicOutput, SpatialAmbisonicSource, StandardOutput};

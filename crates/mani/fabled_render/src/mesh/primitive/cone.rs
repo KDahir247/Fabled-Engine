@@ -43,18 +43,22 @@ impl From<Cone> for Model {
         } = cone;
 
         let mut indices = vec![0_usize; tessellation_slice * 6];
-        let mut vertices: Vec<Vertex> = Vec::with_capacity(tessellation_slice + 2);
+        let mut vertices: Vec<Vertex> = Vec::with_capacity(tessellation_slice + 4);
 
         let apex_position = glam::const_vec3a!(apex_position);
 
         let forward_dir = glam::Vec3A::X.cross(apex_position.normalize());
         let center = apex_position + (-apex_position.normalize() * height);
 
-        let angle_inc = 2.0 * std::f32::consts::PI / tessellation_slice as f32;
+        let rcp_tesselation_slice = 1.0 / tessellation_slice as f32;
+
+        let angle_inc = std::f32::consts::TAU * rcp_tesselation_slice;
+
+        let tess_slice_1 = tessellation_slice + 1;
 
         // Apex Vertex
         vertices.push(Vertex {
-            position: apex_position.to_array(),
+            position: [apex_position.x, apex_position.y, apex_position.z],
             tex_coord: [0.0, 1.0],
             normal: [0.0, 1.0, 0.0],
             tangent: [-1.0, 0.0, 0.0, 1.0],
@@ -63,16 +67,17 @@ impl From<Cone> for Model {
 
         // Base Center Vertex
         vertices.push(Vertex {
-            position: center.to_array(),
+            position: [center.x, center.y, center.z],
             tex_coord: [0.0, -1.0],
             normal: [0.0, -1.0, 0.0],
             tangent: [-1.0, 0.0, 0.0, 1.0],
             bi_tangent: [0.0, 0.0, -1.0, 1.0],
         });
 
+        for side in 0..tess_slice_1 {
+            let side = side as f32;
 
-        for side in 0..=tessellation_slice {
-            let (rad_sin, rad_cos) = (angle_inc * side as f32).sin_cos();
+            let (rad_sin, rad_cos) = (angle_inc * side).sin_cos();
 
             let vertex = center + (glam::Vec3A::X * rad_cos + forward_dir * rad_sin) * radius;
 
@@ -80,12 +85,13 @@ impl From<Cone> for Model {
 
             let vertex_direction = vertex.normalize();
 
-            let tangent = glam::Vec3A::new(-vertex_direction.z, 0.0, vertex_direction.x);
+            let tangent = glam::const_vec3a!([-vertex_direction.z, 0.0, vertex_direction.x]);
+
             let normal = slant_height_vector.cross(tangent).normalize();
 
             vertices.push(Vertex {
                 position: [vertex.x, vertex.y, vertex.z],
-                tex_coord: [side as f32 / tessellation_slice as f32, 0.0],
+                tex_coord: [side * rcp_tesselation_slice, 0.0],
                 normal: [normal.x, normal.y, normal.z],
                 tangent: [0.0; 4],
                 bi_tangent: [0.0; 4],
@@ -104,7 +110,7 @@ impl From<Cone> for Model {
         let mesh = Mesh {
             vertices,
             material_id: 0,
-            indices: indices.into(),
+            indices: indices.into(), // small bottleneck
         };
 
         Model { meshes: vec![mesh] }

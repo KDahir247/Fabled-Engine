@@ -6,5 +6,20 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fbxcel = "0.7.0"
-fbxcel-dom = "0.0.6"
+fbxcel = { version = "0.7.0", features = ["tree", "writer"] }
+#fbxcel-dom = "0.0.6"
+thiserror = {version = "1.0.29"}
+fabled_render = {path = "../fabled_render", version = "*"}
+fabled_transform = {path = "../fabled_transform", version = "*"}
+anyhow = "1"
+rayon = "1.5.1"
+rgb = {version = "0.8.31"}
+
+
+[features]
+default = ["blendshape", "skinning"]
+light = []
+camera = []
+blendshape = []
+skinning = []
+cluster = []

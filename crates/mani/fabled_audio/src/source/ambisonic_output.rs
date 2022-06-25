@@ -1,9 +1,9 @@
-use crate::{OutputConfig, RawAmbisonicClip, SpatialAmbisonicSource};
+use crate::{AudioListener, OutputConfig, RawAmbisonicClip, RawClip, SpatialAmbisonicSource};
 use ambisonic::rodio::Source;
 
 pub struct AmbisonicOutput {
     #[allow(dead_code)]
-    sink: ambisonic::rodio::Sink,
+    sink: ambisonic::rodio::SpatialSink,
     #[allow(dead_code)]
     output_stream: ambisonic::rodio::OutputStream,
     composer: std::sync::Arc<ambisonic::BmixerComposer>,
@@ -11,61 +11,61 @@ pub struct AmbisonicOutput {
 
 impl Default for AmbisonicOutput {
     fn default() -> Self {
-        Self::new().unwrap()
+        Self::new(AudioListener::default())
     }
 }
 
 impl AmbisonicOutput {
-    fn new() -> Option<Self> {
+    fn new(audio_listener: AudioListener) -> AmbisonicOutput {
         let OutputConfig {
             output_device,
             output_config,
         } = OutputConfig::default();
 
-        match (output_device, output_config) {
-            (Some(device), Some(config)) => {
-                let (b_mixer, b_controller) = ambisonic::bmixer(config.sample_rate);
+        assert_eq!(
+            output_config.len(),
+            1,
+            "there should be only one device config on call to default"
+        );
 
-                let (output_stream, output_handle) =
-                    ambisonic::rodio::OutputStream::try_from_device(&device).unwrap();
+        let output_config = output_config[0];
 
-                let sink = ambisonic::rodio::Sink::try_new(&output_handle).unwrap();
+        let (b_mixer, b_controller) = ambisonic::bmixer(output_config.sample_rate);
 
-                match ambisonic::PlaybackConfiguration::default() {
-                    ambisonic::PlaybackConfiguration::Stereo(cfg) => {
-                        let output = ambisonic::BstreamStereoRenderer::new(b_mixer, cfg);
+        let (output_stream, output_handle) =
+            ambisonic::rodio::OutputStream::try_from_device(&output_device).unwrap();
 
-                        sink.append(output);
-                    }
-                    ambisonic::PlaybackConfiguration::Hrtf(cfg) => {
-                        let output = ambisonic::BstreamHrtfRenderer::new(b_mixer, cfg);
 
-                        sink.append(output);
-                    }
-                }
+        let sink = ambisonic::rodio::SpatialSink::try_new(
+            &output_handle,
+            audio_listener.position,
+            audio_listener.stereo_left_position,
+            audio_listener.stereo_right_position,
+        )
+        .unwrap();
 
-                Some(Self {
-                    sink,
-                    output_stream,
-                    composer: b_controller,
-                })
-            }
-            _ => None,
+        let stereo_cfg = ambisonic::StereoConfig::default();
+
+        let output = ambisonic::BstreamStereoRenderer::new(b_mixer, stereo_cfg);
+
+        sink.append(output);
+
+        Self {
+            sink,
+            output_stream,
+            composer: b_controller,
         }
     }
 
 
-    pub fn play_omni(&self, clip: RawAmbisonicClip, volume: f32) -> SpatialAmbisonicSource {
+    pub fn play_omni(&self, clip: RawClip<f32>, volume: f32) -> SpatialAmbisonicSource {
         let dyn_clip = clip.dyn_clip;
 
-        let channels = dyn_clip.channels();
-
-        let channel_volume =
-            ambisonic::rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channels as usize]);
+        self.set_global_volume(volume);
 
         let sound_controller = self
             .composer
-            .play(channel_volume, ambisonic::BstreamConfig::default());
+            .play(dyn_clip, ambisonic::BstreamConfig::default());
 
         SpatialAmbisonicSource::new(sound_controller)
     }
@@ -108,15 +108,6 @@ mod ambisonic_output_test {
 
         audio_buffer
     }
-
-    #[test]
-    fn creation_test() {
-        let _ambisonic_output = AmbisonicOutput::default();
-
-        let another_ambisonic_output = AmbisonicOutput::new();
-        assert!(another_ambisonic_output.is_some());
-    }
-
 
     #[test]
     fn volume_test() {

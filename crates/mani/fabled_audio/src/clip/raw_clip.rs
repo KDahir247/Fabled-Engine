@@ -1,16 +1,30 @@
+// todo remove the usage of Box<dyn> we need both RawClip and RawAmbisonicClip
+// todo remove complete implementation and just use audio clip. What does this
+// container solve?
 pub struct RawClip<T>
 where
-    T: rodio::Sample, {
-    pub dyn_clip: Box<dyn rodio::Source<Item = T> + Send>,
+    T: ambisonic::rodio::Sample, {
+    pub dyn_clip: Box<dyn ambisonic::rodio::Source<Item = T> + Send>,
+}
+
+impl<T: 'static> Default for RawClip<T>
+where
+    T: ambisonic::rodio::Sample + Send,
+{
+    fn default() -> Self {
+        Self {
+            dyn_clip: Box::new(ambisonic::rodio::source::Zero::new(2, 44100)),
+        }
+    }
 }
 
 impl<T> RawClip<T>
 where
-    T: rodio::Sample,
+    T: ambisonic::rodio::Sample,
 {
     pub fn new<U: 'static>(audio_clip: U) -> Self
     where
-        U: rodio::Source<Item = T> + Send, {
+        U: ambisonic::rodio::Source<Item = T> + Send, {
         Self {
             dyn_clip: Box::new(audio_clip),
         }
@@ -21,7 +35,15 @@ pub struct RawAmbisonicClip {
     pub dyn_clip: Box<dyn ambisonic::rodio::Source<Item = f32> + Send>,
 }
 
+impl Default for RawAmbisonicClip {
+    fn default() -> Self {
+        Self {
+            dyn_clip: Box::new(ambisonic::rodio::source::Zero::new(2, 44100)),
+        }
+    }
+}
 
+// todo make a better solution
 impl RawAmbisonicClip {
     pub fn new<T: 'static>(ambisonic_audio_clip: T) -> Self
     where
@@ -43,7 +65,6 @@ mod raw_test {
         let path = &[env!("CARGO_MANIFEST_DIR"), "/src/audio/epic1.mp3"].join("");
 
         let file = std::fs::File::open(path).unwrap();
-
 
         let clip: AudioClip<f32> = AudioClip::from_file(file, true).unwrap();
 

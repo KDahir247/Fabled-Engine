@@ -33,9 +33,8 @@ impl From<SampleFormat> for hound::SampleFormat {
 impl SampleFormat {
     pub fn sample_size(&self) -> usize {
         match self {
-            SampleFormat::I16 => std::mem::size_of::<i16>(),
-            SampleFormat::U16 => std::mem::size_of::<u16>(),
-            SampleFormat::F32 => std::mem::size_of::<f32>(),
+            SampleFormat::I16 | SampleFormat::U16 => 2,
+            SampleFormat::F32 => 4,
         }
     }
 }

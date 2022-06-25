@@ -1,15 +1,15 @@
 use crate::material::*;
 use crate::shader::parser::*;
-use std::ops::IndexMut;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use std::ops::{BitAnd, IndexMut};
 
+// todo size issue now.
 #[derive(Debug, Serialize, Deserialize)]
-#[repr(align(16))]
-pub struct MaterialParser {
+pub struct MaterialParserMetadata {
     material: MaterialTree,
-    map: slotmap::SlotMap<MaterialKey, MaterialNode>,
+    map: slotmap::DenseSlotMap<MaterialKey, MaterialNode>,
 }
-
-impl Default for MaterialParser {
+impl Default for MaterialParserMetadata {
     fn default() -> Self {
         Self {
             material: MaterialTree::new(),
@@ -18,96 +18,118 @@ impl Default for MaterialParser {
     }
 }
 
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct MaterialParser {
+    metadata: parking_lot::RwLock<MaterialParserMetadata>,
+}
+
+
 impl MaterialParser {
+    pub fn new() -> Self {
+        Self {
+            metadata: parking_lot::const_rwlock(Default::default()),
+        }
+    }
+
     pub fn parse_material<P: AsRef<std::path::Path>>(&mut self, path: P) -> String {
         // handle case here where it a user error (invalid path specified) and not a
         // internal bug.
-        let (module, _) = if let Ok(val) = parse_shader(path, None) {
-            val
-        } else {
-            return String::new();
-        };
-
+        let shader_module =
+            parse_shader(path, None).map_or(naga::Module::default(), |(module, _)| module);
 
         let naga::Module {
             types,
             global_variables,
             ..
-        } = module;
+        } = shader_module;
 
-        let globals = global_variables.into_inner();
+        let globals_variables = global_variables.into_inner();
 
-        for global_with_binding in globals.iter().filter(|glob_var| glob_var.binding.is_some()) {
-            let type_var = types
-                .try_get(global_with_binding.ty)
-                .expect("type arena len is less then the handle of type index specified and is out of bounds");
+        globals_variables
+            .into_par_iter()
+            .filter(|module_glob_var| {
+                let material_val = MaterialValue::from(&types[module_glob_var.ty].inner);
 
-            let res_binding = global_with_binding.binding.as_ref().expect("Global Binding for variable has previous pass check of not being None and and has been evaluated as None after the check.");
+                module_glob_var
+                    .binding
+                    .is_some()
+                    .bitand(material_val.get_primitive_ty().is_some())
+            })
+            .for_each(|resource_bounded_var| unsafe {
+                let resource_binding_type_var = &types[resource_bounded_var.ty];
 
-            if let naga::TypeInner::Struct {
-                top_level, members, ..
-            } = &type_var.inner
-            {
-                if *top_level {
-                    let (group, binding) = (res_binding.group, res_binding.binding);
+                // We can guarantee that unwrap will succeed, since we filter for
+                // binding.is_some()
+                let res_binding = resource_bounded_var.binding.unwrap_unchecked();
 
-                    for member in members {
-                        if let Some(member_ty) = types.try_get(member.ty) {
-                            let material_node = MaterialNode {
-                                value_group: group,
-                                value_binding: binding,
-                                ty: MaterialTarget::from(&member_ty.inner),
-                            };
+                let (value_group, value_binding) = (res_binding.group, res_binding.binding);
 
-                            let mat_attr: Option<MaterialAttributes> = material_node.ty.into();
+                let mut material_nodes = Vec::with_capacity(20);
 
-                            if let Some(attr) = mat_attr {
-                                let index = attr as usize;
-                                let material_key = self.map.insert(material_node);
-                                self.material.index_mut(index).add_to_keys(material_key);
-                            }
-                        }
+                if let naga::TypeInner::Struct {
+                    members: struct_members,
+                    ..
+                } = &resource_binding_type_var.inner
+                {
+                    for struct_member in struct_members {
+                        let struct_member_material_node = MaterialNode {
+                            value_group,
+                            value_binding,
+                            value_detail: MaterialValue::from(&types[struct_member.ty].inner),
+                        };
+
+
+                        material_nodes.push(struct_member_material_node);
                     }
-                } else {
-                    let struct_name = type_var
-                        .name
-                        .as_ref()
-                        .expect("One of the shader struct name is consider empty.");
-
-                    println!("Skipped struct name due to having nested struct types as member variable/s.\n The struct in questioning is named : {}", struct_name);
                 }
-            }
 
-            // Handle case where the binding variable in the shader is a sampler or a
-            // texture.
-            let (group, binding) = (res_binding.group, res_binding.binding);
+                // Handle case where the binding variable in the shader is a sampler or a
+                // texture.
+                let material_node = MaterialNode {
+                    value_group,
+                    value_binding,
+                    value_detail: MaterialValue::from(&resource_binding_type_var.inner),
+                };
 
-            let material_node = MaterialNode {
-                value_group: group,
-                value_binding: binding,
-                ty: MaterialTarget::from(&type_var.inner),
-            };
+                material_nodes.push(material_node);
 
-            let mat_attr: Option<MaterialAttributes> = material_node.ty.into();
+                for node in material_nodes
+                    .into_iter()
+                    .filter(|x| x.value_detail.value_ty.ne(&MaterialValueType::None))
+                {
+                    // We can guarantee that get_primitive_ty will never return a None since we
+                    // filtered out all None.
+                    let material_ty = node.value_detail.get_primitive_ty().unwrap_unchecked();
 
-            if let Some(attr) = mat_attr {
-                let index = attr as usize;
-                let material_key = self.map.insert(material_node);
-                self.material.index_mut(index).add_to_keys(material_key);
-            }
-        }
+                    let primitive_ty_index = material_ty as usize;
+
+                    {
+                        // blocking.
+                        let mut write_rw_guard = self.metadata.write();
+
+                        let material_key = write_rw_guard.map.insert(node);
+
+                        write_rw_guard
+                            .material
+                            .index_mut(primitive_ty_index)
+                            .add_to_keys(material_key);
+                    }
+                }
+            });
 
         let pretty = ron::ser::PrettyConfig::new()
-            .with_separate_tuple_members(true)
-            .with_decimal_floats(true)
-            .with_depth_limit(7)
-            .with_enumerate_arrays(true);
+            .decimal_floats(true)
+            .depth_limit(5)
+            .enumerate_arrays(true);
 
         ron::ser::to_string_pretty(&self, pretty).expect("failed to serialize shader data into a material representation.\nMaterial file should be utf-8")
     }
 
     pub fn get_group(&self, index: u32) -> Vec<(MaterialKey, MaterialNode)> {
-        self.map
+        let reader_rw_guard = self.metadata.read();
+
+        reader_rw_guard
+            .map
             .to_owned()
             .into_iter()
             .filter(|key_value| key_value.1.value_group.eq(&index))
@@ -115,7 +137,10 @@ impl MaterialParser {
     }
 
     pub fn get_binding(&self, index: u32) -> Vec<(MaterialKey, MaterialNode)> {
-        self.map
+        let reader_rw_guard = self.metadata.read();
+
+        reader_rw_guard
+            .map
             .to_owned()
             .into_iter()
             .filter(|key_value| key_value.1.value_binding.eq(&index))
@@ -135,16 +160,17 @@ mod material_test {
 
         // ----------------------- WEB GPU -----------------------
 
-        let wgsl_path = std::env::var("WGSL_FILE").unwrap();
-        let wgsl_path = std::path::Path::new(wgsl_path.as_str());
+        // let wgsl_path = std::env::var("WGSL_FILE").unwrap();
+        // let wgsl_path = std::path::Path::new(wgsl_path.as_str());
+        //
+        // println!("{:?}", wgsl_path);
+        // let mut material_wgsl_parser = MaterialParser::default();
+        //
+        // let wgsl_tree = material_wgsl_parser.parse_material(wgsl_path);
+        //
+        // println!("WGSL TREE:\n {}", wgsl_tree);
 
-        let mut material_wgsl_parser = MaterialParser::default();
-
-        let wgsl_tree = material_wgsl_parser.parse_material(wgsl_path);
-
-        println!("WGSL TREE:\n{}\n\n", wgsl_tree);
-
-        // ----------------------- SPIR-V -----------------------
+        // // ----------------------- SPIR-V -----------------------
 
         let spv_path = std::env::var("SPV_FILE").unwrap();
         let spv_path = std::path::Path::new(spv_path.as_str());
@@ -152,40 +178,42 @@ mod material_test {
         let mut material_spv_parser = MaterialParser::default();
 
         let spv_tree = material_spv_parser.parse_material(spv_path);
-        println!("SPV TREE:\n{}\n\n", spv_tree);
+        println!("SPV TREE:\n {}", spv_tree);
 
-        // ----------------------- GLSL Vertex -----------------------
+        println!();
+        // // ----------------------- GLSL Vertex -----------------------
 
-        let vertex_path = std::env::var("VERT_FILE").unwrap();
-        let vertex_path = std::path::Path::new(vertex_path.as_str());
-
-        let mut material_vert_parser = MaterialParser::default();
-
-        let vertex_tree = material_vert_parser.parse_material(vertex_path);
-
-        println!("GLSL VERTEX TREE:\n{}\n\n", vertex_tree);
-
-        // ----------------------- GLSL Fragment -----------------------
-
-        let frag_path = std::env::var("FRAG_FILE").unwrap();
-        let frag_path = std::path::Path::new(frag_path.as_str());
-
-        let mut material_frag_parser = MaterialParser::default();
-
-        let fragment_tree = material_frag_parser.parse_material(frag_path);
-
-        println!("GLSL FRAGMENT TREE:\n{}\n\n", fragment_tree);
-
-        // ----------------------- GLSL Compute -----------------------
-
-        let compute_path = std::env::var("COMP_FILE").unwrap();
-        let compute_path = std::path::Path::new(compute_path.as_str());
-
-        let mut material_comp_parser = MaterialParser::default();
-
-        let compute_tree = material_comp_parser.parse_material(compute_path);
-
-        println!("GLSL COMPUTE TREE:\n{}\n\n", compute_tree);
+        // let vertex_path = std::env::var("VERT_FILE").unwrap();
+        // let vertex_path = std::path::Path::new(vertex_path.as_str());
+        //
+        // let mut material_vert_parser = MaterialParser::default();
+        //
+        // let vertex_tree = material_vert_parser.parse_material(vertex_path);
+        //
+        // println!("GLSL VERTEX TREE:\n {}", vertex_tree);
+        //
+        // println!();
+        // // ----------------------- GLSL Fragment -----------------------
+        //
+        // let frag_path = std::env::var("FRAG_FILE").unwrap();
+        // let frag_path = std::path::Path::new(frag_path.as_str());
+        //
+        // let mut material_frag_parser = MaterialParser::default();
+        //
+        // let fragment_tree = material_frag_parser.parse_material(frag_path);
+        //
+        // println!("GLSL FRAGMENT TREE:\n {}", fragment_tree);
+        //
+        // // ----------------------- GLSL Compute -----------------------
+        //
+        // let compute_path = std::env::var("COMP_FILE").unwrap();
+        // let compute_path = std::path::Path::new(compute_path.as_str());
+        //
+        // let mut material_comp_parser = MaterialParser::default();
+        //
+        // let compute_tree = material_comp_parser.parse_material(compute_path);
+        //
+        // println!("GLSL COMPUTE TREE:\n {}", compute_tree);
     }
 
     #[test]

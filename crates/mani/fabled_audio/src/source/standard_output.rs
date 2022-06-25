@@ -2,78 +2,83 @@ use crate::{AudioListener, OutputConfig, RawClip};
 
 pub struct StandardOutput<D> {
     #[allow(dead_code)]
-    sink: rodio::SpatialSink,
+    sink: ambisonic::rodio::SpatialSink,
     #[allow(dead_code)]
-    output_stream: rodio::OutputStream,
-    composer: std::sync::Arc<rodio::dynamic_mixer::DynamicMixerController<D>>,
+    output_stream: ambisonic::rodio::OutputStream,
+    composer: std::sync::Arc<ambisonic::rodio::dynamic_mixer::DynamicMixerController<D>>,
 }
 
 impl<D: 'static> Default for StandardOutput<D>
 where
-    D: rodio::Sample + Send + std::fmt::Debug,
+    D: ambisonic::rodio::Sample + Send + std::fmt::Debug,
 {
     fn default() -> Self {
-        Self::new([0.; 3], AudioListener::default()).unwrap()
+        Self::new(AudioListener::default())
     }
 }
 
 impl<D: 'static> StandardOutput<D>
 where
-    D: rodio::Sample + Send + std::fmt::Debug,
+    D: ambisonic::rodio::Sample + Send + std::fmt::Debug,
 {
-    pub fn new(init_pos: [f32; 3], audio_listener: AudioListener) -> Option<Self> {
+    pub fn new(audio_listener: AudioListener) -> Self {
         let OutputConfig {
             output_device,
             output_config,
         } = OutputConfig::default();
 
+        assert_eq!(
+            output_config.len(),
+            1,
+            "there should be only one device config on call to default"
+        );
 
-        match (output_device, output_config) {
-            (Some(device), Some(output)) => {
-                let (dyn_controller, dyn_mixer) =
-                    rodio::dynamic_mixer::mixer(output.channel_count, output.sample_rate);
+        let output_config = output_config[0];
 
-                let (output_stream, output_handle) =
-                    rodio::OutputStream::try_from_device(&device).unwrap();
+        let (dyn_controller, dyn_mixer) = ambisonic::rodio::dynamic_mixer::mixer(
+            output_config.channel_count,
+            output_config.sample_rate,
+        );
 
-                let AudioListener {
-                    stereo_left_position,
-                    stereo_right_position,
-                } = audio_listener;
+        let (output_stream, output_handle) =
+            ambisonic::rodio::OutputStream::try_from_device(&output_device).unwrap();
 
-                let sink = rodio::SpatialSink::try_new(
-                    &output_handle,
-                    init_pos,
-                    stereo_left_position,
-                    stereo_right_position,
-                )
-                .unwrap();
+        let AudioListener {
+            position,
+            stereo_left_position,
+            stereo_right_position,
+        } = audio_listener;
 
-                let zeroed = rodio::source::Zero::new(output.channel_count, output.sample_rate);
+        let sink = ambisonic::rodio::SpatialSink::try_new(
+            &output_handle,
+            position,
+            stereo_left_position,
+            stereo_right_position,
+        )
+        .unwrap();
 
-                dyn_controller.add(zeroed);
+        let zeroed = ambisonic::rodio::source::Zero::new(
+            output_config.channel_count,
+            output_config.sample_rate,
+        );
 
-                sink.append(dyn_mixer);
+        dyn_controller.add(zeroed);
 
-                Some(Self {
-                    sink,
-                    output_stream,
-                    composer: dyn_controller,
-                })
-            }
-            _ => None,
+        sink.append(dyn_mixer);
+
+        Self {
+            sink,
+            output_stream,
+            composer: dyn_controller,
         }
     }
 
     pub fn play_omni(&self, clip: RawClip<D>, volume: f32) {
         let dyn_clip = clip.dyn_clip;
 
-        let channels = dyn_clip.channels();
+        self.sink.set_volume(volume);
 
-        let channel_volume =
-            rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channels as usize]);
-
-        self.composer.add(channel_volume);
+        self.composer.add(dyn_clip);
     }
 
 
@@ -82,12 +87,9 @@ where
 
         let dyn_clip = clip.dyn_clip;
 
-        let channel_count = dyn_clip.channels();
+        self.sink.set_volume(volume);
 
-        let channel_volume =
-            rodio::source::ChannelVolume::new(dyn_clip, vec![volume; channel_count as usize]);
-
-        self.composer.add(channel_volume);
+        self.composer.add(dyn_clip);
     }
 
     pub fn set_global_volume(&self, volume: f32) {
@@ -125,7 +127,7 @@ where
 
 #[cfg(test)]
 mod standard_output_test {
-    use crate::{AudioListener, RawClip, StandardOutput};
+    use crate::{RawClip, StandardOutput};
     use std::io::Read;
 
     fn retrieve_audio_buffer() -> Vec<u8> {
@@ -137,15 +139,6 @@ mod standard_output_test {
         audio_buffer
     }
 
-    #[test]
-    fn creation_test() {
-        let _standard_output: StandardOutput<f32> = StandardOutput::default();
-
-        let another_standard_output: Option<StandardOutput<f32>> =
-            StandardOutput::new([0.0; 3], AudioListener::default());
-
-        assert!(another_standard_output.is_some());
-    }
 
     #[test]
     fn volume_test() {

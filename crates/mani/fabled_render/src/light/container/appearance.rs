@@ -16,45 +16,137 @@
 // | 6500K         | RGB monitor (white point) |
 // | 7000-8000K    | Outdoor shade areas       |
 // | 8000-10000K   | Sky partly cloudy         |
-// -_-------------------------------------------
+// ---------------------------------------------
+
+// We are using TM-30 rather then using Black body for the chromaticity
+// coordinates, since black body radiator enter the atmosphere, various gases
+// absorb and alter the spectral content.
+// TM-30 is a combination of Black body and Daylight to eliminates jump and
+// attempts to smooth it out.
+
+#[derive(Copy, Clone, Debug)]
+pub struct ChromaticDesignation(pub [f32; 3]);
+
+impl shipyard::Component for ChromaticDesignation {
+    type Tracking = shipyard::track::Modification;
+}
+
+impl Default for ChromaticDesignation {
+    fn default() -> Self {
+        Self {
+            0: [0.31352, 0.32979, 0.35669],
+        }
+    }
+}
 
 
-use crate::light::{celsius_to_kelvin, fahrenheit_to_kelvin, TemperatureUnit};
-
-// temperature is in kelvin
 #[derive(Copy, Clone, Debug)]
 pub struct LightAppearance {
     pub color: [f32; 3],
-    pub temperature: f32,
+    pub chromaticity_coord: [f32; 3],
+}
+
+impl shipyard::Component for LightAppearance {
+    type Tracking = shipyard::track::All;
 }
 
 impl Default for LightAppearance {
     fn default() -> Self {
         Self {
-            temperature: 6500.0,
-            color: [0.0; 3],
+            color: [1.0; 3],
+            chromaticity_coord: [0.31352, 0.32979, 0.35669],
         }
     }
 }
 
 impl LightAppearance {
-    pub fn new(unit: f32, unit_type: TemperatureUnit, color: [f32; 3]) -> Self {
-        let mut unit = unit;
+    pub const MATCH_FLAME: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.55511, 0.40638, 0.03851],
+    };
 
-        // Convert unit type to Kelvin.
-        match unit_type {
-            TemperatureUnit::Kelvin => {} // Already in kelvin, so no conversion needed.
-            TemperatureUnit::Celsius => {
-                unit = celsius_to_kelvin(unit);
-            }
-            TemperatureUnit::Fahrenheit => {
-                unit = fahrenheit_to_kelvin(unit);
-            }
-        }
+    pub const CANDLE_FLAME: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.53891, 0.41095, 0.05014],
+    };
+
+    pub const SUN_SUNRISE_SUNSET: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.47699, 0.41368, 0.10933],
+    };
+
+    pub const HOUSEHOLD_TUNGSTEN: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.45986, 0.41060, 0.12954],
+    };
+
+    pub const TUNGSTEN_500W_1K: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.43693, 0.40407, 0.159],
+    };
+
+    pub const TUNGSTEN_2K: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.41860, 0.39694, 0.18446],
+    };
+
+    pub const TUNGSTEN_5K_10K: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.41221, 0.39406, 0.19373],
+    };
+
+    pub const QUARTZ: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.40530, 0.39072, 0.20398],
+    };
+
+    pub const FLUORESCENT: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.33596, 0.34955, 0.31449],
+    };
+
+    pub const SUN_DIRECT_NOON: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.33972, 0.35175, 0.30853],
+    };
+
+    pub const DAYLIGHT: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.32208, 0.33805, 0.33987],
+    };
+
+    pub const SKY_OVERCAST: LightAppearance = LightAppearance {
+        color: [1.0; 3],
+        chromaticity_coord: [0.30979, 0.32606, 0.36415],
+    };
+}
+
+impl LightAppearance {
+    pub fn new(chromaticity_coord: [f32; 2], color: [f32; 3]) -> Self {
+        let [x, y] = chromaticity_coord;
+
+        // value must be in a range of 0.0 to 1.0
+        let safe_chromaticity_coord = [x.min(1.0), y.min(1.0)];
+
+
+        let calculated_coord = [
+            safe_chromaticity_coord[0],
+            safe_chromaticity_coord[1],
+            1.0 - safe_chromaticity_coord[0] - safe_chromaticity_coord[1],
+        ];
 
         Self {
-            temperature: unit,
+            chromaticity_coord: calculated_coord,
             color,
         }
     }
+    // pub fn white_point(&self) -> [f32; 3] {
+    // let maximum_luminance_scalar = 1.0 / self.chromaticity_coord[1];
+    //
+    // [
+    // self.chromaticity_coord[0] * maximum_luminance_scalar,
+    // self.chromaticity_coord[1] * maximum_luminance_scalar,
+    // self.chromaticity_coord[2] * maximum_luminance_scalar,
+    // ]
+    // }
 }

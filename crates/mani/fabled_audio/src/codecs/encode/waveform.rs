@@ -33,12 +33,12 @@ impl WavWriter {
 
         let device = device.ok_or(AudioEncodingError::NoDeviceError)?;
 
-        let input_config = input_config.ok_or(AudioEncodingError::NoInputConfigError)?;
+        let input_config = input_config;
 
         let wav_spec = hound::WavSpec {
-            channels: input_config.channel_count as _,
-            sample_rate: input_config.sample_rate as _,
-            bits_per_sample: (input_config.sample_format.sample_size() * 8) as _,
+            channels: input_config.channel_count,
+            sample_rate: input_config.sample_rate,
+            bits_per_sample: (input_config.sample_format.sample_size() * 8) as u16,
             sample_format: input_config.sample_format.into(),
         };
 

@@ -1,3 +1,4 @@
+// todo can we remove this. This is used by the mtl loader.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MaterialParameter {
     None,
