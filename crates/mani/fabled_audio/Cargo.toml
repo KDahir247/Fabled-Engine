@@ -22,6 +22,6 @@ minimp3 = {version ="0.5.1", features = ["async_tokio"]}
 
 parking_lot = { version = "0.12.0" }
 
-mlua = {version = "0.7.4", features = ["lua54", "vendored", "async"]}
+mlua = {version = "0.8.0", features = ["lua54", "vendored", "async"]}
 fabled_binding = {path = "../fabled_binding", version = "0.1.0"}
 
