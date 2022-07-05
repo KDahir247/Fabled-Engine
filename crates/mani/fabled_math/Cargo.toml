@@ -6,5 +6,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-glam = {version = "0.20.1", features = ["bytemuck"]}
+glam = {version = "0.20.1", features = ["bytemuck"]} #todo remove
 bytemuck = {version = "1.7.0", features = ["derive"]}

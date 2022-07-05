@@ -1,4 +1,5 @@
-use crate::{Vector2, Vector4};
+use crate::math::mul_add;
+use crate::{cross, Quaternion, Vector2, Vector4};
 use std::fmt::{Display, Formatter};
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
@@ -83,6 +84,26 @@ impl Display for Vector3 {
             "Vector3 (x : {}, y : {}, z : {})",
             array_representation[0], array_representation[1], array_representation[2]
         )
+    }
+}
+
+impl Mul<Quaternion> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: Quaternion) -> Self::Output {
+        let mut result = self;
+        result *= rhs;
+        result
+    }
+}
+
+impl MulAssign<Quaternion> for Vector3 {
+    fn mul_assign(&mut self, rhs: Quaternion) {
+        let splat_2 = Vector4::splat(2.0);
+        let quaternion_scalar_splat = Vector4::splat(rhs.value[3]);
+        let t = splat_2.value * cross(rhs.value, self.value);
+
+        self.value += mul_add(quaternion_scalar_splat.value, t, cross(rhs.value, t));
     }
 }
 
