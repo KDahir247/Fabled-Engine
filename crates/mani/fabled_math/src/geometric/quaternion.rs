@@ -4,18 +4,14 @@ use crate::{cross, Vector3, Vector4};
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-// todo convert simd type to respective struct type in the math module vbn
-
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Quaternion {
     pub value: std::simd::f32x4,
 }
 
 impl Default for Quaternion {
     fn default() -> Self {
-        Self {
-            value: [0.0, 0.0, 0.0, 1.0].into(),
-        }
+        Quaternion::IDENTITY
     }
 }
 
@@ -27,6 +23,26 @@ impl Quaternion {
     pub const fn set(i: f32, j: f32, k: f32, w: f32) -> Quaternion {
         Quaternion {
             value: std::simd::f32x4::from_array([i, j, k, w]),
+        }
+    }
+
+
+    pub  fn additive_form(
+        real_quaternion: Quaternion,
+        pure_quaternion: Quaternion,
+    ) -> Quaternion {
+        use std::simd::Which;
+        Quaternion {
+            value: std::simd::simd_swizzle!(
+                real_quaternion.value,
+                pure_quaternion.value,
+                [
+                    Which::Second(0),
+                    Which::Second(1),
+                    Which::Second(2),
+                    Which::First(3)
+                ]
+            ),
         }
     }
 }
@@ -58,7 +74,7 @@ impl Add for Quaternion {
 
 impl AddAssign for Quaternion {
     fn add_assign(&mut self, rhs: Self) {
-        self.value = self.value + rhs.value
+        self.value += rhs.value
     }
 }
 
@@ -74,7 +90,7 @@ impl Sub for Quaternion {
 
 impl SubAssign for Quaternion {
     fn sub_assign(&mut self, rhs: Self) {
-        self.value = self.value - rhs.value;
+        self.value -= rhs.value;
     }
 }
 
@@ -95,13 +111,22 @@ impl MulAssign for Quaternion {
         let scalar_lhs = self.value[3];
         let scalar_rhs = rhs.value[3];
 
-        let complex_lhs = Vector4 { value: self.value }.trunc_vec3();
-        let complex_rhs = Vector4 { value: rhs.value }.trunc_vec3();
-
-        let imaginary = (complex_rhs * scalar_lhs + complex_lhs * scalar_rhs).value
-            + cross(complex_lhs.value, complex_rhs.value);
+        let complex_lhs = Vector3 { value: self.value } * Vector3::ONE;
+        let complex_rhs = Vector3 { value: rhs.value } * Vector3::ONE;
 
         let real = scalar_lhs * scalar_rhs - dot(complex_lhs.value, complex_rhs.value);
+
+
+        let imaginary_intermediate = Vector3 {
+            value: mul_add(
+                complex_rhs.value,
+                std::simd::f32x4::splat(scalar_lhs),
+                complex_lhs.value,
+            ),
+        };
+
+        let imaginary = (imaginary_intermediate * scalar_rhs).value
+            + cross(complex_rhs.value, complex_lhs.value);
 
 
         self.value = imaginary + Vector4::set(0.0, 0.0, 0.0, real).value;
@@ -168,18 +193,18 @@ pub mod quaternion_math {
         }
     }
 
-    pub fn angle_axis_mag(axis_mag: Vector3) -> Quaternion {
+    pub fn from_angle_axis_mag(axis_mag: Vector3) -> Quaternion {
         let angle = length(axis_mag.value);
 
         let rcp_angle = rcp(Vector4::splat(angle).value);
 
         let axis = axis_mag.value * rcp_angle;
 
-        angle_axis(Vector3 { value: axis }, angle)
+        from_angle_axis(Vector3 { value: axis }, angle)
     }
 
 
-    pub fn angle_axis(normalized_axis: Vector3, angle_radians: f32) -> Quaternion {
+    pub fn from_angle_axis(normalized_axis: Vector3, angle_radians: f32) -> Quaternion {
         let half_angle: Vector4 = Vector4::splat(angle_radians * 0.5f32);
         let quaternion_imaginary = sin(half_angle.value) * normalized_axis.value;
 
@@ -188,6 +213,24 @@ pub mod quaternion_math {
         Quaternion {
             value: quaternion_imaginary + quaternion_real,
         }
+    }
+
+    pub fn to_angle_axis(quaternion: Quaternion) -> (Vector3, f32) {
+        let real: f32 = quaternion.value[3];
+
+        let angle = 2.0 * real.acos();
+
+        let scale = Vector4::splat(1.0 - real * real);
+
+        let mask = scale.value.lanes_lt(Vector4::splat(f32::EPSILON).value);
+
+        let axis = select(
+            Vector3::set(1.0, 0.0, 0.0).value,
+            quaternion.value * rcp(sqrt(scale.value)),
+            mask,
+        );
+
+        (Vector3 { value: axis }, angle)
     }
 
     pub fn from_rotation_matrix(rotation_matrix: Matrix3x3) -> Quaternion {
@@ -272,25 +315,6 @@ pub mod quaternion_math {
         Matrix3x3 { value: identity_mat4.value + simd_repr_step * splat_2 }
     }
 
-    pub fn to_angle_axis(quaternion: Quaternion) -> (Vector3, f32) {
-        let real: f32 = quaternion.value[3];
-
-        let angle = 2.0 * real.acos();
-
-        let scale = Vector4::splat(1.0 - real * real);
-
-        let mask = scale.value.lanes_lt(Vector4::splat(f32::EPSILON).value);
-
-        let axis = select(
-            Vector3::set(1.0, 0.0, 0.0).value,
-            quaternion.value * rcp(sqrt(scale.value)),
-            mask,
-        );
-
-        (Vector3 { value: axis }, angle)
-    }
-
-
     pub fn conjugate(quaternion: Quaternion) -> Quaternion {
         Quaternion {
             value: quaternion.value * Vector4::set(-1.0, -1.0, -1.0, 1.0).value,
@@ -304,6 +328,7 @@ pub mod quaternion_math {
                 * rcp(Vector4::splat(dot(quaternion.value, quaternion.value)).value),
         }
     }
+
 
     pub fn forward(quaternion: Quaternion) -> Vector3 {
         Vector3::FORWARD * quaternion
@@ -366,8 +391,186 @@ pub mod quaternion_math {
             value: result_slerp,
         }
     }
+
+    pub fn real_quaternion(quaternion: Quaternion) -> Quaternion {
+        Quaternion {
+            value: quaternion.value * Vector4::set(0.0, 0.0, 0.0, 1.0).value,
+        }
+    }
+
+    pub fn pure_quaternion(quaternion: Quaternion) -> Quaternion {
+        Quaternion {
+            value: quaternion.value * Vector3::ONE.value,
+        }
+    }
+
+    pub fn quaternion_log(quaternion : Quaternion) -> Quaternion{
+        todo!()
+    }
+
+    pub fn quaternion_exp(quaternion : Quaternion) -> Quaternion{
+        todo!()
+    }
+
+    pub fn quaternion_pow(quaternion: Quaternion, factor: f32) -> Quaternion {
+
+        todo!()
+
+    }
+
 }
 
 // todo Write test for all quaternion and quaternion math implementation
 #[cfg(test)]
-mod quaternion_test {}
+mod quaternion_test {
+    use crate::Quaternion;
+
+    #[test]
+    fn simple_quaternion_test() {
+        let quaternion_identity = Quaternion::IDENTITY;
+
+        let quaternion_default = Quaternion::default();
+
+        let set_quaternion = Quaternion::set(0.0, 0.0, 0.0, 1.0);
+
+        let manual_quaternion = Quaternion {
+            value: [0.0, 0.0, 0.0, 1.0].into(),
+        };
+
+        assert_eq!(quaternion_default, quaternion_identity);
+        assert_eq!(quaternion_identity, set_quaternion);
+        assert_eq!(set_quaternion, manual_quaternion);
+    }
+
+    #[test]
+    fn quaternion_add_sub_test() {
+        let quaternion_add_values_a = [2.1, 4.12, 0.9512, 2.021].into();
+
+        let quaternion_add_values_b = [1.1123, 5.247, 0.2431, 8.721].into();
+
+        let quaternion_add_a = Quaternion {
+            value: quaternion_add_values_a,
+        };
+
+        let quaternion_addition_b = Quaternion {
+            value: quaternion_add_values_b,
+        };
+
+        let mut quaternion_addition_sum = quaternion_add_a + quaternion_addition_b;
+
+
+        assert_eq!(
+            quaternion_addition_sum.value,
+            quaternion_add_values_a + quaternion_add_values_b
+        );
+
+        quaternion_addition_sum += Quaternion::IDENTITY;
+
+        assert_eq!(
+            quaternion_addition_sum.value,
+            quaternion_add_values_a + quaternion_add_values_b + Quaternion::IDENTITY.value
+        );
+
+
+        let mut quaternion_subtraction_sum = quaternion_add_a - quaternion_addition_b;
+
+        assert_eq!(
+            quaternion_subtraction_sum.value,
+            quaternion_add_values_a - quaternion_add_values_b
+        );
+
+        quaternion_subtraction_sum -= Quaternion::IDENTITY;
+
+        assert_eq!(
+            quaternion_subtraction_sum.value,
+            quaternion_add_values_a - quaternion_add_values_b - Quaternion::IDENTITY.value
+        );
+    }
+
+    #[test]
+    fn quaternion_mul_div_test() {
+        const MULTIPLICATION_FP_ERROR_THRESHOLD: f32 = 0.05;
+
+        // look at the quaternion multiplication table for reference
+        // i * i == 1 * i = 1,    j * 1 == 1 * j = 1,     k * 1 == 1 * k = 1
+        // i * i = -1,  j * j = -1,   k * k = -1
+        // i * j = k,  i * k = -j,
+        // j * i = -k,  j * k = i,
+        // k * i = j,  k * j = -i,
+
+        // we will use hamilton product
+        //(a1 + b1 i + c1 j + d1 k)(a2 + b2 i + c2 j + d2 k)
+
+        //    (a1 * a2) + (a1 * b2)i + (a1 * c2)j + (a1 * d2)k
+        //  + (b1 * a2)i + (b1 * b2)ii + (b1 * c2)ij + (b1 * d2)ik
+        //  + (c1 * a2)j + (c1 * b2)ji + (c1 * c2)jj + (c1 * d2)jk
+        //  + (d1 * a2)k + (d1 * b2)ki + (d1 * c2)kj + (d1 * d2)kk
+
+        // since i * i == -1 , j * j == -1, k * k == -1
+        // w = (a1 * a2) -(b1 * b2) - (c1 * c2) - (d1 * d2)
+
+        // since jk = i and kj = -i
+        // i = (a1 * b2) + (b1 * a2) + (c1 * d2) - (d1 * c2)
+
+        // since ki = j and ik = -j
+        // j = (a1 * c2) + (c1 * a2) + (d1 * b2) - (b1 * d2)
+
+        // since ij = k and ji = -k
+        // k = (d1 * a2) + (a1 * d2) + (b1 * c2) - (c1 * b2)
+
+        // w, i, j, k
+        // 45, 21, 0
+        let quaternion_mul_values_a = [0.3762754, 0.1683637, 0.0697385, 0.9084091];
+
+        // 21, 3, 46
+        let quaternion_mul_values_b = [0.1777481, -0.0474882, 0.3884478, 0.9029168];
+
+        // 0 = 3 and shuffle rest
+        let w = (quaternion_mul_values_a[3] * quaternion_mul_values_b[3])
+            - (quaternion_mul_values_a[0] * quaternion_mul_values_b[0])
+            - (quaternion_mul_values_a[1] * quaternion_mul_values_b[1])
+            - (quaternion_mul_values_a[2] * quaternion_mul_values_b[2]);
+
+        let i = quaternion_mul_values_a[3] * quaternion_mul_values_b[0]
+            + quaternion_mul_values_a[0] * quaternion_mul_values_b[3]
+            + quaternion_mul_values_a[2] * quaternion_mul_values_b[1]
+            - quaternion_mul_values_a[1] * quaternion_mul_values_b[2];
+
+        let j = (quaternion_mul_values_a[3] * quaternion_mul_values_b[1])
+            + (quaternion_mul_values_a[1] * quaternion_mul_values_b[3])
+            + (quaternion_mul_values_a[0] * quaternion_mul_values_b[2])
+            - (quaternion_mul_values_a[2] * quaternion_mul_values_b[0]);
+
+        let k = (quaternion_mul_values_a[2] * quaternion_mul_values_b[3])
+            + (quaternion_mul_values_a[3] * quaternion_mul_values_b[2])
+            + (quaternion_mul_values_a[1] * quaternion_mul_values_b[0])
+            - (quaternion_mul_values_a[0] * quaternion_mul_values_b[1]);
+
+        println!("i {} j {} k {} w {}", i, j, k, w);
+
+        let quaternion_mul_a = Quaternion {
+            value: quaternion_mul_values_a.into(),
+        };
+
+        let quaternion_mul_b = Quaternion {
+            value: quaternion_mul_values_b.into(),
+        };
+
+        let quaternion_product = quaternion_mul_a * quaternion_mul_b;
+
+        println!("{}", quaternion_product);
+
+        assert!((w - quaternion_product.value[3]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+        assert!((i - quaternion_product.value[0]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+        assert!((j - quaternion_product.value[1]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+        assert!((k - quaternion_product.value[2]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+
+        let quaternion_revert_a = quaternion_product / quaternion_mul_b;
+
+        assert!((quaternion_mul_a.value[0] - quaternion_revert_a.value[0]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+        assert!((quaternion_mul_a.value[1] - quaternion_revert_a.value[1]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+        assert!((quaternion_mul_a.value[2] - quaternion_revert_a.value[2]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+        assert!((quaternion_mul_a.value[3] - quaternion_revert_a.value[3]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+
+    }
+}

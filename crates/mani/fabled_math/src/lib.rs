@@ -51,8 +51,7 @@ pub mod math {
         vector_simd.sqrt()
     }
 
-    pub fn dot(simd_vector_1: std::simd::f32x4, simd_vector_2: std::simd::f32x4) -> f32
-where {
+    pub fn dot(simd_vector_1: std::simd::f32x4, simd_vector_2: std::simd::f32x4) -> f32 {
         (simd_vector_1 * simd_vector_2).reduce_sum()
     }
 
