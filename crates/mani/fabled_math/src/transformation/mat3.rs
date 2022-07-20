@@ -301,13 +301,13 @@ pub mod matrix3x3_math {
     pub fn angle_axis(axis_normalized: Vector3, angle_radians: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radians.sin_cos();
 
-        // x * x, y * y  z * z
         let axis_sqr = axis_normalized * axis_normalized;
 
-        // x * z, y * x, z * y
-        let axis_ror_1 = Vector3 {
-            value: axis_normalized.value * ror::<1>(axis_normalized.value),
-        };
+        let xz = axis_normalized[0] * axis_normalized[2];
+
+        let yx = axis_normalized[1] * axis_normalized[0];
+
+        let zy = axis_normalized[2] * axis_normalized[1];
 
         let one_min_cos = 1.0 - cos_angle;
 
@@ -316,17 +316,17 @@ pub mod matrix3x3_math {
         Matrix3x3::set_from_columns(
             Vector3::set(
                 cos_angle + axis_sqr[0] * one_min_cos,
-                axis_ror_1[1] * one_min_cos + axis_mul_sin[2],
-                axis_ror_1[0] * one_min_cos - axis_mul_sin[1],
+                yx * one_min_cos + axis_mul_sin[2],
+                xz * one_min_cos - axis_mul_sin[1],
             ),
             Vector3::set(
-                axis_ror_1[1] * one_min_cos - axis_mul_sin[2],
+                yx * one_min_cos - axis_mul_sin[2],
                 cos_angle + axis_sqr[1] * one_min_cos,
-                axis_ror_1[2] * one_min_cos + axis_mul_sin[0],
+                zy * one_min_cos + axis_mul_sin[0],
             ),
             Vector3::set(
-                axis_ror_1[0] * one_min_cos + axis_mul_sin[1],
-                axis_ror_1[2] * one_min_cos - axis_mul_sin[0],
+                xz * one_min_cos + axis_mul_sin[1],
+                zy * one_min_cos - axis_mul_sin[0],
                 cos_angle + axis_sqr[2] * one_min_cos,
             ),
         )
@@ -363,7 +363,10 @@ mod matrix_3x3_test {
 
     #[test]
     fn matrix3x3_angle_axis_test() {
-        let m = angle_axis(Vector3::RIGHT, 56.11f32.to_radians());
+        let m = angle_axis(
+            Vector3::set(0.5661385170722978, 0.22645540682891913, 0.792593923901217),
+            56.11f32.to_radians(),
+        );
 
         println!("{}", m);
     }
