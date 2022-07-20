@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub struct Matrix4x4 {
     pub value: std::simd::Simd<f32, 16>,
 }

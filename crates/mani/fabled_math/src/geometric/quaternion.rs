@@ -175,7 +175,7 @@ pub mod quaternion_math {
         let quaternion_j = sin(half_angle.value) * Y_VECTOR4.value;
 
         Quaternion {
-            value: quaternion_j * quaternion_w,
+            value: quaternion_j + quaternion_w,
         }
     }
 
@@ -189,7 +189,7 @@ pub mod quaternion_math {
 
 
         Quaternion {
-            value: quaternion_k * quaternion_w,
+            value: quaternion_k + quaternion_w,
         }
     }
 
@@ -230,7 +230,7 @@ pub mod quaternion_math {
             mask,
         );
 
-        (Vector3 { value: axis }, angle)
+        (Vector3 { value: axis } * Vector3::ONE , angle)
     }
 
     pub fn from_rotation_matrix(rotation_matrix: Matrix3x3) -> Quaternion {
@@ -404,12 +404,28 @@ pub mod quaternion_math {
         }
     }
 
-    pub fn quaternion_log(quaternion : Quaternion) -> Quaternion{
+    pub fn quaternion_log(quaternion : Quaternion) -> Quaternion {
+
         todo!()
     }
 
     pub fn quaternion_exp(quaternion : Quaternion) -> Quaternion{
-        todo!()
+
+        let scalar : f32 = quaternion.value[3];
+        let vector : Vector3 = Vector3{ value: quaternion.value * Vector3::ONE.value };
+
+        let quaternion_length : f32 = length(vector.value);
+
+        let (sin_len, cos_len) = quaternion_length.sin_cos();
+
+       let real_quaternion = vector * quaternion_length.recip() * sin_len;
+
+        let pure_quaternion = Vector4::set(0.0, 0.0, 0.0, cos_len);
+
+        let result = Vector4{ value: real_quaternion.value + pure_quaternion.value } * scalar.exp();
+
+        Quaternion{ value: result.value }
+
     }
 
     pub fn quaternion_pow(quaternion: Quaternion, factor: f32) -> Quaternion {
@@ -423,17 +439,19 @@ pub mod quaternion_math {
 // todo Write test for all quaternion and quaternion math implementation
 #[cfg(test)]
 mod quaternion_test {
-    use crate::Quaternion;
+    use rand::Rng;
+    use crate::{conjugate, from_angle_axis, from_rotation_matrix, inverse, Matrix3x3, Quaternion, quaternion_exp, rotate_x, rotate_y, rotate_z, to_angle_axis, to_rotation_matrix, Vector3};
+    use crate::math::{abs, component_sum, normalize};
 
     #[test]
     fn simple_quaternion_test() {
-        let quaternion_identity = Quaternion::IDENTITY;
+        let quaternion_identity : Quaternion = Quaternion::IDENTITY;
 
-        let quaternion_default = Quaternion::default();
+        let quaternion_default : Quaternion = Quaternion::default();
 
-        let set_quaternion = Quaternion::set(0.0, 0.0, 0.0, 1.0);
+        let set_quaternion : Quaternion = Quaternion::set(0.0, 0.0, 0.0, 1.0);
 
-        let manual_quaternion = Quaternion {
+        let manual_quaternion : Quaternion = Quaternion {
             value: [0.0, 0.0, 0.0, 1.0].into(),
         };
 
@@ -444,19 +462,19 @@ mod quaternion_test {
 
     #[test]
     fn quaternion_add_sub_test() {
-        let quaternion_add_values_a = [2.1, 4.12, 0.9512, 2.021].into();
+        let quaternion_add_values_a : std::simd::f32x4 = [2.1, 4.12, 0.9512, 2.021].into();
 
-        let quaternion_add_values_b = [1.1123, 5.247, 0.2431, 8.721].into();
+        let quaternion_add_values_b : std::simd::f32x4 = [1.1123, 5.247, 0.2431, 8.721].into();
 
-        let quaternion_add_a = Quaternion {
+        let quaternion_add_a : Quaternion = Quaternion {
             value: quaternion_add_values_a,
         };
 
-        let quaternion_addition_b = Quaternion {
+        let quaternion_addition_b : Quaternion = Quaternion {
             value: quaternion_add_values_b,
         };
 
-        let mut quaternion_addition_sum = quaternion_add_a + quaternion_addition_b;
+        let mut quaternion_addition_sum : Quaternion = quaternion_add_a + quaternion_addition_b;
 
 
         assert_eq!(
@@ -472,7 +490,7 @@ mod quaternion_test {
         );
 
 
-        let mut quaternion_subtraction_sum = quaternion_add_a - quaternion_addition_b;
+        let mut quaternion_subtraction_sum : Quaternion = quaternion_add_a - quaternion_addition_b;
 
         assert_eq!(
             quaternion_subtraction_sum.value,
@@ -489,7 +507,7 @@ mod quaternion_test {
 
     #[test]
     fn quaternion_mul_div_test() {
-        const MULTIPLICATION_FP_ERROR_THRESHOLD: f32 = 0.05;
+        const MULTIPLICATION_FP_ERROR_THRESHOLD: std::simd::f32x4 = std::simd::f32x4::from_array([0.05f32,0.05f32,0.0532, 0.05f32]);
 
         // look at the quaternion multiplication table for reference
         // i * i == 1 * i = 1,    j * 1 == 1 * j = 1,     k * 1 == 1 * k = 1
@@ -520,57 +538,224 @@ mod quaternion_test {
 
         // w, i, j, k
         // 45, 21, 0
-        let quaternion_mul_values_a = [0.3762754, 0.1683637, 0.0697385, 0.9084091];
+        let quaternion_mul_values_a : [f32;4] = [0.3762754, 0.1683637, 0.0697385, 0.9084091];
 
         // 21, 3, 46
-        let quaternion_mul_values_b = [0.1777481, -0.0474882, 0.3884478, 0.9029168];
+        let quaternion_mul_values_b : [f32; 4] = [0.1777481, -0.0474882, 0.3884478, 0.9029168];
 
         // 0 = 3 and shuffle rest
-        let w = (quaternion_mul_values_a[3] * quaternion_mul_values_b[3])
+        let w : f32 = (quaternion_mul_values_a[3] * quaternion_mul_values_b[3])
             - (quaternion_mul_values_a[0] * quaternion_mul_values_b[0])
             - (quaternion_mul_values_a[1] * quaternion_mul_values_b[1])
             - (quaternion_mul_values_a[2] * quaternion_mul_values_b[2]);
 
-        let i = quaternion_mul_values_a[3] * quaternion_mul_values_b[0]
+        let i : f32 = quaternion_mul_values_a[3] * quaternion_mul_values_b[0]
             + quaternion_mul_values_a[0] * quaternion_mul_values_b[3]
             + quaternion_mul_values_a[2] * quaternion_mul_values_b[1]
             - quaternion_mul_values_a[1] * quaternion_mul_values_b[2];
 
-        let j = (quaternion_mul_values_a[3] * quaternion_mul_values_b[1])
+        let j : f32 = (quaternion_mul_values_a[3] * quaternion_mul_values_b[1])
             + (quaternion_mul_values_a[1] * quaternion_mul_values_b[3])
             + (quaternion_mul_values_a[0] * quaternion_mul_values_b[2])
             - (quaternion_mul_values_a[2] * quaternion_mul_values_b[0]);
 
-        let k = (quaternion_mul_values_a[2] * quaternion_mul_values_b[3])
+        let k : f32 = (quaternion_mul_values_a[2] * quaternion_mul_values_b[3])
             + (quaternion_mul_values_a[3] * quaternion_mul_values_b[2])
             + (quaternion_mul_values_a[1] * quaternion_mul_values_b[0])
             - (quaternion_mul_values_a[0] * quaternion_mul_values_b[1]);
 
-        println!("i {} j {} k {} w {}", i, j, k, w);
+        let quaternion_proven_mul : Quaternion = Quaternion::set(i, j, k, w);
 
-        let quaternion_mul_a = Quaternion {
+        let quaternion_mul_a : Quaternion = Quaternion {
             value: quaternion_mul_values_a.into(),
         };
 
-        let quaternion_mul_b = Quaternion {
+        let quaternion_mul_b : Quaternion = Quaternion {
             value: quaternion_mul_values_b.into(),
         };
 
         let quaternion_product = quaternion_mul_a * quaternion_mul_b;
 
-        println!("{}", quaternion_product);
-
-        assert!((w - quaternion_product.value[3]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
-        assert!((i - quaternion_product.value[0]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
-        assert!((j - quaternion_product.value[1]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
-        assert!((k - quaternion_product.value[2]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+        assert!(abs((quaternion_proven_mul - quaternion_product).value).lanes_lt(MULTIPLICATION_FP_ERROR_THRESHOLD).all());
 
         let quaternion_revert_a = quaternion_product / quaternion_mul_b;
 
-        assert!((quaternion_mul_a.value[0] - quaternion_revert_a.value[0]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
-        assert!((quaternion_mul_a.value[1] - quaternion_revert_a.value[1]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
-        assert!((quaternion_mul_a.value[2] - quaternion_revert_a.value[2]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
-        assert!((quaternion_mul_a.value[3] - quaternion_revert_a.value[3]).abs() < MULTIPLICATION_FP_ERROR_THRESHOLD);
+        assert!(abs((quaternion_mul_a - quaternion_revert_a).value).lanes_lt(MULTIPLICATION_FP_ERROR_THRESHOLD).all());
+    }
+
+    #[test]
+    fn quaternion_rotate_axis_test(){
+
+        const FP_ERROR_THRESHOLD: std::simd::f32x4 =  std::simd::f32x4::from_array([0.0000003,0.0000003,0.0000003,0.0000003]);
+
+        let angle_1: f32 = 31.11f32.to_radians();
+        let angle_2: f32 = 241.12f32.to_radians();
+
+        let rotate_x_result_1 : Quaternion = Quaternion::set(0.2681633, 0.0, 0.0, 0.9633735);
+
+        let rotate_x_result_2 : Quaternion = Quaternion::set( 0.8610972, 0.0, 0.0, -0.5084404);
+
+        let rotate_x_1 : Quaternion = rotate_x(angle_1);
+
+        let rotate_x_2 : Quaternion  = rotate_x(angle_2);
+
+        assert!(abs((rotate_x_1 - rotate_x_result_1).value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert!(abs((rotate_x_2 - rotate_x_result_2).value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+
+
+        let rotation_y_result_1 : Quaternion = Quaternion::set(0.0, 0.2681633, 0.0, 0.9633735);
+
+        let rotation_y_result_2 : Quaternion = Quaternion::set(0.0, 0.8610972, 0.0, -0.5084404);
+
+        let rotate_y_1 : Quaternion = rotate_y(angle_1);
+
+        let rotate_y_2 : Quaternion = rotate_y(angle_2);
+
+        assert!(abs((rotate_y_1 - rotation_y_result_1).value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert!(abs((rotate_y_2 - rotation_y_result_2).value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+
+
+
+        let rotation_z_result_1 : Quaternion = Quaternion::set(0.0, 0.0, 0.2681633, 0.9633735);
+
+        let rotation_z_result_2 : Quaternion = Quaternion::set(0.0, 0.0, 0.8610972, -0.5084404);
+
+        let rotate_z_1 : Quaternion = rotate_z(angle_1);
+
+        let rotate_z_2 : Quaternion = rotate_z(angle_2);
+
+        assert!(abs((rotate_z_1 - rotation_z_result_1).value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert!(abs((rotate_z_2 - rotation_z_result_2).value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+
+
+        let (Vector3{ value : axis_x_1 }, angle_rad_x_1) = to_angle_axis(rotate_x_1);
+
+        assert!(abs(axis_x_1 - Vector3::RIGHT.value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert_eq!(angle_rad_x_1, angle_1);
+
+        let (Vector3{ value : axis_x_2 }, angle_rad_x_2) = to_angle_axis(rotate_x_2);
+
+        assert!(abs(axis_x_2 - Vector3::RIGHT.value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert_eq!(angle_rad_x_2, angle_2);
+
+
+
+        let (Vector3{ value : axis_y_1 }, angle_rad_y_1) = to_angle_axis(rotate_y_1);
+
+        assert!(abs(axis_y_1 - Vector3::UP.value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert_eq!(angle_rad_y_1, angle_1);
+
+        let (Vector3{ value  : axis_y_2}, angle_rad_y_2) = to_angle_axis(rotate_y_2);
+
+        assert!(abs(axis_y_2 - Vector3::UP.value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert_eq!(angle_rad_y_2, angle_2);
+
+
+
+        let (Vector3{ value : axis_z_1 }, angle_rad_z_1) = to_angle_axis(rotate_z_1);
+
+        assert!(abs(axis_z_1 - Vector3::FORWARD.value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert_eq!(angle_rad_z_1, angle_1);
+
+        let (Vector3{ value : axis_z_2}, angle_rad_z_2) = to_angle_axis(rotate_z_2);
+
+        assert!(abs(axis_z_2 - Vector3::FORWARD.value).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert_eq!(angle_rad_z_2, angle_2);
+
+        let axis_norm = normalize([58.23, 12.124, 0.42, 0.0].into());
+
+        let angle_axis_quaternion = from_angle_axis(Vector3{ value: axis_norm }, 24.24f32.to_radians());
+
+        let (Vector3{ value }, angle) = to_angle_axis(angle_axis_quaternion);
+
+        println!("{:?}", abs(value - axis_norm).lanes_lt(FP_ERROR_THRESHOLD));
+
+        assert!(abs(value - axis_norm).lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        assert!((24.24f32.to_radians() - angle).abs() < component_sum(FP_ERROR_THRESHOLD) / 3.0f32);
 
     }
+    #[test]
+    fn quaternion_matrix_test(){
+        const FP_ERROR_THRESHOLD_MATRIX: std::simd::f32x16 =  std::simd::f32x16::from_array([0.0000003;16]);
+        const FP_ERROR_THRESHOLD : std::simd::f32x4 = std::simd::f32x4::from_array([0.0000003;4]);
+
+        let identity_matrix: Matrix3x3 = Matrix3x3::IDENTITY;
+
+        let identity_quaternion : Quaternion = from_rotation_matrix(identity_matrix);
+
+        assert_eq!(identity_quaternion, Quaternion::IDENTITY);
+
+        // euler angle (-34.2, 2.57, 121.11)
+        let quaternion_rot_result : Quaternion = Quaternion::set(-0.1258448, 0.266531, 0.8288804, 0.4754803);
+
+        let rotation_matrix_result : Matrix3x3 = Matrix3x3::set_from_rows(Vector3::set(-0.5161631, -0.8553157,  0.0448399), Vector3::set(0.7211497, -0.4057594,  0.5615180), Vector3::set(-0.4620810,  0.3221712,  0.8262487));
+
+        let rnd_quat = to_rotation_matrix(quaternion_rot_result);
+
+        assert!((rotation_matrix_result - rnd_quat).value.lanes_lt(FP_ERROR_THRESHOLD_MATRIX).all());
+
+        let rotation_mat_to_quaternion : Quaternion = from_rotation_matrix(rnd_quat);
+
+        assert!((rotation_mat_to_quaternion - quaternion_rot_result).value.lanes_lt(FP_ERROR_THRESHOLD).all());
+
+        println!("{}", rotation_mat_to_quaternion - quaternion_rot_result);
+
+    }
+
+
+    #[test]
+    fn quaternion_exp_test(){
+        let quaternion_rot_result : Quaternion = Quaternion::set(-0.1258448, 0.266531, 0.8288804, 0.4754803);
+
+        quaternion_exp(quaternion_rot_result);
+
+    }
+
+
+    #[test]
+    fn quaternion_conj_inv_test(){
+
+        const FP_ERROR_THRESHOLD : std::simd::f32x4 = std::simd::f32x4::from_array([0.000003;4]);
+
+        let quaternion : Quaternion = Quaternion::set(0.1479202, -0.1477288, 0.7230414, 0.6584125);
+
+        let conjugate_quaternion: Quaternion = conjugate(quaternion);
+
+        let inverse_quaternion : Quaternion = inverse(quaternion);
+
+        assert_eq!(abs(conjugate_quaternion.value - inverse_quaternion.value), FP_ERROR_THRESHOLD);
+
+
+        println!("conjugate quaternion {}", conjugate_quaternion);
+
+        println!("inverse quaternion {}", inverse_quaternion);
+
+        assert_ne!(conjugate_quaternion, inverse_quaternion);
+
+        let normalized_quaternion : Quaternion = Quaternion{ value: normalize(quaternion.value) };
+
+        let norm_conjugate_quaternion : Quaternion = conjugate(normalized_quaternion);
+
+        let norm_inverse_quaternion : Quaternion = inverse(normalized_quaternion);
+
+        println!("normalized conjugate quaternion {}", norm_conjugate_quaternion);
+
+        println!("normalized inverse quaternion {}", norm_inverse_quaternion);
+
+
+    }
+
 }

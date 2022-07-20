@@ -38,6 +38,10 @@ impl Vector2 {
         value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 0.0]),
     };
 
+    pub const NEG_ZERO: Vector2 = Vector2 {
+        value: std::simd::f32x4::from_array([-1.0, -1.0, 0.0, 0.0]),
+    };
+
     pub fn extend_vec3(self) -> Vector3 {
         Vector3 { value: self.value }
     }
@@ -177,7 +181,6 @@ impl MulAssign<f32> for Vector2 {
     }
 }
 
-
 impl Div<f32> for Vector2 {
     type Output = Vector2;
 
@@ -218,13 +221,6 @@ impl RemAssign<f32> for Vector2 {
     }
 }
 
-impl Neg for Vector2 {
-    type Output = Vector2;
-
-    fn neg(self) -> Self::Output {
-        Vector2 { value: -self.value }
-    }
-}
 
 impl Add<Vector2> for Vector2 {
     type Output = Vector2;
@@ -258,17 +254,23 @@ impl SubAssign<Vector2> for Vector2 {
     }
 }
 
+impl Neg for Vector2 {
+    type Output = Vector2;
+
+    fn neg(self) -> Self::Output {
+        Vector2 { value: -self.value }
+    }
+}
+
 // AOSOA (Array of Struct of Array) form
 pub struct F32X8Vector2 {
     pub x: std::simd::f32x8,
     pub y: std::simd::f32x8,
 }
 
-
 pub struct TiledVector2<const N: usize> {
     pub value: [F32X8Vector2; N],
 }
-
 
 #[cfg(test)]
 mod vector2_test {

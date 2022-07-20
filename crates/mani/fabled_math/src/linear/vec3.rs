@@ -2,7 +2,7 @@ use crate::math::mul_add;
 use crate::{cross, Quaternion, Vector2, Vector4};
 use std::fmt::{Display, Formatter};
 use std::ops::{
-    Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
+    Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
 use std::simd::Which::*;
 
@@ -84,6 +84,14 @@ impl Display for Vector3 {
             "Vector3 (x : {}, y : {}, z : {})",
             array_representation[0], array_representation[1], array_representation[2]
         )
+    }
+}
+
+impl Index<usize> for Vector3 {
+    type Output = f32;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.value.as_array()[index]
     }
 }
 
@@ -306,7 +314,7 @@ pub struct F32X8Vector3 {
     pub z: std::simd::f32x8,
 }
 
-pub struct SOAVector3<const N: usize> {
+pub struct TiledVector3<const N: usize> {
     pub value: [F32X8Vector3; N],
 }
 

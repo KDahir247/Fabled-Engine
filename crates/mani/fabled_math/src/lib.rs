@@ -11,12 +11,13 @@ mod geometric;
 mod linear;
 mod transformation;
 
-use crate::math::{cross, ror};
+use crate::math::{angle, any, cross, project, reverse, ror};
 pub use arithmetic::*;
 pub use boolean::*;
 pub use easing::*;
 pub use geometric::*;
 pub use linear::*;
+use std::f32::consts::PI;
 pub use transformation::*;
 
 // temp solution.
@@ -44,6 +45,10 @@ pub mod math {
     use crate::{
         cos_v4f32, exp2_v4f32, exp_v4f32, log10_v4f32, log2_v4f32, log_v4f32, pow_v4f32, sin_v4f32,
     };
+
+
+    // todo remove std::simd::f32x4 and find a way to accept both vector 2, 3, 4 and
+    //  quaternion.
 
 
     pub fn sqrt(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
@@ -352,6 +357,29 @@ pub mod math {
         )
     }
 
+    pub fn project(
+        project_vector: std::simd::f32x4,
+        target_vector: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        let c_dot_bb = dot(project_vector, target_vector);
+        let rcp_c_dot_ab = dot(target_vector, target_vector).recip();
+
+        let projection_factor = c_dot_bb * rcp_c_dot_ab;
+
+        let splat_project_factor = std::simd::f32x4::splat(projection_factor);
+
+        target_vector * splat_project_factor
+    }
+
+    pub fn reject(
+        simd_vector: std::simd::f32x4,
+        simd_vector1: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        let projection_vector = project(simd_vector, simd_vector1);
+
+        simd_vector - projection_vector
+    }
+
     pub fn saturate(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
         clamp(
             simd_vector,
@@ -366,6 +394,19 @@ pub mod math {
         mask: std::simd::mask32x4,
     ) -> std::simd::f32x4 {
         mask.select(simd_vector1, simd_vector2)
+    }
+
+    // todo improve
+    pub fn angle(simd_vector: std::simd::f32x4, simd_vector_1: std::simd::f32x4) -> f32 {
+        // a . b == ||a|| ||b|| cos(theta)
+        let dot_product = dot(simd_vector, simd_vector_1);
+
+        let rcp_vec = 1.0 / length(simd_vector);
+        let rcp_vec_1 = 1.0 / length(simd_vector_1);
+
+        let cos_theta: f32 = dot_product * rcp_vec * rcp_vec_1;
+
+        cos_theta.acos()
     }
 
     pub fn sign(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
@@ -388,12 +429,12 @@ pub mod math {
 
 #[test]
 pub fn cross_test() {
-    let vector = Vector3::set(1.0, 2.0, 3.0);
-    let vector_1 = Vector3::set(1.0, 5.0, 7.0);
+    let vector = Vector3::set(17.0, 23.0, 7.0);
+    let vector_1 = Vector3::set(5.0, 11.0, 24.0);
 
-    println!("{:?}", cross(vector.value, vector_1.value));
+    let a = project(vector.value, vector_1.value);
 
-    println!("rotate on right {:?}", ror::<2>(vector.value));
+    let b = reverse(Vector3::set(0.0, 0.5, 0.2).value);
 
-    panic!()
+    println!("{:?}", b);
 }
