@@ -45,6 +45,10 @@ impl Quaternion {
             ),
         }
     }
+
+    pub const fn to_primitive(self) -> [f32; 4] {
+        self.value.to_array()
+    }
 }
 
 impl Display for Quaternion {

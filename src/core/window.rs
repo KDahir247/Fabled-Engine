@@ -94,11 +94,11 @@ impl Window {
 
                 winit::event::Event::WindowEvent { event, .. } => {
                     match event {
-                        winit::event::WindowEvent::Resized(_) => {
+                        WindowEvent::Resized(_) => {
                             world.run_workload("render_resize_system").unwrap();
                         }
 
-                        winit::event::WindowEvent::KeyboardInput {
+                        WindowEvent::KeyboardInput {
                             input:
                                 winit::event::KeyboardInput {
                                     virtual_keycode: Some(winit::event::VirtualKeyCode::Escape),
@@ -107,11 +107,11 @@ impl Window {
                                 },
                             ..
                         }
-                        | winit::event::WindowEvent::CloseRequested => {
+                        | WindowEvent::CloseRequested => {
                             *control_flow = winit::event_loop::ControlFlow::Exit;
                         }
 
-                        winit::event::WindowEvent::DroppedFile(file_path) => {
+                        WindowEvent::DroppedFile(file_path) => {
                             // todo add an entity to the world that will have the file_path and the
                             // string to represent the path to the shader.
                             let model_id = world.add_entity((ModelData {
@@ -124,7 +124,7 @@ impl Window {
                             world.delete_component::<(ModelData,)>(model_id);
                         }
 
-                        winit::event::WindowEvent::ScaleFactorChanged { .. } => {
+                        WindowEvent::ScaleFactorChanged { .. } => {
                             world.run_workload("render_resize_system").unwrap();
                         }
                         WindowEvent::Focused(focus) => self.focused = focus,

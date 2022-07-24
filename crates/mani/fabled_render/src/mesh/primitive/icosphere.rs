@@ -130,9 +130,9 @@ impl From<IcoSphere> for Model {
                 let v2 : usize = tri[1];
                 let v3 : usize = tri[2];
                 
-                let a = self::IcoSphere::middle_point(v1,v2, &mut normalized_vertices, &mut middle_index_cache);
-                let b = self::IcoSphere::middle_point(v2, v3, &mut normalized_vertices, &mut middle_index_cache);
-                let c = self::IcoSphere::middle_point(v3, v1, &mut normalized_vertices, &mut middle_index_cache);
+                let a = IcoSphere::middle_point(v1,v2, &mut normalized_vertices, &mut middle_index_cache);
+                let b = IcoSphere::middle_point(v2, v3, &mut normalized_vertices, &mut middle_index_cache);
+                let c = IcoSphere::middle_point(v3, v1, &mut normalized_vertices, &mut middle_index_cache);
 
                 
                 let sub_divide_triangle_chunk = [v1, a, c, v2, b, a, v3, c, b, a, b, c];

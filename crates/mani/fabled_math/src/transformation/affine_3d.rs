@@ -8,7 +8,6 @@ pub struct Affine3 {
 
 
 impl Affine3 {
-    // euler is in radians
     #[rustfmt::skip]
     pub fn new(translation: Vector3, euler_radians: Vector3) -> Self {
 
@@ -19,10 +18,7 @@ impl Affine3 {
 
         let quaternion = x*y* z;
 
-
         let rotation_matrix = to_rotation_matrix(quaternion);
-
-
 
         Self{
             translation,

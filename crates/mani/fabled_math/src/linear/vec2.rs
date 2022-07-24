@@ -55,6 +55,10 @@ impl Vector2 {
             value: std::simd::f32x4::from_array([x, y, 0.0, 0.0]),
         }
     }
+
+    pub const fn to_primitive(self) -> [f32; 4] {
+        self.value.to_array()
+    }
 }
 
 impl Display for Vector2 {

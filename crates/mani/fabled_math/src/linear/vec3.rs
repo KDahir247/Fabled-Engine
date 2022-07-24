@@ -1,5 +1,6 @@
-use crate::math::mul_add;
-use crate::{cross, Quaternion, Vector2, Vector4};
+use crate::math::{component_sum, mul_add};
+use crate::matrix3x3_math::transpose;
+use crate::{cross, Matrix3x3, Quaternion, Vector2, Vector4};
 use std::fmt::{Display, Formatter};
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
@@ -73,6 +74,10 @@ impl Vector3 {
             value: std::simd::f32x4::from_array([x, y, z, 0.0]),
         }
     }
+
+    pub const fn to_primitive(self) -> [f32; 4] {
+        self.value.to_array()
+    }
 }
 
 impl Display for Vector3 {
@@ -114,6 +119,37 @@ impl MulAssign<Quaternion> for Vector3 {
         self.value += mul_add(quaternion_scalar_splat.value, t, cross(rhs.value, t));
     }
 }
+
+
+impl Mul<Vector3> for Matrix3x3 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: Vector3) -> Self::Output {
+        let row_col_matrix: [f32; 16] = transpose(self).to_primitive();
+
+        let res: Vec<f32> = row_col_matrix
+            .chunks_exact(4)
+            .map(|x| {
+                let row_mul_col_vec = Vector3 {
+                    value: std::simd::f32x4::from_slice(x),
+                } * rhs;
+
+                component_sum(row_mul_col_vec.value)
+            })
+            .collect::<Vec<f32>>();
+
+        Vector3 {
+            value: std::simd::f32x4::from_slice(res.as_slice()),
+        }
+    }
+}
+
+impl MulAssign<Matrix3x3> for Vector3 {
+    fn mul_assign(&mut self, rhs: Matrix3x3) {
+        self.value = (rhs * *self).value;
+    }
+}
+
 
 // Component-Wise
 impl Mul<Vector3> for Vector3 {

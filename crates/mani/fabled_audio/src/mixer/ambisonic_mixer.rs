@@ -12,7 +12,7 @@ impl RawAmbisonicClip {
 
     pub fn mix<U>(self, raw_clip: RawAmbisonicClip) -> RawAmbisonicClip
     where
-        U: ambisonic::rodio::Source<Item = f32>, {
+        U: Source<Item = f32>, {
         RawAmbisonicClip::new(self.dyn_clip.mix(raw_clip.dyn_clip))
     }
 
@@ -68,7 +68,7 @@ impl RawAmbisonicClip {
         raw_clip: RawAmbisonicClip,
     ) -> RawAmbisonicClip
     where
-        U: ambisonic::rodio::Source<Item = f32>, {
+        U: Source<Item = f32>, {
         let micro_seconds = micro_seconds * 1000;
 
         let cross_fade = self.dyn_clip.take_crossfade_with(
@@ -98,8 +98,8 @@ impl RawAmbisonicClip {
         access: F,
     ) -> RawAmbisonicClip
     where
-        T: ambisonic::rodio::Source<Item = f32>,
-        F: FnMut(&mut Box<dyn ambisonic::rodio::Source<Item = f32> + Send>) + Send, {
+        T: Source<Item = f32>,
+        F: FnMut(&mut Box<dyn Source<Item = f32> + Send>) + Send, {
         let micro_seconds = micro_seconds * 1000;
 
         let access = self

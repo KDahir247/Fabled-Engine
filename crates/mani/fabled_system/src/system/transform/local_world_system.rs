@@ -160,7 +160,7 @@ mod local_world_test {
             fabled_transform::Rotation {
                 value: [0.3097265, 0.2101103, 0.5141426, 0.7717387],
             },
-            fabled_transform::LocalToWorld::default(),
+            LocalToWorld::default(),
         ));
 
         shipyard::Workload::builder("run_test")
@@ -210,7 +210,7 @@ mod local_world_test {
             fabled_transform::Rotation {
                 value: [0.0, 0.0, 0.0, 1.0],
             },
-            fabled_transform::LocalToWorld::default(),
+            LocalToWorld::default(),
         ));
 
         let entity_parent = world.add_entity((
@@ -223,8 +223,8 @@ mod local_world_test {
             fabled_transform::Rotation {
                 value: [0.3097265, 0.2101103, 0.5141426, 0.7717387],
             },
-            fabled_transform::LocalToWorld::default(),
-            fabled_transform::Parent {
+            LocalToWorld::default(),
+            Parent {
                 value: root_entity_parent.inner(),
             },
         ));
@@ -240,7 +240,7 @@ mod local_world_test {
             fabled_transform::Rotation {
                 value: [0.3097265, 0.2101103, 0.5141426, 0.7717387],
             },
-            fabled_transform::LocalToWorld::default(),
+            LocalToWorld::default(),
             Parent {
                 value: entity_parent.inner(),
             },

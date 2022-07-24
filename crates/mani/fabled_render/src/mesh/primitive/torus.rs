@@ -57,8 +57,8 @@ impl From<Torus> for Model {
         let inv_segment = 1.0 / tessellation_segment as f32;
         let inv_side = 1.0 / tessellation_side as f32;
 
-        for seg in 0..=tessellation_segment {
-            for side in 0..=tessellation_side {
+        for seg in 0..tessellation_segment + 1 {
+            for side in 0..tessellation_side + 1 {
                 // Calculate the UV texture coordinates.
                 let u_tex = seg as f32 * inv_segment;
                 let v_tex = side as f32 * inv_side;

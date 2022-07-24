@@ -25,7 +25,7 @@ impl MaterialValue {
 }
 
 
-impl From<&naga::TypeInner> for MaterialValue {
+impl From<&TypeInner> for MaterialValue {
     fn from(ty: &TypeInner) -> Self {
         match ty {
             TypeInner::Scalar { kind, .. } => match kind {

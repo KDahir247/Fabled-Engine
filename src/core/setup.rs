@@ -139,7 +139,7 @@ fn setup_depth_texture(
 
 fn setup_input_system(world: &shipyard::World) -> anyhow::Result<()> {
     superluminal_perf::begin_event("Create_Input_System");
-    world.add_unique(lib::component::input_component::Input::default())?;
+    world.add_unique(input_component::Input::default())?;
     superluminal_perf::end_event();
     Ok(())
 }

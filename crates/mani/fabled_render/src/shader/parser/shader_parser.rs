@@ -125,7 +125,7 @@ pub fn decode_shader<P: AsRef<std::path::Path>>(target: P) -> Result<String, Sha
     let mut buffer = vec![0; length];
     file.read_exact(&mut buffer)?;
 
-    let data = std::string::String::from_utf8(buffer).unwrap_or_default();
+    let data = String::from_utf8(buffer).unwrap_or_default();
 
     Ok(data)
 }

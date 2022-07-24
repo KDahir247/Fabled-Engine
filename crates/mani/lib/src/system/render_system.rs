@@ -7,12 +7,12 @@ use crate::util::{camera, constant, texture};
 use shipyard::*;
 
 pub fn begin_render_pass_system(
-    setup: shipyard::UniqueView<render_component::RenderData>,
-    camera: shipyard::UniqueView<camera_component::Camera>,
-    lighting: shipyard::View<light_component::LightUniform>,
-    depth_texture: shipyard::UniqueView<render_component::Texture>,
-    model_render: shipyard::View<model_component::ModelRenderDetail>,
-    skybox_render: shipyard::View<grid_component::GridRenderDetail>,
+    setup: UniqueView<render_component::RenderData>,
+    camera: UniqueView<camera_component::Camera>,
+    lighting: View<light_component::LightUniform>,
+    depth_texture: UniqueView<render_component::Texture>,
+    model_render: View<model_component::ModelRenderDetail>,
+    skybox_render: View<grid_component::GridRenderDetail>,
 ) -> anyhow::Result<()> {
     let frame = setup.pass.swap_chain.get_current_frame()?.output;
 
@@ -129,10 +129,10 @@ pub fn begin_render_pass_system(
 }
 
 pub fn render_resize_system(
-    window: shipyard::UniqueView<window_component::Window>,
-    mut render: shipyard::UniqueViewMut<render_component::RenderData>,
-    mut camera: shipyard::UniqueViewMut<camera_component::Camera>,
-    mut depth_texture: shipyard::UniqueViewMut<render_component::Texture>,
+    window: UniqueView<window_component::Window>,
+    mut render: UniqueViewMut<render_component::RenderData>,
+    mut camera: UniqueViewMut<camera_component::Camera>,
+    mut depth_texture: UniqueViewMut<render_component::Texture>,
 ) {
     let size = window.raw.inner_size();
 

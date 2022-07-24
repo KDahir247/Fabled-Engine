@@ -18,7 +18,7 @@ impl State {
 
         world
             .add_unique(Time {
-                application: lib::component::time_component::Application {
+                application: Application {
                     time: std::time::Instant::now(),
                 },
                 last_frame: 0.0,

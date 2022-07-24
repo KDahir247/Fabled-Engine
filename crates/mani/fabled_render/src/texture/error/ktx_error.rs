@@ -5,7 +5,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum KTXError {
-    KTXError(libktx_rs::KtxError),
+    KTXError(KtxError),
 }
 
 

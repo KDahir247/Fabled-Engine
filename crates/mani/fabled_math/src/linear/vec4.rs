@@ -50,6 +50,10 @@ impl Vector4 {
             value: std::simd::f32x4::splat(val),
         }
     }
+
+    pub const fn to_primitive(self) -> [f32; 4] {
+        self.value.to_array()
+    }
 }
 
 impl Display for Vector4 {

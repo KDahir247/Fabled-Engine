@@ -1,7 +1,9 @@
-use crate::matrix3x3_math::transpose;
-use crate::Vector3;
+use crate::math::component_sum;
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+
+use crate::matrix3x3_math::transpose;
+use crate::Vector3;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Matrix3x3 {
@@ -61,6 +63,11 @@ impl Matrix3x3 {
             value: std::simd::f32x16::splat(val),
         };
         splat_matrix_3x3
+    }
+
+
+    pub const fn to_primitive(self) -> [f32; 16] {
+        self.value.to_array()
     }
 }
 
@@ -170,13 +177,19 @@ impl Mul<f32> for Matrix3x3 {
     type Output = Matrix3x3;
 
     fn mul(self, rhs: f32) -> Self::Output {
-        todo!()
+        let matrix3x3_of_rhs = Matrix3x3::splat(rhs);
+
+        Matrix3x3 {
+            value: self.value * matrix3x3_of_rhs.value,
+        }
     }
 }
 
 impl MulAssign<f32> for Matrix3x3 {
     fn mul_assign(&mut self, rhs: f32) {
-        todo!()
+        let matrix3x3_of_rhs = Matrix3x3::splat(rhs);
+
+        self.value *= matrix3x3_of_rhs.value;
     }
 }
 
@@ -231,7 +244,6 @@ impl MulAssign for Matrix3x3 {
         self.value *= transpose(rhs).value;
     }
 }
-
 
 pub mod matrix3x3_math {
     use crate::{reverse, ror, Matrix3x3, Vector2, Vector3};
@@ -298,7 +310,7 @@ pub mod matrix3x3_math {
         Matrix3x3::set_from_columns(cos_sin_vector, neg_sin_cos_vector, Vector3::FORWARD)
     }
 
-    pub fn angle_axis(axis_normalized: Vector3, angle_radians: f32) -> Matrix3x3 {
+    pub fn from_angle_axis(axis_normalized: Vector3, angle_radians: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radians.sin_cos();
 
         let axis_sqr = axis_normalized * axis_normalized;
@@ -331,6 +343,41 @@ pub mod matrix3x3_math {
             ),
         )
     }
+
+
+    pub fn from_scale_angle_translation(
+        scalar_vec: Vector2,
+        angle_radians: f32,
+        translation: Vector2,
+    ) -> Matrix3x3 {
+        let (angle_sin, angle_cos) = angle_radians.sin_cos();
+
+        let extended_translation = translation.extend_vec3() + Vector3::FORWARD;
+
+        Matrix3x3::set_from_columns(
+            Vector3::set(angle_cos * scalar_vec.value[0], angle_sin, 0.0),
+            Vector3::set(-angle_sin, angle_cos * scalar_vec.value[1], 0.0),
+            extended_translation,
+        )
+    }
+
+    pub fn from_angle(angle_radians: f32) -> Matrix3x3 {
+        let (sin_angle, cos_angle) = angle_radians.sin_cos();
+
+        Matrix3x3::set_from_columns(
+            Vector3::set(cos_angle, sin_angle, 0.0),
+            Vector3::set(-sin_angle, cos_angle, 0.0),
+            Vector3::ZERO,
+        )
+    }
+
+    pub fn determinant(matrix: Matrix3x3) -> f32 {
+        todo!()
+    }
+
+    pub fn inverse(matrix: Matrix3x3) -> Matrix3x3 {
+        todo!()
+    }
 }
 
 
@@ -340,7 +387,7 @@ pub struct SOAMatrix3x3<const N: usize> {
 
 #[cfg(test)]
 mod matrix_3x3_test {
-    use crate::matrix3x3_math::{angle_axis, transpose};
+    use crate::matrix3x3_math::{from_angle_axis, transpose};
     use crate::{Matrix3x3, Vector3};
 
     #[test]
@@ -363,11 +410,26 @@ mod matrix_3x3_test {
 
     #[test]
     fn matrix3x3_angle_axis_test() {
-        let m = angle_axis(
+        let m = from_angle_axis(
             Vector3::set(0.5661385170722978, 0.22645540682891913, 0.792593923901217),
             56.11f32.to_radians(),
         );
 
+
         println!("{}", m);
+
+
+        let m2 = Matrix3x3::set_from_columns(
+            Vector3::set(2.0, 11.0, 2.0),
+            Vector3::set(3.0, 8.0, 5.0),
+            Vector3::set(-4.0, 7.0, 3.0),
+        );
+
+
+        let v1 = Vector3::set(3.0, 7.0, 5.0);
+
+        let res = m2 * v1;
+
+        println!("{}", res);
     }
 }

@@ -6,7 +6,7 @@ use gltf::khr_lights_punctual::{Kind, Light};
 
 // todo this will return and entity identifier that contains both LightType and
 // LightAppearance component.
-impl From<gltf::khr_lights_punctual::Light<'_>> for LightType {
+impl From<Light<'_>> for LightType {
     fn from(light: Light<'_>) -> Self {
         let intensity = light.intensity();
 
