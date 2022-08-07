@@ -1,7 +1,18 @@
 # Fabled Engine
 
-Personal blog for ideas and development of Fabled Engine and other major personal project can be found at
-[Development Blog Site](https://kdahir247.github.io/Fabled_Blog/ "Fabled Blog")
+Working on strengthening my understanding in assembly. It seem like it vital for game engineer.
+I will bounce between Fabled Engine and assembly study and eventually learn cpu design (can't help it I really enjoy the nitty gritty).
+
+[Assembly Study](https://github.com/KDahir247/X86AssemblyPratice/ "Fabled Assembly Study")
+
+CPU design will be posted on my github when I start learning it. All these studies will be used to complement this Game Engine.
+This is going to be a Big project which I don't see myself finishing in a really long while and I will be working on it daily either through
+studies (Game engine architecture, cpu design, or assembly)
+
+# Changes.
+ - pushing to main now it seem to be really un-organized when creating seperate branches for each component in the engine. They will be a branch for experimental feature and other that make sense.
+
+
 
 <br/>
 <br/>
