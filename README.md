@@ -7,7 +7,7 @@ I will bounce between Fabled Engine and assembly study and eventually learn cpu 
 
 CPU design will be posted on my github when I start learning it. All these studies will be used to complement this Game Engine.
 This is going to be a Big project which I don't see myself finishing in a really long while and I will be working on it daily either through
-studies (Game engine architecture, cpu design, or assembly)
+studies reading or writing code (Game engine architecture, cpu design, or assembly).
 
 # Changes.
  - pushing to main now it seem to be really un-organized when creating seperate branches for each component in the engine. They will be a branch for experimental feature and other that make sense.
