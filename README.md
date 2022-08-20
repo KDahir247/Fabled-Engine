@@ -9,6 +9,7 @@ CPU design will be posted on my github when I start learning it. All these studi
 This is going to be a Big project which I don't see myself finishing in a really long while and I will be working on it daily either through
 studies reading or writing code (Game engine architecture, cpu design, or assembly).
 
+[CPU Architecture/Design](https://github.com/KDahir247/CPU_Design_Studies/ "Fabled CPU study") 
 # Changes.
  - pushing to main now it seem to be really un-organized when creating seperate branches for each component in the engine. They will be a branch for experimental feature and other that make sense.
 
