@@ -1,6 +1,6 @@
 use crate::texture::container::{ColorType, Extent3d};
 use crate::texture::{ColorTarget, TextureError};
-use std::ops::{Add, Index, IndexMut, Range};
+use std::ops::{Index, IndexMut, Range};
 use std::path::Path;
 
 

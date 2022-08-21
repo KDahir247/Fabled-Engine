@@ -67,7 +67,7 @@ mod png_loader_codecs {
                 assert!(!result.data.is_empty());
             }
             Err(err) => {
-                panic!("{}", err)
+                panic!("{:?}", err)
             }
         }
 
@@ -88,7 +88,7 @@ mod png_loader_codecs {
                 panic!("Should not pass")
             }
             Err(err) => {
-                println!("{}", err);
+                println!("{:?}", err);
             }
         }
     }

@@ -5,5 +5,4 @@ use crate::mesh::Indices;
 pub struct Mesh {
     pub vertices: Vec<Vertex>,
     pub indices: Indices,
-    pub material_id: usize,
 }

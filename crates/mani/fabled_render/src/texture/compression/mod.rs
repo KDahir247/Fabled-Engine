@@ -18,7 +18,7 @@ pub enum TranscodeSource {
     BasisPath { path: String },
 }
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum BasisCompressionFormat {
     UASTC4x4 = 1,
     ETC1S = 0,
@@ -35,14 +35,14 @@ impl From<BasisCompressionFormat> for basis_universal::BasisTextureFormat {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum CompressionQuality {
     Default,
     Minimum,
     Maximum,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct MipmapDescriptor {
     pub generate_mipmap: bool,
     pub color_space: ColorSpace,

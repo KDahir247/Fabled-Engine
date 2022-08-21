@@ -11,13 +11,13 @@ mod geometric;
 mod linear;
 mod transformation;
 
-use crate::math::{angle, any, cross, project, reverse, ror};
+use crate::math::{cross, reverse, ror};
 pub use arithmetic::*;
 pub use boolean::*;
 pub use easing::*;
 pub use geometric::*;
 pub use linear::*;
-use std::f32::consts::PI;
+
 pub use transformation::*;
 
 // temp solution.
@@ -42,6 +42,9 @@ extern "C" {
 }
 
 pub mod math {
+
+    use std::simd::StdFloat;
+
     use crate::{
         cos_v4f32, exp2_v4f32, exp_v4f32, log10_v4f32, log2_v4f32, log_v4f32, pow_v4f32, sin_v4f32,
     };
@@ -52,7 +55,6 @@ pub mod math {
 
     #[inline]
     pub fn sqrt(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
-        use std::simd::StdFloat;
         vector_simd.sqrt()
     }
 
@@ -205,19 +207,16 @@ pub mod math {
 
     #[inline]
     pub fn rsqrt(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        use std::simd::StdFloat;
         std::simd::f32x4::splat(1.0) / simd_vector.sqrt()
     }
 
     #[inline]
     pub fn ceil(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        use std::simd::StdFloat;
         simd_vector.ceil()
     }
 
     #[inline]
     pub fn floor(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        use std::simd::StdFloat;
         simd_vector.floor()
     }
 
@@ -315,19 +314,16 @@ pub mod math {
 
     #[inline]
     pub fn fract<const SIZE: usize>(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        use std::simd::StdFloat;
         simd_vector.fract()
     }
 
     #[inline]
     pub fn round(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        use std::simd::StdFloat;
         simd_vector.round()
     }
 
     #[inline]
     pub fn trunc(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        use std::simd::StdFloat;
         simd_vector.trunc()
     }
 
@@ -343,7 +339,6 @@ pub mod math {
         mul_vector: std::simd::f32x4,
         add_vector: std::simd::f32x4,
     ) -> std::simd::f32x4 {
-        use std::simd::StdFloat;
         simd_vector.mul_add(mul_vector, add_vector)
     }
 
@@ -441,6 +436,7 @@ pub mod math {
         )
     }
 
+    #[inline]
     pub fn select(
         simd_vector1: std::simd::f32x4,
         simd_vector2: std::simd::f32x4,

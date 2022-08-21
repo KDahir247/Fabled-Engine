@@ -25,7 +25,7 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
 
     let module = match file_ext {
         "wgsl" => {
-            file.read_to_string(&mut file_content_buf);
+            file.read_to_string(&mut file_content_buf)?;
 
             naga::front::wgsl::parse_str(&file_content_buf).map_err(ShaderError::WGSLParseError)?
         }
@@ -61,7 +61,7 @@ pub fn parse_shader<P: AsRef<std::path::Path>>(
         }
 
         stage @ "vert" | stage @ "frag" | stage @ "comp" => unsafe {
-            file.read_to_string(&mut file_content_buf);
+            file.read_to_string(&mut file_content_buf)?;
 
             let mut entry_points = naga::FastHashMap::default();
 
@@ -216,7 +216,7 @@ mod shader_test {
         if let ShaderConvertResult::Glsl(data) = conversion_res {
             match encode_shader(data, target) {
                 Ok(_) => {}
-                Err(err) => panic!("shader encode failed : error {}", err),
+                Err(err) => panic!("shader encode failed : error {:?}", err),
             }
         }
     }

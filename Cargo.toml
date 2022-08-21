@@ -7,6 +7,9 @@ edition = "2018"
 [profile.dev]
 debug = true
 
+[profile.release]
+debug = true
+
 #[profile.release]
 #debug = false
 #lto = true

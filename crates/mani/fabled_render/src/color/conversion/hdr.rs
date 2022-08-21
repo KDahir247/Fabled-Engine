@@ -5,7 +5,7 @@ pub fn screen_referred_to_rgbe(screen_referred_color: [f32; 3]) -> [f32; 4] {
 
     let maximum_luminance = red.max(green.max(blue));
 
-    let scalar = f32::from(u8::from((maximum_luminance > 10.0f32.powf(-38.0))));
+    let scalar = f32::from(u8::from(maximum_luminance > 10.0f32.powf(-38.0)));
 
     let exponent = maximum_luminance.log2() + 128.0;
 
@@ -28,7 +28,7 @@ pub fn rgbe_to_screen_referred(rgbe: [f32; 4]) -> [f32; 3] {
 
     let maximum_luminance = red.max(green.max(blue));
 
-    let scalar = f32::from(u8::from((maximum_luminance > 10.0f32.powf(-38.0))));
+    let scalar = f32::from(u8::from(maximum_luminance > 10.0f32.powf(-38.0)));
 
     let screen_referred_intermediate = 256.0 * 2.0f32.powf(exponent - 128.0);
 

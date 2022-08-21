@@ -9,8 +9,8 @@ Any issues, enhancement, features, or bugs report are always welcome in Issues.
 <br/>
 <br/>
 
-Going to change my development pipeline. I will use github for public changes, while also using jetbrain source for interal team/self project management and
-forward detail github.
+Going to change my development pipeline. I will use GitHub for public changes, while also using JetBrain source for interal team/self project management and
+forward detail GitHub.
 
 ## Camera Movement
 * Forward : Up or W

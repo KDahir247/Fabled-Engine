@@ -31,10 +31,10 @@ unreal 157 threads.
 
 Shader module notes
 // Feature lists for shader:
-// Maybe add a shader query system where you can pass a generic and it will return all the data for that generic from the shader.
+// Maybe add a shader query system where you can pass a generic, and it will return all the data for that generic from the shader.
 // Maybe add a shader cache for the shader module??, but definitely add a common with will hold all the directory path to the common shader for the game engine.
-// Maybe add benching for the shader scripts.
-// Look into rspirv crate
+// Possibly add benching for the shader scripts.
+// Look into r_spir_v crate
 
 
 Features
@@ -106,7 +106,7 @@ Positive X is Right
 
 // work on the texture next.
 
-// Prefer moving the loop inside run and move borrow's call outside the loop
+// Prefer moving the loop inside run and move borrows call outside the loop
 // Division is an expensive operation use reciprocal
 // for passes should i store the required data in a pass file and decode it when doing the render passes?
 
@@ -116,13 +116,13 @@ Positive X is Right
 // for compilation time test use cargo build --timings
 // for bloat see https://github.com/RazrFalcon/cargo-bloat
 
-// use #[cold] if the the function isn't called and #[inline(never)] to reduce icache pressure
+// use #[cold] if the the function isn't called and #[inline(never)] to reduce i_cache pressure
 
 // use #[likely] for condition that will likely be true use in only hot code
 // use #[unlikely] for condition that will likely be false use in only hot code
-first scale then rotate then translate.
+first scale then rotate and lastly translate.
 
-transfromation matrix formula
+transformation matrix formula
 
 [scale.x * cos(angle.y) * cos(angle.z),          -sin(angle.z),          sin(angle.y),           position.x]
 [sin(angle.z),          scale.y * cos(angle.x) * cos(angle.z),          -sin(angle.x),           position.y]

@@ -1,6 +1,5 @@
 use crate::light::{
-    DirectionalLight, IntensityUnit, LightAppearance, LightType, PointLight, SpotLight,
-    TemperatureUnit,
+    DirectionalLight, IntensityUnit, LightType, PointLight, SpotLight,
 };
 use gltf::khr_lights_punctual::{Kind, Light};
 
@@ -12,7 +11,9 @@ impl From<Light<'_>> for LightType {
 
         let range = light.range().unwrap_or_default();
 
-        let light_type = match light.kind() {
+        
+
+        match light.kind() {
             Kind::Directional => {
                 let directional_light = DirectionalLight {
                     illuminance: intensity,
@@ -43,8 +44,6 @@ impl From<Light<'_>> for LightType {
 
                 LightType::SpotLight(spot_light)
             }
-        };
-
-        light_type
+        }
     }
 }

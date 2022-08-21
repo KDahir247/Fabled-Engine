@@ -33,9 +33,7 @@ impl shipyard::Component for ChromaticDesignation {
 
 impl Default for ChromaticDesignation {
     fn default() -> Self {
-        Self {
-            0: [0.31352, 0.32979, 0.35669],
-        }
+        Self([0.31352, 0.32979, 0.35669])
     }
 }
 

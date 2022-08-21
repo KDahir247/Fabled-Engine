@@ -1,4 +1,3 @@
-use crate::math::component_sum;
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
@@ -26,6 +25,7 @@ impl Default for Matrix3x3 {
 
 impl Matrix3x3 {
     #[rustfmt::skip]
+    #[inline]
     pub fn set_from_columns(
         x_column: Vector3,
         y_column: Vector3,
@@ -42,6 +42,7 @@ impl Matrix3x3 {
     }
 
     #[rustfmt::skip]
+    #[inline]
     pub fn set_from_rows(
         x_rows: Vector3,
         y_rows: Vector3,
@@ -58,14 +59,15 @@ impl Matrix3x3 {
     }
 
 
+    #[inline]
     pub fn splat(val: f32) -> Matrix3x3 {
-        let splat_matrix_3x3 = Matrix3x3 {
+        Matrix3x3 {
             value: std::simd::f32x16::splat(val),
-        };
-        splat_matrix_3x3
+        }
     }
 
 
+    #[inline]
     pub const fn to_primitive(self) -> [f32; 16] {
         self.value.to_array()
     }
@@ -136,6 +138,7 @@ impl Display for Matrix3x3 {
 impl Add<f32> for Matrix3x3 {
     type Output = Matrix3x3;
 
+    #[inline]
     fn add(self, rhs: f32) -> Self::Output {
         let splat_matrix_3x3 = Matrix3x3::splat(rhs);
 
@@ -146,6 +149,7 @@ impl Add<f32> for Matrix3x3 {
 }
 
 impl AddAssign<f32> for Matrix3x3 {
+    #[inline]
     fn add_assign(&mut self, rhs: f32) {
         let splat_matrix_3x3 = Matrix3x3::splat(rhs);
 
@@ -156,6 +160,7 @@ impl AddAssign<f32> for Matrix3x3 {
 impl Sub<f32> for Matrix3x3 {
     type Output = Matrix3x3;
 
+    #[inline]
     fn sub(self, rhs: f32) -> Self::Output {
         let splat_matrix_3x3 = Matrix3x3::splat(rhs);
 
@@ -166,6 +171,7 @@ impl Sub<f32> for Matrix3x3 {
 }
 
 impl SubAssign<f32> for Matrix3x3 {
+    #[inline]
     fn sub_assign(&mut self, rhs: f32) {
         let splat_matrix_3x3 = Matrix3x3::splat(rhs);
 
@@ -176,6 +182,7 @@ impl SubAssign<f32> for Matrix3x3 {
 impl Mul<f32> for Matrix3x3 {
     type Output = Matrix3x3;
 
+    #[inline]
     fn mul(self, rhs: f32) -> Self::Output {
         let matrix3x3_of_rhs = Matrix3x3::splat(rhs);
 
@@ -186,6 +193,7 @@ impl Mul<f32> for Matrix3x3 {
 }
 
 impl MulAssign<f32> for Matrix3x3 {
+    #[inline]
     fn mul_assign(&mut self, rhs: f32) {
         let matrix3x3_of_rhs = Matrix3x3::splat(rhs);
 
@@ -198,6 +206,7 @@ impl MulAssign<f32> for Matrix3x3 {
 impl Add for Matrix3x3 {
     type Output = Matrix3x3;
 
+    #[inline]
     fn add(self, rhs: Self) -> Self::Output {
         Matrix3x3 {
             value: self.value + rhs.value,
@@ -206,6 +215,7 @@ impl Add for Matrix3x3 {
 }
 
 impl AddAssign for Matrix3x3 {
+    #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.value += rhs.value
     }
@@ -214,6 +224,7 @@ impl AddAssign for Matrix3x3 {
 impl Sub for Matrix3x3 {
     type Output = Matrix3x3;
 
+    #[inline]
     fn sub(self, rhs: Self) -> Self::Output {
         Matrix3x3 {
             value: self.value - rhs.value,
@@ -222,6 +233,7 @@ impl Sub for Matrix3x3 {
 }
 
 impl SubAssign for Matrix3x3 {
+    #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.value -= rhs.value
     }
@@ -230,6 +242,7 @@ impl SubAssign for Matrix3x3 {
 impl Mul for Matrix3x3 {
     type Output = Matrix3x3;
 
+    #[inline]
     fn mul(self, rhs: Self) -> Self::Output {
         let transposed_rhs: Matrix3x3 = transpose(rhs);
 
@@ -240,14 +253,16 @@ impl Mul for Matrix3x3 {
 }
 
 impl MulAssign for Matrix3x3 {
+    #[inline]
     fn mul_assign(&mut self, rhs: Self) {
         self.value *= transpose(rhs).value;
     }
 }
 
 pub mod matrix3x3_math {
-    use crate::{reverse, ror, Matrix3x3, Vector2, Vector3};
+    use crate::{reverse, Matrix3x3, Vector2, Vector3};
 
+    #[inline]
     pub fn transpose(matrix_3x3: Matrix3x3) -> Matrix3x3 {
         const TRANSPOSE_INDICES: [usize; 16] =
             [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15];
@@ -259,6 +274,7 @@ pub mod matrix3x3_math {
         }
     }
 
+    #[inline]
     pub fn from_scale(scalar_vector: Vector2) -> Matrix3x3 {
         let extended_scalar = scalar_vector.extend_vec3();
 
@@ -269,10 +285,12 @@ pub mod matrix3x3_math {
         )
     }
 
+    #[inline]
     pub fn from_translation(translation_vector: Vector3) -> Matrix3x3 {
         Matrix3x3::set_from_columns(Vector3::RIGHT, Vector3::UP, translation_vector)
     }
 
+    #[inline]
     pub fn rotate_x(angle_radians: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radians.sin_cos();
 
@@ -285,6 +303,7 @@ pub mod matrix3x3_math {
         Matrix3x3::set_from_columns(Vector3::RIGHT, cos_sin_vector, neg_sin_cos_vector)
     }
 
+    #[inline]
     pub fn rotate_y(angle_radians: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radians.sin_cos();
 
@@ -297,7 +316,7 @@ pub mod matrix3x3_math {
         Matrix3x3::set_from_columns(cos_sin_vector, Vector3::UP, neg_sin_cos_vector)
     }
 
-
+    #[inline]
     pub fn rotate_z(angle_radians: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radians.sin_cos();
 
@@ -310,6 +329,7 @@ pub mod matrix3x3_math {
         Matrix3x3::set_from_columns(cos_sin_vector, neg_sin_cos_vector, Vector3::FORWARD)
     }
 
+    #[inline]
     pub fn from_angle_axis(axis_normalized: Vector3, angle_radians: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radians.sin_cos();
 
@@ -345,6 +365,7 @@ pub mod matrix3x3_math {
     }
 
 
+    #[inline]
     pub fn from_scale_angle_translation(
         scalar_vec: Vector2,
         angle_radians: f32,
@@ -361,6 +382,7 @@ pub mod matrix3x3_math {
         )
     }
 
+    #[inline]
     pub fn from_angle(angle_radians: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radians.sin_cos();
 
@@ -371,11 +393,11 @@ pub mod matrix3x3_math {
         )
     }
 
-    pub fn determinant(matrix: Matrix3x3) -> f32 {
+    pub fn determinant(_matrix: Matrix3x3) -> f32 {
         todo!()
     }
 
-    pub fn inverse(matrix: Matrix3x3) -> Matrix3x3 {
+    pub fn inverse(_matrix: Matrix3x3) -> Matrix3x3 {
         todo!()
     }
 }
@@ -393,9 +415,9 @@ mod matrix_3x3_test {
     #[test]
     fn matrix3x3_transpose_test() {
         let matrix = Matrix3x3::set_from_rows(
-            Vector3::set(0.5489190, -0.8138058, 0.1908090),
+            Vector3::set(0.548_919, -0.8138058, 0.190_809),
             Vector3::set(0.8007619, 0.4465074, -0.3992637),
-            Vector3::set(0.2397255, 0.3719560, 0.8967611),
+            Vector3::set(0.2397255, 0.371_956, 0.8967611),
         );
         println!("original {}", matrix);
 
@@ -411,7 +433,7 @@ mod matrix_3x3_test {
     #[test]
     fn matrix3x3_angle_axis_test() {
         let m = from_angle_axis(
-            Vector3::set(0.5661385170722978, 0.22645540682891913, 0.792593923901217),
+            Vector3::set(0.566_138_5, 0.226_455_4, 0.792_593_9),
             56.11f32.to_radians(),
         );
 

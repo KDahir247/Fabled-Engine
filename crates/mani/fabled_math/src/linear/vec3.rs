@@ -53,6 +53,7 @@ impl Vector3 {
         value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 0.0]),
     };
 
+    #[inline]
     pub fn trunc_vec2(self) -> Vector2 {
         const ZERO_VEC: Vector3 = Vector3::ZERO;
 
@@ -65,18 +66,27 @@ impl Vector3 {
         Vector2 { value: swizzle_vec }
     }
 
+    #[inline]
     pub fn extend_vec4(self) -> Vector4 {
         Vector4 { value: self.value }
     }
 
+    #[inline(always)]
     pub const fn set(x: f32, y: f32, z: f32) -> Vector3 {
         Vector3 {
             value: std::simd::f32x4::from_array([x, y, z, 0.0]),
         }
     }
 
-    pub const fn to_primitive(self) -> [f32; 4] {
-        self.value.to_array()
+    #[inline]
+    pub const fn to_primitive(self) -> [f32; 3] {
+        let simd_rep = self.value.to_array();
+        [simd_rep[0], simd_rep[1], simd_rep[2]]
+    }
+
+    #[inline]
+    pub const fn from_array(array: [f32; 3]) -> Vector3 {
+        Vector3::set(array[0], array[1], array[2])
     }
 }
 
@@ -95,6 +105,7 @@ impl Display for Vector3 {
 impl Index<usize> for Vector3 {
     type Output = f32;
 
+    #[inline]
     fn index(&self, index: usize) -> &Self::Output {
         &self.value.as_array()[index]
     }
@@ -103,6 +114,7 @@ impl Index<usize> for Vector3 {
 impl Mul<Quaternion> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn mul(self, rhs: Quaternion) -> Self::Output {
         let mut result = self;
         result *= rhs;
@@ -111,6 +123,7 @@ impl Mul<Quaternion> for Vector3 {
 }
 
 impl MulAssign<Quaternion> for Vector3 {
+    #[inline]
     fn mul_assign(&mut self, rhs: Quaternion) {
         let splat_2 = Vector4::splat(2.0);
         let quaternion_scalar_splat = Vector4::splat(rhs.value[3]);
@@ -124,6 +137,7 @@ impl MulAssign<Quaternion> for Vector3 {
 impl Mul<Vector3> for Matrix3x3 {
     type Output = Vector3;
 
+    // todo improve this.
     fn mul(self, rhs: Vector3) -> Self::Output {
         let row_col_matrix: [f32; 16] = transpose(self).to_primitive();
 
@@ -145,6 +159,7 @@ impl Mul<Vector3> for Matrix3x3 {
 }
 
 impl MulAssign<Matrix3x3> for Vector3 {
+    #[inline]
     fn mul_assign(&mut self, rhs: Matrix3x3) {
         self.value = (rhs * *self).value;
     }
@@ -155,6 +170,7 @@ impl MulAssign<Matrix3x3> for Vector3 {
 impl Mul<Vector3> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn mul(self, rhs: Vector3) -> Self::Output {
         Vector3 {
             value: self.value * rhs.value,
@@ -163,6 +179,7 @@ impl Mul<Vector3> for Vector3 {
 }
 
 impl MulAssign<Vector3> for Vector3 {
+    #[inline]
     fn mul_assign(&mut self, rhs: Vector3) {
         self.value *= rhs.value;
     }
@@ -171,6 +188,7 @@ impl MulAssign<Vector3> for Vector3 {
 impl Div<Vector3> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn div(self, rhs: Vector3) -> Self::Output {
         Vector3 {
             value: self.value / rhs.value,
@@ -179,6 +197,7 @@ impl Div<Vector3> for Vector3 {
 }
 
 impl DivAssign<Vector3> for Vector3 {
+    #[inline]
     fn div_assign(&mut self, rhs: Vector3) {
         self.value /= rhs.value;
     }
@@ -187,6 +206,7 @@ impl DivAssign<Vector3> for Vector3 {
 impl Rem<Vector3> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn rem(self, rhs: Vector3) -> Self::Output {
         Vector3 {
             value: self.value % rhs.value,
@@ -195,6 +215,7 @@ impl Rem<Vector3> for Vector3 {
 }
 
 impl RemAssign<Vector3> for Vector3 {
+    #[inline]
     fn rem_assign(&mut self, rhs: Vector3) {
         self.value %= rhs.value;
     }
@@ -203,6 +224,8 @@ impl RemAssign<Vector3> for Vector3 {
 impl Add<f32> for Vector3 {
     type Output = Vector3;
 
+
+    #[inline]
     fn add(self, rhs: f32) -> Self::Output {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -213,6 +236,7 @@ impl Add<f32> for Vector3 {
 }
 
 impl AddAssign<f32> for Vector3 {
+    #[inline]
     fn add_assign(&mut self, rhs: f32) {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -223,6 +247,7 @@ impl AddAssign<f32> for Vector3 {
 impl Sub<f32> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn sub(self, rhs: f32) -> Self::Output {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -233,19 +258,20 @@ impl Sub<f32> for Vector3 {
 }
 
 impl SubAssign<f32> for Vector3 {
+    #[inline]
     fn sub_assign(&mut self, rhs: f32) {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
         self.value -= splat_f32x4;
     }
 }
-//
 
 // Vector-Wise
 
 impl Mul<f32> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn mul(self, rhs: f32) -> Self::Output {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -256,6 +282,7 @@ impl Mul<f32> for Vector3 {
 }
 
 impl MulAssign<f32> for Vector3 {
+    #[inline]
     fn mul_assign(&mut self, rhs: f32) {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -266,6 +293,7 @@ impl MulAssign<f32> for Vector3 {
 impl Div<f32> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn div(self, rhs: f32) -> Self::Output {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -276,6 +304,7 @@ impl Div<f32> for Vector3 {
 }
 
 impl DivAssign<f32> for Vector3 {
+    #[inline]
     fn div_assign(&mut self, rhs: f32) {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -286,6 +315,7 @@ impl DivAssign<f32> for Vector3 {
 impl Rem<f32> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn rem(self, rhs: f32) -> Self::Output {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -296,6 +326,7 @@ impl Rem<f32> for Vector3 {
 }
 
 impl RemAssign<f32> for Vector3 {
+    #[inline]
     fn rem_assign(&mut self, rhs: f32) {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -306,6 +337,7 @@ impl RemAssign<f32> for Vector3 {
 impl Neg for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         Vector3 { value: -self.value }
     }
@@ -314,6 +346,7 @@ impl Neg for Vector3 {
 impl Add<Vector3> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn add(self, rhs: Vector3) -> Self::Output {
         Vector3 {
             value: self.value + rhs.value,
@@ -322,6 +355,7 @@ impl Add<Vector3> for Vector3 {
 }
 
 impl AddAssign<Vector3> for Vector3 {
+    #[inline]
     fn add_assign(&mut self, rhs: Vector3) {
         self.value += rhs.value;
     }
@@ -330,6 +364,7 @@ impl AddAssign<Vector3> for Vector3 {
 impl Sub<Vector3> for Vector3 {
     type Output = Vector3;
 
+    #[inline]
     fn sub(self, rhs: Vector3) -> Self::Output {
         Vector3 {
             value: self.value - rhs.value,
@@ -338,6 +373,7 @@ impl Sub<Vector3> for Vector3 {
 }
 
 impl SubAssign<Vector3> for Vector3 {
+    #[inline]
     fn sub_assign(&mut self, rhs: Vector3) {
         self.value -= rhs.value;
     }
@@ -357,7 +393,7 @@ pub struct TiledVector3<const N: usize> {
 
 #[cfg(test)]
 mod vector3_test {
-    use crate::Vector3;
+
 
     #[test]
     fn create_vector3() {}

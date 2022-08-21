@@ -1,4 +1,4 @@
-use crate::{rotate_x, rotate_y, to_rotation_matrix, Matrix3x3, Quaternion, Vector3};
+use crate::{rotate_x, rotate_y, to_rotation_matrix, Matrix3x3, Vector3};
 
 #[derive(Default)]
 pub struct Affine3 {

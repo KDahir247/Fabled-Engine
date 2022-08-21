@@ -1,4 +1,4 @@
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum CameraFormat {
     CustomFormat,
     // D1 NTSC,

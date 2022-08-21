@@ -42,7 +42,7 @@ pub enum ShaderConvertOption {
     Glsl { version: Version },
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ShaderConvertResult {
     Wgsl(String),
     Spv(Vec<u8>),

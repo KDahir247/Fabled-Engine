@@ -27,7 +27,7 @@ mod iso_speed_test {
             640.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3200.0,
         ];
 
-        let logarithmics = [
+        let logarithms = [
             0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
             16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0,
             30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0,
@@ -35,7 +35,7 @@ mod iso_speed_test {
 
         for index in 0..arithmetics.len() {
             let logarithmic = arithmetic_to_logarithmic_speed(arithmetics[index]);
-            assert!(logarithmic.round().eq(&logarithmics[index]))
+            assert!(logarithmic.round().eq(&logarithms[index]))
         }
     }
 
@@ -50,14 +50,14 @@ mod iso_speed_test {
             800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3200.0,
         ];
 
-        let logarithmics = [
+        let logarithms = [
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0,
             17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0,
             31.0, 32.0, 33.0, 34.0, 35.0, 36.0,
         ];
 
-        for index in 0..logarithmics.len() {
-            let arithmetic = logarithmic_to_arithmetic_speed(logarithmics[index]);
+        for index in 0..logarithms.len() {
+            let arithmetic = logarithmic_to_arithmetic_speed(logarithms[index]);
 
             println!("{} {}", arithmetic, arithmetics[index]);
             assert!((arithmetic - arithmetics[index]) < error_threshold);

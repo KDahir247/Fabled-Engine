@@ -90,7 +90,7 @@ mod hdr_loader_codecs {
                 println!("Pass");
             }
             Err(err) => {
-                panic!("{}", err);
+                panic!("{:?}", err);
             }
         }
 
@@ -110,7 +110,7 @@ mod hdr_loader_codecs {
                 panic!("Should not pass")
             }
             Err(err) => {
-                println!("{}", err);
+                println!("{:?}", err);
             }
         }
     }

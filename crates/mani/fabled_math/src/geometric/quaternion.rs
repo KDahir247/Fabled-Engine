@@ -20,6 +20,7 @@ impl Quaternion {
         value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 1.0]),
     };
 
+    #[inline(always)]
     pub const fn set(i: f32, j: f32, k: f32, w: f32) -> Quaternion {
         Quaternion {
             value: std::simd::f32x4::from_array([i, j, k, w]),
@@ -27,6 +28,7 @@ impl Quaternion {
     }
 
 
+    #[inline]
     pub  fn additive_form(
         real_quaternion: Quaternion,
         pure_quaternion: Quaternion,
@@ -46,6 +48,7 @@ impl Quaternion {
         }
     }
 
+    #[inline]
     pub const fn to_primitive(self) -> [f32; 4] {
         self.value.to_array()
     }
@@ -69,6 +72,7 @@ impl Display for Quaternion {
 impl Add for Quaternion {
     type Output = Quaternion;
 
+    #[inline]
     fn add(self, rhs: Self) -> Self::Output {
         Quaternion {
             value: self.value + rhs.value,
@@ -77,6 +81,8 @@ impl Add for Quaternion {
 }
 
 impl AddAssign for Quaternion {
+
+    #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.value += rhs.value
     }
@@ -85,6 +91,7 @@ impl AddAssign for Quaternion {
 impl Sub for Quaternion {
     type Output = Quaternion;
 
+    #[inline]
     fn sub(self, rhs: Self) -> Self::Output {
         Quaternion {
             value: self.value - rhs.value,
@@ -93,6 +100,8 @@ impl Sub for Quaternion {
 }
 
 impl SubAssign for Quaternion {
+
+    #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.value -= rhs.value;
     }
@@ -102,6 +111,7 @@ impl SubAssign for Quaternion {
 impl Mul for Quaternion {
     type Output = Quaternion;
 
+    #[inline]
     fn mul(self, rhs: Self) -> Self::Output {
         let mut result = self;
         result *= rhs;
@@ -111,6 +121,8 @@ impl Mul for Quaternion {
 }
 
 impl MulAssign for Quaternion {
+
+    #[inline]
     fn mul_assign(&mut self, rhs: Self) {
         let scalar_lhs = self.value[3];
         let scalar_rhs = rhs.value[3];
@@ -139,12 +151,16 @@ impl MulAssign for Quaternion {
 
 impl Div for Quaternion {
     type Output = Quaternion;
+
+    #[inline]
     fn div(self, rhs: Self) -> Self::Output {
         self * inverse(rhs)
     }
 }
 
 impl DivAssign for Quaternion {
+
+    #[inline]
     fn div_assign(&mut self, rhs: Self) {
         *self = Quaternion { value: self.value } * inverse(rhs)
     }
@@ -156,6 +172,7 @@ pub mod quaternion_math {
     };
     use crate::{ror, Matrix3x3, Matrix4x4, Quaternion, Vector3, Vector4};
 
+    #[inline]
     pub fn rotate_x(angle_radians: f32) -> Quaternion {
         const W_VECTOR4: Vector4 = Vector4::set(0.0, 0.0, 0.0, 1.0);
         const X_VECTOR4: Vector4 = Vector4::set(1.0, 0.0, 0.0, 0.0);
@@ -170,6 +187,7 @@ pub mod quaternion_math {
         }
     }
 
+    #[inline]
     pub fn rotate_y(angle_radians: f32) -> Quaternion {
         const W_VECTOR4: Vector4 = Vector4::set(0.0, 0.0, 0.0, 1.0);
         const Y_VECTOR4: Vector4 = Vector4::set(0.0, 1.0, 0.0, 0.0);
@@ -183,6 +201,7 @@ pub mod quaternion_math {
         }
     }
 
+    #[inline]
     pub fn rotate_z(angle_radians: f32) -> Quaternion {
         const W_VECTOR4: Vector4 = Vector4::set(0.0, 0.0, 0.0, 1.0);
         const Z_VECTOR4: Vector4 = Vector4::set(0.0, 0.0, 1.0, 0.0);
@@ -197,6 +216,7 @@ pub mod quaternion_math {
         }
     }
 
+    #[inline]
     pub fn from_angle_axis_mag(axis_mag: Vector3) -> Quaternion {
         let angle = length(axis_mag.value);
 
@@ -208,6 +228,7 @@ pub mod quaternion_math {
     }
 
 
+    #[inline]
     pub fn from_angle_axis(normalized_axis: Vector3, angle_radians: f32) -> Quaternion {
         let half_angle: Vector4 = Vector4::splat(angle_radians * 0.5f32);
         let quaternion_imaginary = sin(half_angle.value) * normalized_axis.value;
@@ -219,6 +240,7 @@ pub mod quaternion_math {
         }
     }
 
+    #[inline]
     pub fn to_angle_axis(quaternion: Quaternion) -> (Vector3, f32) {
         let real: f32 = quaternion.value[3];
 
@@ -319,13 +341,14 @@ pub mod quaternion_math {
         Matrix3x3 { value: identity_mat4.value + simd_repr_step * splat_2 }
     }
 
+    #[inline]
     pub fn conjugate(quaternion: Quaternion) -> Quaternion {
         Quaternion {
             value: quaternion.value * Vector4::set(-1.0, -1.0, -1.0, 1.0).value,
         }
     }
 
-
+    #[inline]
     pub fn inverse(quaternion: Quaternion) -> Quaternion {
         Quaternion {
             value: conjugate(quaternion).value
@@ -334,18 +357,22 @@ pub mod quaternion_math {
     }
 
 
+    #[inline]
     pub fn forward(quaternion: Quaternion) -> Vector3 {
         Vector3::FORWARD * quaternion
     }
 
+    #[inline]
     pub fn right(quaternion: Quaternion) -> Vector3 {
         Vector3::RIGHT * quaternion
     }
 
+    #[inline]
     pub fn up(quaternion: Quaternion) -> Vector3 {
         Vector3::UP * quaternion
     }
 
+    #[inline]
     pub fn normalized_lerp(
         start_quaternion: Quaternion,
         target_quaternion: Quaternion,
@@ -370,6 +397,7 @@ pub mod quaternion_math {
         }
     }
 
+    #[inline]
     pub fn slerp(
         start_quaternion: Quaternion,
         target_quaternion: Quaternion,
@@ -396,23 +424,26 @@ pub mod quaternion_math {
         }
     }
 
+    #[inline]
     pub fn real_quaternion(quaternion: Quaternion) -> Quaternion {
         Quaternion {
             value: quaternion.value * Vector4::set(0.0, 0.0, 0.0, 1.0).value,
         }
     }
 
+    #[inline]
     pub fn pure_quaternion(quaternion: Quaternion) -> Quaternion {
         Quaternion {
             value: quaternion.value * Vector3::ONE.value,
         }
     }
 
-    pub fn quaternion_log(quaternion : Quaternion) -> Quaternion {
+    pub fn quaternion_log(_quaternion : Quaternion) -> Quaternion {
 
         todo!()
     }
 
+    #[inline]
     pub fn quaternion_exp(quaternion : Quaternion) -> Quaternion{
 
         let scalar : f32 = quaternion.value[3];
@@ -432,7 +463,7 @@ pub mod quaternion_math {
 
     }
 
-    pub fn quaternion_pow(quaternion: Quaternion, factor: f32) -> Quaternion {
+    pub fn quaternion_pow(_quaternion: Quaternion, _factor: f32) -> Quaternion {
 
         todo!()
 
@@ -443,7 +474,7 @@ pub mod quaternion_math {
 // todo Write test for all quaternion and quaternion math implementation
 #[cfg(test)]
 mod quaternion_test {
-    use rand::Rng;
+    
     use crate::{conjugate, from_angle_axis, from_rotation_matrix, inverse, Matrix3x3, Quaternion, quaternion_exp, rotate_x, rotate_y, rotate_z, to_angle_axis, to_rotation_matrix, Vector3};
     use crate::math::{abs, component_sum, normalize};
 
@@ -705,7 +736,7 @@ mod quaternion_test {
         // euler angle (-34.2, 2.57, 121.11)
         let quaternion_rot_result : Quaternion = Quaternion::set(-0.1258448, 0.266531, 0.8288804, 0.4754803);
 
-        let rotation_matrix_result : Matrix3x3 = Matrix3x3::set_from_rows(Vector3::set(-0.5161631, -0.8553157,  0.0448399), Vector3::set(0.7211497, -0.4057594,  0.5615180), Vector3::set(-0.4620810,  0.3221712,  0.8262487));
+        let rotation_matrix_result : Matrix3x3 = Matrix3x3::set_from_rows(Vector3::set(-0.5161631, -0.8553157,  0.0448399), Vector3::set(0.7211497, -0.4057594,  0.561_518), Vector3::set(-0.462_081,  0.3221712,  0.8262487));
 
         let rnd_quat = to_rotation_matrix(quaternion_rot_result);
 

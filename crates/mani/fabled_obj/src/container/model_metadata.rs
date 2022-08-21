@@ -1,6 +1,6 @@
-use fabled_render::mesh::Model;
+use fabled_render::mesh::Mesh;
 
 pub struct ModelMetadata {
     pub mtl_path: std::path::PathBuf,
-    pub model: Model,
+    pub mesh: Mesh,
 }

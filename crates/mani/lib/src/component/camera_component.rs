@@ -1,6 +1,6 @@
 //The method are only used to construct the component.
 use crate::util::camera::{calc_proj_matrix, calc_view_matrix};
-use glam::Vec4Swizzles;
+
 use wgpu::util::DeviceExt;
 
 pub struct Camera {

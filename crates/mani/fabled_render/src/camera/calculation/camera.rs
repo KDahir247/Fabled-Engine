@@ -4,9 +4,9 @@
 // use fabled_math::Matrix4x4;
 // #[derive(Copy, Clone, Default, Debug)]
 // pub struct MatrixDescriptor {
-//     pub projection: [f32;16],
-//     pub view: [f32;16],
-//     pub model: [f32;16],
+//     pub projection: [f32; 16],
+//     pub view: [f32; 16],
+//     pub model: [f32; 16],
 // }
 //
 // pub fn project(
@@ -66,11 +66,8 @@
 //     ]
 // }
 //
-// pub fn compute_look_at_matrix(
-//     translation: Translation,
-//     rotation: Rotation,
-// ) -> [f32;16] {
-//     let forward = fabled_transform::forward(rotation);
+// pub fn compute_look_at_matrix(translation: Translation, rotation: Rotation)
+// -> [f32; 16] {     let forward = fabled_transform::forward(rotation);
 //
 //     let translation_xyz = [
 //         translation.value[0],
@@ -102,7 +99,8 @@
 // }
 //
 // #[deprecated(note = "Calculate arc ball matrix function has not been
-// tested.")] pub fn compute_arc_ball_matrix(
+// tested.")]
+// pub fn compute_arc_ball_matrix(
 //     translation: Translation,
 //     rotation: Rotation,
 //     center: Option<[f32; 3]>,
@@ -130,7 +128,7 @@
 //         .into()
 // }
 //
-// pub fn compute_inverse_view_matrix(view_matrix: [f32;16]) -> [f32;16] {
+// pub fn compute_inverse_view_matrix(view_matrix: [f32; 16]) -> [f32; 16] {
 //     let view_matrix = glam::Mat4::from_cols_array(&view_matrix);
 //
 //     view_matrix.inverse().to_cols_array()
@@ -214,8 +212,8 @@
 //     ]
 // }
 //
-// pub fn compute_inverse_projection_matrix(projection_matrix: [f32;16]) ->
-// [f32;16] {     let projection =
+// pub fn compute_inverse_projection_matrix(projection_matrix: [f32; 16]) ->
+// [f32; 16] {     let projection =
 // glam::Mat4::from_cols_array(&projection_matrix);
 //
 //     projection.inverse().to_cols_array()
@@ -263,11 +261,8 @@
 //                 projection: projection_matrix,
 //                 view: view_matrix,
 //                 model: [
-//                     1.0, 0.0, 0.0, 0.0,
-//                     0.0, 1.0, 0.0, 0.0,
-//                     0.0, 0.0, 1.0, 0.0,
-//                     0.0, 0.0, 0.0, 1.0,
-//                 ],
+//                     1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+// 0.0, 0.0, 0.0, 0.0, 1.0,                 ],
 //             },
 //         );
 //
@@ -312,11 +307,8 @@
 //                 projection: projection_matrix,
 //                 view: view_matrix,
 //                 model: [
-//                     1.0, 0.0, 0.0, 0.0,
-//                     0.0, 1.0, 0.0, 0.0,
-//                     0.0, 0.0, 1.0, 0.0,
-//                     0.0, 0.0, 0.0, 1.0,
-//                 ],
+//                     1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+// 0.0, 0.0, 0.0, 0.0, 1.0,                 ],
 //             },
 //         );
 //
@@ -333,9 +325,9 @@
 //     fn compute_view_projection(
 //         rotation_target: Rotation,
 //         translation_target: Translation,
-//     ) -> ([f32;16], [f32;16]) {
-//         let view_matrix =
-//             compute_look_at_matrix(translation_target, rotation_target);
+//     ) -> ([f32; 16], [f32; 16]) {
+//         let view_matrix = compute_look_at_matrix(translation_target,
+// rotation_target);
 //
 //         let perspective = Perspective::default();
 //         let projection = Projection::Perspective(perspective);
@@ -592,11 +584,8 @@
 //                 projection: projection_matrix,
 //                 view: view_matrix,
 //                 model: [
-//                     1.0, 0.0, 0.0, 0.0,
-//                     0.0, 1.0, 0.0, 0.0,
-//                     0.0, 0.0, 1.0, 0.0,
-//                     0.0, 0.0, 0.0, 1.0,
-//                 ],
+//                     1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+// 0.0, 0.0, 0.0, 0.0, 1.0,                 ],
 //             },
 //         );
 //         println!("unproject value is {:?}", start_unproject);
@@ -608,11 +597,8 @@
 //                 projection: projection_matrix,
 //                 view: view_matrix,
 //                 model: [
-//                     1.0, 0.0, 0.0, 0.0,
-//                     0.0, 1.0, 0.0, 0.0,
-//                     0.0, 0.0, 1.0, 0.0,
-//                     0.0, 0.0, 0.0, 1.0,
-//                 ],
+//                     1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+// 0.0, 0.0, 0.0, 0.0, 1.0,                 ],
 //             },
 //         );
 //
@@ -625,11 +611,8 @@
 //                 projection: projection_matrix,
 //                 view: view_matrix,
 //                 model: [
-//                     1.0, 0.0, 0.0, 0.0,
-//                     0.0, 1.0, 0.0, 0.0,
-//                     0.0, 0.0, 1.0, 0.0,
-//                     0.0, 0.0, 0.0, 1.0,
-//                 ],
+//                     1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+// 0.0, 0.0, 0.0, 0.0, 1.0,                 ],
 //             },
 //         );
 //
@@ -644,5 +627,4 @@
 // error_threshold);         assert!((start_unproject[1] -
 // end_unproject[1]).abs() < error_threshold);         assert!
 // ((start_unproject[2] - end_unproject[2]).abs() < error_threshold)     }
-//
 // }

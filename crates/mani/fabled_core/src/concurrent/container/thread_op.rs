@@ -1,5 +1,5 @@
 #[allow(dead_code)]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(C)]
 pub enum ThreadOperation {
     /// Single threaded execution that runs a operation in the current thread.

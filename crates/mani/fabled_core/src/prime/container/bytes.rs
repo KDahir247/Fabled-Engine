@@ -224,10 +224,10 @@ where
     V: bytemuck::Pod + bytemuck::Zeroable,
 {
     pub fn retrieve_bytes(&self) -> Vec<u8> {
-        let byte_buffer3_prepend = Bytes3Array { 0: self.0 };
+        let byte_buffer3_prepend = Bytes3Array(self.0);
 
         {
-            let byte_buffer3_append = Bytes3Array { 0: self.1 };
+            let byte_buffer3_append = Bytes3Array(self.1);
 
             byte_buffer3_prepend
                 .retrieve_bytes()
@@ -269,10 +269,10 @@ where
     W: bytemuck::Pod + bytemuck::Zeroable,
 {
     pub fn retrieve_bytes(&self) -> Vec<u8> {
-        let byte_buffer4_prepend = Bytes4Array { 0: self.0 };
+        let byte_buffer4_prepend = Bytes4Array(self.0);
 
         {
-            let byte_buffer3_append = Bytes3Array { 0: self.1 };
+            let byte_buffer3_append = Bytes3Array(self.1);
 
             byte_buffer4_prepend
                 .retrieve_bytes()
@@ -316,10 +316,10 @@ where
     X: bytemuck::Pod + bytemuck::Zeroable,
 {
     pub fn retrieve_bytes(&self) -> Vec<u8> {
-        let byte_buffer4_prepend = Bytes4Array { 0: self.0 };
+        let byte_buffer4_prepend = Bytes4Array(self.0);
 
         {
-            let byte_buffer4_append = Bytes4Array { 0: self.1 };
+            let byte_buffer4_append = Bytes4Array(self.1);
 
             byte_buffer4_prepend
                 .retrieve_bytes()
@@ -363,10 +363,10 @@ where
     Y: bytemuck::Pod + bytemuck::Zeroable,
 {
     pub fn retrieve_bytes(&self) -> Vec<u8> {
-        let byte_buffer5_prepend = Bytes5Array { 0: self.0 };
+        let byte_buffer5_prepend = Bytes5Array(self.0);
 
         {
-            let byte_buffer4_append = Bytes4Array { 0: self.1 };
+            let byte_buffer4_append = Bytes4Array(self.1);
 
             byte_buffer5_prepend
                 .retrieve_bytes()
@@ -414,10 +414,10 @@ where
     Z: bytemuck::Pod + bytemuck::Zeroable,
 {
     pub fn retrieve_bytes(&self) -> Vec<u8> {
-        let byte_buffer5_prepend = Bytes5Array { 0: self.0 };
+        let byte_buffer5_prepend = Bytes5Array(self.0);
 
         {
-            let byte_buffer5_append = Bytes5Array { 0: self.1 };
+            let byte_buffer5_append = Bytes5Array(self.1);
 
             byte_buffer5_prepend
                 .retrieve_bytes()
@@ -463,7 +463,7 @@ mod test {
         let dummy = MockStruct::default();
         let dummy_bytes: Vec<u8> = bytemuck::cast_slice(&[dummy]).to_owned();
 
-        let byte_array = BytesArray { 0: WR::new(50) };
+        let byte_array = BytesArray(WR::new(50));
         let buff_data = byte_array.retrieve_bytes();
 
         assert!(dummy_bytes.len().eq(&buff_data.len()));
@@ -510,9 +510,7 @@ mod test {
             arg3: [32, 100],
         };
 
-        let byte_array = Bytes2Array {
-            0: (WR::new(mock_missing_arg3), WR::new([32, 100])),
-        };
+        let byte_array = Bytes2Array((WR::new(mock_missing_arg3), WR::new([32, 100])));
 
         let byte_buffer01: Vec<u8> = bytemuck::cast_slice(&[mock]).to_vec();
         let byte_buffer02: Vec<u8> = byte_array.retrieve_bytes();
@@ -545,13 +543,11 @@ mod test {
             arg2: 1.234567,
         };
 
-        let byte_array = Bytes3Array {
-            0: (
+        let byte_array = Bytes3Array((
                 WR::new([2.0f32, 1.0f32, 0.3f32, 0.01f32, 0.234f32]),
                 WR::new(50i32),
                 WR::new(1.234567f64),
-            ),
-        };
+            ));
 
         let byte_buffer = byte_array.retrieve_bytes().to_vec();
         let byte_buffer01: Vec<u8> = bytemuck::cast_slice(&[mock]).to_vec();
@@ -582,14 +578,12 @@ mod test {
             arg3: 105,
         };
 
-        let byte_array = Bytes4Array {
-            0: (
+        let byte_array = Bytes4Array((
                 WR::new([2.0f32, 1.0f32, 0.3f32, 0.01f32, 0.234f32]),
                 WR::new(50i32),
                 WR::new(1.234567f64),
                 WR::new(105i64),
-            ),
-        };
+            ));
 
         let byte_buffer = byte_array.retrieve_bytes().to_vec();
         let byte_buffer01: Vec<u8> = bytemuck::cast_slice(&[mock]).to_vec();
@@ -622,15 +616,13 @@ mod test {
             arg4: 10000,
         };
 
-        let byte_array = Bytes5Array {
-            0: (
+        let byte_array = Bytes5Array((
                 WR::new([2.0f32, 1.0f32, 0.3f32, 0.01f32, 0.234f32]),
                 WR::new(50i32),
                 WR::new(1.234567f64),
                 WR::new(105i64),
                 WR::new(10000usize),
-            ),
-        };
+            ));
 
         let byte_buffer = byte_array.retrieve_bytes().to_vec();
         let byte_buffer01: Vec<u8> = bytemuck::cast_slice(&[mock]).to_vec();

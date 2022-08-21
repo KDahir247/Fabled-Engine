@@ -1,5 +1,5 @@
 use crate::light::{
-    ev_to_candela, lux_to_candela, point_light_candela_to_lumen, LightAppearance, IntensityUnit,
+    ev_to_candela, lux_to_candela, point_light_candela_to_lumen, IntensityUnit,
 };
 
 // Intensity is Luminance Power (Luminance flux) in lumen

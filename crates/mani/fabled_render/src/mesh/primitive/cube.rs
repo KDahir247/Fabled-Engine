@@ -1,37 +1,38 @@
-use crate::mesh::{Mesh, Model, Vertex};
+use crate::mesh::Indices::U32;
+use crate::mesh::{Indices, Mesh, Vertex};
+use fabled_math::Vector3;
+use smallvec::{SmallVec, ToSmallVec};
 
-#[repr(C, align(16))]
-#[derive(Debug)]
 struct CubeData {
-    pub normal: [glam::Vec3A; 6],
-    pub tangent: [glam::Vec3A; 6],
-    pub bi_tangent: [glam::Vec3A; 6],
+    pub normal: [Vector3; 6],
+    pub tangent: [Vector3; 6],
+    pub bi_tangent: [Vector3; 6],
 }
 
 const CUBE_FACE_DATA: CubeData = CubeData {
     normal: [
-        glam::const_vec3a!([0.0, 0.0, 1.0]),  // Front
-        glam::const_vec3a!([0.0, 0.0, -1.0]), // Back
-        glam::const_vec3a!([1.0, 0.0, 0.0]),  // Right
-        glam::const_vec3a!([-1.0, 0.0, 0.0]), // Left
-        glam::const_vec3a!([0.0, 1.0, 0.0]),  // Up
-        glam::const_vec3a!([0.0, -1.0, 0.0]), // Down
+        Vector3::set(0.0, 0.0, 1.0),  // Front
+        Vector3::set(0.0, 0.0, -1.0), // Back
+        Vector3::set(1.0, 0.0, 0.0),  // Right
+        Vector3::set(-1.0, 0.0, 0.0), // Left,
+        Vector3::set(0.0, 1.0, 0.0),  // UP
+        Vector3::set(0.0, -1.0, 0.0), // Down
     ],
     tangent: [
-        glam::const_vec3a!([-1.0, 0.0, 0.0]), // Front
-        glam::const_vec3a!([1.0, 0.0, 0.0]),  // Back
-        glam::const_vec3a!([0.0, 0.0, 1.0]),  // Right
-        glam::const_vec3a!([0.0, 0.0, -1.0]), // Left
-        glam::const_vec3a!([1.0, 0.0, 0.0]),  // Up
-        glam::const_vec3a!([-1.0, 0.0, 0.0]), // Down
+        Vector3::set(-1.0, 0.0, 0.0), // Front
+        Vector3::set(1.0, 0.0, 0.0),  // Back
+        Vector3::set(0.0, 0.0, 1.0),  // Right
+        Vector3::set(0.0, 0.0, -1.0), // Left
+        Vector3::set(1.0, 0.0, 0.0),  // Up
+        Vector3::set(-1.0, 0.0, 0.0), // Down
     ],
     bi_tangent: [
-        glam::const_vec3a!([0.0, 1.0, 0.0]), // Front
-        glam::const_vec3a!([0.0, 1.0, 0.0]), // Back
-        glam::const_vec3a!([0.0, 1.0, 0.0]), // Right
-        glam::const_vec3a!([0.0, 1.0, 0.0]), // Left
-        glam::const_vec3a!([0.0, 0.0, 1.0]), // Up
-        glam::const_vec3a!([0.0, 0.0, 1.0]), // Down
+        Vector3::set(0.0, 1.0, 0.0), // Front
+        Vector3::set(0.0, 1.0, 0.0), // Back
+        Vector3::set(0.0, 1.0, 0.0), // Right,
+        Vector3::set(0.0, 1.0, 0.0), // Left
+        Vector3::set(0.0, 0.0, 1.0), // UP
+        Vector3::set(0.0, 0.0, 1.0), // Down
     ],
 };
 
@@ -52,75 +53,75 @@ impl Cube {
     }
 }
 
-impl From<Cube> for Model {
+impl From<Cube> for Mesh {
+    #[inline(always)]
     fn from(cube: Cube) -> Self {
         const CUBE_DATA: CubeData = CUBE_FACE_DATA;
 
-        let mut vertices = vec![Vertex::default(); 24];
-        let mut indices = vec![0; 36];
+        const DEFAULT_VERTEX: Vertex = Vertex::init();
 
-        for chunk in 0..6 {
-            let normal = CUBE_DATA.normal[chunk];
-            let tangent = CUBE_DATA.tangent[chunk];
-            let bi_tangent = CUBE_DATA.bi_tangent[chunk];
+        let mut vertices = [DEFAULT_VERTEX; 24];
+        let mut indices = [0; 36];
 
-            let corners = [
-                (normal - bi_tangent - tangent) * cube.size,
-                (normal - bi_tangent + tangent) * cube.size,
-                (normal + bi_tangent + tangent) * cube.size,
-                (normal + bi_tangent - tangent) * cube.size,
-            ];
+        for face_index in 0..6 {
+            let face_index_u32: u32 = face_index as u32;
 
-            let indices_face = [
-                chunk * 4 + 2,
-                chunk * 4 + 1,
-                chunk * 4,
-                chunk * 4,
-                chunk * 4 + 3,
-                chunk * 4 + 2,
-            ];
+            let normal = CUBE_DATA.normal[face_index];
+            let tangent = CUBE_DATA.tangent[face_index];
+            let bi_tangent = CUBE_DATA.bi_tangent[face_index];
 
             {
-                let offset = chunk * 6;
-                let (target_left, _) = indices[offset..].split_at_mut(6);
+                let intermediate_indices_step = face_index_u32 << 2;
+
+                let indices_face = [
+                    intermediate_indices_step + 2,
+                    intermediate_indices_step + 1,
+                    intermediate_indices_step,
+                    intermediate_indices_step,
+                    intermediate_indices_step + 3,
+                    intermediate_indices_step + 2,
+                ];
+
+                let offset = face_index * 6;
+                let (target_left, _) = indices[offset..].split_array_mut::<6>();
                 target_left.copy_from_slice(&indices_face);
             }
 
-            for (index, face) in corners.chunks_exact(4).enumerate() {
-                assert!(face.len().eq(&4));
+            let normal_primitive = normal.to_primitive();
 
-                let first_vertex_chunk = Vertex {
-                    position: face[0].to_array(),
-                    tex_coord: [1.0, 0.0],
-                    normal: normal.to_array(),
-                    tangent: [0.0; 4],
-                    bi_tangent: [0.0; 4],
-                };
+            let first_vertex_chunk = Vertex {
+                position: ((normal - bi_tangent - tangent) * cube.size).to_primitive(),
+                tex_coord: [1.0, 0.0],
+                normal: normal_primitive,
+                tangent: [0.0; 4],
+                bi_tangent: [0.0; 4],
+            };
 
-                let second_vertex_chunk = Vertex {
-                    position: face[1].to_array(),
-                    tex_coord: [1.0, 1.0],
-                    normal: normal.to_array(),
-                    tangent: [0.0; 4],
-                    bi_tangent: [0.0; 4],
-                };
+            let second_vertex_chunk = Vertex {
+                position: ((normal - bi_tangent + tangent) * cube.size).to_primitive(),
+                tex_coord: [1.0, 1.0],
+                normal: normal_primitive,
+                tangent: [0.0; 4],
+                bi_tangent: [0.0; 4],
+            };
 
-                let third_vertex_chunk = Vertex {
-                    position: face[2].to_array(),
-                    tex_coord: [0.0, 1.0],
-                    normal: normal.to_array(),
-                    tangent: [0.0; 4],
-                    bi_tangent: [0.0; 4],
-                };
+            let third_vertex_chunk = Vertex {
+                position: ((normal + bi_tangent + tangent) * cube.size).to_primitive(),
+                tex_coord: [0.0, 1.0],
+                normal: normal_primitive,
+                tangent: [0.0; 4],
+                bi_tangent: [0.0; 4],
+            };
 
-                let fourth_vertex_chunk = Vertex {
-                    position: face[3].to_array(),
-                    tex_coord: [0.0, 0.0],
-                    normal: normal.to_array(),
-                    tangent: [0.0; 4],
-                    bi_tangent: [0.0; 4],
-                };
+            let fourth_vertex_chunk = Vertex {
+                position: ((normal + bi_tangent - tangent) * cube.size).to_primitive(),
+                tex_coord: [0.0, 0.0],
+                normal: normal_primitive,
+                tangent: [0.0; 4],
+                bi_tangent: [0.0; 4],
+            };
 
+            {
                 let face_vertices = [
                     first_vertex_chunk,
                     second_vertex_chunk,
@@ -128,39 +129,35 @@ impl From<Cube> for Model {
                     fourth_vertex_chunk,
                 ];
 
-                {
-                    let offset = (index + chunk) * 4;
-                    let (target_left, _) = vertices[offset..].split_at_mut(4);
-                    target_left.copy_from_slice(&face_vertices);
-                }
+                let offset = face_index << 2;
+                let (target_left, _) = vertices[offset..].split_array_mut::<4>();
+                target_left.copy_from_slice(&face_vertices);
             }
         }
 
-        let mesh = Mesh {
-            vertices,
-            material_id: 0,
-            indices: indices.into(),
-        };
-
-        Model { meshes: vec![mesh] }
+        Mesh {
+            vertices: vertices.to_vec(),
+            indices: U32(indices.to_smallvec()),
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::mesh::primitive::cube::Cube;
-    use crate::mesh::Model;
+    use crate::mesh::Mesh;
 
     #[test]
     fn test() {
         let cube = Cube::new(1.0);
-        let cube_model: Model = cube.into();
-        for vertex in &cube_model.meshes[0].vertices {
+        let cube_model: Mesh = cube.into();
+        for vertex in &cube_model.vertices {
             println!(
                 "new Vector3({}f, {}f, {}f),",
-                vertex.normal[0], vertex.normal[1], vertex.normal[2]
+                vertex.position[0], vertex.position[1], vertex.position[2]
             );
         }
-        println!("{:?}", cube_model.meshes[0].indices);
+        println!("{:?}", cube_model.indices);
+        println!("{:?}", cube_model.vertices.len());
     }
 }
