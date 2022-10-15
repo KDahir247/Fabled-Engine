@@ -1,5 +1,7 @@
 # Fabled Engine
 
+## Currently Broken. Re-Working solution with knowledge I've aquired so far from reading and testing.
+
 Working on strengthening my understanding in assembly. It seem like it vital for game engineer.
 I will bounce between Fabled Engine and assembly study and eventually learn cpu design (can't help it I really enjoy the nitty gritty).
 
