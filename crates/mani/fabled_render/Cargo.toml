@@ -37,7 +37,7 @@ shipyard = {version ="0.6.0-alpha.1", features = ["thread_local", "proc", "paral
 
 # Shader
 naga = {version = "0.5.0", features = ["wgsl-in", "wgsl-out", "glsl-in", "glsl-out", "spv-out", "spv-in", "serialize", "deserialize"]}
-ron = "0.7.0"
+ron = "0.8.0"
 
 # Mesh
 # Remove later since fabled_math will have all the mathematical calculation and function.
