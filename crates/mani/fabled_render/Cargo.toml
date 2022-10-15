@@ -19,7 +19,6 @@ basis-universal-sys = "0.2.0"
 fabled_core = {path = "../fabled_core", version = "*"}
 fabled_transform = {path = "../fabled_transform", version = "*"}
 fabled_math = {path ="../fabled_math", version = "*"}
-fabled_binding = {path = "../fabled_binding", version = "*"}
 
 serde = "1.0.126"
 thiserror = "1.0.30"

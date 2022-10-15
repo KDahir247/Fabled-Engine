@@ -76,7 +76,7 @@ impl WavWriter {
 
         let writer_2 = concurrent_writer.clone();
 
-        let error_predicate = move |err| println!("an error has occurred on stream: {}", err);
+        let error_predicate = move |err| println!("an error has occurred on stream: {:?}", err);
 
         let stream = self.device.build_input_stream_raw(
             &self.stream_config,

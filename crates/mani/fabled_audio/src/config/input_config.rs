@@ -93,10 +93,10 @@ impl InputConfig {
     pub fn retrieve_from_devices() -> Vec<InputConfig> {
         let host: cpal::Host = cpal::default_host();
 
-        let input_devices: Result<cpal::InputDevices<cpal::Devices>, cpal::DevicesError> =
+        let _input_devices: Result<cpal::InputDevices<cpal::Devices>, cpal::DevicesError> =
             host.input_devices();
 
-        let input_configs: Vec<InputConfig> = Vec::with_capacity(10);
+        let _input_configs: Vec<InputConfig> = Vec::with_capacity(10);
 
 
         todo!()

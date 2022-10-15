@@ -16,7 +16,10 @@ mod data_test {
 
     #[test]
     fn data_alignment() {
-        let encode_wavform_alignment = std::mem::align_of::<WavWriter>();
-        assert_eq!(encode_wavform_alignment & (encode_wavform_alignment - 1), 0);
+        let encode_waveform_alignment = std::mem::align_of::<WavWriter>();
+        assert_eq!(
+            encode_waveform_alignment & (encode_waveform_alignment - 1),
+            0
+        );
     }
 }

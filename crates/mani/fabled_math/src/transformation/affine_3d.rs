@@ -1,6 +1,7 @@
-use crate::{rotate_x, rotate_y, to_rotation_matrix, Matrix3x3, Vector3};
+use crate::quaternion_math::{rotate_x, rotate_y, rotate_z, to_rotation_matrix};
+use crate::{Matrix3x3, Vector3};
 
-#[derive(Default)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Affine3 {
     pub translation: Vector3,
     pub matrix3: Matrix3x3,
@@ -11,12 +12,11 @@ impl Affine3 {
     #[rustfmt::skip]
     pub fn new(translation: Vector3, euler_radians: Vector3) -> Self {
 
+        let x = rotate_x(euler_radians.x());
+        let y = rotate_y(euler_radians.y());
+        let z = rotate_z(euler_radians.z());
 
-        let x = rotate_x(euler_radians[0]);
-        let y = rotate_y(euler_radians[1]);
-        let z = rotate_y(euler_radians[2]);
-
-        let quaternion = x*y* z;
+        let quaternion = x * y * z;
 
         let rotation_matrix = to_rotation_matrix(quaternion);
 
@@ -26,7 +26,6 @@ impl Affine3 {
         }
     }
 }
-
 
 #[cfg(test)]
 mod affine3d_test {
@@ -43,5 +42,6 @@ mod affine3d_test {
             ),
         );
         println!("{}", affine3d.matrix3);
+        println!("{}", affine3d.translation);
     }
 }

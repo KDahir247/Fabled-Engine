@@ -1,18 +1,18 @@
 #![feature(portable_simd)]
 #![feature(link_llvm_intrinsics)]
 #![feature(simd_ffi)]
+#![feature(const_float_classify)]
 
 extern crate core;
 
-mod arithmetic;
 mod boolean;
 mod easing;
 mod geometric;
 mod linear;
+mod math_trait;
 mod transformation;
 
-use crate::math::{cross, reverse, ror};
-pub use arithmetic::*;
+use crate::math::cross;
 pub use boolean::*;
 pub use easing::*;
 pub use geometric::*;
@@ -20,7 +20,7 @@ pub use linear::*;
 
 pub use transformation::*;
 
-// temp solution.
+
 #[allow(improper_ctypes)]
 extern "C" {
     #[link_name = "llvm.cos.v4f32"]
@@ -42,46 +42,324 @@ extern "C" {
 }
 
 pub mod math {
-
-    use std::simd::StdFloat;
+    use std::simd::{SimdFloat, SimdInt, SimdPartialOrd, StdFloat};
 
     use crate::{
         cos_v4f32, exp2_v4f32, exp_v4f32, log10_v4f32, log2_v4f32, log_v4f32, pow_v4f32, sin_v4f32,
     };
 
-
-    // todo remove std::simd::f32x4 and find a way to accept both vector 2, 3, 4 and
-    //  quaternion.
-
-    #[inline]
-    pub fn sqrt(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
-        vector_simd.sqrt()
+    #[inline(always)]
+    pub fn degrees(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.to_degrees()
     }
 
-    #[inline]
+    #[inline(always)]
+    pub fn radians(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.to_radians()
+    }
+
+    #[inline(always)]
+    pub fn rcp(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.recip()
+    }
+
+    #[inline(always)]
     pub fn dot(simd_vector_1: std::simd::f32x4, simd_vector_2: std::simd::f32x4) -> f32 {
         (simd_vector_1 * simd_vector_2).reduce_sum()
     }
 
     #[inline]
+    pub fn pow(vector_simd: std::simd::f32x4, exponent_simd: std::simd::f32x4) -> std::simd::f32x4 {
+        unsafe { pow_v4f32(vector_simd, exponent_simd) }
+    }
+
+    #[inline(always)]
+    pub fn clamp(
+        simd_vector: std::simd::f32x4,
+        min: std::simd::f32x4,
+        max: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        simd_vector.simd_clamp(min, max)
+    }
+
+    #[inline(always)]
+    pub fn length(simd_vector: std::simd::f32x4) -> f32 {
+        let simd_mul = simd_vector * simd_vector;
+
+        let dot_product = simd_mul.reduce_sum();
+
+        dot_product.sqrt()
+    }
+
+    #[inline(always)]
+    pub fn distance(simd_vector_1: std::simd::f32x4, simd_vector_2: std::simd::f32x4) -> f32 {
+        let direction_vec = simd_vector_2 - simd_vector_1;
+
+        length(direction_vec)
+    }
+
+    #[inline(always)]
+    pub fn normalize(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        let length = length(simd_vector);
+        let length_vector = std::simd::f32x4::from_array([length; 4]);
+
+        simd_vector / length_vector
+    }
+
+    #[inline(always)]
+    pub fn mul_add(
+        simd_vector: std::simd::f32x4,
+        mul_vector: std::simd::f32x4,
+        add_vector: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        simd_vector.mul_add(mul_vector, add_vector)
+    }
+
+    #[inline(always)]
+    pub fn lerp(
+        src: std::simd::f32x4,
+        dst: std::simd::f32x4,
+        t: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        mul_add(t, dst, mul_add(-t, src, src))
+    }
+
+    #[inline(always)]
+    pub fn length_squared(simd_vector: std::simd::f32x4) -> f32 {
+        let dot_product = simd_vector * simd_vector;
+
+        dot_product.reduce_sum()
+    }
+
+    #[inline(always)]
+    pub fn distance_squared(
+        simd_vector_1: std::simd::f32x4,
+        simd_vector_2: std::simd::f32x4,
+    ) -> f32 {
+        let direction_vec = simd_vector_2 - simd_vector_1;
+
+        length_squared(direction_vec)
+    }
+
+    #[inline(always)]
+    pub fn select(
+        true_simd_vec: std::simd::f32x4,
+        false_simd_vec: std::simd::f32x4,
+        mask: std::simd::mask32x4,
+    ) -> std::simd::f32x4 {
+        mask.select(true_simd_vec, false_simd_vec)
+    }
+
+    #[inline(always)]
+    pub fn saturate(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        const ZERO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([0.0; 4]);
+        const ONE_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([1.0; 4]);
+
+        clamp(simd_vector, ZERO_VEC, ONE_VEC)
+    }
+
+    #[inline(always)]
+    pub fn fract(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.fract()
+    }
+
+    #[inline(always)]
+    pub fn round(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.round()
+    }
+
+    #[inline(always)]
+    pub fn trunc(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.trunc()
+    }
+
+    #[inline(always)]
+    pub fn ceil(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.ceil()
+    }
+
+    #[inline(always)]
+    pub fn floor(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.floor()
+    }
+
+    #[inline]
+    pub fn fast_angle(
+        norm_simd_vector: std::simd::f32x4,
+        norm_simd_vector1: std::simd::f32x4,
+    ) -> f32 {
+        let dot_product = dot(norm_simd_vector, norm_simd_vector1);
+
+        dot_product.acos()
+    }
+
+    #[inline]
+    pub fn angle(simd_vector: std::simd::f32x4, simd_vector_1: std::simd::f32x4) -> f32 {
+        let normalized_vec = normalize(simd_vector);
+        let normalized_vec1 = normalize(simd_vector_1);
+
+        let dot_product = dot(normalized_vec, normalized_vec1);
+
+        dot_product.acos()
+    }
+
+    #[inline(always)]
+    pub fn sqrt(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
+        vector_simd.sqrt()
+    }
+
+    #[inline(always)]
     pub fn abs(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
         simd_vector.abs()
     }
 
-    #[inline]
-    pub fn face_forward(
-        normal_vector: std::simd::f32x4,
-        incident_vector: std::simd::f32x4,
-        geo_normal_vector: std::simd::f32x4,
-    ) -> std::simd::f32x4 {
-        select(
-            normal_vector,
-            -normal_vector,
-            std::simd::mask32x4::splat(dot(incident_vector, geo_normal_vector) >= 0.0),
-        )
+
+    #[inline(always)]
+    pub fn rsqrt(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        const ONE_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([1.0; 4]);
+
+        ONE_VEC / simd_vector.sqrt()
     }
 
-    // exp 10
+    #[inline(always)]
+    pub fn step(vec_simd1: std::simd::f32x4, vec_simd2: std::simd::f32x4) -> std::simd::f32x4 {
+        const ZERO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([0.0; 4]);
+        const ONE_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([1.0; 4]);
+
+        let mask = vec_simd1.simd_ge(vec_simd2);
+
+        select(ZERO_VEC, ONE_VEC, mask)
+    }
+
+    #[inline]
+    pub fn cross(
+        simd_vector: std::simd::f32x4,
+        simd_vector1: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        const BIT_SHUFFLE_MASK: [usize; 4] = [1, 2, 0, 3];
+
+        // simd_vector
+        let simd_yzx = std::simd::simd_swizzle!(simd_vector, BIT_SHUFFLE_MASK);
+        let simd1_yzx = std::simd::simd_swizzle!(simd_vector1, BIT_SHUFFLE_MASK);
+
+        let b = simd_vector1 * simd_yzx;
+        let a = simd_vector * simd1_yzx;
+        let res = a - b;
+
+        std::simd::simd_swizzle!(res, BIT_SHUFFLE_MASK)
+    }
+
+    #[inline(always)]
+    pub fn unlerp(
+        simd_vector: std::simd::f32x4,
+        min_vector: std::simd::f32x4,
+        max_vector: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        (simd_vector - min_vector) / (max_vector - min_vector)
+    }
+
+    #[inline(always)]
+    pub fn all(simd_vector: std::simd::f32x4) -> bool {
+        const ZERO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([0.0; 4]);
+
+        simd_vector.simd_gt(ZERO_VEC).all()
+    }
+
+    #[inline(always)]
+    pub fn any(simd_vector: std::simd::f32x4) -> bool {
+        const ZERO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([0.0; 4]);
+
+        simd_vector.simd_gt(ZERO_VEC).any()
+    }
+
+    #[inline(always)]
+    pub fn component_max(simd_vector: std::simd::f32x4) -> f32 {
+        simd_vector.reduce_max()
+    }
+
+    #[inline(always)]
+    pub fn component_min(simd_vector: std::simd::f32x4) -> f32 {
+        simd_vector.reduce_min()
+    }
+
+    #[inline(always)]
+    pub fn component_sum(simd_vector: std::simd::f32x4) -> f32 {
+        simd_vector.reduce_sum()
+    }
+
+    #[inline(always)]
+    pub fn component_product(simd_vector: std::simd::f32x4) -> f32 {
+        simd_vector.reduce_product()
+    }
+
+    #[inline]
+    pub fn sign(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.signum()
+    }
+
+    #[inline(always)]
+    pub fn copysign(
+        simd_vector: std::simd::f32x4,
+        sign_vector: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        simd_vector.copysign(sign_vector)
+    }
+
+    #[inline(always)]
+    pub fn is_positive(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
+        simd_vector.is_sign_positive()
+    }
+
+    #[inline(always)]
+    pub fn is_negative(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
+        simd_vector.is_sign_negative()
+    }
+
+
+    #[inline(always)]
+    pub fn is_finite(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
+        simd_vector.is_finite()
+    }
+
+    #[inline(always)]
+    pub fn is_infinite(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
+        simd_vector.is_infinite()
+    }
+
+    #[inline(always)]
+    pub fn is_nan(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
+        simd_vector.is_nan()
+    }
+
+
+    #[inline]
+    pub fn smooth_step(
+        min_range: std::simd::f32x4,
+        max_range: std::simd::f32x4,
+        simd_val: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        const THREE_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([3.0; 4]);
+        const TWO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([2.0; 4]);
+
+        let un_clamp_time = (simd_val - min_range) / (max_range - min_range);
+
+        let time = saturate(un_clamp_time);
+
+        let time_sqr = time * time;
+        let time_mul_two = time * TWO_VEC;
+
+        time_sqr * (THREE_VEC - time_mul_two)
+    }
+
+    #[inline]
+    pub fn cos(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        unsafe { cos_v4f32(simd_vector) }
+    }
+
+    #[inline]
+    pub fn sin(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
+        unsafe { sin_v4f32(vector_simd) }
+    }
 
     #[inline]
     pub fn exp(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
@@ -93,53 +371,6 @@ pub mod math {
         unsafe { exp2_v4f32(simd_vector) }
     }
 
-    #[inline]
-    pub fn cos(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        unsafe { cos_v4f32(simd_vector) }
-    }
-
-    #[inline]
-    pub fn cosh(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
-        let e_vec = std::simd::f32x4::splat(std::f32::consts::E);
-
-        (pow(e_vec, vector_simd) + pow(e_vec, -vector_simd)) * std::simd::f32x4::splat(0.5)
-    }
-
-    #[inline]
-    pub fn sin(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
-        unsafe { sin_v4f32(vector_simd) }
-    }
-
-    // acos
-
-    // asin
-
-
-    #[inline]
-    pub fn pow(vector_simd: std::simd::f32x4, exponent_simd: std::simd::f32x4) -> std::simd::f32x4 {
-        unsafe { pow_v4f32(vector_simd, exponent_simd) }
-    }
-
-    #[inline]
-    pub fn sinh(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
-        let e_vec = std::simd::f32x4::splat(std::f32::consts::E);
-
-        (pow(e_vec, vector_simd) - pow(e_vec, -vector_simd)) * std::simd::f32x4::splat(0.5)
-    }
-
-    // atan
-
-    // atan2
-
-    #[inline]
-    pub fn tanh(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
-        let e_vec = std::simd::f32x4::splat(std::f32::consts::E);
-
-        let one_vec = std::simd::f32x4::splat(1.0);
-        let two_vector_simd = std::simd::f32x4::splat(2.0) * vector_simd;
-
-        (pow(e_vec, two_vector_simd) - one_vec) / (pow(e_vec, two_vector_simd) + one_vec)
-    }
 
     #[inline]
     pub fn log(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
@@ -156,229 +387,48 @@ pub mod math {
         unsafe { log10_v4f32(simd_vector) }
     }
 
+
     #[inline]
-    pub fn smooth_step(
-        min_range: std::simd::f32x4,
-        max_range: std::simd::f32x4,
-        simd_val: std::simd::f32x4,
+    pub fn face_forward(
+        normal_vector: std::simd::f32x4,
+        incident_vector: std::simd::f32x4,
+        geo_normal_vector: std::simd::f32x4,
     ) -> std::simd::f32x4 {
-        let t = saturate((simd_val - min_range) / (max_range - min_range));
-        t * t * (std::simd::f32x4::splat(3.0) - std::simd::f32x4::splat(2.0) * t)
+        let dot_prod = dot(incident_vector, geo_normal_vector);
+        let mask: bool = dot_prod.is_sign_positive();
+
+        select(
+            normal_vector,
+            -normal_vector,
+            std::simd::mask32x4::splat(mask),
+        )
     }
 
-    #[inline]
-    pub fn step(vec_simd1: std::simd::f32x4, vec_simd2: std::simd::f32x4) -> std::simd::f32x4 {
-        vec_simd1
-            .lanes_ge(vec_simd2)
-            .select(std::simd::f32x4::splat(0.0), std::simd::f32x4::splat(1.0))
-    }
-
-    #[inline]
-    pub fn bitmask(simd_vector: std::simd::f32x4) -> i32 {
-        simd_vector.cast::<i32>().reduce_or()
-    }
-
-    // todo optimize
-    #[inline]
-    pub fn cross(
-        simd_vector: std::simd::f32x4,
-        simd_vector1: std::simd::f32x4,
+    #[inline(always)]
+    pub fn project(
+        project_vector: std::simd::f32x4,
+        target_vector: std::simd::f32x4,
     ) -> std::simd::f32x4 {
-        let a: [f32; 4] = simd_vector.to_array();
-        let b: [f32; 4] = simd_vector1.to_array();
+        let c_dot_bb = dot(project_vector, target_vector);
+        let recip_target_mag_sqr = length_squared(target_vector).recip();
 
-        std::simd::f32x4::from_array([
-            (a[1] * b[2] - a[2] * b[1]),
-            (a[2] * b[0] - a[0] * b[2]),
-            (a[0] * b[1] - a[1] * b[0]),
-            0.0,
-        ])
+        let projection_factor = c_dot_bb * recip_target_mag_sqr;
+
+        let project_factor_vector = std::simd::f32x4::from_array([projection_factor; 4]);
+
+        target_vector * project_factor_vector
     }
-
-    #[inline]
-    pub fn unlerp(
-        simd_vector: std::simd::f32x4,
-        min_vector: std::simd::f32x4,
-        max_vector: std::simd::f32x4,
-    ) -> std::simd::f32x4 {
-        (simd_vector - min_vector) / (max_vector - min_vector)
-    }
-
-
-    #[inline]
-    pub fn rsqrt(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        std::simd::f32x4::splat(1.0) / simd_vector.sqrt()
-    }
-
-    #[inline]
-    pub fn ceil(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.ceil()
-    }
-
-    #[inline]
-    pub fn floor(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.floor()
-    }
-
-    #[inline]
-    pub fn all(simd_vector: std::simd::f32x4) -> bool {
-        simd_vector.lanes_gt(std::simd::f32x4::splat(0.0)).all()
-    }
-
-    #[inline]
-    pub fn any(simd_vector: std::simd::f32x4) -> bool {
-        simd_vector.lanes_gt(std::simd::f32x4::splat(0.0)).any()
-    }
-
-    #[inline]
-    pub fn clamp(
-        simd_vector: std::simd::f32x4,
-        min: std::simd::f32x4,
-        max: std::simd::f32x4,
-    ) -> std::simd::f32x4 {
-        simd_vector.clamp(min, max)
-    }
-
-    #[inline]
-    pub fn component_max(simd_vector: std::simd::f32x4) -> f32 {
-        simd_vector.reduce_max()
-    }
-
-    #[inline]
-    pub fn component_min(simd_vector: std::simd::f32x4) -> f32 {
-        simd_vector.reduce_min()
-    }
-
-    #[inline]
-    pub fn component_sum(simd_vector: std::simd::f32x4) -> f32 {
-        simd_vector.reduce_sum()
-    }
-
-    #[inline]
-    pub fn copysign(
-        simd_vector: std::simd::f32x4,
-        sign_vector: std::simd::f32x4,
-    ) -> std::simd::f32x4 {
-        simd_vector.copysign(sign_vector)
-    }
-
-
-    #[inline]
-    pub fn degrees(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.to_degrees()
-    }
-
-    #[inline]
-    pub fn radians(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.to_radians()
-    }
-
-    #[inline]
-    pub fn length(simd_vector: std::simd::f32x4) -> f32 {
-        let dot_product = simd_vector * simd_vector;
-
-        let sqr_length = dot_product.reduce_sum();
-
-        sqr_length.sqrt()
-    }
-
-    #[inline]
-    pub fn length_squared(simd_vector: std::simd::f32x4) -> f32 {
-        let dot_product = simd_vector * simd_vector;
-
-        dot_product.reduce_sum()
-    }
-
-
-    #[inline]
-    pub fn distance(simd_vector_1: std::simd::f32x4, simd_vector_2: std::simd::f32x4) -> f32 {
-        length(simd_vector_2 - simd_vector_1)
-    }
-
-    #[inline]
-    pub fn distance_squared(
-        simd_vector_1: std::simd::f32x4,
-        simd_vector_2: std::simd::f32x4,
-    ) -> f32 {
-        length_squared(simd_vector_2 - simd_vector_1)
-    }
-
-
-    #[inline]
-    pub fn fmod(
-        simd_vector_1: std::simd::f32x4,
-        simd_vector_2: std::simd::f32x4,
-    ) -> std::simd::f32x4 {
-        simd_vector_1 % simd_vector_2
-    }
-
-    #[inline]
-    pub fn fract<const SIZE: usize>(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.fract()
-    }
-
-    #[inline]
-    pub fn round(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.round()
-    }
-
-    #[inline]
-    pub fn trunc(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.trunc()
-    }
-
-    #[inline]
-    pub fn normalize(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        let mag = length(simd_vector);
-        simd_vector / std::simd::f32x4::splat(mag)
-    }
-
-    #[inline]
-    pub fn mul_add(
-        simd_vector: std::simd::f32x4,
-        mul_vector: std::simd::f32x4,
-        add_vector: std::simd::f32x4,
-    ) -> std::simd::f32x4 {
-        simd_vector.mul_add(mul_vector, add_vector)
-    }
-
-    #[inline]
-    pub fn rcp(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        std::simd::f32x4::splat(1.0) / simd_vector
-    }
-
-    #[inline]
-    pub fn is_finite(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
-        simd_vector.is_finite()
-    }
-
-    #[inline]
-    pub fn is_infinite(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
-        simd_vector.is_infinite()
-    }
-
-    #[inline]
-    pub fn is_nan(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
-        simd_vector.is_nan()
-    }
-
-    #[inline]
-
-    pub fn lerp(
-        src: std::simd::f32x4,
-        dst: std::simd::f32x4,
-        t: std::simd::f32x4,
-    ) -> std::simd::f32x4 {
-        mul_add(t, dst, mul_add(-t, src, src))
-    }
-
 
     #[inline]
     pub fn reflect(
         incident_vector: std::simd::f32x4,
         normal_vector: std::simd::f32x4,
     ) -> std::simd::f32x4 {
-        let intermediate_step = std::simd::f32x4::splat(2.0 * dot(incident_vector, normal_vector));
+        let dot_prod = dot(incident_vector, normal_vector);
+        let dot_prod_mul_2 = 2.0 * dot_prod;
+
+        let intermediate_step: std::simd::f32x4 = std::simd::f32x4::from_array([dot_prod_mul_2; 4]);
+
         incident_vector - intermediate_step * normal_vector
     }
 
@@ -389,32 +439,25 @@ pub mod math {
         eta: f32,
     ) -> std::simd::f32x4 {
         let ni = dot(normal_vector, incident_vector);
-        let k = 1.0 - eta * eta * (1.0 - ni * ni);
 
-        let eta_vec = std::simd::f32x4::splat(eta);
-        let k_sqrt_vec = std::simd::f32x4::splat(k.sqrt());
-        let ni_vec = std::simd::f32x4::splat(ni);
-        let mask = std::simd::mask32x4::splat(k >= 0.0);
+        let ni_sqr = ni * ni;
+        let eta_sqr = eta * eta;
+        let eta_mul_ni = eta * ni;
 
-        mask.select(
-            std::simd::f32x4::splat(0.0),
-            eta_vec * incident_vector - (eta_vec * ni_vec + k_sqrt_vec) * normal_vector,
+        let k = 1.0 - eta_sqr * (1.0 - ni_sqr);
+        let intermediate = eta_mul_ni + k.sqrt();
+
+        let eta_vector = std::simd::f32x4::from_array([eta; 4]);
+        let intermediate_vector = std::simd::f32x4::from_array([intermediate; 4]);
+
+        let mask = std::simd::mask32x4::from_array([k.is_sign_positive(); 4]);
+
+
+        select(
+            (eta_vector * incident_vector) - (intermediate_vector * normal_vector),
+            std::simd::f32x4::from_array([0.0; 4]),
+            mask,
         )
-    }
-
-    #[inline]
-    pub fn project(
-        project_vector: std::simd::f32x4,
-        target_vector: std::simd::f32x4,
-    ) -> std::simd::f32x4 {
-        let c_dot_bb = dot(project_vector, target_vector);
-        let rcp_c_dot_ab = dot(target_vector, target_vector).recip();
-
-        let projection_factor = c_dot_bb * rcp_c_dot_ab;
-
-        let splat_project_factor = std::simd::f32x4::splat(projection_factor);
-
-        target_vector * splat_project_factor
     }
 
     #[inline]
@@ -428,62 +471,42 @@ pub mod math {
     }
 
     #[inline]
-    pub fn saturate(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        clamp(
-            simd_vector,
-            std::simd::f32x4::splat(0.0),
-            std::simd::f32x4::splat(1.0),
-        )
+    pub fn cosh(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
+        const E_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([std::f32::consts::E; 4]);
+        const HALF_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([0.5; 4]);
+
+        let rhs = pow(E_VEC, vector_simd);
+        let lhs = pow(E_VEC, -vector_simd);
+
+        (rhs + lhs) * HALF_VEC
     }
 
     #[inline]
-    pub fn select(
-        simd_vector1: std::simd::f32x4,
-        simd_vector2: std::simd::f32x4,
-        mask: std::simd::mask32x4,
-    ) -> std::simd::f32x4 {
-        mask.select(simd_vector1, simd_vector2)
+    pub fn sinh(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
+        const E_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([std::f32::consts::E; 4]);
+        const HALF_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([0.5; 4]);
+
+        let rhs = pow(E_VEC, vector_simd);
+        let lhs = pow(E_VEC, -vector_simd);
+
+        (rhs - lhs) * HALF_VEC
     }
 
     #[inline]
-    pub fn angle(simd_vector: std::simd::f32x4, simd_vector_1: std::simd::f32x4) -> f32 {
-        // a . b == ||a|| ||b|| cos(theta)
-        let normalized_vec = normalize(simd_vector);
+    pub fn tanh(vector_simd: std::simd::f32x4) -> std::simd::f32x4 {
+        const E_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([std::f32::consts::E; 4]);
+        const ONE_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([1.0; 4]);
+        const TWO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([2.0; 4]);
 
-        let normalized_vec1 = normalize(simd_vector_1);
+        let two_vector_simd = vector_simd * TWO_VEC;
 
-        let dot_product = dot(normalized_vec, normalized_vec1);
+        let intermediate = pow(E_VEC, two_vector_simd);
 
-        dot_product.acos()
+        (intermediate - ONE_VEC) / (intermediate + ONE_VEC)
     }
 
     #[inline]
-    pub fn fast_angle(
-        norm_simd_vector: std::simd::f32x4,
-        norm_simd_vector1: std::simd::f32x4,
-    ) -> f32 {
-        let dot_product = dot(norm_simd_vector, norm_simd_vector1);
-
-        dot_product.acos()
-    }
-
-    #[inline]
-    pub fn sign(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.signum()
-    }
-
-    #[inline]
-    pub fn reverse(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.reverse()
-    }
-
-    #[inline]
-    pub fn ror<const OFFSET: usize>(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.rotate_lanes_right::<OFFSET>()
-    }
-
-    #[inline]
-    pub fn rol<const OFFSET: usize>(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.rotate_lanes_left::<OFFSET>()
+    pub fn bitmask(simd_vector: std::simd::f32x4) -> i32 {
+        simd_vector.cast::<i32>().reduce_or()
     }
 }

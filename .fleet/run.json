@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "cargo",
+            "cargoArgs": ["run"],
+            "name": "Fabled_Engine",
+        },
+
+    ]
+}

@@ -11,4 +11,3 @@ fabled_transform = {path = "../fabled_transform", version = "*"}
 fabled_render = {path = "../fabled_render", version = "*"}
 rayon = {version = "1.5.1"}
 bitflags = {version = "1.2.1"}
-fabled_binding = {path = "../fabled_binding", version = "0.1.0"}

@@ -1,3 +1,2 @@
-# only good for windows-msvc remove this if your on linux or mac if build causes issues
 [build]
 rustflags = ["-C", "link-arg=-fuse-ld=lld"]

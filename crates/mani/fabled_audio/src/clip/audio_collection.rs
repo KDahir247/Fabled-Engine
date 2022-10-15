@@ -55,7 +55,7 @@ impl AmbisonicCollection {
 #[cfg(test)]
 mod audio_collection_test {
     use crate::{
-        AmbisonicCollection, AmbisonicOutput, AudioCollection, FadeFilter, RawAmbisonicClip,
+        AmbisonicOutput, AudioCollection, FadeFilter,
         RawClip, StandardOutput,
     };
 
@@ -83,13 +83,19 @@ mod audio_collection_test {
 
     #[test]
     fn ambisonic_collection() {
-        let ambisonic_collection = AmbisonicCollection::new(true);
+        let ambisonic_collection = AudioCollection::new(true);
 
-        let first_clip = RawAmbisonicClip::new(ambisonic::sources::Noise::new(10000))
-            .take_duration(5, 0, FadeFilter::FADE);
+        let first_clip = RawClip::new(ambisonic::sources::Noise::new(10000)).take_duration(
+            5,
+            0,
+            FadeFilter::FADE,
+        );
 
-        let second_clip = RawAmbisonicClip::new(ambisonic::sources::Noise::new(48000))
-            .take_duration(5, 0, FadeFilter::ABRUPT);
+        let second_clip = RawClip::new(ambisonic::sources::Noise::new(48000)).take_duration(
+            5,
+            0,
+            FadeFilter::ABRUPT,
+        );
 
         ambisonic_collection.append(first_clip);
         ambisonic_collection.append(second_clip);
