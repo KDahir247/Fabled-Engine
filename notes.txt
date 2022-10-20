@@ -42,6 +42,7 @@ Finish Mat4 and Mat3
 cargo miri test
 cargo miri run
 
+// Move test to it own seperate script
 
 Crate that will be used
 

@@ -1,11 +1,14 @@
-use crate::math::{component_sum, mul_add};
+use crate::{Matrix3x3, Quaternion, Vector2, Vector4};
+
 use crate::math_trait::Vec3Swizzles;
+
+use crate::vector_math::{component_sum, mul_add, cross};
 use crate::matrix3x3_math::transpose;
-use crate::{cross, Matrix3x3, Quaternion, Vector2, Vector4};
-use std::fmt::{Display, Formatter};
+
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
+use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vector3 {
@@ -76,16 +79,13 @@ impl Vector3 {
     #[inline]
     pub const fn splat(val: f32) -> Vector3 {
         Vector3 {
-            value: std::simd::f32x4::from_array([val; 4]),
+            value: std::simd::f32x4::from_array([val, val, val, 0.0]),
         }
     }
 
     #[inline]
     pub const fn to_primitive(self) -> [f32; 3] {
-        let simd_rep = self.value.to_array();
-        let z = simd_rep[2];
-
-        [simd_rep[0], simd_rep[1], z]
+        [self.x(), self.y(), self.z()]
     }
 
     #[inline]
@@ -143,10 +143,10 @@ impl Mul<Quaternion> for Vector3 {
 impl MulAssign<Quaternion> for Vector3 {
     #[inline]
     fn mul_assign(&mut self, rhs: Quaternion) {
-        let quaternion_scalar = rhs.value[3];
+        let quaternion_real = rhs.to_real();
 
         const TWO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([2.0; 4]);
-        let quaternion_scalar_vector = std::simd::f32x4::from_array([quaternion_scalar; 4]);
+        let quaternion_scalar_vector = std::simd::f32x4::from_array([quaternion_real; 4]);
 
         let t = TWO_VEC * cross(rhs.value, self.value);
         let intermediate = cross(rhs.value, t);
@@ -405,29 +405,17 @@ impl Vec3Swizzles for Vector3 {
 
     #[inline]
     fn xy(self) -> Self::Vec2 {
-        let arr_vector3 = self.value.to_array();
-        let y = arr_vector3[1];
-        let x = arr_vector3[0];
-
-        Vector2::set(x, y)
+        Vector2::set(self.x(),self.y())
     }
 
     #[inline]
     fn xz(self) -> Self::Vec2 {
-        let arr_vector3 = self.value.to_array();
-        let z = arr_vector3[2];
-        let x = arr_vector3[0];
-
-        Vector2::set(x, z)
+        Vector2::set(self.x(), self.z())
     }
 
     #[inline]
     fn yx(self) -> Self::Vec2 {
-        let arr_vector3 = self.value.to_array();
-        let y = arr_vector3[1];
-        let x = arr_vector3[0];
-
-        Vector2::set(y, x)
+        Vector2::set(self.y(), self.x())
     }
 
     #[inline]
@@ -437,29 +425,17 @@ impl Vec3Swizzles for Vector3 {
 
     #[inline]
     fn yz(self) -> Self::Vec2 {
-        let arr_vector3 = self.value.to_array();
-        let z = arr_vector3[2];
-        let y = arr_vector3[1];
-
-        Vector2::set(y, z)
+        Vector2::set(self.y(), self.z())
     }
 
     #[inline]
     fn zx(self) -> Self::Vec2 {
-        let arr_vector3 = self.value.to_array();
-        let z = arr_vector3[2];
-        let x = arr_vector3[0];
-
-        Vector2::set(z, x)
+        Vector2::set(self.z(), self.x())
     }
 
     #[inline]
     fn zy(self) -> Self::Vec2 {
-        let arr_vector3 = self.value.to_array();
-        let z = arr_vector3[2];
-        let y = arr_vector3[1];
-
-        Vector2::set(z, y)
+        Vector2::set(self.z(), self.y())
     }
 
     #[inline]
@@ -469,7 +445,9 @@ impl Vec3Swizzles for Vector3 {
 
     #[inline]
     fn xxx(self) -> Self {
-        Vector3::splat(self.x())
+        let xxx = std::simd::simd_swizzle!(self.value, [0,0,0,0]);
+
+        Vector3{ value: xxx }
     }
 
     #[inline]

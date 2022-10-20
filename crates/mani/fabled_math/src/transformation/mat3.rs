@@ -1,8 +1,10 @@
-use std::fmt::{Display, Formatter};
-use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+use crate::Vector3;
 
 use crate::matrix3x3_math::transpose;
-use crate::Vector3;
+
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+
+use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Matrix3x3 {
@@ -239,8 +241,11 @@ impl MulAssign for Matrix3x3 {
 }
 
 pub mod matrix3x3_math {
+    use crate::{Matrix3x3, Vector2, Vector3, EulerOrder};
+
+    use crate::vector_math::{dot, cross};
+
     use crate::math_trait::Vec3Swizzles;
-    use crate::{Matrix3x3, Vector2, Vector3};
 
     #[inline]
     pub fn transpose(matrix_3x3: Matrix3x3) -> Matrix3x3 {
@@ -377,19 +382,36 @@ pub mod matrix3x3_math {
         )
     }
 
-    pub fn determinant(_matrix: Matrix3x3) -> f32 {
-        todo!()
+    pub fn from_euler(euler_radians : Vector3, euler_order : EulerOrder) -> Matrix3x3{
+        let quaternion = crate::quaternion_math::from_euler(euler_radians, euler_order);
+
+        let rotation_matrix = crate::quaternion_math::to_rotation_matrix(quaternion);
+
+        rotation_matrix
     }
 
-    pub fn inverse(_matrix: Matrix3x3) -> Matrix3x3 {
-        todo!()
+    pub fn determinant(matrix: Matrix3x3) -> f32 {
+        dot(matrix.column_z.value, cross(matrix.column_x.value, matrix.column_y.value))
+    }
+
+    pub fn inverse(matrix: Matrix3x3) -> Matrix3x3 {
+        let x = Vector3 { value: cross(matrix.column_y.value, matrix.column_z.value) };
+        let y = Vector3 { value: cross(matrix.column_z.value, matrix.column_x.value) };
+        let z = Vector3 { value: cross(matrix.column_x.value, matrix.column_y.value) };
+
+        let inverse_determinant = determinant(matrix).recip();
+
+        let cofactor_matrix = Matrix3x3::set_from_columns(x, y, z);
+        let adjugate_matrix = transpose(cofactor_matrix);
+
+        adjugate_matrix * inverse_determinant
     }
 }
 
 
 #[cfg(test)]
 mod matrix_3x3_test {
-    use crate::matrix3x3_math::{from_angle_axis, rotate_x, rotate_y, rotate_z, transpose};
+    use crate::matrix3x3_math::{from_angle_axis,  rotate_y, transpose};
     use crate::{Matrix3x3, Vector3};
 
     #[test]

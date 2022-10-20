@@ -27,10 +27,6 @@
 #[derive(Copy, Clone, Debug)]
 pub struct ChromaticDesignation(pub [f32; 3]);
 
-impl shipyard::Component for ChromaticDesignation {
-    type Tracking = shipyard::track::Modification;
-}
-
 impl Default for ChromaticDesignation {
     fn default() -> Self {
         Self([0.31352, 0.32979, 0.35669])
@@ -42,10 +38,6 @@ impl Default for ChromaticDesignation {
 pub struct LightAppearance {
     pub color: [f32; 3],
     pub chromaticity_coord: [f32; 3],
-}
-
-impl shipyard::Component for LightAppearance {
-    type Tracking = shipyard::track::All;
 }
 
 impl Default for LightAppearance {

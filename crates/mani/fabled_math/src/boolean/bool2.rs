@@ -1,3 +1,4 @@
+// We will use flag a bytes
 pub struct Bool2 {
-    pub value: std::simd::Mask<i32, 4>,
+    value : [bool; 2]
 }

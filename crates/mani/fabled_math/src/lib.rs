@@ -2,6 +2,7 @@
 #![feature(link_llvm_intrinsics)]
 #![feature(simd_ffi)]
 #![feature(const_float_classify)]
+#![feature(core_intrinsics)]
 
 extern crate core;
 
@@ -12,7 +13,6 @@ mod linear;
 mod math_trait;
 mod transformation;
 
-use crate::math::cross;
 pub use boolean::*;
 pub use easing::*;
 pub use geometric::*;
@@ -41,7 +41,7 @@ extern "C" {
     fn log10_v4f32(x: std::simd::f32x4) -> std::simd::f32x4;
 }
 
-pub mod math {
+pub mod vector_math {
     use std::simd::{SimdFloat, SimdInt, SimdPartialOrd, StdFloat};
 
     use crate::{
@@ -113,6 +113,12 @@ pub mod math {
         add_vector: std::simd::f32x4,
     ) -> std::simd::f32x4 {
         simd_vector.mul_add(mul_vector, add_vector)
+    }
+
+    // todo add slerp
+    #[inline(always)]
+    pub fn slerp(src : std::simd::f32x4, dst : std::simd::f32x4 , t : f32) -> std::simd::f32x4{
+        todo!()
     }
 
     #[inline(always)]
@@ -352,6 +358,11 @@ pub mod math {
     }
 
     #[inline]
+    pub fn sin_cos(simd_vector: std::simd::f32x4) -> (std::simd::f32x4, std::simd::f32x4){
+        (sin(simd_vector), cos(simd_vector))
+    }
+
+    #[inline]
     pub fn cos(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
         unsafe { cos_v4f32(simd_vector) }
     }
@@ -508,5 +519,10 @@ pub mod math {
     #[inline]
     pub fn bitmask(simd_vector: std::simd::f32x4) -> i32 {
         simd_vector.cast::<i32>().reduce_or()
+    }
+
+    #[inline]
+    pub fn ldexp(mul_vector : std::simd::f32x4, power_vector : std::simd::f32x4) -> std::simd::f32x4{
+        mul_vector * exp2(power_vector)
     }
 }

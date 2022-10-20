@@ -1,6 +1,12 @@
+use crate::{Vector3, Vector4};
+
 use crate::math_trait::QuaternionSwizzles;
+
+use crate::vector_math::{cross, dot};
+
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, AddAssign,  Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Quaternion {
@@ -25,7 +31,6 @@ impl Quaternion {
         }
     }
 
-
     #[inline]
     pub const fn splat(val: f32) -> Quaternion {
         Quaternion {
@@ -34,19 +39,37 @@ impl Quaternion {
     }
 
     #[inline]
-    pub const fn from_array(val: [f32; 4]) -> Quaternion {
+    pub const fn from_primitive(val: [f32; 4]) -> Quaternion {
         Quaternion {
             value: std::simd::f32x4::from_array(val),
         }
     }
 
     #[inline]
-    pub fn additive_form(real_quaternion: Quaternion, pure_quaternion: Quaternion) -> Quaternion {
+    pub const fn to_primitive(self) -> [f32; 4] {
+        self.value.to_array()
+    }
+
+    #[inline]
+    pub const fn to_pure(self) -> Vector3 {
+        Vector3::set(self.i(), self.j(), self.k())
+    }
+
+    #[inline]
+    pub const fn to_real(self) -> f32 {
+        self.w()
+    }
+
+    #[inline]
+    pub fn from_additive_form(real: f32, pure: Vector3) -> Quaternion {
         use std::simd::Which;
+
+        let real: std::simd::f32x4 = std::simd::f32x4::from_array([0.0, 0.0, 0.0, real]);
+
         Quaternion {
             value: std::simd::simd_swizzle!(
-                real_quaternion.value,
-                pure_quaternion.value,
+                real,
+                pure.value,
                 [
                     Which::Second(0),
                     Which::Second(1),
@@ -58,8 +81,10 @@ impl Quaternion {
     }
 
     #[inline]
-    pub const fn to_primitive(self) -> [f32; 4] {
-        self.value.to_array()
+    pub fn scale_quaternion(self, scale_vector4: Vector4) -> Quaternion {
+        Quaternion {
+            value: self.value * scale_vector4.value,
+        }
     }
 
     #[inline]
@@ -92,10 +117,9 @@ impl Quaternion {
 }
 
 impl Display for Quaternion {
-
-    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
-            _f,
+            f,
             "Quaternion (i : {}, j : {}, k : {}, w : {})",
             self.i(),
             self.j(),
@@ -105,6 +129,72 @@ impl Display for Quaternion {
     }
 }
 
+// Component-Wise
+impl Add<f32> for Quaternion {
+    type Output = Quaternion;
+
+    #[inline]
+    fn add(self, rhs: f32) -> Self::Output {
+        let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
+
+        Quaternion {
+            value: self.value + splat_f32x4,
+        }
+    }
+}
+
+impl AddAssign<f32> for Quaternion {
+    #[inline]
+    fn add_assign(&mut self, rhs: f32) {
+        let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
+
+        self.value += splat_f32x4;
+    }
+}
+
+impl Sub<f32> for Quaternion {
+    type Output = Quaternion;
+
+    #[inline]
+    fn sub(self, rhs: f32) -> Self::Output {
+        let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
+
+        Quaternion {
+            value: self.value - splat_f32x4,
+        }
+    }
+}
+
+impl SubAssign<f32> for Quaternion {
+    #[inline]
+    fn sub_assign(&mut self, rhs: f32) {
+        let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
+
+        self.value -= splat_f32x4;
+    }
+}
+
+impl Mul<f32> for Quaternion {
+    type Output = Quaternion;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
+
+        Quaternion {
+            value: self.value * splat_f32x4,
+        }
+    }
+}
+
+impl MulAssign<f32> for Quaternion {
+    fn mul_assign(&mut self, rhs: f32) {
+        let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
+
+        self.value *= splat_f32x4;
+    }
+}
+
+// Quaternion-Wise
 impl Add for Quaternion {
     type Output = Quaternion;
 
@@ -117,7 +207,6 @@ impl Add for Quaternion {
 }
 
 impl AddAssign for Quaternion {
-
     #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.value += rhs.value
@@ -136,7 +225,6 @@ impl Sub for Quaternion {
 }
 
 impl SubAssign for Quaternion {
-
     #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.value -= rhs.value;
@@ -149,22 +237,24 @@ impl Mul for Quaternion {
 
     #[inline]
     fn mul(self, rhs: Self) -> Self::Output {
-        let [lhs_i, lhs_j, lhs_k, lhs_w] = self.value.to_array();
-        let [rhs_i, rhs_j, rhs_k, rhs_w] = rhs.value.to_array();
+        let lhs_pure_vector: Vector3 = self.to_pure();
+        let rhs_pure_vector: Vector3 = rhs.to_pure();
 
-        let w = (lhs_w * rhs_w) - (lhs_i * rhs_i) - (lhs_j * rhs_j) - (lhs_k * rhs_k);
-        let i = (lhs_w * rhs_i) + (lhs_i * rhs_w) + (lhs_j * rhs_k) - (lhs_k * rhs_j);
-        let j = (lhs_w * rhs_j) + (lhs_j * rhs_w) + (lhs_k * rhs_i) - (lhs_i * rhs_k);
-        let k = (lhs_w * rhs_k) + (lhs_k * rhs_w) + (lhs_i * rhs_j) - (lhs_j * rhs_i);
+        let lhs_real: f32 = self.to_real();
+        let rhs_real: f32 = rhs.to_real();
 
-        Quaternion {
-            value: std::simd::f32x4::from_array([i, j, k, w]),
-        }
+        Quaternion::from_additive_form(
+            (lhs_real * rhs_real) - (dot(lhs_pure_vector.value, rhs_pure_vector.value)),
+            (rhs_pure_vector * lhs_real)
+                + (lhs_pure_vector * rhs_real)
+                + Vector3 {
+                    value: cross(lhs_pure_vector.value, rhs_pure_vector.value),
+                },
+        )
     }
 }
 
 impl MulAssign for Quaternion {
-
     #[inline]
     fn mul_assign(&mut self, rhs: Self) {
         *self = *self * rhs;
@@ -172,121 +262,143 @@ impl MulAssign for Quaternion {
 }
 
 pub mod quaternion_math {
-    use crate::math::{
-        component_sum, cos, dot, length, length_squared, lerp, mul_add, normalize, rcp, select,
-        sin, sqrt,
-    };
     use crate::math_trait::QuaternionSwizzles;
-    use crate::{Matrix3x3, Quaternion, Vector3, Vector4};
+    use crate::vector_math::{
+        component_sum, cos, dot, length, length_squared, lerp, normalize, rcp, select, sin,
+    };
+    use crate::{EulerOrder, Matrix3x3, Matrix4x4, Quaternion, Vector3, Vector4};
     use std::ops::Neg;
-    use std::simd::SimdPartialOrd;
 
     #[inline]
     pub fn rotate_x(angle_radians: f32) -> Quaternion {
-        const W_VECTOR4: Vector4 = Vector4::set(0.0, 0.0, 0.0, 1.0);
-        const X_VECTOR4: Vector4 = Vector4::set(1.0, 0.0, 0.0, 0.0);
+        let half_angle: f32 = angle_radians * 0.5f32;
 
-        let half_angle: Vector4 = Vector4::splat(angle_radians * 0.5f32);
-
-        let quaternion_w = cos(half_angle.value) * W_VECTOR4.value;
-        let quaternion_i = sin(half_angle.value) * X_VECTOR4.value;
-
-        Quaternion {
-            value: quaternion_i + quaternion_w,
-        }
+        Quaternion::from_primitive([half_angle.sin(), 0.0, 0.0, half_angle.cos()])
     }
 
     #[inline]
     pub fn rotate_y(angle_radians: f32) -> Quaternion {
-        const W_VECTOR4: Vector4 = Vector4::set(0.0, 0.0, 0.0, 1.0);
-        const Y_VECTOR4: Vector4 = Vector4::set(0.0, 1.0, 0.0, 0.0);
+        let half_angle: f32 = angle_radians * 0.5f32;
 
-        let half_angle: Vector4 = Vector4::splat(angle_radians * 0.5f32);
-
-        let quaternion_w = cos(half_angle.value) * W_VECTOR4.value;
-        let quaternion_j = sin(half_angle.value) * Y_VECTOR4.value;
-
-        Quaternion {
-            value: quaternion_j + quaternion_w,
-        }
+        Quaternion::from_primitive([0.0, half_angle.sin(), 0.0, half_angle.cos()])
     }
 
     #[inline]
     pub fn rotate_z(angle_radians: f32) -> Quaternion {
-        const W_VECTOR4: Vector4 = Vector4::set(0.0, 0.0, 0.0, 1.0);
-        const Z_VECTOR4: Vector4 = Vector4::set(0.0, 0.0, 1.0, 0.0);
-        let half_angle: Vector4 = Vector4::splat(angle_radians * 0.5f32);
+        let half_angle: f32 = angle_radians * 0.5f32;
 
-        let quaternion_w = cos(half_angle.value) * W_VECTOR4.value;
-        let quaternion_k = sin(half_angle.value) * Z_VECTOR4.value;
+        Quaternion::from_primitive([0.0, 0.0, half_angle.sin(), half_angle.cos()])
+    }
 
-        Quaternion {
-            value: quaternion_k + quaternion_w,
-        }
+    #[inline]
+    pub fn to_angle_axis_mag(quaternion: Quaternion) -> Vector3 {
+        let axis_rot_angle: Vector4 = to_angle_axis(quaternion);
+
+        axis_rot_angle.trunc_vec3() * axis_rot_angle.w()
     }
 
     #[inline]
     pub fn from_angle_axis_mag(axis_mag: Vector3) -> Quaternion {
-        let angle = length(axis_mag.value);
+        let angle: f32 = length(axis_mag.value);
 
-        let rcp_angle = rcp(Vector4::splat(angle).value);
+        let rcp_angle: f32 = angle.recip();
 
-        let axis = axis_mag.value * rcp_angle;
+        let axis: Vector3 = axis_mag * rcp_angle;
 
-        from_angle_axis(Vector3 { value: axis }, angle)
+        from_angle_axis(axis, angle)
     }
 
 
     #[inline]
     pub fn from_angle_axis(normalized_axis: Vector3, angle_radians: f32) -> Quaternion {
-        let half_angle: Vector4 = Vector4::splat(angle_radians * 0.5f32);
-        let quaternion_imaginary = sin(half_angle.value) * normalized_axis.value;
+        let half_angle: f32 = angle_radians * 0.5f32;
 
-        let quaternion_real = cos(half_angle.value) * Vector4::set(0.0, 0.0, 0.0, 1.0).value;
+        let quaternion_pure: Vector3 = normalized_axis * half_angle.sin();
 
-        Quaternion {
-            value: quaternion_imaginary + quaternion_real,
-        }
+        let quaternion_real: f32 = half_angle.cos();
+
+        Quaternion::from_additive_form(quaternion_real, quaternion_pure)
     }
 
     #[inline]
-    pub fn to_angle_axis(quaternion: Quaternion) -> (Vector3, f32) {
-        let real: f32 = quaternion.value[3];
+    pub fn to_angle_axis(quaternion: Quaternion) -> Vector4 {
+        let quaternion_real: f32 = quaternion.to_real();
 
-        let angle = 2.0 * real.acos();
+        let angle: f32 = 2.0 * quaternion_real.acos();
 
-        let scale = Vector4::splat(1.0 - real * real);
+        let scale: f32 = 1.0 - quaternion_real * quaternion_real;
 
-        let mask = scale.value.simd_lt(Vector4::splat(f32::EPSILON).value);
+        let mut axis: Vector3 = quaternion.to_pure() * scale.sqrt().recip();
 
-        let axis = select(
-            Vector3::set(1.0, 0.0, 0.0).value,
-            quaternion.value * rcp(sqrt(scale.value)),
-            mask,
+        if std::intrinsics::unlikely(scale < f32::EPSILON) {
+            axis = Vector3::RIGHT;
+        }
+
+        Vector4::set(axis.x(), axis.y(), axis.z(), angle)
+    }
+
+    #[inline]
+    pub fn from_euler(euler_radians: Vector3, euler_order: EulerOrder) -> Quaternion {
+        let half_euler_rad: Vector3 = euler_radians * 0.5f32;
+
+        let cos_half_euler_rad: Vector3 = Vector3 {
+            value: cos(half_euler_rad.value),
+        };
+        let sin_half_euler_rad: Vector3 = Vector3 {
+            value: sin(half_euler_rad.value),
+        };
+
+        let rhs_quaternion_equation: Quaternion = Quaternion::set(
+            sin_half_euler_rad.x() * cos_half_euler_rad.y() * cos_half_euler_rad.z(),
+            cos_half_euler_rad.x() * sin_half_euler_rad.y() * cos_half_euler_rad.z(),
+            cos_half_euler_rad.x() * cos_half_euler_rad.y() * sin_half_euler_rad.z(),
+            cos_half_euler_rad.x() * cos_half_euler_rad.y() * cos_half_euler_rad.z(),
         );
 
-        (Vector3 { value: axis } * Vector3::ONE, angle)
+        let lhs_quaternion_equation: Quaternion = Quaternion::set(
+            cos_half_euler_rad.x() * sin_half_euler_rad.y() * sin_half_euler_rad.z(),
+            sin_half_euler_rad.x() * cos_half_euler_rad.y() * sin_half_euler_rad.z(),
+            sin_half_euler_rad.x() * sin_half_euler_rad.y() * cos_half_euler_rad.z(),
+            sin_half_euler_rad.x() * sin_half_euler_rad.y() * sin_half_euler_rad.z(),
+        );
+
+        let corrected_sign_lhs_quat_equation: Quaternion =
+            lhs_quaternion_equation.scale_quaternion(euler_order.0);
+
+        rhs_quaternion_equation + corrected_sign_lhs_quat_equation
+    }
+
+    pub fn from_transformation_matrix(transformation_matrix: Matrix4x4) -> Quaternion {
+        let column_x_trunc: Vector3 = transformation_matrix.column_x.trunc_vec3();
+        let column_y_trunc: Vector3 = transformation_matrix.column_y.trunc_vec3();
+        let column_z_trunc: Vector3 = transformation_matrix.column_z.trunc_vec3();
+
+        let rotation_matrix: Matrix3x3 = Matrix3x3::set_from_columns(
+            column_x_trunc * length(column_x_trunc.value).recip(),
+            column_y_trunc * length(column_y_trunc.value).recip(),
+            column_z_trunc * length(column_z_trunc.value).recip(),
+        );
+
+        from_rotation_matrix(rotation_matrix)
     }
 
     pub fn from_rotation_matrix(rotation_matrix: Matrix3x3) -> Quaternion {
-        const HALF_VEC4: Vector4 = Vector4::from_array([0.5; 4]);
+        let mut quaternion_array: std::simd::f32x4 = std::simd::f32x4::from_array([0.0; 4]);
 
-        let mut quaternion_array = std::simd::f32x4::from_array([0.0; 4]);
+        let mut _s0: f32 = 0.0;
+        let mut _s1: f32 = 0.0;
+        let mut _s2: f32 = 0.0;
 
-        let mut _s0 = 0.0;
-        let mut _s1 = 0.0;
-        let mut _s2 = 0.0;
+        let mut _k0: usize = 0;
+        let mut _k1: usize = 0;
+        let mut _k2: usize = 0;
+        let mut _k3: usize = 0;
 
-        let mut _k0 = 0;
-        let mut _k1 = 0;
-        let mut _k2 = 0;
-        let mut _k3 = 0;
+        let diagonal_col_x: f32 = rotation_matrix.column_x.x();
+        let diagonal_col_y: f32 = rotation_matrix.column_y.y();
+        let diagonal_col_z: f32 = rotation_matrix.column_z.z();
 
-        let diagonal_col_x = rotation_matrix.column_x.x();
-        let diagonal_col_y = rotation_matrix.column_y.y();
-        let diagonal_col_z = rotation_matrix.column_z.z();
-
-        let sum_diagonal = component_sum(std::simd::f32x4::from_array([
+        let sum_diagonal: f32 = component_sum(std::simd::f32x4::from_array([
             diagonal_col_x,
             diagonal_col_y,
             diagonal_col_z,
@@ -331,44 +443,42 @@ pub mod quaternion_math {
             _s2 = 1.0;
         }
 
-        let t = (_s0 * diagonal_col_x) + (_s1 * diagonal_col_y) + (_s2 * diagonal_col_z) + 1.0;
+        let t: f32 = (_s0 * diagonal_col_x) + (_s1 * diagonal_col_y) + (_s2 * diagonal_col_z) + 1.0;
 
-        let s2_yx = _s2 * rotation_matrix.column_y.x();
-        let s1_xz = _s1 * rotation_matrix.column_x.z();
-        let s0_zy = _s0 * rotation_matrix.column_z.y();
+        let s2_yx: f32 = _s2 * rotation_matrix.column_y.x();
+        let s1_xz: f32 = _s1 * rotation_matrix.column_x.z();
+        let s0_zy: f32 = _s0 * rotation_matrix.column_z.y();
 
         quaternion_array[_k1] = rotation_matrix.column_x.y() - s2_yx;
         quaternion_array[_k2] = rotation_matrix.column_z.x() - s1_xz;
         quaternion_array[_k3] = rotation_matrix.column_y.z() - s0_zy;
         quaternion_array[_k0] = t;
 
-        let s = Vector4 {
-            value: rcp(sqrt(std::simd::f32x4::splat(t))),
-        } * HALF_VEC4;
+        let scalar: f32 = t.sqrt().recip() * 0.5f32;
 
         Quaternion {
-            value: quaternion_array * s.value,
-        }
+            value: quaternion_array,
+        } * scalar
     }
 
     #[rustfmt::skip]
     pub fn to_rotation_matrix(quaternion: Quaternion) -> Matrix3x3 {
         let quaternion2 = quaternion + quaternion;
-        
-        let a = quaternion.jiij().value * quaternion2.jjkk().value;
 
-        let b = quaternion.kwww().value * quaternion2.kkji().value;
+        let a : std::simd::f32x4 = quaternion.jiij().value * quaternion2.jjkk().value;
 
-        let ii2 = quaternion.i() * quaternion2.i();
+        let b : std::simd::f32x4 = quaternion.kwww().value * quaternion2.kkji().value;
+
+        let ii2 : f32 = quaternion.i() * quaternion2.i();
 
         let interleave = a.interleave(b);
 
-        let first = interleave.0.to_array();
-        let second = interleave.1.to_array();
+        let first : [f32;4] = interleave.0.to_array();
+        let second : [f32;4] = interleave.1.to_array();
 
-        let col_0 = Vector3::set(-first[1] - first[0] + 1.0,first[3] + first[2],  second[0] - second[1]);
-        let col_1 = Vector3::set( first[2] - first[3], -ii2 - first[1] + 1.0, second[3] + second[2]);
-        let col_2 = Vector3::set(second[1] + second[0],   second[2] - second[3], -ii2 - first[0] + 1.0);
+        let col_0 : Vector3 = Vector3::set(-first[1] - first[0] + 1.0,first[3] + first[2],  second[0] - second[1]);
+        let col_1 : Vector3 = Vector3::set( first[2] - first[3], -ii2 - first[1] + 1.0, second[3] + second[2]);
+        let col_2 : Vector3 = Vector3::set(second[1] + second[0],   second[2] - second[3], -ii2 - first[0] + 1.0);
 
         Matrix3x3::set_from_columns(col_0, col_1, col_2)
     }
@@ -410,7 +520,7 @@ pub mod quaternion_math {
         target_quaternion: Quaternion,
         delta: f32,
     ) -> Quaternion {
-        let target_quaternion = select(
+        let target_quaternion: std::simd::f32x4 = select(
             target_quaternion.value,
             -target_quaternion.value,
             std::simd::mask32x4::splat(
@@ -418,7 +528,7 @@ pub mod quaternion_math {
             ),
         );
 
-        let linear_interpolated_quaternion = lerp(
+        let linear_interpolated_quaternion: std::simd::f32x4 = lerp(
             start_quaternion.value,
             target_quaternion,
             Vector4::splat(delta).value,
@@ -435,81 +545,60 @@ pub mod quaternion_math {
         target_quaternion: Quaternion,
         delta: f32,
     ) -> Quaternion {
-        let normalized_dot = dot(start_quaternion.value, target_quaternion.value);
+        let normalized_dot: f32 = dot(start_quaternion.value, target_quaternion.value);
 
-        let angle = normalized_dot.acos();
+        let angle: f32 = normalized_dot.acos();
 
-        let rcp_sin_angle = angle.sin().recip();
+        let rcp_sin_angle: f32 = angle.sin().recip();
 
-        let delta_difference = 1.0 - delta;
+        let delta_difference: f32 = 1.0 - delta;
 
-        let delta_mul_angle = delta * angle;
-        let delta_diff_mul_angle = delta_difference * angle;
+        let delta_mul_angle: f32 = delta * angle;
+        let delta_diff_mul_angle: f32 = delta_difference * angle;
 
-        let weight_start: Vector4 = Vector4::splat(delta_diff_mul_angle.sin() * rcp_sin_angle);
-        let weight_target: Vector4 = Vector4::splat(delta_mul_angle.sin() * rcp_sin_angle);
+        let weight_start: f32 = delta_diff_mul_angle.sin() * rcp_sin_angle;
+        let weight_target: f32 = delta_mul_angle.sin() * rcp_sin_angle;
 
-        let result_slerp = mul_add(
-            start_quaternion.value,
-            weight_start.value,
-            target_quaternion.value * weight_target.value,
-        );
-
-        Quaternion {
-            value: result_slerp,
-        }
+        (start_quaternion * weight_start) + (target_quaternion * weight_target)
     }
 
-    #[inline]
-    pub fn real_quaternion(quaternion: Quaternion) -> Quaternion {
-        Quaternion {
-            value: quaternion.value * Vector4::set(0.0, 0.0, 0.0, 1.0).value,
-        }
-    }
+    pub fn quaternion_log(quaternion: Quaternion) -> Quaternion {
+        let quaternion_real: f32 = quaternion.to_real();
 
-    #[inline]
-    pub fn pure_quaternion(quaternion: Quaternion) -> Quaternion {
-        Quaternion {
-            value: quaternion.value * Vector3::ONE.value,
-        }
-    }
+        let quaternion_pure: Vector3 = quaternion.to_pure();
 
-    pub fn quaternion_log(_quaternion: Quaternion) -> Quaternion {
-        todo!()
-    }
+        let quaternion_length: f32 = length(quaternion.value);
 
+        let real_norm: f32 = (quaternion_real * quaternion_length.recip()).clamp(-1.0, 1.0);
+        let arc_cos_real_norm: f32 = real_norm.acos();
+
+        let pure_quaternion: Vector3 =
+            quaternion_pure * length(quaternion_pure.value).recip() * arc_cos_real_norm;
+        let real_quaternion: f32 = 0.5f32 * quaternion_length.log2();
+
+        Quaternion::from_additive_form(real_quaternion, pure_quaternion)
+    }
 
     pub fn quaternion_exp(quaternion: Quaternion) -> Quaternion {
-        let scalar: f32 = quaternion.value[3];
-        let vector: Vector3 = Vector3 {
-            value: quaternion.value * Vector3::ONE.value,
-        };
+        let quaternion_real: f32 = quaternion.to_real();
+        let quaternion_pure: Vector3 = quaternion.to_pure();
 
-        let quaternion_length: f32 = length(vector.value);
+        let quaternion_pure_length: f32 = length(quaternion_pure.value);
 
-        let (sin_len, cos_len) = quaternion_length.sin_cos();
+        let (sin_pure_len, cos_pure_len) = quaternion_pure_length.sin_cos();
 
-        let real_quaternion = vector * quaternion_length.recip() * sin_len;
+        let pure_exp_quaternion: Vector3 =
+            quaternion_pure * quaternion_pure_length.recip() * sin_pure_len;
 
-        let pure_quaternion = Vector4::set(0.0, 0.0, 0.0, cos_len);
+        let real_exp_quaternion: f32 = cos_pure_len;
 
-        let result = Vector4 {
-            value: real_quaternion.value + pure_quaternion.value,
-        } * scalar.exp();
-
-        Quaternion {
-            value: result.value,
-        }
-    }
-
-    pub fn quaternion_pow(_quaternion: Quaternion, _factor: f32) -> Quaternion {
-        todo!()
+        Quaternion::from_additive_form(real_exp_quaternion, pure_exp_quaternion)
+            * quaternion_real.exp()
     }
 }
 
 
 impl QuaternionSwizzles for Quaternion {
-
     #[inline]
     fn iiii(self) -> Self {
         Quaternion::splat(self.i())
@@ -1411,9 +1500,9 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kiik(self) -> Self {
-        let kiik = std::simd::simd_swizzle!(self.value, [2,0,0,2]);
+        let kiik = std::simd::simd_swizzle!(self.value, [2, 0, 0, 2]);
 
-        Quaternion{ value: kiik }
+        Quaternion { value: kiik }
     }
 
     #[inline]
@@ -1425,7 +1514,7 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kiji(self) -> Self {
-        let kiji = std::simd::simd_swizzle!(self.value, [2,0,1,0]);
+        let kiji = std::simd::simd_swizzle!(self.value, [2, 0, 1, 0]);
 
         Quaternion { value: kiji }
     }
@@ -1439,28 +1528,28 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kijk(self) -> Self {
-        let kijk = std::simd::simd_swizzle!(self.value, [2,0,1,2]);
+        let kijk = std::simd::simd_swizzle!(self.value, [2, 0, 1, 2]);
 
         Quaternion { value: kijk }
     }
 
     #[inline]
     fn kijw(self) -> Self {
-        let kijw = std::simd::simd_swizzle!(self.value, [2,0,1,3]);
+        let kijw = std::simd::simd_swizzle!(self.value, [2, 0, 1, 3]);
 
         Quaternion { value: kijw }
     }
 
     #[inline]
     fn kiki(self) -> Self {
-        let kiki = std::simd::simd_swizzle!(self.value, [2,0,2,0]);
+        let kiki = std::simd::simd_swizzle!(self.value, [2, 0, 2, 0]);
 
         Quaternion { value: kiki }
     }
 
     #[inline]
     fn kikj(self) -> Self {
-        let kikj = std::simd::simd_swizzle!(self.value, [2,0,2,1]);
+        let kikj = std::simd::simd_swizzle!(self.value, [2, 0, 2, 1]);
 
         Quaternion { value: kikj }
     }
@@ -1523,56 +1612,56 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kjik(self) -> Self {
-        let kjik = std::simd::simd_swizzle!(self.value, [2,1,0,2]);
+        let kjik = std::simd::simd_swizzle!(self.value, [2, 1, 0, 2]);
 
         Quaternion { value: kjik }
     }
 
     #[inline]
     fn kjiw(self) -> Self {
-        let kjiw = std::simd::simd_swizzle!(self.value, [2,1,0,3]);
+        let kjiw = std::simd::simd_swizzle!(self.value, [2, 1, 0, 3]);
 
         Quaternion { value: kjiw }
     }
 
     #[inline]
     fn kjji(self) -> Self {
-        let kjji = std::simd::simd_swizzle!(self.value, [2,1,1,0]);
+        let kjji = std::simd::simd_swizzle!(self.value, [2, 1, 1, 0]);
 
         Quaternion { value: kjji }
     }
 
     #[inline]
     fn kjjj(self) -> Self {
-        let kjjj = std::simd::simd_swizzle!(self.value, [2,1,1,1]);
+        let kjjj = std::simd::simd_swizzle!(self.value, [2, 1, 1, 1]);
 
         Quaternion { value: kjjj }
     }
 
     #[inline]
     fn kjjk(self) -> Self {
-        let kjjk = std::simd::simd_swizzle!(self.value, [2,1,1,2]);
+        let kjjk = std::simd::simd_swizzle!(self.value, [2, 1, 1, 2]);
 
         Quaternion { value: kjjk }
     }
 
     #[inline]
     fn kjjw(self) -> Self {
-        let kjjw = std::simd::simd_swizzle!(self.value, [2,1,1,3]);
+        let kjjw = std::simd::simd_swizzle!(self.value, [2, 1, 1, 3]);
 
         Quaternion { value: kjjw }
     }
 
     #[inline]
     fn kjki(self) -> Self {
-        let kjki = std::simd::simd_swizzle!(self.value, [2,1,2,0]);
+        let kjki = std::simd::simd_swizzle!(self.value, [2, 1, 2, 0]);
 
         Quaternion { value: kjki }
     }
 
     #[inline]
     fn kjkj(self) -> Self {
-        let kjkj = std::simd::simd_swizzle!(self.value, [2,1,2,1]);
+        let kjkj = std::simd::simd_swizzle!(self.value, [2, 1, 2, 1]);
 
         Quaternion { value: kjkj }
     }
@@ -1600,7 +1689,7 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kjwj(self) -> Self {
-        let kjwj = std::simd::simd_swizzle!(self.value, [2,1,3,1]);
+        let kjwj = std::simd::simd_swizzle!(self.value, [2, 1, 3, 1]);
 
         Quaternion { value: kjwj }
     }
@@ -1614,35 +1703,35 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kjww(self) -> Self {
-        let kjww = std::simd::simd_swizzle!(self.value, [2,1,3,3]);
+        let kjww = std::simd::simd_swizzle!(self.value, [2, 1, 3, 3]);
 
         Quaternion { value: kjww }
     }
 
     #[inline]
     fn kkii(self) -> Self {
-        let kkii = std::simd::simd_swizzle!(self.value, [2,2,0,0]);
+        let kkii = std::simd::simd_swizzle!(self.value, [2, 2, 0, 0]);
 
         Quaternion { value: kkii }
     }
 
     #[inline]
     fn kkij(self) -> Self {
-        let kkij = std::simd::simd_swizzle!(self.value, [2,2,0,1]);
+        let kkij = std::simd::simd_swizzle!(self.value, [2, 2, 0, 1]);
 
         Quaternion { value: kkij }
     }
 
     #[inline]
     fn kkik(self) -> Self {
-        let kkik = std::simd::simd_swizzle!(self.value, [2,2,0,2]);
+        let kkik = std::simd::simd_swizzle!(self.value, [2, 2, 0, 2]);
 
         Quaternion { value: kkik }
     }
 
     #[inline]
     fn kkiw(self) -> Self {
-        let kkiw = std::simd::simd_swizzle!(self.value, [2,2,0,3]);
+        let kkiw = std::simd::simd_swizzle!(self.value, [2, 2, 0, 3]);
 
         Quaternion { value: kkiw }
     }
@@ -1656,35 +1745,35 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kkjj(self) -> Self {
-        let kkjj = std::simd::simd_swizzle!(self.value, [2,2,1,1]);
+        let kkjj = std::simd::simd_swizzle!(self.value, [2, 2, 1, 1]);
 
         Quaternion { value: kkjj }
     }
 
     #[inline]
     fn kkjk(self) -> Self {
-        let kkjk = std::simd::simd_swizzle!(self.value, [2,2,1,2]);
+        let kkjk = std::simd::simd_swizzle!(self.value, [2, 2, 1, 2]);
 
         Quaternion { value: kkjk }
     }
 
     #[inline]
     fn kkjw(self) -> Self {
-        let kkjw = std::simd::simd_swizzle!(self.value, [2,2,1,3]);
+        let kkjw = std::simd::simd_swizzle!(self.value, [2, 2, 1, 3]);
 
         Quaternion { value: kkjw }
     }
 
     #[inline]
     fn kkki(self) -> Self {
-        let kkki = std::simd::simd_swizzle!(self.value, [2,2,2,0]);
+        let kkki = std::simd::simd_swizzle!(self.value, [2, 2, 2, 0]);
 
         Quaternion { value: kkki }
     }
 
     #[inline]
     fn kkkj(self) -> Self {
-        let kkkj = std::simd::simd_swizzle!(self.value, [2,2,2,1]);
+        let kkkj = std::simd::simd_swizzle!(self.value, [2, 2, 2, 1]);
 
         Quaternion { value: kkkj }
     }
@@ -1696,140 +1785,140 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kkkw(self) -> Self {
-        let kkkw = std::simd::simd_swizzle!(self.value, [2,2,2,3]);
+        let kkkw = std::simd::simd_swizzle!(self.value, [2, 2, 2, 3]);
 
         Quaternion { value: kkkw }
     }
 
     #[inline]
     fn kkwi(self) -> Self {
-        let kkwi = std::simd::simd_swizzle!(self.value, [2,2,3,0]);
+        let kkwi = std::simd::simd_swizzle!(self.value, [2, 2, 3, 0]);
 
         Quaternion { value: kkwi }
     }
 
     #[inline]
     fn kkwj(self) -> Self {
-        let kkwj = std::simd::simd_swizzle!(self.value, [2,2,3,1]);
+        let kkwj = std::simd::simd_swizzle!(self.value, [2, 2, 3, 1]);
 
         Quaternion { value: kkwj }
     }
 
     #[inline]
     fn kkwk(self) -> Self {
-        let kkwk = std::simd::simd_swizzle!(self.value, [2,2,3,2]);
+        let kkwk = std::simd::simd_swizzle!(self.value, [2, 2, 3, 2]);
 
         Quaternion { value: kkwk }
     }
 
     #[inline]
     fn kkww(self) -> Self {
-        let kkww = std::simd::simd_swizzle!(self.value, [2,2,3,3]);
+        let kkww = std::simd::simd_swizzle!(self.value, [2, 2, 3, 3]);
 
         Quaternion { value: kkww }
     }
 
     #[inline]
     fn kwii(self) -> Self {
-        let kwii = std::simd::simd_swizzle!(self.value, [2,3,0,0]);
+        let kwii = std::simd::simd_swizzle!(self.value, [2, 3, 0, 0]);
 
         Quaternion { value: kwii }
     }
 
     #[inline]
     fn kwij(self) -> Self {
-        let kwij = std::simd::simd_swizzle!(self.value, [2,3,0,1]);
+        let kwij = std::simd::simd_swizzle!(self.value, [2, 3, 0, 1]);
 
         Quaternion { value: kwij }
     }
 
     #[inline]
     fn kwik(self) -> Self {
-        let kwik = std::simd::simd_swizzle!(self.value, [2,3,0,2]);
+        let kwik = std::simd::simd_swizzle!(self.value, [2, 3, 0, 2]);
 
         Quaternion { value: kwik }
     }
 
     #[inline]
     fn kwiw(self) -> Self {
-        let kwiw = std::simd::simd_swizzle!(self.value, [2,3,0,3]);
+        let kwiw = std::simd::simd_swizzle!(self.value, [2, 3, 0, 3]);
 
         Quaternion { value: kwiw }
     }
 
     #[inline]
     fn kwji(self) -> Self {
-        let kwji = std::simd::simd_swizzle!(self.value, [2,3,1,0]);
+        let kwji = std::simd::simd_swizzle!(self.value, [2, 3, 1, 0]);
 
         Quaternion { value: kwji }
     }
 
     #[inline]
     fn kwjj(self) -> Self {
-        let kwjj = std::simd::simd_swizzle!(self.value, [2,3,1,1]);
+        let kwjj = std::simd::simd_swizzle!(self.value, [2, 3, 1, 1]);
 
         Quaternion { value: kwjj }
     }
 
     #[inline]
     fn kwjk(self) -> Self {
-        let kwjk = std::simd::simd_swizzle!(self.value, [2,3,1,2]);
+        let kwjk = std::simd::simd_swizzle!(self.value, [2, 3, 1, 2]);
 
         Quaternion { value: kwjk }
     }
 
     #[inline]
     fn kwjw(self) -> Self {
-        let kwjw = std::simd::simd_swizzle!(self.value, [2,3,1,3]);
+        let kwjw = std::simd::simd_swizzle!(self.value, [2, 3, 1, 3]);
 
         Quaternion { value: kwjw }
     }
 
     #[inline]
     fn kwki(self) -> Self {
-        let kwki = std::simd::simd_swizzle!(self.value, [2,3,2,0]);
+        let kwki = std::simd::simd_swizzle!(self.value, [2, 3, 2, 0]);
 
         Quaternion { value: kwki }
     }
 
     #[inline]
     fn kwkj(self) -> Self {
-        let kwkj = std::simd::simd_swizzle!(self.value, [2,3,2,1]);
+        let kwkj = std::simd::simd_swizzle!(self.value, [2, 3, 2, 1]);
 
         Quaternion { value: kwkj }
     }
 
     #[inline]
     fn kwkk(self) -> Self {
-        let kwkk = std::simd::simd_swizzle!(self.value, [2,3,2,2]);
+        let kwkk = std::simd::simd_swizzle!(self.value, [2, 3, 2, 2]);
 
         Quaternion { value: kwkk }
     }
 
     #[inline]
     fn kwkw(self) -> Self {
-        let kwkw = std::simd::simd_swizzle!(self.value, [2,3,2,3]);
+        let kwkw = std::simd::simd_swizzle!(self.value, [2, 3, 2, 3]);
 
         Quaternion { value: kwkw }
     }
 
     #[inline]
     fn kwwi(self) -> Self {
-        let kwwi = std::simd::simd_swizzle!(self.value, [2,3,3,0]);
+        let kwwi = std::simd::simd_swizzle!(self.value, [2, 3, 3, 0]);
 
         Quaternion { value: kwwi }
     }
 
     #[inline]
     fn kwwj(self) -> Self {
-        let kwwj = std::simd::simd_swizzle!(self.value, [2,3,3,1]);
+        let kwwj = std::simd::simd_swizzle!(self.value, [2, 3, 3, 1]);
 
         Quaternion { value: kwwj }
     }
 
     #[inline]
     fn kwwk(self) -> Self {
-        let kwwk = std::simd::simd_swizzle!(self.value, [2,3,3,2]);
+        let kwwk = std::simd::simd_swizzle!(self.value, [2, 3, 3, 2]);
 
         Quaternion { value: kwwk }
     }
@@ -1843,441 +1932,441 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn wiii(self) -> Self {
-        let wiii = std::simd::simd_swizzle!(self.value, [3,0,0,0]);
+        let wiii = std::simd::simd_swizzle!(self.value, [3, 0, 0, 0]);
 
         Quaternion { value: wiii }
     }
 
     #[inline]
     fn wiij(self) -> Self {
-        let wiij = std::simd::simd_swizzle!(self.value, [3,0,0,1]);
+        let wiij = std::simd::simd_swizzle!(self.value, [3, 0, 0, 1]);
 
         Quaternion { value: wiij }
     }
 
     #[inline]
     fn wiik(self) -> Self {
-        let wiik = std::simd::simd_swizzle!(self.value, [3,0,0,2]);
+        let wiik = std::simd::simd_swizzle!(self.value, [3, 0, 0, 2]);
 
         Quaternion { value: wiik }
     }
 
     #[inline]
     fn wiiw(self) -> Self {
-        let wiiw = std::simd::simd_swizzle!(self.value, [3,0,0,3]);
+        let wiiw = std::simd::simd_swizzle!(self.value, [3, 0, 0, 3]);
 
         Quaternion { value: wiiw }
     }
 
     #[inline]
     fn wiji(self) -> Self {
-        let wiji = std::simd::simd_swizzle!(self.value, [3,0,1,0]);
+        let wiji = std::simd::simd_swizzle!(self.value, [3, 0, 1, 0]);
 
         Quaternion { value: wiji }
     }
 
     #[inline]
     fn wijj(self) -> Self {
-        let wijj = std::simd::simd_swizzle!(self.value, [3,0,1,1]);
+        let wijj = std::simd::simd_swizzle!(self.value, [3, 0, 1, 1]);
 
         Quaternion { value: wijj }
     }
 
     #[inline]
     fn wijk(self) -> Self {
-        let wijk = std::simd::simd_swizzle!(self.value, [3,0,1,2]);
+        let wijk = std::simd::simd_swizzle!(self.value, [3, 0, 1, 2]);
 
         Quaternion { value: wijk }
     }
 
     #[inline]
     fn wijw(self) -> Self {
-        let wijw = std::simd::simd_swizzle!(self.value, [3,0,1,3]);
+        let wijw = std::simd::simd_swizzle!(self.value, [3, 0, 1, 3]);
 
         Quaternion { value: wijw }
     }
 
     #[inline]
     fn wiki(self) -> Self {
-        let wiki = std::simd::simd_swizzle!(self.value, [3,0,2,0]);
+        let wiki = std::simd::simd_swizzle!(self.value, [3, 0, 2, 0]);
 
         Quaternion { value: wiki }
     }
 
     #[inline]
     fn wikj(self) -> Self {
-        let wikj = std::simd::simd_swizzle!(self.value, [3,0,2,1]);
+        let wikj = std::simd::simd_swizzle!(self.value, [3, 0, 2, 1]);
 
         Quaternion { value: wikj }
     }
 
     #[inline]
     fn wikk(self) -> Self {
-         let wikk = std::simd::simd_swizzle!(self.value, [3,0,2,2]);
+        let wikk = std::simd::simd_swizzle!(self.value, [3, 0, 2, 2]);
 
-         Quaternion { value: wikk }
+        Quaternion { value: wikk }
     }
 
     #[inline]
     fn wikw(self) -> Self {
-        let wikw = std::simd::simd_swizzle!(self.value, [3,0,2,3]);
+        let wikw = std::simd::simd_swizzle!(self.value, [3, 0, 2, 3]);
 
         Quaternion { value: wikw }
     }
 
     #[inline]
     fn wiwi(self) -> Self {
-        let wiwi = std::simd::simd_swizzle!(self.value, [3,0,3,0]);
+        let wiwi = std::simd::simd_swizzle!(self.value, [3, 0, 3, 0]);
 
         Quaternion { value: wiwi }
     }
 
     #[inline]
     fn wiwj(self) -> Self {
-        let wiwj = std::simd::simd_swizzle!(self.value, [3,0,3,1]);
+        let wiwj = std::simd::simd_swizzle!(self.value, [3, 0, 3, 1]);
 
         Quaternion { value: wiwj }
     }
 
     #[inline]
     fn wiwk(self) -> Self {
-        let wiwk = std::simd::simd_swizzle!(self.value, [3,0,3,2]);
+        let wiwk = std::simd::simd_swizzle!(self.value, [3, 0, 3, 2]);
 
         Quaternion { value: wiwk }
     }
 
     #[inline]
     fn wiww(self) -> Self {
-        let wiww = std::simd::simd_swizzle!(self.value, [3,0,3,3]);
+        let wiww = std::simd::simd_swizzle!(self.value, [3, 0, 3, 3]);
 
         Quaternion { value: wiww }
     }
 
     #[inline]
     fn wjii(self) -> Self {
-        let wjii = std::simd::simd_swizzle!(self.value, [3,1,0,0]);
+        let wjii = std::simd::simd_swizzle!(self.value, [3, 1, 0, 0]);
 
         Quaternion { value: wjii }
     }
 
     #[inline]
     fn wjij(self) -> Self {
-        let wjij = std::simd::simd_swizzle!(self.value, [3,1,0,1]);
+        let wjij = std::simd::simd_swizzle!(self.value, [3, 1, 0, 1]);
 
         Quaternion { value: wjij }
     }
 
     #[inline]
     fn wjik(self) -> Self {
-        let wjik = std::simd::simd_swizzle!(self.value, [3,1,0,2]);
+        let wjik = std::simd::simd_swizzle!(self.value, [3, 1, 0, 2]);
 
         Quaternion { value: wjik }
     }
 
     #[inline]
     fn wjiw(self) -> Self {
-        let wjiw = std::simd::simd_swizzle!(self.value, [3,1,0,3]);
+        let wjiw = std::simd::simd_swizzle!(self.value, [3, 1, 0, 3]);
 
         Quaternion { value: wjiw }
     }
 
     #[inline]
     fn wjji(self) -> Self {
-        let wjji = std::simd::simd_swizzle!(self.value, [3,1,1,0]);
+        let wjji = std::simd::simd_swizzle!(self.value, [3, 1, 1, 0]);
 
         Quaternion { value: wjji }
     }
 
     #[inline]
     fn wjjj(self) -> Self {
-        let wjjj = std::simd::simd_swizzle!(self.value, [3,1,1,1]);
+        let wjjj = std::simd::simd_swizzle!(self.value, [3, 1, 1, 1]);
 
         Quaternion { value: wjjj }
     }
 
     #[inline]
     fn wjjk(self) -> Self {
-        let wjjk = std::simd::simd_swizzle!(self.value, [3,1,1,2]);
+        let wjjk = std::simd::simd_swizzle!(self.value, [3, 1, 1, 2]);
 
         Quaternion { value: wjjk }
     }
 
     #[inline]
     fn wjjw(self) -> Self {
-        let wjjw = std::simd::simd_swizzle!(self.value, [3,1,1,3]);
+        let wjjw = std::simd::simd_swizzle!(self.value, [3, 1, 1, 3]);
 
         Quaternion { value: wjjw }
     }
 
     #[inline]
     fn wjki(self) -> Self {
-        let wjki = std::simd::simd_swizzle!(self.value, [3,1,2,0]);
+        let wjki = std::simd::simd_swizzle!(self.value, [3, 1, 2, 0]);
 
         Quaternion { value: wjki }
     }
 
     #[inline]
     fn wjkj(self) -> Self {
-        let wjkj = std::simd::simd_swizzle!(self.value, [3,1,2,1]);
+        let wjkj = std::simd::simd_swizzle!(self.value, [3, 1, 2, 1]);
 
         Quaternion { value: wjkj }
     }
 
     #[inline]
     fn wjkk(self) -> Self {
-        let wjkk = std::simd::simd_swizzle!(self.value, [3,1,2,2]);
+        let wjkk = std::simd::simd_swizzle!(self.value, [3, 1, 2, 2]);
 
         Quaternion { value: wjkk }
     }
 
     #[inline]
     fn wjkw(self) -> Self {
-        let wjkw = std::simd::simd_swizzle!(self.value, [3,1,2,3]);
+        let wjkw = std::simd::simd_swizzle!(self.value, [3, 1, 2, 3]);
 
         Quaternion { value: wjkw }
     }
 
     #[inline]
     fn wjwi(self) -> Self {
-        let wjwi = std::simd::simd_swizzle!(self.value, [3,1,3,0]);
+        let wjwi = std::simd::simd_swizzle!(self.value, [3, 1, 3, 0]);
 
         Quaternion { value: wjwi }
     }
 
     #[inline]
     fn wjwj(self) -> Self {
-        let wjwj = std::simd::simd_swizzle!(self.value, [3,1,3,1]);
+        let wjwj = std::simd::simd_swizzle!(self.value, [3, 1, 3, 1]);
 
         Quaternion { value: wjwj }
     }
 
     #[inline]
     fn wjwk(self) -> Self {
-        let wjwk = std::simd::simd_swizzle!(self.value, [3,1,3,2]);
+        let wjwk = std::simd::simd_swizzle!(self.value, [3, 1, 3, 2]);
 
         Quaternion { value: wjwk }
     }
 
     #[inline]
     fn wjww(self) -> Self {
-        let wjww = std::simd::simd_swizzle!(self.value, [3,1,3,3]);
+        let wjww = std::simd::simd_swizzle!(self.value, [3, 1, 3, 3]);
 
         Quaternion { value: wjww }
     }
 
     #[inline]
     fn wkii(self) -> Self {
-        let wkii = std::simd::simd_swizzle!(self.value, [3,2,0,0]);
+        let wkii = std::simd::simd_swizzle!(self.value, [3, 2, 0, 0]);
 
         Quaternion { value: wkii }
     }
 
     #[inline]
     fn wkij(self) -> Self {
-        let wkij = std::simd::simd_swizzle!(self.value, [3,2,0,1]);
+        let wkij = std::simd::simd_swizzle!(self.value, [3, 2, 0, 1]);
 
         Quaternion { value: wkij }
     }
 
     #[inline]
     fn wkik(self) -> Self {
-        let wkik = std::simd::simd_swizzle!(self.value, [3,2,0,2]);
+        let wkik = std::simd::simd_swizzle!(self.value, [3, 2, 0, 2]);
 
         Quaternion { value: wkik }
     }
 
     #[inline]
     fn wkiw(self) -> Self {
-        let wkiw = std::simd::simd_swizzle!(self.value, [3,2,0,3]);
+        let wkiw = std::simd::simd_swizzle!(self.value, [3, 2, 0, 3]);
 
         Quaternion { value: wkiw }
     }
 
     #[inline]
     fn wkji(self) -> Self {
-        let wkji = std::simd::simd_swizzle!(self.value, [3,2,1,0]);
+        let wkji = std::simd::simd_swizzle!(self.value, [3, 2, 1, 0]);
 
         Quaternion { value: wkji }
     }
 
     #[inline]
     fn wkjj(self) -> Self {
-        let wkjj = std::simd::simd_swizzle!(self.value, [3,2,1,1]);
+        let wkjj = std::simd::simd_swizzle!(self.value, [3, 2, 1, 1]);
 
         Quaternion { value: wkjj }
     }
 
     #[inline]
     fn wkjk(self) -> Self {
-        let wkjk = std::simd::simd_swizzle!(self.value, [3,2,1,2]);
+        let wkjk = std::simd::simd_swizzle!(self.value, [3, 2, 1, 2]);
 
         Quaternion { value: wkjk }
     }
 
     #[inline]
     fn wkjw(self) -> Self {
-        let wkjw = std::simd::simd_swizzle!(self.value, [3,2,1,3]);
+        let wkjw = std::simd::simd_swizzle!(self.value, [3, 2, 1, 3]);
 
         Quaternion { value: wkjw }
     }
 
     #[inline]
     fn wkki(self) -> Self {
-        let wkki = std::simd::simd_swizzle!(self.value, [3,2,2,0]);
+        let wkki = std::simd::simd_swizzle!(self.value, [3, 2, 2, 0]);
 
         Quaternion { value: wkki }
     }
 
     #[inline]
     fn wkkj(self) -> Self {
-        let wkkj = std::simd::simd_swizzle!(self.value, [3,2,2,1]);
+        let wkkj = std::simd::simd_swizzle!(self.value, [3, 2, 2, 1]);
 
         Quaternion { value: wkkj }
     }
 
     #[inline]
     fn wkkk(self) -> Self {
-        let wkkk = std::simd::simd_swizzle!(self.value, [3,2,2,2]);
+        let wkkk = std::simd::simd_swizzle!(self.value, [3, 2, 2, 2]);
 
         Quaternion { value: wkkk }
     }
 
     #[inline]
     fn wkkw(self) -> Self {
-        let wkkw = std::simd::simd_swizzle!(self.value, [3,2,2,3]);
+        let wkkw = std::simd::simd_swizzle!(self.value, [3, 2, 2, 3]);
 
         Quaternion { value: wkkw }
     }
 
     #[inline]
     fn wkwi(self) -> Self {
-        let wkwi = std::simd::simd_swizzle!(self.value, [3,2,3,0]);
+        let wkwi = std::simd::simd_swizzle!(self.value, [3, 2, 3, 0]);
 
         Quaternion { value: wkwi }
     }
 
     #[inline]
     fn wkwj(self) -> Self {
-        let wkwj = std::simd::simd_swizzle!(self.value, [3,2,3,1]);
+        let wkwj = std::simd::simd_swizzle!(self.value, [3, 2, 3, 1]);
 
         Quaternion { value: wkwj }
     }
 
     #[inline]
     fn wkwk(self) -> Self {
-        let wkwk = std::simd::simd_swizzle!(self.value, [3,2,3,2]);
+        let wkwk = std::simd::simd_swizzle!(self.value, [3, 2, 3, 2]);
 
         Quaternion { value: wkwk }
     }
 
     #[inline]
     fn wkww(self) -> Self {
-        let wkww = std::simd::simd_swizzle!(self.value, [3,2,3,3]);
+        let wkww = std::simd::simd_swizzle!(self.value, [3, 2, 3, 3]);
 
         Quaternion { value: wkww }
     }
 
     #[inline]
     fn wwii(self) -> Self {
-        let wwii = std::simd::simd_swizzle!(self.value, [3,3,0,0]);
+        let wwii = std::simd::simd_swizzle!(self.value, [3, 3, 0, 0]);
 
         Quaternion { value: wwii }
     }
 
     #[inline]
     fn wwij(self) -> Self {
-        let wwij = std::simd::simd_swizzle!(self.value, [3,3,0,1]);
+        let wwij = std::simd::simd_swizzle!(self.value, [3, 3, 0, 1]);
 
         Quaternion { value: wwij }
     }
 
     #[inline]
     fn wwik(self) -> Self {
-        let wwik = std::simd::simd_swizzle!(self.value, [3,3,0,2]);
+        let wwik = std::simd::simd_swizzle!(self.value, [3, 3, 0, 2]);
 
         Quaternion { value: wwik }
     }
 
     #[inline]
     fn wwiw(self) -> Self {
-        let wwiw = std::simd::simd_swizzle!(self.value, [3,3,0,3]);
+        let wwiw = std::simd::simd_swizzle!(self.value, [3, 3, 0, 3]);
 
         Quaternion { value: wwiw }
     }
 
     #[inline]
     fn wwji(self) -> Self {
-        let wwji = std::simd::simd_swizzle!(self.value, [3,3,1,0]);
+        let wwji = std::simd::simd_swizzle!(self.value, [3, 3, 1, 0]);
 
         Quaternion { value: wwji }
     }
 
     #[inline]
     fn wwjj(self) -> Self {
-        let wwjj = std::simd::simd_swizzle!(self.value, [3,3,1,1]);
+        let wwjj = std::simd::simd_swizzle!(self.value, [3, 3, 1, 1]);
 
         Quaternion { value: wwjj }
     }
 
     #[inline]
     fn wwjk(self) -> Self {
-        let wwjk = std::simd::simd_swizzle!(self.value, [3,3,1,2]);
+        let wwjk = std::simd::simd_swizzle!(self.value, [3, 3, 1, 2]);
 
         Quaternion { value: wwjk }
     }
 
     #[inline]
     fn wwjw(self) -> Self {
-        let wwjw = std::simd::simd_swizzle!(self.value, [3,3,1,3]);
+        let wwjw = std::simd::simd_swizzle!(self.value, [3, 3, 1, 3]);
 
         Quaternion { value: wwjw }
     }
 
     #[inline]
     fn wwki(self) -> Self {
-        let wwki = std::simd::simd_swizzle!(self.value, [3,3,2,0]);
+        let wwki = std::simd::simd_swizzle!(self.value, [3, 3, 2, 0]);
 
         Quaternion { value: wwki }
     }
 
     #[inline]
     fn wwkj(self) -> Self {
-        let wwkj = std::simd::simd_swizzle!(self.value, [3,3,2,1]);
+        let wwkj = std::simd::simd_swizzle!(self.value, [3, 3, 2, 1]);
 
         Quaternion { value: wwkj }
     }
 
     #[inline]
     fn wwkk(self) -> Self {
-        let wwkk = std::simd::simd_swizzle!(self.value, [3,3,2,2]);
+        let wwkk = std::simd::simd_swizzle!(self.value, [3, 3, 2, 2]);
 
         Quaternion { value: wwkk }
     }
 
     #[inline]
     fn wwkw(self) -> Self {
-        let wwkw = std::simd::simd_swizzle!(self.value, [3,3,2,3]);
+        let wwkw = std::simd::simd_swizzle!(self.value, [3, 3, 2, 3]);
 
         Quaternion { value: wwkw }
     }
 
     #[inline]
     fn wwwi(self) -> Self {
-        let wwwi = std::simd::simd_swizzle!(self.value, [3,3,3,0]);
+        let wwwi = std::simd::simd_swizzle!(self.value, [3, 3, 3, 0]);
 
         Quaternion { value: wwwi }
     }
 
     #[inline]
     fn wwwj(self) -> Self {
-        let wwwj = std::simd::simd_swizzle!(self.value, [3,3,3,1]);
+        let wwwj = std::simd::simd_swizzle!(self.value, [3, 3, 3, 1]);
 
         Quaternion { value: wwwj }
     }
 
     #[inline]
     fn wwwk(self) -> Self {
-        let wwwk = std::simd::simd_swizzle!(self.value, [3,3,3,2]);
+        let wwwk = std::simd::simd_swizzle!(self.value, [3, 3, 3, 2]);
 
         Quaternion { value: wwwk }
     }
@@ -2285,370 +2374,5 @@ impl QuaternionSwizzles for Quaternion {
     #[inline]
     fn wwww(self) -> Self {
         Quaternion::splat(self.w())
-    }
-}
-
-// todo Write test for all quaternion and quaternion math implementation
-#[cfg(test)]
-mod quaternion_test {
-    use crate::math::{abs, component_sum, normalize};
-
-    use crate::quaternion_math::{
-        conjugate, from_angle_axis, from_rotation_matrix, inverse, quaternion_exp, rotate_x,
-        rotate_y, rotate_z, to_angle_axis, to_rotation_matrix,
-    };
-    use crate::{Matrix3x3, Quaternion, Vector3};
-    use std::simd::SimdPartialOrd;
-
-    #[test]
-    fn simple_quaternion_test() {
-        let quaternion_identity: Quaternion = Quaternion::IDENTITY;
-
-        let quaternion_default: Quaternion = Quaternion::default();
-
-        let set_quaternion: Quaternion = Quaternion::set(0.0, 0.0, 0.0, 1.0);
-
-        let manual_quaternion: Quaternion = Quaternion {
-            value: [0.0, 0.0, 0.0, 1.0].into(),
-        };
-
-        assert_eq!(quaternion_default, quaternion_identity);
-        assert_eq!(quaternion_identity, set_quaternion);
-        assert_eq!(set_quaternion, manual_quaternion);
-    }
-
-    #[test]
-    fn quaternion_add_sub_test() {
-        let quaternion_add_values_a: std::simd::f32x4 = [2.1, 4.12, 0.9512, 2.021].into();
-
-        let quaternion_add_values_b: std::simd::f32x4 = [1.1123, 5.247, 0.2431, 8.721].into();
-
-        let quaternion_add_a: Quaternion = Quaternion {
-            value: quaternion_add_values_a,
-        };
-
-        let quaternion_addition_b: Quaternion = Quaternion {
-            value: quaternion_add_values_b,
-        };
-
-        let mut quaternion_addition_sum: Quaternion = quaternion_add_a + quaternion_addition_b;
-
-
-        assert_eq!(
-            quaternion_addition_sum.value,
-            quaternion_add_values_a + quaternion_add_values_b
-        );
-
-        quaternion_addition_sum += Quaternion::IDENTITY;
-
-        assert_eq!(
-            quaternion_addition_sum.value,
-            quaternion_add_values_a + quaternion_add_values_b + Quaternion::IDENTITY.value
-        );
-
-
-        let mut quaternion_subtraction_sum: Quaternion = quaternion_add_a - quaternion_addition_b;
-
-        assert_eq!(
-            quaternion_subtraction_sum.value,
-            quaternion_add_values_a - quaternion_add_values_b
-        );
-
-        quaternion_subtraction_sum -= Quaternion::IDENTITY;
-
-        assert_eq!(
-            quaternion_subtraction_sum.value,
-            quaternion_add_values_a - quaternion_add_values_b - Quaternion::IDENTITY.value
-        );
-    }
-
-    #[test]
-    fn quaternion_mul_div_test() {
-        const MULTIPLICATION_FP_ERROR_THRESHOLD: std::simd::f32x4 =
-            std::simd::f32x4::from_array([0.05f32, 0.05f32, 0.0532, 0.05f32]);
-
-        // look at the quaternion multiplication table for reference
-        // i * i == 1 * i = 1,    j * 1 == 1 * j = 1,     k * 1 == 1 * k = 1
-        // i * i = -1,  j * j = -1,   k * k = -1
-        // i * j = k,  i * k = -j,
-        // j * i = -k,  j * k = i,
-        // k * i = j,  k * j = -i,
-
-        // we will use hamilton product
-        //(a1 + b1 i + c1 j + d1 k)(a2 + b2 i + c2 j + d2 k)
-
-        //    (a1 * a2) + (a1 * b2)i + (a1 * c2)j + (a1 * d2)k
-        //  + (b1 * a2)i + (b1 * b2)ii + (b1 * c2)ij + (b1 * d2)ik
-        //  + (c1 * a2)j + (c1 * b2)ji + (c1 * c2)jj + (c1 * d2)jk
-        //  + (d1 * a2)k + (d1 * b2)ki + (d1 * c2)kj + (d1 * d2)kk
-
-        // since i * i == -1 , j * j == -1, k * k == -1
-        // w = (a1 * a2) -(b1 * b2) - (c1 * c2) - (d1 * d2)
-
-        // since jk = i and kj = -i
-        // i = (a1 * b2) + (b1 * a2) + (c1 * d2) - (d1 * c2)
-
-        // since ki = j and ik = -j
-        // j = (a1 * c2) + (c1 * a2) + (d1 * b2) - (b1 * d2)
-
-        // since ij = k and ji = -k
-        // k = (d1 * a2) + (a1 * d2) + (b1 * c2) - (c1 * b2)
-
-        // w, i, j, k
-        // 45, 21, 0
-        let quaternion_mul_values_a: [f32; 4] = [0.3762754, 0.1683637, 0.0697385, 0.9084091];
-
-        // 21, 3, 46
-        let quaternion_mul_values_b: [f32; 4] = [0.1777481, -0.0474882, 0.3884478, 0.9029168];
-
-
-        let w: f32 = (quaternion_mul_values_a[3] * quaternion_mul_values_b[3])
-                     - (quaternion_mul_values_a[0] * quaternion_mul_values_b[0])
-                     - (quaternion_mul_values_a[1] * quaternion_mul_values_b[1])
-                     - (quaternion_mul_values_a[2] * quaternion_mul_values_b[2]);
-
-        let i: f32 = quaternion_mul_values_a[3] * quaternion_mul_values_b[0]
-                     + quaternion_mul_values_a[0] * quaternion_mul_values_b[3]
-                     + quaternion_mul_values_a[1] * quaternion_mul_values_b[2]
-                     - quaternion_mul_values_a[2] * quaternion_mul_values_b[1];
-
-        let j: f32 = (quaternion_mul_values_a[3] * quaternion_mul_values_b[1])
-                     + (quaternion_mul_values_a[1] * quaternion_mul_values_b[3])
-                     + (quaternion_mul_values_a[2] * quaternion_mul_values_b[0])
-                     - (quaternion_mul_values_a[0] * quaternion_mul_values_b[2]);
-
-        let k: f32 = (quaternion_mul_values_a[3] * quaternion_mul_values_b[2])
-                     + (quaternion_mul_values_a[2] * quaternion_mul_values_b[3])
-                     + (quaternion_mul_values_a[0] * quaternion_mul_values_b[1])
-                     - (quaternion_mul_values_a[1] * quaternion_mul_values_b[0]);
-
-        let quaternion_proven_mul: Quaternion = Quaternion::set(i, j, k, w);
-
-        let quaternion_mul_a: Quaternion = Quaternion {
-            value: quaternion_mul_values_a.into(),
-        };
-
-        let quaternion_mul_b: Quaternion = Quaternion {
-            value: quaternion_mul_values_b.into(),
-        };
-
-        let quaternion_product = quaternion_mul_a * quaternion_mul_b;
-
-        assert!(abs((quaternion_proven_mul - quaternion_product).value)
-            .simd_lt(MULTIPLICATION_FP_ERROR_THRESHOLD)
-            .all());
-    }
-
-    #[test]
-    fn quaternion_rotate_axis_test() {
-        const FP_ERROR_THRESHOLD: std::simd::f32x4 =
-            std::simd::f32x4::from_array([0.0000003, 0.0000003, 0.0000003, 0.0000003]);
-
-        let angle_1: f32 = 31.11f32.to_radians();
-        let angle_2: f32 = 241.12f32.to_radians();
-
-        let rotate_x_result_1: Quaternion = Quaternion::set(0.2681633, 0.0, 0.0, 0.9633735);
-
-        let rotate_x_result_2: Quaternion = Quaternion::set(0.8610972, 0.0, 0.0, -0.5084404);
-
-        let rotate_x_1: Quaternion = rotate_x(angle_1);
-
-        let rotate_x_2: Quaternion = rotate_x(angle_2);
-
-        assert!(abs((rotate_x_1 - rotate_x_result_1).value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert!(abs((rotate_x_2 - rotate_x_result_2).value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-
-        let rotation_y_result_1: Quaternion = Quaternion::set(0.0, 0.2681633, 0.0, 0.9633735);
-
-        let rotation_y_result_2: Quaternion = Quaternion::set(0.0, 0.8610972, 0.0, -0.5084404);
-
-        let rotate_y_1: Quaternion = rotate_y(angle_1);
-
-        let rotate_y_2: Quaternion = rotate_y(angle_2);
-
-        assert!(abs((rotate_y_1 - rotation_y_result_1).value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert!(abs((rotate_y_2 - rotation_y_result_2).value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-
-        let rotation_z_result_1: Quaternion = Quaternion::set(0.0, 0.0, 0.2681633, 0.9633735);
-
-        let rotation_z_result_2: Quaternion = Quaternion::set(0.0, 0.0, 0.8610972, -0.5084404);
-
-        let rotate_z_1: Quaternion = rotate_z(angle_1);
-
-        let rotate_z_2: Quaternion = rotate_z(angle_2);
-
-        assert!(abs((rotate_z_1 - rotation_z_result_1).value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert!(abs((rotate_z_2 - rotation_z_result_2).value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-
-        let (Vector3 { value: axis_x_1 }, angle_rad_x_1) = to_angle_axis(rotate_x_1);
-
-        assert!(abs(axis_x_1 - Vector3::RIGHT.value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert_eq!(angle_rad_x_1, angle_1);
-
-        let (Vector3 { value: axis_x_2 }, angle_rad_x_2) = to_angle_axis(rotate_x_2);
-
-        assert!(abs(axis_x_2 - Vector3::RIGHT.value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert_eq!(angle_rad_x_2, angle_2);
-
-
-        let (Vector3 { value: axis_y_1 }, angle_rad_y_1) = to_angle_axis(rotate_y_1);
-
-        assert!(abs(axis_y_1 - Vector3::UP.value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert_eq!(angle_rad_y_1, angle_1);
-
-        let (Vector3 { value: axis_y_2 }, angle_rad_y_2) = to_angle_axis(rotate_y_2);
-
-        assert!(abs(axis_y_2 - Vector3::UP.value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert_eq!(angle_rad_y_2, angle_2);
-
-
-        let (Vector3 { value: axis_z_1 }, angle_rad_z_1) = to_angle_axis(rotate_z_1);
-
-        assert!(abs(axis_z_1 - Vector3::FORWARD.value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert_eq!(angle_rad_z_1, angle_1);
-
-        let (Vector3 { value: axis_z_2 }, angle_rad_z_2) = to_angle_axis(rotate_z_2);
-
-        assert!(abs(axis_z_2 - Vector3::FORWARD.value)
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-
-        assert_eq!(angle_rad_z_2, angle_2);
-
-        let axis_norm = normalize([58.23, 12.124, 0.42, 0.0].into());
-
-        let angle_axis_quaternion =
-            from_angle_axis(Vector3 { value: axis_norm }, 24.24f32.to_radians());
-
-        let (Vector3 { value }, angle) = to_angle_axis(angle_axis_quaternion);
-
-        assert!(abs(value - axis_norm).simd_lt(FP_ERROR_THRESHOLD).all());
-
-        assert!((24.24f32.to_radians() - angle).abs() < component_sum(FP_ERROR_THRESHOLD) / 3.0f32);
-    }
-
-    #[test]
-    fn quaternion_matrix_test() {
-        const FP_ERROR_THRESHOLD_MATRIX: Matrix3x3 = Matrix3x3::splat(0.0000003);
-
-        const FP_ERROR_THRESHOLD: std::simd::f32x4 = std::simd::f32x4::from_array([0.0000003; 4]);
-
-        let identity_matrix: Matrix3x3 = Matrix3x3::IDENTITY;
-
-        let identity_quaternion: Quaternion = from_rotation_matrix(identity_matrix);
-
-        assert_eq!(identity_quaternion, Quaternion::IDENTITY);
-
-        // euler angle (-34.2, 2.57, 121.11)
-        let quaternion_rot_result: Quaternion =
-            Quaternion::set(-0.1258448, 0.266531, 0.8288804, 0.4754803);
-
-        let rotation_matrix_result: Matrix3x3 = Matrix3x3::set_from_columns(
-            Vector3::set(-0.5161631, 0.7211497, -0.462_081),
-            Vector3::set(-0.8553157, -0.4057594, 0.3221712),
-            Vector3::set(0.0448399, 0.5615181, 0.8262486),
-        );
-        let rnd_quat = to_rotation_matrix(quaternion_rot_result);
-
-        assert!((rotation_matrix_result.column_x - rnd_quat.column_x)
-            .value
-            .simd_lt(FP_ERROR_THRESHOLD_MATRIX.column_x.value)
-            .all());
-
-        assert!((rotation_matrix_result.column_y - rnd_quat.column_y)
-            .value
-            .simd_lt(FP_ERROR_THRESHOLD_MATRIX.column_y.value)
-            .all());
-
-        assert!((rotation_matrix_result.column_z - rnd_quat.column_z)
-            .value
-            .simd_lt(FP_ERROR_THRESHOLD_MATRIX.column_z.value)
-            .all());
-
-        let rotation_mat_to_quaternion: Quaternion = from_rotation_matrix(rotation_matrix_result);
-
-        assert!((rotation_mat_to_quaternion - quaternion_rot_result)
-            .value
-            .simd_lt(FP_ERROR_THRESHOLD)
-            .all());
-    }
-
-
-    #[test]
-    fn quaternion_exp_test() {
-        let quaternion_rot_result: Quaternion =
-            Quaternion::set(-0.1258448, 0.266531, 0.8288804, 0.4754803);
-
-        quaternion_exp(quaternion_rot_result);
-    }
-
-
-    #[test]
-    fn quaternion_conj_inv_test() {
-        const FP_ERROR_THRESHOLD: std::simd::f32x4 = std::simd::f32x4::from_array([0.000003; 4]);
-
-        let quaternion: Quaternion = Quaternion::set(0.1479202, -0.1477288, 0.7230414, 0.6584125);
-
-        let conjugate_quaternion: Quaternion = conjugate(quaternion);
-
-        let inverse_quaternion: Quaternion = inverse(quaternion);
-
-        assert!(abs(conjugate_quaternion.value - inverse_quaternion.value) < FP_ERROR_THRESHOLD);
-
-
-        println!("conjugate quaternion {}", conjugate_quaternion);
-
-        println!("inverse quaternion {}", inverse_quaternion);
-
-        assert_ne!(conjugate_quaternion, inverse_quaternion);
-
-        let normalized_quaternion: Quaternion = Quaternion {
-            value: normalize(quaternion.value),
-        };
-
-        let norm_conjugate_quaternion: Quaternion = conjugate(normalized_quaternion);
-
-        let norm_inverse_quaternion: Quaternion = inverse(normalized_quaternion);
-
-        println!(
-            "normalized conjugate quaternion {}",
-            norm_conjugate_quaternion
-        );
-
-        println!("normalized inverse quaternion {}", norm_inverse_quaternion);
-
     }
 }

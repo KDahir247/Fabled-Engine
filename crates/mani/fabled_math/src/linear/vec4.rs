@@ -1,9 +1,13 @@
-use crate::math_trait::Vec4Swizzles;
 use crate::{Vector2, Vector3};
-use std::fmt::{Display, Formatter};
+
+use crate::math_trait::Vec4Swizzles;
+
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
+
+use std::fmt::{Display, Formatter};
+
 use std::simd::Which::*;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -335,34 +339,22 @@ impl Vec4Swizzles for Vector4 {
 
     #[inline]
     fn xy(self) -> Self::Vec2 {
-        let y = self.value[1];
-        let x = self.value[0];
-
-        Vector2::set(x, y)
+        Vector2::set(self.x(), self.y())
     }
 
     #[inline]
     fn xz(self) -> Self::Vec2 {
-        let z = self.value[2];
-        let x = self.value[0];
-
-        Vector2::set(x, z)
+        Vector2::set(self.x(), self.z())
     }
 
     #[inline]
     fn xw(self) -> Self::Vec2 {
-        let w = self.value[3];
-        let x = self.value[0];
-
-        Vector2::set(x, w)
+        Vector2::set(self.x(), self.w())
     }
 
     #[inline]
     fn yx(self) -> Self::Vec2 {
-        let y = self.value[1];
-        let x = self.value[0];
-
-        Vector2::set(y, x)
+        Vector2::set(self.y(), self.x())
     }
 
     #[inline]
@@ -372,18 +364,12 @@ impl Vec4Swizzles for Vector4 {
 
     #[inline]
     fn yz(self) -> Self::Vec2 {
-        let z = self.value[2];
-        let y = self.value[1];
-
-        Vector2::set(y, z)
+        Vector2::set(self.y(), self.z())
     }
 
     #[inline]
     fn yw(self) -> Self::Vec2 {
-        let w = self.value[3];
-        let y = self.value[1];
-
-        Vector2::set(y, w)
+        Vector2::set(self.y(), self.w())
     }
 
     #[inline]
@@ -403,10 +389,7 @@ impl Vec4Swizzles for Vector4 {
 
     #[inline]
     fn zw(self) -> Self::Vec2 {
-        let w = self.value[3];
-        let z = self.value[2];
-
-        Vector2::set(z, w)
+        Vector2::set(self.z(), self.w())
     }
 
     #[inline]
@@ -431,717 +414,873 @@ impl Vec4Swizzles for Vector4 {
 
     #[inline]
     fn xxx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::splat(self.x())
     }
 
     #[inline]
     fn xxy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.x(), self.y())
     }
 
     #[inline]
     fn xxz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.x(), self.z())
     }
 
     #[inline]
     fn xxw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.x(), self.w())
     }
 
     #[inline]
     fn xyx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.y(), self.x())
     }
 
     #[inline]
     fn xyy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.y(), self.y())
     }
 
     #[inline]
     fn xyz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.y(), self.z())
     }
 
     #[inline]
     fn xyw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.y(), self.w())
     }
 
     #[inline]
     fn xzx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.z(), self.x())
     }
 
     #[inline]
     fn xzy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.z(), self.y())
     }
 
     #[inline]
     fn xzz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.z(), self.z())
     }
 
     #[inline]
     fn xzw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.z(), self.w())
     }
 
     #[inline]
     fn xwx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.w(), self.x())
     }
 
     #[inline]
     fn xwy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.w(), self.y())
     }
 
     #[inline]
     fn xwz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.w(), self.z())
     }
 
     #[inline]
     fn xww(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.x(), self.w(), self.w())
     }
 
     #[inline]
     fn yxx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.x(), self.x())
     }
 
     #[inline]
     fn yxy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.x(), self.y())
     }
 
     #[inline]
     fn yxz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.x(), self.z())
     }
 
     #[inline]
     fn yxw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.x(), self.w())
     }
 
     #[inline]
     fn yyx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.y(), self.x())
     }
 
     #[inline]
     fn yyy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::splat(self.y())
     }
 
     #[inline]
     fn yyz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.y(), self.z())
     }
 
     #[inline]
     fn yyw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.y(), self.w())
     }
 
     #[inline]
     fn yzx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.z(), self.x())
     }
 
     #[inline]
     fn yzy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.z(), self.y())
     }
 
     #[inline]
     fn yzz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.z(), self.z())
     }
 
     #[inline]
     fn yzw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.z(), self.w())
     }
 
     #[inline]
     fn ywx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.w(), self.x())
     }
 
     #[inline]
     fn ywy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.w(), self.y())
     }
 
     #[inline]
     fn ywz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.w(), self.z())
     }
 
     #[inline]
     fn yww(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.y(), self.w(), self.w())
     }
 
     #[inline]
     fn zxx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.x(), self.x())
     }
 
     #[inline]
     fn zxy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.x(), self.y())
     }
 
     #[inline]
     fn zxz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.x(), self.z())
     }
 
     #[inline]
     fn zxw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.x(), self.w())
     }
 
     #[inline]
     fn zyx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.y(), self.x())
     }
 
     #[inline]
     fn zyy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.y(), self.y())
     }
 
     #[inline]
     fn zyz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.y(), self.z())
     }
 
     #[inline]
     fn zyw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.y(), self.w())
     }
 
     #[inline]
     fn zzx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.z(), self.x())
     }
 
     #[inline]
     fn zzy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.z(), self.y())
     }
 
     #[inline]
     fn zzz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::splat(self.z())
     }
 
     #[inline]
     fn zzw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.z(), self.w())
     }
 
     #[inline]
     fn zwx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.w(), self.x())
     }
 
     #[inline]
     fn zwy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.w(), self.y())
     }
 
     #[inline]
     fn zwz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.w(), self.z())
     }
 
     #[inline]
     fn zww(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.z(), self.w(), self.w())
     }
 
     #[inline]
     fn wxx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.x(), self.x())
     }
 
     #[inline]
     fn wxy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.x(), self.y())
     }
 
     #[inline]
     fn wxz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.x(), self.z())
     }
 
     #[inline]
     fn wxw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.x(), self.w())
     }
 
     #[inline]
     fn wyx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.y(), self.x())
     }
 
     #[inline]
     fn wyy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.y(), self.y())
     }
 
     #[inline]
     fn wyz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.y(), self.z())
     }
 
     #[inline]
     fn wyw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.y(), self.w())
     }
 
     #[inline]
     fn wzx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.z(), self.x())
     }
 
     #[inline]
     fn wzy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.z(), self.y())
     }
 
     #[inline]
     fn wzz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.z(), self.z())
     }
 
     #[inline]
     fn wzw(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.z(), self.w())
     }
 
     #[inline]
     fn wwx(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.w(), self.x())
     }
 
     #[inline]
     fn wwy(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.w(), self.y())
     }
 
     #[inline]
     fn wwz(self) -> Self::Vec3 {
-        todo!()
+        Vector3::set(self.w(), self.w(), self.z())
     }
 
     #[inline]
     fn www(self) -> Self::Vec3 {
-        todo!()
+        Vector3::splat(self.w())
     }
 
     #[inline]
     fn xxxx(self) -> Self {
-        todo!()
+        Vector4::splat(self.x())
     }
 
     #[inline]
     fn xxxy(self) -> Self {
-        todo!()
+        let xxxy = std::simd::simd_swizzle!(self.value, [0,0,0,1]);
+
+        Vector4 { value: xxxy }
     }
 
     #[inline]
     fn xxxz(self) -> Self {
-        todo!()
+        let xxxz = std::simd::simd_swizzle!(self.value, [0,0,0,2]);
+
+        Vector4 { value: xxxz }
     }
 
     #[inline]
     fn xxxw(self) -> Self {
-        todo!()
+        let xxxw = std::simd::simd_swizzle!(self.value, [0,0,0,3]);
+
+        Vector4 { value: xxxw }
     }
 
     #[inline]
     fn xxyx(self) -> Self {
-        todo!()
+        let xxyx = std::simd::simd_swizzle!(self.value, [0,0,1,0]);
+
+        Vector4 { value: xxyx }
     }
 
     #[inline]
     fn xxyy(self) -> Self {
-        todo!()
+        let xxyy = std::simd::simd_swizzle!(self.value, [0,0,1,1]);
+
+        Vector4 { value: xxyy }
     }
 
     #[inline]
     fn xxyz(self) -> Self {
-        todo!()
+        let xxyz = std::simd::simd_swizzle!(self.value, [0,0,1,2]);
+
+        Vector4 { value: xxyz }
     }
 
     #[inline]
     fn xxyw(self) -> Self {
-        todo!()
+        let xxyw = std::simd::simd_swizzle!(self.value, [0,0,1,3]);
+
+        Vector4 { value: xxyw }
     }
 
     #[inline]
     fn xxzx(self) -> Self {
-        todo!()
+        let xxzx = std::simd::simd_swizzle!(self.value, [0,0,2,0]);
+
+        Vector4 { value: xxzx }
     }
 
     #[inline]
     fn xxzy(self) -> Self {
-        todo!()
+        let xxzy = std::simd::simd_swizzle!(self.value, [0,0,2,1]);
+
+        Vector4 { value: xxzy }
     }
 
     #[inline]
     fn xxzz(self) -> Self {
-        todo!()
+        let xxzz = std::simd::simd_swizzle!(self.value, [0,0,2,2]);
+
+        Vector4 { value: xxzz }
     }
 
     #[inline]
     fn xxzw(self) -> Self {
-        todo!()
+        let xxzw = std::simd::simd_swizzle!(self.value, [0,0,2,3]);
+
+        Vector4 { value: xxzw }
     }
 
     #[inline]
     fn xxwx(self) -> Self {
-        todo!()
+        let xxwx = std::simd::simd_swizzle!(self.value, [0,0,3,0]);
+
+        Vector4 { value: xxwx }
     }
 
     #[inline]
     fn xxwy(self) -> Self {
-        todo!()
+        let xxwy = std::simd::simd_swizzle!(self.value, [0,0,3,1]);
+
+        Vector4 { value: xxwy }
     }
 
     #[inline]
     fn xxwz(self) -> Self {
-        todo!()
+        let xxwz = std::simd::simd_swizzle!(self.value, [0,0,3,2]);
+
+        Vector4 { value: xxwz }
     }
 
     #[inline]
     fn xxww(self) -> Self {
-        todo!()
+        let xxww = std::simd::simd_swizzle!(self.value, [0,0,3,3]);
+
+        Vector4 { value: xxww }
     }
 
     #[inline]
     fn xyxx(self) -> Self {
-        todo!()
+        let xyxx = std::simd::simd_swizzle!(self.value, [0,1,0,0]);
+
+        Vector4 { value: xyxx }
     }
 
     #[inline]
     fn xyxy(self) -> Self {
-        todo!()
+        let xyxy = std::simd::simd_swizzle!(self.value, [0,1,0,1]);
+
+        Vector4 { value: xyxy }
     }
 
     #[inline]
     fn xyxz(self) -> Self {
-        todo!()
+        let xyxz = std::simd::simd_swizzle!(self.value, [0,1,0,2]);
+
+        Vector4 { value: xyxz }
     }
 
     #[inline]
     fn xyxw(self) -> Self {
-        todo!()
+        let xyxw = std::simd::simd_swizzle!(self.value, [0,1,0,3]);
+
+        Vector4 { value: xyxw }
     }
 
     #[inline]
     fn xyyx(self) -> Self {
-        todo!()
+        let xyyx = std::simd::simd_swizzle!(self.value, [0,1,1,0]);
+
+        Vector4 { value: xyyx }
     }
 
     #[inline]
     fn xyyy(self) -> Self {
-        todo!()
+        let xyyy = std::simd::simd_swizzle!(self.value, [0,1,1,1]);
+
+        Vector4 { value: xyyy }
     }
 
     #[inline]
     fn xyyz(self) -> Self {
-        todo!()
+        let xyyz = std::simd::simd_swizzle!(self.value, [0,1,1,2]);
+
+        Vector4 { value: xyyz }
     }
 
     #[inline]
     fn xyyw(self) -> Self {
-        todo!()
+        let xyyw = std::simd::simd_swizzle!(self.value, [0,1,1,3]);
+
+        Vector4 { value: xyyw }
     }
 
     #[inline]
     fn xyzx(self) -> Self {
-        todo!()
+        let xyzx = std::simd::simd_swizzle!(self.value, [0,1,2,0]);
+
+        Vector4 { value: xyzx }
     }
 
     #[inline]
     fn xyzy(self) -> Self {
-        todo!()
+        let xyzy = std::simd::simd_swizzle!(self.value, [0,1,2,1]);
+
+        Vector4 { value: xyzy }
     }
 
     #[inline]
     fn xyzz(self) -> Self {
-        todo!()
+        let xyzz = std::simd::simd_swizzle!(self.value, [0,1,2,2]);
+
+        Vector4 { value: xyzz }
     }
 
     #[inline]
     fn xywx(self) -> Self {
-        todo!()
+        let xywx = std::simd::simd_swizzle!(self.value, [0,1,3,0]);
+
+        Vector4 { value: xywx }
     }
 
     #[inline]
     fn xywy(self) -> Self {
-        todo!()
+        let xywy = std::simd::simd_swizzle!(self.value, [0,1,3,1]);
+
+        Vector4 { value: xywy }
     }
 
     #[inline]
     fn xywz(self) -> Self {
-        todo!()
+        let xywz = std::simd::simd_swizzle!(self.value, [0,1,3,2]);
+
+        Vector4 { value: xywz }
     }
 
     #[inline]
     fn xyww(self) -> Self {
-        todo!()
+        let xyww = std::simd::simd_swizzle!(self.value, [0,1,3,3]);
+
+        Vector4 { value: xyww }
     }
 
     #[inline]
     fn xzxx(self) -> Self {
-        todo!()
+        let xzxx = std::simd::simd_swizzle!(self.value, [0,2,0,0]);
+
+        Vector4 { value: xzxx }
     }
 
     #[inline]
     fn xzxy(self) -> Self {
-        todo!()
+        let xzxy = std::simd::simd_swizzle!(self.value, [0,2,0,1]);
+
+        Vector4 { value: xzxy }
     }
 
     #[inline]
     fn xzxz(self) -> Self {
-        todo!()
+        let xzxz = std::simd::simd_swizzle!(self.value, [0,2,0,2]);
+
+        Vector4 { value: xzxz }
     }
 
     #[inline]
     fn xzxw(self) -> Self {
-        todo!()
+        let xzxw = std::simd::simd_swizzle!(self.value, [0,2,0,3]);
+
+        Vector4 { value: xzxw }
     }
 
     #[inline]
     fn xzyx(self) -> Self {
-        todo!()
+        let xzyx = std::simd::simd_swizzle!(self.value, [0,2,1,0]);
+
+        Vector4 { value: xzyx }
     }
 
     #[inline]
     fn xzyy(self) -> Self {
-        todo!()
+        let xzyy = std::simd::simd_swizzle!(self.value, [0,2,1,1]);
+
+        Vector4 { value: xzyy }
     }
 
     #[inline]
     fn xzyz(self) -> Self {
-        todo!()
+        let xzyz = std::simd::simd_swizzle!(self.value, [0,2,1,2]);
+
+        Vector4 { value: xzyz }
     }
 
     #[inline]
     fn xzyw(self) -> Self {
-        todo!()
+        let xzyw = std::simd::simd_swizzle!(self.value, [0,2,1,3]);
+
+        Vector4 { value: xzyw }
     }
 
     #[inline]
     fn xzzx(self) -> Self {
-        todo!()
+        let xzzx = std::simd::simd_swizzle!(self.value, [0,2,2,0]);
+
+        Vector4 { value: xzzx }
     }
 
     #[inline]
     fn xzzy(self) -> Self {
-        todo!()
+        let xzzy = std::simd::simd_swizzle!(self.value, [0,2,2,1]);
+
+        Vector4 { value: xzzy }
     }
 
     #[inline]
     fn xzzz(self) -> Self {
-        todo!()
+        let xzzz = std::simd::simd_swizzle!(self.value, [0,2,2,2]);
+
+        Vector4 { value: xzzz }
     }
 
     #[inline]
     fn xzzw(self) -> Self {
-        todo!()
+        let xzzw = std::simd::simd_swizzle!(self.value, [0,2,2,3]);
+
+        Vector4 { value: xzzw }
     }
 
     #[inline]
     fn xzwx(self) -> Self {
-        todo!()
+        let xzwx = std::simd::simd_swizzle!(self.value, [0,2,3,0]);
+
+        Vector4 { value: xzwx }
     }
 
     #[inline]
     fn xzwy(self) -> Self {
-        todo!()
+        let xzwy = std::simd::simd_swizzle!(self.value, [0,2,3,1]);
+
+        Vector4 { value: xzwy }
     }
 
     #[inline]
     fn xzwz(self) -> Self {
-        todo!()
+        let xzwz = std::simd::simd_swizzle!(self.value, [0,2,3,2]);
+
+        Vector4 { value: xzwz }
     }
 
     #[inline]
     fn xzww(self) -> Self {
-        todo!()
+        let xzww = std::simd::simd_swizzle!(self.value, [0,2,3,3]);
+
+        Vector4 { value: xzww }
     }
 
     #[inline]
     fn xwxx(self) -> Self {
-        todo!()
+        let xwxx = std::simd::simd_swizzle!(self.value, [0,3,0,0]);
+
+        Vector4 { value: xwxx }
     }
 
     #[inline]
     fn xwxy(self) -> Self {
-        todo!()
+        let xwxy = std::simd::simd_swizzle!(self.value, [0,3,0,1]);
+
+        Vector4 { value: xwxy }
     }
 
     #[inline]
     fn xwxz(self) -> Self {
-        todo!()
+        let xwxz = std::simd::simd_swizzle!(self.value, [0,3,0,2]);
+
+        Vector4 { value: xwxz }
     }
 
     #[inline]
     fn xwxw(self) -> Self {
-        todo!()
+        let xwxw = std::simd::simd_swizzle!(self.value, [0,3,0,3]);
+
+        Vector4 { value: xwxw }
     }
 
     #[inline]
     fn xwyx(self) -> Self {
-        todo!()
+        let xwyx = std::simd::simd_swizzle!(self.value, [0,3,1,0]);
+
+        Vector4 { value: xwyx }
     }
 
     #[inline]
     fn xwyy(self) -> Self {
-        todo!()
+        let xwyy = std::simd::simd_swizzle!(self.value, [0,3,1,1]);
+
+        Vector4 { value: xwyy }
     }
 
     #[inline]
     fn xwyz(self) -> Self {
-        todo!()
+        let xwyz = std::simd::simd_swizzle!(self.value, [0,3,1,2]);
+
+        Vector4 { value: xwyz }
     }
 
     #[inline]
     fn xwyw(self) -> Self {
-        todo!()
+        let xwyw = std::simd::simd_swizzle!(self.value, [0,3,1,3]);
+
+        Vector4 { value: xwyw }
     }
 
     #[inline]
     fn xwzx(self) -> Self {
-        todo!()
+        let xwzx = std::simd::simd_swizzle!(self.value, [0,3,2,0]);
+
+        Vector4 { value: xwzx }
     }
 
     #[inline]
     fn xwzy(self) -> Self {
-        todo!()
+        let xwzy = std::simd::simd_swizzle!(self.value, [0,3,2,1]);
+
+        Vector4 { value: xwzy }
     }
 
     #[inline]
     fn xwzz(self) -> Self {
-        todo!()
+        let xwzz = std::simd::simd_swizzle!(self.value, [0,3,2,2]);
+
+        Vector4 { value: xwzz }
     }
 
     #[inline]
     fn xwzw(self) -> Self {
-        todo!()
+        let xwzw = std::simd::simd_swizzle!(self.value, [0,3,2,3]);
+
+        Vector4 { value: xwzw }
     }
 
     #[inline]
     fn xwwx(self) -> Self {
-        todo!()
+        let xwwx = std::simd::simd_swizzle!(self.value, [0,3,3,0]);
+
+        Vector4 { value: xwwx }
     }
 
     #[inline]
     fn xwwy(self) -> Self {
-        todo!()
+        let xwwy = std::simd::simd_swizzle!(self.value, [0,3,3,1]);
+
+        Vector4 { value: xwwy }
     }
 
     #[inline]
     fn xwwz(self) -> Self {
-        todo!()
+        let xwwz = std::simd::simd_swizzle!(self.value, [0,3,3,2]);
+
+        Vector4 { value: xwwz }
     }
 
     #[inline]
     fn xwww(self) -> Self {
-        todo!()
+        let xwww = std::simd::simd_swizzle!(self.value, [0,3,3,3]);
+
+        Vector4 { value: xwww }
     }
 
     #[inline]
     fn yxxx(self) -> Self {
-        todo!()
+        let yxxx = std::simd::simd_swizzle!(self.value, [1,0,0,0]);
+
+        Vector4 { value: yxxx }
     }
 
     #[inline]
     fn yxxy(self) -> Self {
-        todo!()
+        let yxxy = std::simd::simd_swizzle!(self.value, [1,0,0,1]);
+
+        Vector4 { value: yxxy }
     }
 
     #[inline]
     fn yxxz(self) -> Self {
-        todo!()
+        let yxxz = std::simd::simd_swizzle!(self.value, [1,0,0,2]);
+
+        Vector4 { value: yxxz }
     }
 
     #[inline]
     fn yxxw(self) -> Self {
-        todo!()
+        let yxxw = std::simd::simd_swizzle!(self.value, [1,0,0,3]);
+
+        Vector4 { value: yxxw }
     }
 
     #[inline]
     fn yxyx(self) -> Self {
-        todo!()
+        let yxyx = std::simd::simd_swizzle!(self.value, [1,0,1,0]);
+
+        Vector4 { value: yxyx }
     }
 
     #[inline]
     fn yxyy(self) -> Self {
-        todo!()
+        let yxyy = std::simd::simd_swizzle!(self.value, [1,0,1,1]);
+
+        Vector4 { value: yxyy }
     }
 
     #[inline]
     fn yxyz(self) -> Self {
-        todo!()
+        let yxyz = std::simd::simd_swizzle!(self.value, [1,0,1,2]);
+
+        Vector4 { value: yxyz }
     }
 
     #[inline]
     fn yxyw(self) -> Self {
-        todo!()
+        let yxyw = std::simd::simd_swizzle!(self.value, [1,0,1,3]);
+
+        Vector4 { value: yxyw }
     }
 
     #[inline]
     fn yxzx(self) -> Self {
-        todo!()
+        let yxzx = std::simd::simd_swizzle!(self.value, [1,0,2,0]);
+
+        Vector4 { value: yxzx }
     }
 
     #[inline]
     fn yxzy(self) -> Self {
-        todo!()
+        let yxzy = std::simd::simd_swizzle!(self.value, [1,0,2,1]);
+
+        Vector4 { value: yxzy }
     }
 
     #[inline]
     fn yxzz(self) -> Self {
-        todo!()
+        let yxzz = std::simd::simd_swizzle!(self.value, [1,0,2,2]);
+
+        Vector4 { value: yxzz }
     }
 
     #[inline]
     fn yxzw(self) -> Self {
-        todo!()
+        let yxzw = std::simd::simd_swizzle!(self.value, [1,0,2,3]);
+
+        Vector4 { value: yxzw }
     }
 
     #[inline]
     fn yxwx(self) -> Self {
-        todo!()
+        let yxwx = std::simd::simd_swizzle!(self.value, [1,0,3,0]);
+
+        Vector4 { value: yxwx }
     }
 
     #[inline]
     fn yxwy(self) -> Self {
-        todo!()
+        let yxwy = std::simd::simd_swizzle!(self.value, [1,0,3,1]);
+
+        Vector4 { value: yxwy }
     }
 
     #[inline]
     fn yxwz(self) -> Self {
-        todo!()
+        let yxwz = std::simd::simd_swizzle!(self.value, [1,0,3,2]);
+
+        Vector4 { value: yxwz }
     }
 
     #[inline]
     fn yxww(self) -> Self {
-        todo!()
+        let yxww = std::simd::simd_swizzle!(self.value, [1,0,3,3]);
+
+        Vector4 { value: yxww }
     }
 
     #[inline]

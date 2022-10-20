@@ -1,6 +1,6 @@
-use fabled_math::FloatExtension;
+use fabled_math::{Vector3, Vector4};
 
-pub fn screen_referred_to_rgbe(screen_referred_color: [f32; 3]) -> [f32; 4] {
+pub fn screen_referred_to_rgbe(screen_referred_color: [f32;3]) -> [f32;4] {
     let [red, green, blue] = screen_referred_color;
 
     let maximum_luminance = red.max(green.max(blue));

@@ -1,5 +1,4 @@
 #![feature(split_array)]
-#![feature(generic_const_exprs)]
 #![feature(array_zip)]
 
 pub mod camera;

@@ -1,9 +1,12 @@
-use crate::math_trait::Vec2Swizzles;
 use crate::{Vector3, Vector4};
-use std::fmt::{Display, Formatter};
+
+use crate::math_trait::Vec2Swizzles;
+
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
+
+use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone)]
 pub struct Vector2 {

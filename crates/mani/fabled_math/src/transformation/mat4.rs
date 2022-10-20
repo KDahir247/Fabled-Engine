@@ -1,6 +1,10 @@
-use std::{fmt::Display, ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign}};
+use crate::Vector4;
 
-use crate::{Vector4, matrix4x4_math::transpose};
+use crate::matrix4x4_math::transpose;
+
+use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign};
+
+use std::fmt::Display;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Matrix4x4 {

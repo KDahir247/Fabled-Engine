@@ -13,3 +13,6 @@ EaseInOutElastic, EaseInBounce, EaseOutBounce, EaseInOutBounce
 
 linear interpolation, spherical interpolation, normalized linear
 interpolation
+
+
+Add Vector2 Math
