@@ -2,13 +2,13 @@ use crate::{Matrix3x3, Quaternion, Vector2, Vector4};
 
 use crate::math_trait::Vec3Swizzles;
 
-use crate::vector_math::{component_sum, mul_add, cross};
 use crate::matrix3x3_math::transpose;
+use crate::vector_math::{component_sum, cross};
 
+use std::fmt::{Display, Formatter};
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
-use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vector3 {
@@ -17,9 +17,7 @@ pub struct Vector3 {
 
 impl Default for Vector3 {
     fn default() -> Self {
-        Self {
-            value: [0.0; 4].into(),
-        }
+        Vector3::ZERO
     }
 }
 
@@ -89,10 +87,8 @@ impl Vector3 {
     }
 
     #[inline]
-    pub const fn from_array(array: [f32; 3]) -> Vector3 {
-        let z = array[2];
-
-        Vector3::set(array[0], array[1], z)
+    pub const fn from_primitive(array: [f32; 3]) -> Vector3 {
+        Vector3::set(array[0], array[1], array[2])
     }
 
     #[inline]
@@ -134,24 +130,25 @@ impl Mul<Quaternion> for Vector3 {
 
     #[inline]
     fn mul(self, rhs: Quaternion) -> Self::Output {
-        let mut result = self;
-        result *= rhs;
-        result
+        let quaternion_real: f32 = rhs.to_real();
+
+        let quaternion_scalar_vector: Vector3 = Vector3::splat(quaternion_real);
+
+        let t: Vector3 = Vector3 {
+            value: cross(rhs.value, self.value),
+        } * 2.0;
+        let intermediate: Vector3 = Vector3 {
+            value: cross(rhs.value, t.value),
+        };
+
+        (quaternion_scalar_vector * t) + (intermediate + self)
     }
 }
 
 impl MulAssign<Quaternion> for Vector3 {
     #[inline]
     fn mul_assign(&mut self, rhs: Quaternion) {
-        let quaternion_real = rhs.to_real();
-
-        const TWO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([2.0; 4]);
-        let quaternion_scalar_vector = std::simd::f32x4::from_array([quaternion_real; 4]);
-
-        let t = TWO_VEC * cross(rhs.value, self.value);
-        let intermediate = cross(rhs.value, t);
-
-        self.value += mul_add(quaternion_scalar_vector, t, intermediate);
+        self.value = (*self * rhs).value;
     }
 }
 
@@ -159,17 +156,17 @@ impl Mul<Vector3> for Matrix3x3 {
     type Output = Vector3;
 
     fn mul(self, rhs: Vector3) -> Self::Output {
-        let row_col_matrix = transpose(self);
+        let row_col_matrix: Matrix3x3 = transpose(self);
 
-        let row_mul_col_vec_x = row_col_matrix.column_x * rhs;
-        let row_mul_col_vec_y = row_col_matrix.column_y * rhs;
-        let row_mul_col_vec_z = row_col_matrix.column_z * rhs;
+        let row_mul_col_vec_x: Vector3 = row_col_matrix.column_x * rhs;
+        let row_mul_col_vec_y: Vector3 = row_col_matrix.column_y * rhs;
+        let row_mul_col_vec_z: Vector3 = row_col_matrix.column_z * rhs;
 
-        let x = component_sum(row_mul_col_vec_x.value);
-        let y = component_sum(row_mul_col_vec_y.value);
-        let z = component_sum(row_mul_col_vec_z.value);
-
-        Vector3::set(x, y, z)
+        Vector3::set(
+            component_sum(row_mul_col_vec_x.value),
+            component_sum(row_mul_col_vec_y.value),
+            component_sum(row_mul_col_vec_z.value),
+        )
     }
 }
 
@@ -179,7 +176,6 @@ impl MulAssign<Matrix3x3> for Vector3 {
         self.value = (rhs * *self).value;
     }
 }
-
 
 // Component-Wise
 impl Mul<Vector3> for Vector3 {
@@ -282,7 +278,6 @@ impl SubAssign<f32> for Vector3 {
 }
 
 // Vector-Wise
-
 impl Mul<f32> for Vector3 {
     type Output = Vector3;
 
@@ -354,7 +349,9 @@ impl Neg for Vector3 {
 
     #[inline]
     fn neg(self) -> Self::Output {
-        Vector3 { value: -self.value }
+        Vector3 {
+            value: self.value.neg(),
+        }
     }
 }
 
@@ -405,7 +402,7 @@ impl Vec3Swizzles for Vector3 {
 
     #[inline]
     fn xy(self) -> Self::Vec2 {
-        Vector2::set(self.x(),self.y())
+        Vector2::set(self.x(), self.y())
     }
 
     #[inline]
@@ -445,9 +442,9 @@ impl Vec3Swizzles for Vector3 {
 
     #[inline]
     fn xxx(self) -> Self {
-        let xxx = std::simd::simd_swizzle!(self.value, [0,0,0,0]);
+        let xxx = std::simd::simd_swizzle!(self.value, [0, 0, 0, 0]);
 
-        Vector3{ value: xxx }
+        Vector3 { value: xxx }
     }
 
     #[inline]

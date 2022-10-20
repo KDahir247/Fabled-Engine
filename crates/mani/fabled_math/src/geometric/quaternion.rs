@@ -257,7 +257,7 @@ impl Mul for Quaternion {
 impl MulAssign for Quaternion {
     #[inline]
     fn mul_assign(&mut self, rhs: Self) {
-        *self = *self * rhs;
+        self.value = (*self * rhs).value;
     }
 }
 
