@@ -46,7 +46,7 @@ fabled_obj = {path = "crates/mani/fabled_obj", version = "*"}
 # todo others remove
 image = "*"
 winit = "*"
-wgpu = "0.8"
+wgpu = "0.14"
 futures = "*"
 bytemuck = {version = "*", features = ["derive"]}
 tobj = "*"
