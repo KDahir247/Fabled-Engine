@@ -1,6 +1,6 @@
 use crate::{Vector2, Vector3};
 
-use crate::math_trait::Vec4Swizzles;
+use crate::math_trait::Swizzles4;
 
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
@@ -65,7 +65,7 @@ impl Vector4 {
     }
 
     #[inline]
-    pub const fn from_array(array: [f32; 4]) -> Vector4 {
+    pub const fn from_primitive(array: [f32; 4]) -> Vector4 {
         Vector4 {
             value: std::simd::f32x4::from_array(array),
         }
@@ -330,407 +330,407 @@ impl SubAssign<Vector4> for Vector4 {
     }
 }
 
-impl Vec4Swizzles for Vector4 {
-    type Vec2 = Vector2;
-    type Vec3 = Vector3;
+impl Swizzles4 for Vector4 {
+    type Swizzle2 = Vector2;
+    type Swizzle3 = Vector3;
 
     #[inline]
-    fn xx(self) -> Self::Vec2 {
+    fn xx(self) -> Self::Swizzle2 {
         Vector2::splat(self.x())
     }
 
     #[inline]
-    fn xy(self) -> Self::Vec2 {
+    fn xy(self) -> Self::Swizzle2 {
         Vector2::set(self.x(), self.y())
     }
 
     #[inline]
-    fn xz(self) -> Self::Vec2 {
+    fn xz(self) -> Self::Swizzle2 {
         Vector2::set(self.x(), self.z())
     }
 
     #[inline]
-    fn xw(self) -> Self::Vec2 {
+    fn xw(self) -> Self::Swizzle2 {
         Vector2::set(self.x(), self.w())
     }
 
     #[inline]
-    fn yx(self) -> Self::Vec2 {
+    fn yx(self) -> Self::Swizzle2 {
         Vector2::set(self.y(), self.x())
     }
 
     #[inline]
-    fn yy(self) -> Self::Vec2 {
+    fn yy(self) -> Self::Swizzle2 {
         Vector2::splat(self.y())
     }
 
     #[inline]
-    fn yz(self) -> Self::Vec2 {
+    fn yz(self) -> Self::Swizzle2 {
         Vector2::set(self.y(), self.z())
     }
 
     #[inline]
-    fn yw(self) -> Self::Vec2 {
+    fn yw(self) -> Self::Swizzle2 {
         Vector2::set(self.y(), self.w())
     }
 
     #[inline]
-    fn zx(self) -> Self::Vec2 {
+    fn zx(self) -> Self::Swizzle2 {
         Vector2::set(self.z(), self.x())
     }
 
     #[inline]
-    fn zy(self) -> Self::Vec2 {
+    fn zy(self) -> Self::Swizzle2 {
         Vector2::set(self.z(), self.y())
     }
 
     #[inline]
-    fn zz(self) -> Self::Vec2 {
+    fn zz(self) -> Self::Swizzle2 {
         Vector2::splat(self.z())
     }
 
     #[inline]
-    fn zw(self) -> Self::Vec2 {
+    fn zw(self) -> Self::Swizzle2 {
         Vector2::set(self.z(), self.w())
     }
 
     #[inline]
-    fn wx(self) -> Self::Vec2 {
+    fn wx(self) -> Self::Swizzle2 {
         Vector2::set(self.w(), self.x())
     }
 
     #[inline]
-    fn wy(self) -> Self::Vec2 {
+    fn wy(self) -> Self::Swizzle2 {
         Vector2::set(self.w(), self.y())
     }
 
     #[inline]
-    fn wz(self) -> Self::Vec2 {
+    fn wz(self) -> Self::Swizzle2 {
         Vector2::set(self.w(), self.z())
     }
 
     #[inline]
-    fn ww(self) -> Self::Vec2 {
+    fn ww(self) -> Self::Swizzle2 {
         Vector2::splat(self.w())
     }
 
     #[inline]
-    fn xxx(self) -> Self::Vec3 {
+    fn xxx(self) -> Self::Swizzle3 {
         Vector3::splat(self.x())
     }
 
     #[inline]
-    fn xxy(self) -> Self::Vec3 {
+    fn xxy(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.x(), self.y())
     }
 
     #[inline]
-    fn xxz(self) -> Self::Vec3 {
+    fn xxz(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.x(), self.z())
     }
 
     #[inline]
-    fn xxw(self) -> Self::Vec3 {
+    fn xxw(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.x(), self.w())
     }
 
     #[inline]
-    fn xyx(self) -> Self::Vec3 {
+    fn xyx(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.y(), self.x())
     }
 
     #[inline]
-    fn xyy(self) -> Self::Vec3 {
+    fn xyy(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.y(), self.y())
     }
 
     #[inline]
-    fn xyz(self) -> Self::Vec3 {
+    fn xyz(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.y(), self.z())
     }
 
     #[inline]
-    fn xyw(self) -> Self::Vec3 {
+    fn xyw(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.y(), self.w())
     }
 
     #[inline]
-    fn xzx(self) -> Self::Vec3 {
+    fn xzx(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.z(), self.x())
     }
 
     #[inline]
-    fn xzy(self) -> Self::Vec3 {
+    fn xzy(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.z(), self.y())
     }
 
     #[inline]
-    fn xzz(self) -> Self::Vec3 {
+    fn xzz(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.z(), self.z())
     }
 
     #[inline]
-    fn xzw(self) -> Self::Vec3 {
+    fn xzw(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.z(), self.w())
     }
 
     #[inline]
-    fn xwx(self) -> Self::Vec3 {
+    fn xwx(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.w(), self.x())
     }
 
     #[inline]
-    fn xwy(self) -> Self::Vec3 {
+    fn xwy(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.w(), self.y())
     }
 
     #[inline]
-    fn xwz(self) -> Self::Vec3 {
+    fn xwz(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.w(), self.z())
     }
 
     #[inline]
-    fn xww(self) -> Self::Vec3 {
+    fn xww(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.w(), self.w())
     }
 
     #[inline]
-    fn yxx(self) -> Self::Vec3 {
+    fn yxx(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.x(), self.x())
     }
 
     #[inline]
-    fn yxy(self) -> Self::Vec3 {
+    fn yxy(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.x(), self.y())
     }
 
     #[inline]
-    fn yxz(self) -> Self::Vec3 {
+    fn yxz(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.x(), self.z())
     }
 
     #[inline]
-    fn yxw(self) -> Self::Vec3 {
+    fn yxw(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.x(), self.w())
     }
 
     #[inline]
-    fn yyx(self) -> Self::Vec3 {
+    fn yyx(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.y(), self.x())
     }
 
     #[inline]
-    fn yyy(self) -> Self::Vec3 {
+    fn yyy(self) -> Self::Swizzle3 {
         Vector3::splat(self.y())
     }
 
     #[inline]
-    fn yyz(self) -> Self::Vec3 {
+    fn yyz(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.y(), self.z())
     }
 
     #[inline]
-    fn yyw(self) -> Self::Vec3 {
+    fn yyw(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.y(), self.w())
     }
 
     #[inline]
-    fn yzx(self) -> Self::Vec3 {
+    fn yzx(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.z(), self.x())
     }
 
     #[inline]
-    fn yzy(self) -> Self::Vec3 {
+    fn yzy(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.z(), self.y())
     }
 
     #[inline]
-    fn yzz(self) -> Self::Vec3 {
+    fn yzz(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.z(), self.z())
     }
 
     #[inline]
-    fn yzw(self) -> Self::Vec3 {
+    fn yzw(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.z(), self.w())
     }
 
     #[inline]
-    fn ywx(self) -> Self::Vec3 {
+    fn ywx(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.w(), self.x())
     }
 
     #[inline]
-    fn ywy(self) -> Self::Vec3 {
+    fn ywy(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.w(), self.y())
     }
 
     #[inline]
-    fn ywz(self) -> Self::Vec3 {
+    fn ywz(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.w(), self.z())
     }
 
     #[inline]
-    fn yww(self) -> Self::Vec3 {
+    fn yww(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.w(), self.w())
     }
 
     #[inline]
-    fn zxx(self) -> Self::Vec3 {
+    fn zxx(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.x(), self.x())
     }
 
     #[inline]
-    fn zxy(self) -> Self::Vec3 {
+    fn zxy(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.x(), self.y())
     }
 
     #[inline]
-    fn zxz(self) -> Self::Vec3 {
+    fn zxz(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.x(), self.z())
     }
 
     #[inline]
-    fn zxw(self) -> Self::Vec3 {
+    fn zxw(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.x(), self.w())
     }
 
     #[inline]
-    fn zyx(self) -> Self::Vec3 {
+    fn zyx(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.y(), self.x())
     }
 
     #[inline]
-    fn zyy(self) -> Self::Vec3 {
+    fn zyy(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.y(), self.y())
     }
 
     #[inline]
-    fn zyz(self) -> Self::Vec3 {
+    fn zyz(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.y(), self.z())
     }
 
     #[inline]
-    fn zyw(self) -> Self::Vec3 {
+    fn zyw(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.y(), self.w())
     }
 
     #[inline]
-    fn zzx(self) -> Self::Vec3 {
+    fn zzx(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.z(), self.x())
     }
 
     #[inline]
-    fn zzy(self) -> Self::Vec3 {
+    fn zzy(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.z(), self.y())
     }
 
     #[inline]
-    fn zzz(self) -> Self::Vec3 {
+    fn zzz(self) -> Self::Swizzle3 {
         Vector3::splat(self.z())
     }
 
     #[inline]
-    fn zzw(self) -> Self::Vec3 {
+    fn zzw(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.z(), self.w())
     }
 
     #[inline]
-    fn zwx(self) -> Self::Vec3 {
+    fn zwx(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.w(), self.x())
     }
 
     #[inline]
-    fn zwy(self) -> Self::Vec3 {
+    fn zwy(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.w(), self.y())
     }
 
     #[inline]
-    fn zwz(self) -> Self::Vec3 {
+    fn zwz(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.w(), self.z())
     }
 
     #[inline]
-    fn zww(self) -> Self::Vec3 {
+    fn zww(self) -> Self::Swizzle3 {
         Vector3::set(self.z(), self.w(), self.w())
     }
 
     #[inline]
-    fn wxx(self) -> Self::Vec3 {
+    fn wxx(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.x(), self.x())
     }
 
     #[inline]
-    fn wxy(self) -> Self::Vec3 {
+    fn wxy(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.x(), self.y())
     }
 
     #[inline]
-    fn wxz(self) -> Self::Vec3 {
+    fn wxz(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.x(), self.z())
     }
 
     #[inline]
-    fn wxw(self) -> Self::Vec3 {
+    fn wxw(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.x(), self.w())
     }
 
     #[inline]
-    fn wyx(self) -> Self::Vec3 {
+    fn wyx(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.y(), self.x())
     }
 
     #[inline]
-    fn wyy(self) -> Self::Vec3 {
+    fn wyy(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.y(), self.y())
     }
 
     #[inline]
-    fn wyz(self) -> Self::Vec3 {
+    fn wyz(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.y(), self.z())
     }
 
     #[inline]
-    fn wyw(self) -> Self::Vec3 {
+    fn wyw(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.y(), self.w())
     }
 
     #[inline]
-    fn wzx(self) -> Self::Vec3 {
+    fn wzx(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.z(), self.x())
     }
 
     #[inline]
-    fn wzy(self) -> Self::Vec3 {
+    fn wzy(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.z(), self.y())
     }
 
     #[inline]
-    fn wzz(self) -> Self::Vec3 {
+    fn wzz(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.z(), self.z())
     }
 
     #[inline]
-    fn wzw(self) -> Self::Vec3 {
+    fn wzw(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.z(), self.w())
     }
 
     #[inline]
-    fn wwx(self) -> Self::Vec3 {
+    fn wwx(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.w(), self.x())
     }
 
     #[inline]
-    fn wwy(self) -> Self::Vec3 {
+    fn wwy(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.w(), self.y())
     }
 
     #[inline]
-    fn wwz(self) -> Self::Vec3 {
+    fn wwz(self) -> Self::Swizzle3 {
         Vector3::set(self.w(), self.w(), self.z())
     }
 
     #[inline]
-    fn www(self) -> Self::Vec3 {
+    fn www(self) -> Self::Swizzle3 {
         Vector3::splat(self.w())
     }
 

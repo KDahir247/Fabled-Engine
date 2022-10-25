@@ -1,7 +1,7 @@
-pub trait Vec2Swizzles: Sized + Copy + Clone {
-    type Vec3;
+pub trait Swizzles2: Sized + Copy + Clone {
+    type Swizzle3;
 
-    type Vec4;
+    type Swizzle4;
 
     #[inline]
     fn xy(self) -> Self {
@@ -14,82 +14,82 @@ pub trait Vec2Swizzles: Sized + Copy + Clone {
 
     fn yy(self) -> Self;
 
-    fn xxx(self) -> Self::Vec3;
+    fn xxx(self) -> Self::Swizzle3;
 
-    fn xxy(self) -> Self::Vec3;
+    fn xxy(self) -> Self::Swizzle3;
 
-    fn xyx(self) -> Self::Vec3;
+    fn xyx(self) -> Self::Swizzle3;
 
-    fn xyy(self) -> Self::Vec3;
+    fn xyy(self) -> Self::Swizzle3;
 
-    fn yxx(self) -> Self::Vec3;
+    fn yxx(self) -> Self::Swizzle3;
 
-    fn yxy(self) -> Self::Vec3;
+    fn yxy(self) -> Self::Swizzle3;
 
-    fn yyx(self) -> Self::Vec3;
+    fn yyx(self) -> Self::Swizzle3;
 
-    fn yyy(self) -> Self::Vec3;
+    fn yyy(self) -> Self::Swizzle3;
 
-    fn xxxx(self) -> Self::Vec4;
+    fn xxxx(self) -> Self::Swizzle4;
 
-    fn xxxy(self) -> Self::Vec4;
+    fn xxxy(self) -> Self::Swizzle4;
 
-    fn xxyx(self) -> Self::Vec4;
+    fn xxyx(self) -> Self::Swizzle4;
 
-    fn xxyy(self) -> Self::Vec4;
+    fn xxyy(self) -> Self::Swizzle4;
 
-    fn xyxx(self) -> Self::Vec4;
+    fn xyxx(self) -> Self::Swizzle4;
 
-    fn xyxy(self) -> Self::Vec4;
+    fn xyxy(self) -> Self::Swizzle4;
 
-    fn xyyx(self) -> Self::Vec4;
+    fn xyyx(self) -> Self::Swizzle4;
 
-    fn xyyy(self) -> Self::Vec4;
+    fn xyyy(self) -> Self::Swizzle4;
 
-    fn yxxx(self) -> Self::Vec4;
+    fn yxxx(self) -> Self::Swizzle4;
 
-    fn yxxy(self) -> Self::Vec4;
+    fn yxxy(self) -> Self::Swizzle4;
 
-    fn yxyx(self) -> Self::Vec4;
+    fn yxyx(self) -> Self::Swizzle4;
 
-    fn yxyy(self) -> Self::Vec4;
+    fn yxyy(self) -> Self::Swizzle4;
 
-    fn yyxx(self) -> Self::Vec4;
+    fn yyxx(self) -> Self::Swizzle4;
 
-    fn yyxy(self) -> Self::Vec4;
+    fn yyxy(self) -> Self::Swizzle4;
 
-    fn yyyx(self) -> Self::Vec4;
+    fn yyyx(self) -> Self::Swizzle4;
 
-    fn yyyy(self) -> Self::Vec4;
+    fn yyyy(self) -> Self::Swizzle4;
 }
 
-pub trait Vec3Swizzles: Sized + Copy + Clone {
-    type Vec2;
+pub trait Swizzles3: Sized + Copy + Clone {
+    type Swizzle2;
 
-    type Vec4;
+    type Swizzle4;
 
     #[inline]
     fn xyz(self) -> Self {
         self
     }
 
-    fn xx(self) -> Self::Vec2;
+    fn xx(self) -> Self::Swizzle2;
 
-    fn xy(self) -> Self::Vec2;
+    fn xy(self) -> Self::Swizzle2;
 
-    fn xz(self) -> Self::Vec2;
+    fn xz(self) -> Self::Swizzle2;
 
-    fn yx(self) -> Self::Vec2;
+    fn yx(self) -> Self::Swizzle2;
 
-    fn yy(self) -> Self::Vec2;
+    fn yy(self) -> Self::Swizzle2;
 
-    fn yz(self) -> Self::Vec2;
+    fn yz(self) -> Self::Swizzle2;
 
-    fn zx(self) -> Self::Vec2;
+    fn zx(self) -> Self::Swizzle2;
 
-    fn zy(self) -> Self::Vec2;
+    fn zy(self) -> Self::Swizzle2;
 
-    fn zz(self) -> Self::Vec2;
+    fn zz(self) -> Self::Swizzle2;
 
     fn xxx(self) -> Self;
 
@@ -143,338 +143,338 @@ pub trait Vec3Swizzles: Sized + Copy + Clone {
 
     fn zzz(self) -> Self;
 
-    fn xxxx(self) -> Self::Vec4;
+    fn xxxx(self) -> Self::Swizzle4;
 
-    fn xxxy(self) -> Self::Vec4;
+    fn xxxy(self) -> Self::Swizzle4;
 
-    fn xxxz(self) -> Self::Vec4;
+    fn xxxz(self) -> Self::Swizzle4;
 
-    fn xxyx(self) -> Self::Vec4;
+    fn xxyx(self) -> Self::Swizzle4;
 
-    fn xxyy(self) -> Self::Vec4;
+    fn xxyy(self) -> Self::Swizzle4;
 
-    fn xxyz(self) -> Self::Vec4;
+    fn xxyz(self) -> Self::Swizzle4;
 
-    fn xxzx(self) -> Self::Vec4;
+    fn xxzx(self) -> Self::Swizzle4;
 
-    fn xxzy(self) -> Self::Vec4;
+    fn xxzy(self) -> Self::Swizzle4;
 
-    fn xxzz(self) -> Self::Vec4;
+    fn xxzz(self) -> Self::Swizzle4;
 
-    fn xyxx(self) -> Self::Vec4;
+    fn xyxx(self) -> Self::Swizzle4;
 
-    fn xyxy(self) -> Self::Vec4;
+    fn xyxy(self) -> Self::Swizzle4;
 
-    fn xyxz(self) -> Self::Vec4;
+    fn xyxz(self) -> Self::Swizzle4;
 
-    fn xyyx(self) -> Self::Vec4;
+    fn xyyx(self) -> Self::Swizzle4;
 
-    fn xyyy(self) -> Self::Vec4;
+    fn xyyy(self) -> Self::Swizzle4;
 
-    fn xyyz(self) -> Self::Vec4;
+    fn xyyz(self) -> Self::Swizzle4;
 
-    fn xyzx(self) -> Self::Vec4;
+    fn xyzx(self) -> Self::Swizzle4;
 
-    fn xyzy(self) -> Self::Vec4;
+    fn xyzy(self) -> Self::Swizzle4;
 
-    fn xyzz(self) -> Self::Vec4;
+    fn xyzz(self) -> Self::Swizzle4;
 
-    fn xzxx(self) -> Self::Vec4;
+    fn xzxx(self) -> Self::Swizzle4;
 
-    fn xzxy(self) -> Self::Vec4;
+    fn xzxy(self) -> Self::Swizzle4;
 
-    fn xzxz(self) -> Self::Vec4;
+    fn xzxz(self) -> Self::Swizzle4;
 
-    fn xzyx(self) -> Self::Vec4;
+    fn xzyx(self) -> Self::Swizzle4;
 
-    fn xzyy(self) -> Self::Vec4;
+    fn xzyy(self) -> Self::Swizzle4;
 
-    fn xzyz(self) -> Self::Vec4;
+    fn xzyz(self) -> Self::Swizzle4;
 
-    fn xzzx(self) -> Self::Vec4;
+    fn xzzx(self) -> Self::Swizzle4;
 
-    fn xzzy(self) -> Self::Vec4;
+    fn xzzy(self) -> Self::Swizzle4;
 
-    fn xzzz(self) -> Self::Vec4;
+    fn xzzz(self) -> Self::Swizzle4;
 
-    fn yxxx(self) -> Self::Vec4;
+    fn yxxx(self) -> Self::Swizzle4;
 
-    fn yxxy(self) -> Self::Vec4;
+    fn yxxy(self) -> Self::Swizzle4;
 
-    fn yxxz(self) -> Self::Vec4;
+    fn yxxz(self) -> Self::Swizzle4;
 
-    fn yxyx(self) -> Self::Vec4;
+    fn yxyx(self) -> Self::Swizzle4;
 
-    fn yxyy(self) -> Self::Vec4;
+    fn yxyy(self) -> Self::Swizzle4;
 
-    fn yxyz(self) -> Self::Vec4;
+    fn yxyz(self) -> Self::Swizzle4;
 
-    fn yxzx(self) -> Self::Vec4;
+    fn yxzx(self) -> Self::Swizzle4;
 
-    fn yxzy(self) -> Self::Vec4;
+    fn yxzy(self) -> Self::Swizzle4;
 
-    fn yxzz(self) -> Self::Vec4;
+    fn yxzz(self) -> Self::Swizzle4;
 
-    fn yyxx(self) -> Self::Vec4;
+    fn yyxx(self) -> Self::Swizzle4;
 
-    fn yyxy(self) -> Self::Vec4;
+    fn yyxy(self) -> Self::Swizzle4;
 
-    fn yyxz(self) -> Self::Vec4;
+    fn yyxz(self) -> Self::Swizzle4;
 
-    fn yyyx(self) -> Self::Vec4;
+    fn yyyx(self) -> Self::Swizzle4;
 
-    fn yyyy(self) -> Self::Vec4;
+    fn yyyy(self) -> Self::Swizzle4;
 
-    fn yyyz(self) -> Self::Vec4;
+    fn yyyz(self) -> Self::Swizzle4;
 
-    fn yyzx(self) -> Self::Vec4;
+    fn yyzx(self) -> Self::Swizzle4;
 
-    fn yyzy(self) -> Self::Vec4;
+    fn yyzy(self) -> Self::Swizzle4;
 
-    fn yyzz(self) -> Self::Vec4;
+    fn yyzz(self) -> Self::Swizzle4;
 
-    fn yzxx(self) -> Self::Vec4;
+    fn yzxx(self) -> Self::Swizzle4;
 
-    fn yzxy(self) -> Self::Vec4;
+    fn yzxy(self) -> Self::Swizzle4;
 
-    fn yzxz(self) -> Self::Vec4;
+    fn yzxz(self) -> Self::Swizzle4;
 
-    fn yzyx(self) -> Self::Vec4;
+    fn yzyx(self) -> Self::Swizzle4;
 
-    fn yzyy(self) -> Self::Vec4;
+    fn yzyy(self) -> Self::Swizzle4;
 
-    fn yzyz(self) -> Self::Vec4;
+    fn yzyz(self) -> Self::Swizzle4;
 
-    fn yzzx(self) -> Self::Vec4;
+    fn yzzx(self) -> Self::Swizzle4;
 
-    fn yzzy(self) -> Self::Vec4;
+    fn yzzy(self) -> Self::Swizzle4;
 
-    fn yzzz(self) -> Self::Vec4;
+    fn yzzz(self) -> Self::Swizzle4;
 
-    fn zxxx(self) -> Self::Vec4;
+    fn zxxx(self) -> Self::Swizzle4;
 
-    fn zxxy(self) -> Self::Vec4;
+    fn zxxy(self) -> Self::Swizzle4;
 
-    fn zxxz(self) -> Self::Vec4;
+    fn zxxz(self) -> Self::Swizzle4;
 
-    fn zxyx(self) -> Self::Vec4;
+    fn zxyx(self) -> Self::Swizzle4;
 
-    fn zxyy(self) -> Self::Vec4;
+    fn zxyy(self) -> Self::Swizzle4;
 
-    fn zxyz(self) -> Self::Vec4;
+    fn zxyz(self) -> Self::Swizzle4;
 
-    fn zxzx(self) -> Self::Vec4;
+    fn zxzx(self) -> Self::Swizzle4;
 
-    fn zxzy(self) -> Self::Vec4;
+    fn zxzy(self) -> Self::Swizzle4;
 
-    fn zxzz(self) -> Self::Vec4;
+    fn zxzz(self) -> Self::Swizzle4;
 
-    fn zyxx(self) -> Self::Vec4;
+    fn zyxx(self) -> Self::Swizzle4;
 
-    fn zyxy(self) -> Self::Vec4;
+    fn zyxy(self) -> Self::Swizzle4;
 
-    fn zyxz(self) -> Self::Vec4;
+    fn zyxz(self) -> Self::Swizzle4;
 
-    fn zyyx(self) -> Self::Vec4;
+    fn zyyx(self) -> Self::Swizzle4;
 
-    fn zyyy(self) -> Self::Vec4;
+    fn zyyy(self) -> Self::Swizzle4;
 
-    fn zyyz(self) -> Self::Vec4;
+    fn zyyz(self) -> Self::Swizzle4;
 
-    fn zyzx(self) -> Self::Vec4;
+    fn zyzx(self) -> Self::Swizzle4;
 
-    fn zyzy(self) -> Self::Vec4;
+    fn zyzy(self) -> Self::Swizzle4;
 
-    fn zyzz(self) -> Self::Vec4;
+    fn zyzz(self) -> Self::Swizzle4;
 
-    fn zzxx(self) -> Self::Vec4;
+    fn zzxx(self) -> Self::Swizzle4;
 
-    fn zzxy(self) -> Self::Vec4;
+    fn zzxy(self) -> Self::Swizzle4;
 
-    fn zzxz(self) -> Self::Vec4;
+    fn zzxz(self) -> Self::Swizzle4;
 
-    fn zzyx(self) -> Self::Vec4;
+    fn zzyx(self) -> Self::Swizzle4;
 
-    fn zzyy(self) -> Self::Vec4;
+    fn zzyy(self) -> Self::Swizzle4;
 
-    fn zzyz(self) -> Self::Vec4;
+    fn zzyz(self) -> Self::Swizzle4;
 
-    fn zzzx(self) -> Self::Vec4;
+    fn zzzx(self) -> Self::Swizzle4;
 
-    fn zzzy(self) -> Self::Vec4;
+    fn zzzy(self) -> Self::Swizzle4;
 
-    fn zzzz(self) -> Self::Vec4;
+    fn zzzz(self) -> Self::Swizzle4;
 }
 
-pub trait Vec4Swizzles: Sized + Copy + Clone {
-    type Vec2;
+pub trait Swizzles4: Sized + Copy + Clone {
+    type Swizzle2;
 
-    type Vec3;
+    type Swizzle3;
 
     #[inline]
     fn xyzw(self) -> Self {
         self
     }
 
-    fn xx(self) -> Self::Vec2;
+    fn xx(self) -> Self::Swizzle2;
 
-    fn xy(self) -> Self::Vec2;
+    fn xy(self) -> Self::Swizzle2;
 
-    fn xz(self) -> Self::Vec2;
+    fn xz(self) -> Self::Swizzle2;
 
-    fn xw(self) -> Self::Vec2;
+    fn xw(self) -> Self::Swizzle2;
 
-    fn yx(self) -> Self::Vec2;
+    fn yx(self) -> Self::Swizzle2;
 
-    fn yy(self) -> Self::Vec2;
+    fn yy(self) -> Self::Swizzle2;
 
-    fn yz(self) -> Self::Vec2;
+    fn yz(self) -> Self::Swizzle2;
 
-    fn yw(self) -> Self::Vec2;
+    fn yw(self) -> Self::Swizzle2;
 
-    fn zx(self) -> Self::Vec2;
+    fn zx(self) -> Self::Swizzle2;
 
-    fn zy(self) -> Self::Vec2;
+    fn zy(self) -> Self::Swizzle2;
 
-    fn zz(self) -> Self::Vec2;
+    fn zz(self) -> Self::Swizzle2;
 
-    fn zw(self) -> Self::Vec2;
+    fn zw(self) -> Self::Swizzle2;
 
-    fn wx(self) -> Self::Vec2;
+    fn wx(self) -> Self::Swizzle2;
 
-    fn wy(self) -> Self::Vec2;
+    fn wy(self) -> Self::Swizzle2;
 
-    fn wz(self) -> Self::Vec2;
+    fn wz(self) -> Self::Swizzle2;
 
-    fn ww(self) -> Self::Vec2;
+    fn ww(self) -> Self::Swizzle2;
 
-    fn xxx(self) -> Self::Vec3;
+    fn xxx(self) -> Self::Swizzle3;
 
-    fn xxy(self) -> Self::Vec3;
+    fn xxy(self) -> Self::Swizzle3;
 
-    fn xxz(self) -> Self::Vec3;
+    fn xxz(self) -> Self::Swizzle3;
 
-    fn xxw(self) -> Self::Vec3;
+    fn xxw(self) -> Self::Swizzle3;
 
-    fn xyx(self) -> Self::Vec3;
+    fn xyx(self) -> Self::Swizzle3;
 
-    fn xyy(self) -> Self::Vec3;
+    fn xyy(self) -> Self::Swizzle3;
 
-    fn xyz(self) -> Self::Vec3;
+    fn xyz(self) -> Self::Swizzle3;
 
-    fn xyw(self) -> Self::Vec3;
+    fn xyw(self) -> Self::Swizzle3;
 
-    fn xzx(self) -> Self::Vec3;
+    fn xzx(self) -> Self::Swizzle3;
 
-    fn xzy(self) -> Self::Vec3;
+    fn xzy(self) -> Self::Swizzle3;
 
-    fn xzz(self) -> Self::Vec3;
+    fn xzz(self) -> Self::Swizzle3;
 
-    fn xzw(self) -> Self::Vec3;
+    fn xzw(self) -> Self::Swizzle3;
 
-    fn xwx(self) -> Self::Vec3;
+    fn xwx(self) -> Self::Swizzle3;
 
-    fn xwy(self) -> Self::Vec3;
+    fn xwy(self) -> Self::Swizzle3;
 
-    fn xwz(self) -> Self::Vec3;
+    fn xwz(self) -> Self::Swizzle3;
 
-    fn xww(self) -> Self::Vec3;
+    fn xww(self) -> Self::Swizzle3;
 
-    fn yxx(self) -> Self::Vec3;
+    fn yxx(self) -> Self::Swizzle3;
 
-    fn yxy(self) -> Self::Vec3;
+    fn yxy(self) -> Self::Swizzle3;
 
-    fn yxz(self) -> Self::Vec3;
+    fn yxz(self) -> Self::Swizzle3;
 
-    fn yxw(self) -> Self::Vec3;
+    fn yxw(self) -> Self::Swizzle3;
 
-    fn yyx(self) -> Self::Vec3;
+    fn yyx(self) -> Self::Swizzle3;
 
-    fn yyy(self) -> Self::Vec3;
+    fn yyy(self) -> Self::Swizzle3;
 
-    fn yyz(self) -> Self::Vec3;
+    fn yyz(self) -> Self::Swizzle3;
 
-    fn yyw(self) -> Self::Vec3;
+    fn yyw(self) -> Self::Swizzle3;
 
-    fn yzx(self) -> Self::Vec3;
+    fn yzx(self) -> Self::Swizzle3;
 
-    fn yzy(self) -> Self::Vec3;
+    fn yzy(self) -> Self::Swizzle3;
 
-    fn yzz(self) -> Self::Vec3;
+    fn yzz(self) -> Self::Swizzle3;
 
-    fn yzw(self) -> Self::Vec3;
+    fn yzw(self) -> Self::Swizzle3;
 
-    fn ywx(self) -> Self::Vec3;
+    fn ywx(self) -> Self::Swizzle3;
 
-    fn ywy(self) -> Self::Vec3;
+    fn ywy(self) -> Self::Swizzle3;
 
-    fn ywz(self) -> Self::Vec3;
+    fn ywz(self) -> Self::Swizzle3;
 
-    fn yww(self) -> Self::Vec3;
+    fn yww(self) -> Self::Swizzle3;
 
-    fn zxx(self) -> Self::Vec3;
+    fn zxx(self) -> Self::Swizzle3;
 
-    fn zxy(self) -> Self::Vec3;
+    fn zxy(self) -> Self::Swizzle3;
 
-    fn zxz(self) -> Self::Vec3;
+    fn zxz(self) -> Self::Swizzle3;
 
-    fn zxw(self) -> Self::Vec3;
+    fn zxw(self) -> Self::Swizzle3;
 
-    fn zyx(self) -> Self::Vec3;
+    fn zyx(self) -> Self::Swizzle3;
 
-    fn zyy(self) -> Self::Vec3;
+    fn zyy(self) -> Self::Swizzle3;
 
-    fn zyz(self) -> Self::Vec3;
+    fn zyz(self) -> Self::Swizzle3;
 
-    fn zyw(self) -> Self::Vec3;
+    fn zyw(self) -> Self::Swizzle3;
 
-    fn zzx(self) -> Self::Vec3;
+    fn zzx(self) -> Self::Swizzle3;
 
-    fn zzy(self) -> Self::Vec3;
+    fn zzy(self) -> Self::Swizzle3;
 
-    fn zzz(self) -> Self::Vec3;
+    fn zzz(self) -> Self::Swizzle3;
 
-    fn zzw(self) -> Self::Vec3;
+    fn zzw(self) -> Self::Swizzle3;
 
-    fn zwx(self) -> Self::Vec3;
+    fn zwx(self) -> Self::Swizzle3;
 
-    fn zwy(self) -> Self::Vec3;
+    fn zwy(self) -> Self::Swizzle3;
 
-    fn zwz(self) -> Self::Vec3;
+    fn zwz(self) -> Self::Swizzle3;
 
-    fn zww(self) -> Self::Vec3;
+    fn zww(self) -> Self::Swizzle3;
 
-    fn wxx(self) -> Self::Vec3;
+    fn wxx(self) -> Self::Swizzle3;
 
-    fn wxy(self) -> Self::Vec3;
+    fn wxy(self) -> Self::Swizzle3;
 
-    fn wxz(self) -> Self::Vec3;
+    fn wxz(self) -> Self::Swizzle3;
 
-    fn wxw(self) -> Self::Vec3;
+    fn wxw(self) -> Self::Swizzle3;
 
-    fn wyx(self) -> Self::Vec3;
+    fn wyx(self) -> Self::Swizzle3;
 
-    fn wyy(self) -> Self::Vec3;
+    fn wyy(self) -> Self::Swizzle3;
 
-    fn wyz(self) -> Self::Vec3;
+    fn wyz(self) -> Self::Swizzle3;
 
-    fn wyw(self) -> Self::Vec3;
+    fn wyw(self) -> Self::Swizzle3;
 
-    fn wzx(self) -> Self::Vec3;
+    fn wzx(self) -> Self::Swizzle3;
 
-    fn wzy(self) -> Self::Vec3;
+    fn wzy(self) -> Self::Swizzle3;
 
-    fn wzz(self) -> Self::Vec3;
+    fn wzz(self) -> Self::Swizzle3;
 
-    fn wzw(self) -> Self::Vec3;
+    fn wzw(self) -> Self::Swizzle3;
 
-    fn wwx(self) -> Self::Vec3;
+    fn wwx(self) -> Self::Swizzle3;
 
-    fn wwy(self) -> Self::Vec3;
+    fn wwy(self) -> Self::Swizzle3;
 
-    fn wwz(self) -> Self::Vec3;
+    fn wwz(self) -> Self::Swizzle3;
 
-    fn www(self) -> Self::Vec3;
+    fn www(self) -> Self::Swizzle3;
 
     fn xxxx(self) -> Self;
 

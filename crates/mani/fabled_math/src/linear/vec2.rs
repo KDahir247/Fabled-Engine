@@ -1,6 +1,6 @@
 use crate::{Vector3, Vector4};
 
-use crate::math_trait::Vec2Swizzles;
+use crate::math_trait::Swizzles2;
 
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
@@ -50,7 +50,7 @@ impl Vector2 {
     }
 
     #[inline]
-    pub const fn from_array(array: [f32; 2]) -> Vector2 {
+    pub const fn from_primitive(array: [f32; 2]) -> Vector2 {
         Vector2 { value: array }
     }
 
@@ -298,9 +298,9 @@ impl Neg for Vector2 {
     }
 }
 
-impl Vec2Swizzles for Vector2 {
-    type Vec3 = Vector3;
-    type Vec4 = Vector4;
+impl Swizzles2 for Vector2 {
+    type Swizzle3 = Vector3;
+    type Swizzle4 = Vector4;
 
     #[inline]
     fn xx(self) -> Self {
@@ -318,121 +318,121 @@ impl Vec2Swizzles for Vector2 {
     }
 
     #[inline]
-    fn xxx(self) -> Self::Vec3 {
+    fn xxx(self) -> Self::Swizzle3 {
         Vector3::splat(self.x())
     }
 
     #[inline]
-    fn xxy(self) -> Self::Vec3 {
+    fn xxy(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.x(), self.y())
     }
 
     #[inline]
-    fn xyx(self) -> Self::Vec3 {
+    fn xyx(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.y(), self.x())
     }
 
     #[inline]
-    fn xyy(self) -> Self::Vec3 {
+    fn xyy(self) -> Self::Swizzle3 {
         Vector3::set(self.x(), self.y(), self.y())
     }
 
     #[inline]
-    fn yxx(self) -> Self::Vec3 {
+    fn yxx(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.x(), self.x())
     }
 
     #[inline]
-    fn yxy(self) -> Self::Vec3 {
+    fn yxy(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.x(), self.y())
     }
 
     #[inline]
-    fn yyx(self) -> Self::Vec3 {
+    fn yyx(self) -> Self::Swizzle3 {
         Vector3::set(self.y(), self.y(), self.x())
     }
 
     #[inline]
-    fn yyy(self) -> Self::Vec3 {
+    fn yyy(self) -> Self::Swizzle3 {
         Vector3::splat(self.y())
     }
 
     #[inline]
-    fn xxxx(self) -> Self::Vec4 {
+    fn xxxx(self) -> Self::Swizzle4 {
         Vector4::splat(self.x())
     }
 
     #[inline]
-    fn xxxy(self) -> Self::Vec4 {
+    fn xxxy(self) -> Self::Swizzle4 {
         Vector4::set(self.x(), self.x(), self.x(), self.y())
     }
 
     #[inline]
-    fn xxyx(self) -> Self::Vec4 {
+    fn xxyx(self) -> Self::Swizzle4 {
         Vector4::set(self.x(), self.x(), self.y(), self.x())
     }
 
     #[inline]
-    fn xxyy(self) -> Self::Vec4 {
+    fn xxyy(self) -> Self::Swizzle4 {
         Vector4::set(self.x(), self.x(), self.y(), self.y())
     }
 
     #[inline]
-    fn xyxx(self) -> Self::Vec4 {
+    fn xyxx(self) -> Self::Swizzle4 {
         Vector4::set(self.x(), self.y(), self.x(), self.x())
     }
 
     #[inline]
-    fn xyxy(self) -> Self::Vec4 {
+    fn xyxy(self) -> Self::Swizzle4 {
         Vector4::set(self.x(), self.y(), self.x(), self.y())
     }
 
     #[inline]
-    fn xyyx(self) -> Self::Vec4 {
+    fn xyyx(self) -> Self::Swizzle4 {
         Vector4::set(self.x(), self.y(), self.y(), self.x())
     }
 
     #[inline]
-    fn xyyy(self) -> Self::Vec4 {
+    fn xyyy(self) -> Self::Swizzle4 {
         Vector4::set(self.x(), self.y(), self.y(), self.y())
     }
 
     #[inline]
-    fn yxxx(self) -> Self::Vec4 {
+    fn yxxx(self) -> Self::Swizzle4 {
         Vector4::set(self.y(), self.x(), self.x(), self.x())
     }
 
     #[inline]
-    fn yxxy(self) -> Self::Vec4 {
+    fn yxxy(self) -> Self::Swizzle4 {
         Vector4::set(self.y(), self.x(), self.x(), self.y())
     }
 
-    fn yxyx(self) -> Self::Vec4 {
+    fn yxyx(self) -> Self::Swizzle4 {
         Vector4::set(self.y(), self.x(), self.y(), self.x())
     }
 
     #[inline]
-    fn yxyy(self) -> Self::Vec4 {
+    fn yxyy(self) -> Self::Swizzle4 {
         Vector4::set(self.y(), self.x(), self.y(), self.y())
     }
 
     #[inline]
-    fn yyxx(self) -> Self::Vec4 {
+    fn yyxx(self) -> Self::Swizzle4 {
         Vector4::set(self.y(), self.y(), self.x(), self.x())
     }
 
     #[inline]
-    fn yyxy(self) -> Self::Vec4 {
+    fn yyxy(self) -> Self::Swizzle4 {
         Vector4::set(self.y(), self.y(), self.x(), self.y())
     }
 
     #[inline]
-    fn yyyx(self) -> Self::Vec4 {
+    fn yyyx(self) -> Self::Swizzle4 {
         Vector4::set(self.y(), self.y(), self.y(), self.x())
     }
 
     #[inline]
-    fn yyyy(self) -> Self::Vec4 {
+    fn yyyy(self) -> Self::Swizzle4 {
         Vector4::splat(self.y())
     }
 }

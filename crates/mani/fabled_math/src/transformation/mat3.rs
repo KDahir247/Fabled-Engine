@@ -245,7 +245,7 @@ pub mod matrix3x3_math {
 
     use crate::vector_math::{dot, cross};
 
-    use crate::math_trait::Vec3Swizzles;
+    use crate::math_trait::Swizzles3;
 
     #[inline]
     pub fn transpose(matrix_3x3: Matrix3x3) -> Matrix3x3 {
@@ -405,61 +405,5 @@ pub mod matrix3x3_math {
         let adjugate_matrix = transpose(cofactor_matrix);
 
         adjugate_matrix * inverse_determinant
-    }
-}
-
-
-#[cfg(test)]
-mod matrix_3x3_test {
-    use crate::matrix3x3_math::{from_angle_axis,  rotate_y, transpose};
-    use crate::{Matrix3x3, Vector3};
-
-    #[test]
-    fn matrix3x3_transpose_test() {
-        let matrix = Matrix3x3::set_from_columns(
-            Vector3::set(0.548_919, -0.8138058, 0.190_809),
-            Vector3::set(0.8007619, 0.4465074, -0.3992637),
-            Vector3::set(0.2397255, 0.371_956, 0.8967611),
-        );
-        println!("original {}", matrix);
-
-        let transposed = transpose(matrix);
-
-        println!("transposed {}", transposed);
-
-        let reverted = transpose(transposed);
-
-        assert_eq!(matrix, reverted);
-    }
-
-    #[test]
-    fn matrix3x3_angle_axis_test() {
-        let m = from_angle_axis(
-            Vector3::set(0.5661385, 0.2264554, 0.7925939),
-            56.11f32.to_radians(),
-        );
-
-
-        println!("{}", m);
-
-
-        let m2 = Matrix3x3::set_from_columns(
-            Vector3::set(2.0, 11.0, 2.0),
-            Vector3::set(3.0, 8.0, 5.0),
-            Vector3::set(-4.0, 7.0, 3.0),
-        );
-
-
-        let v1 = Vector3::set(3.0, 7.0, 5.0);
-
-        let res = m2 * v1;
-
-        println!("{}", res);
-    }
-
-    #[test]
-    fn matrix3x4_rotate_test() {
-        let rotation_matrix = rotate_y(45.115f32.to_radians());
-        println!("{}", rotation_matrix);
     }
 }

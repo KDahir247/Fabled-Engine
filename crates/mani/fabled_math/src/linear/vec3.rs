@@ -1,6 +1,6 @@
 use crate::{Matrix3x3, Quaternion, Vector2, Vector4};
 
-use crate::math_trait::Vec3Swizzles;
+use crate::math_trait::Swizzles3;
 
 use crate::matrix3x3_math::transpose;
 use crate::vector_math::{component_sum, cross};
@@ -391,52 +391,52 @@ impl SubAssign<Vector3> for Vector3 {
     }
 }
 
-impl Vec3Swizzles for Vector3 {
-    type Vec2 = Vector2;
-    type Vec4 = Vector4;
+impl Swizzles3 for Vector3 {
+    type Swizzle2 = Vector2;
+    type Swizzle4 = Vector4;
 
     #[inline]
-    fn xx(self) -> Self::Vec2 {
+    fn xx(self) -> Self::Swizzle2 {
         Vector2::splat(self.x())
     }
 
     #[inline]
-    fn xy(self) -> Self::Vec2 {
+    fn xy(self) -> Self::Swizzle2 {
         Vector2::set(self.x(), self.y())
     }
 
     #[inline]
-    fn xz(self) -> Self::Vec2 {
+    fn xz(self) -> Self::Swizzle2 {
         Vector2::set(self.x(), self.z())
     }
 
     #[inline]
-    fn yx(self) -> Self::Vec2 {
+    fn yx(self) -> Self::Swizzle2 {
         Vector2::set(self.y(), self.x())
     }
 
     #[inline]
-    fn yy(self) -> Self::Vec2 {
+    fn yy(self) -> Self::Swizzle2 {
         Vector2::splat(self.y())
     }
 
     #[inline]
-    fn yz(self) -> Self::Vec2 {
+    fn yz(self) -> Self::Swizzle2 {
         Vector2::set(self.y(), self.z())
     }
 
     #[inline]
-    fn zx(self) -> Self::Vec2 {
+    fn zx(self) -> Self::Swizzle2 {
         Vector2::set(self.z(), self.x())
     }
 
     #[inline]
-    fn zy(self) -> Self::Vec2 {
+    fn zy(self) -> Self::Swizzle2 {
         Vector2::set(self.z(), self.y())
     }
 
     #[inline]
-    fn zz(self) -> Self::Vec2 {
+    fn zz(self) -> Self::Swizzle2 {
         Vector2::splat(self.z())
     }
 
@@ -623,565 +623,565 @@ impl Vec3Swizzles for Vector3 {
     }
 
     #[inline]
-    fn xxxx(self) -> Self::Vec4 {
+    fn xxxx(self) -> Self::Swizzle4 {
         let xxxx = std::simd::simd_swizzle!(self.value, [0, 0, 0, 0]);
 
         Vector4 { value: xxxx }
     }
 
     #[inline]
-    fn xxxy(self) -> Self::Vec4 {
+    fn xxxy(self) -> Self::Swizzle4 {
         let xxxy = std::simd::simd_swizzle!(self.value, [0, 0, 0, 1]);
 
         Vector4 { value: xxxy }
     }
 
     #[inline]
-    fn xxxz(self) -> Self::Vec4 {
+    fn xxxz(self) -> Self::Swizzle4 {
         let xxxz = std::simd::simd_swizzle!(self.value, [0, 0, 0, 2]);
 
         Vector4 { value: xxxz }
     }
 
     #[inline]
-    fn xxyx(self) -> Self::Vec4 {
+    fn xxyx(self) -> Self::Swizzle4 {
         let xxyx = std::simd::simd_swizzle!(self.value, [0, 0, 1, 0]);
 
         Vector4 { value: xxyx }
     }
 
     #[inline]
-    fn xxyy(self) -> Self::Vec4 {
+    fn xxyy(self) -> Self::Swizzle4 {
         let xxyy = std::simd::simd_swizzle!(self.value, [0, 0, 1, 1]);
 
         Vector4 { value: xxyy }
     }
 
     #[inline]
-    fn xxyz(self) -> Self::Vec4 {
+    fn xxyz(self) -> Self::Swizzle4 {
         let xxyz = std::simd::simd_swizzle!(self.value, [0, 0, 1, 2]);
 
         Vector4 { value: xxyz }
     }
 
     #[inline]
-    fn xxzx(self) -> Self::Vec4 {
+    fn xxzx(self) -> Self::Swizzle4 {
         let xxzx = std::simd::simd_swizzle!(self.value, [0, 0, 2, 0]);
 
         Vector4 { value: xxzx }
     }
 
     #[inline]
-    fn xxzy(self) -> Self::Vec4 {
+    fn xxzy(self) -> Self::Swizzle4 {
         let xxzy = std::simd::simd_swizzle!(self.value, [0, 0, 2, 1]);
 
         Vector4 { value: xxzy }
     }
 
     #[inline]
-    fn xxzz(self) -> Self::Vec4 {
+    fn xxzz(self) -> Self::Swizzle4 {
         let xxzz = std::simd::simd_swizzle!(self.value, [0, 0, 2, 2]);
 
         Vector4 { value: xxzz }
     }
 
     #[inline]
-    fn xyxx(self) -> Self::Vec4 {
+    fn xyxx(self) -> Self::Swizzle4 {
         let xyxx = std::simd::simd_swizzle!(self.value, [0, 1, 0, 0]);
 
         Vector4 { value: xyxx }
     }
 
     #[inline]
-    fn xyxy(self) -> Self::Vec4 {
+    fn xyxy(self) -> Self::Swizzle4 {
         let xyxy = std::simd::simd_swizzle!(self.value, [0, 1, 0, 1]);
 
         Vector4 { value: xyxy }
     }
 
     #[inline]
-    fn xyxz(self) -> Self::Vec4 {
+    fn xyxz(self) -> Self::Swizzle4 {
         let xyxz = std::simd::simd_swizzle!(self.value, [0, 1, 0, 2]);
 
         Vector4 { value: xyxz }
     }
 
     #[inline]
-    fn xyyx(self) -> Self::Vec4 {
+    fn xyyx(self) -> Self::Swizzle4 {
         let xyyx = std::simd::simd_swizzle!(self.value, [0, 1, 1, 0]);
 
         Vector4 { value: xyyx }
     }
 
     #[inline]
-    fn xyyy(self) -> Self::Vec4 {
+    fn xyyy(self) -> Self::Swizzle4 {
         let xyyy = std::simd::simd_swizzle!(self.value, [0, 1, 1, 1]);
 
         Vector4 { value: xyyy }
     }
 
     #[inline]
-    fn xyyz(self) -> Self::Vec4 {
+    fn xyyz(self) -> Self::Swizzle4 {
         let xyyz = std::simd::simd_swizzle!(self.value, [0, 1, 1, 2]);
 
         Vector4 { value: xyyz }
     }
 
     #[inline]
-    fn xyzx(self) -> Self::Vec4 {
+    fn xyzx(self) -> Self::Swizzle4 {
         let xyzx = std::simd::simd_swizzle!(self.value, [0, 1, 2, 0]);
 
         Vector4 { value: xyzx }
     }
 
     #[inline]
-    fn xyzy(self) -> Self::Vec4 {
+    fn xyzy(self) -> Self::Swizzle4 {
         let xyzy = std::simd::simd_swizzle!(self.value, [0, 1, 2, 1]);
 
         Vector4 { value: xyzy }
     }
 
     #[inline]
-    fn xyzz(self) -> Self::Vec4 {
+    fn xyzz(self) -> Self::Swizzle4 {
         let xyzz = std::simd::simd_swizzle!(self.value, [0, 1, 2, 2]);
 
         Vector4 { value: xyzz }
     }
 
     #[inline]
-    fn xzxx(self) -> Self::Vec4 {
+    fn xzxx(self) -> Self::Swizzle4 {
         let xzxx = std::simd::simd_swizzle!(self.value, [0, 2, 0, 0]);
 
         Vector4 { value: xzxx }
     }
 
     #[inline]
-    fn xzxy(self) -> Self::Vec4 {
+    fn xzxy(self) -> Self::Swizzle4 {
         let xzxy = std::simd::simd_swizzle!(self.value, [0, 2, 0, 1]);
 
         Vector4 { value: xzxy }
     }
 
     #[inline]
-    fn xzxz(self) -> Self::Vec4 {
+    fn xzxz(self) -> Self::Swizzle4 {
         let xzxz = std::simd::simd_swizzle!(self.value, [0, 2, 0, 2]);
 
         Vector4 { value: xzxz }
     }
 
     #[inline]
-    fn xzyx(self) -> Self::Vec4 {
+    fn xzyx(self) -> Self::Swizzle4 {
         let xzyx = std::simd::simd_swizzle!(self.value, [0, 2, 1, 0]);
 
         Vector4 { value: xzyx }
     }
 
     #[inline]
-    fn xzyy(self) -> Self::Vec4 {
+    fn xzyy(self) -> Self::Swizzle4 {
         let xzyy = std::simd::simd_swizzle!(self.value, [0, 2, 1, 1]);
 
         Vector4 { value: xzyy }
     }
 
     #[inline]
-    fn xzyz(self) -> Self::Vec4 {
+    fn xzyz(self) -> Self::Swizzle4 {
         let xzyz = std::simd::simd_swizzle!(self.value, [0, 2, 1, 2]);
 
         Vector4 { value: xzyz }
     }
 
     #[inline]
-    fn xzzx(self) -> Self::Vec4 {
+    fn xzzx(self) -> Self::Swizzle4 {
         let xzzx = std::simd::simd_swizzle!(self.value, [0, 2, 2, 0]);
 
         Vector4 { value: xzzx }
     }
 
     #[inline]
-    fn xzzy(self) -> Self::Vec4 {
+    fn xzzy(self) -> Self::Swizzle4 {
         let xzzy = std::simd::simd_swizzle!(self.value, [0, 2, 2, 1]);
 
         Vector4 { value: xzzy }
     }
 
     #[inline]
-    fn xzzz(self) -> Self::Vec4 {
+    fn xzzz(self) -> Self::Swizzle4 {
         let xzzz = std::simd::simd_swizzle!(self.value, [0, 2, 2, 2]);
 
         Vector4 { value: xzzz }
     }
 
     #[inline]
-    fn yxxx(self) -> Self::Vec4 {
+    fn yxxx(self) -> Self::Swizzle4 {
         let yxxx = std::simd::simd_swizzle!(self.value, [1, 0, 0, 0]);
 
         Vector4 { value: yxxx }
     }
 
     #[inline]
-    fn yxxy(self) -> Self::Vec4 {
+    fn yxxy(self) -> Self::Swizzle4 {
         let yxxy = std::simd::simd_swizzle!(self.value, [1, 0, 0, 1]);
 
         Vector4 { value: yxxy }
     }
 
     #[inline]
-    fn yxxz(self) -> Self::Vec4 {
+    fn yxxz(self) -> Self::Swizzle4 {
         let yxxz = std::simd::simd_swizzle!(self.value, [1, 0, 0, 2]);
 
         Vector4 { value: yxxz }
     }
 
     #[inline]
-    fn yxyx(self) -> Self::Vec4 {
+    fn yxyx(self) -> Self::Swizzle4 {
         let yxyx = std::simd::simd_swizzle!(self.value, [1, 0, 1, 0]);
 
         Vector4 { value: yxyx }
     }
 
     #[inline]
-    fn yxyy(self) -> Self::Vec4 {
+    fn yxyy(self) -> Self::Swizzle4 {
         let yxyy = std::simd::simd_swizzle!(self.value, [1, 0, 1, 1]);
 
         Vector4 { value: yxyy }
     }
 
     #[inline]
-    fn yxyz(self) -> Self::Vec4 {
+    fn yxyz(self) -> Self::Swizzle4 {
         let yxyz = std::simd::simd_swizzle!(self.value, [1, 0, 1, 2]);
 
         Vector4 { value: yxyz }
     }
 
     #[inline]
-    fn yxzx(self) -> Self::Vec4 {
+    fn yxzx(self) -> Self::Swizzle4 {
         let yxzx = std::simd::simd_swizzle!(self.value, [1, 0, 2, 0]);
 
         Vector4 { value: yxzx }
     }
 
     #[inline]
-    fn yxzy(self) -> Self::Vec4 {
+    fn yxzy(self) -> Self::Swizzle4 {
         let yxzy = std::simd::simd_swizzle!(self.value, [1, 0, 2, 1]);
 
         Vector4 { value: yxzy }
     }
 
     #[inline]
-    fn yxzz(self) -> Self::Vec4 {
+    fn yxzz(self) -> Self::Swizzle4 {
         let yxzz = std::simd::simd_swizzle!(self.value, [1, 0, 2, 2]);
 
         Vector4 { value: yxzz }
     }
 
     #[inline]
-    fn yyxx(self) -> Self::Vec4 {
+    fn yyxx(self) -> Self::Swizzle4 {
         let yyxx = std::simd::simd_swizzle!(self.value, [1, 1, 0, 0]);
 
         Vector4 { value: yyxx }
     }
 
     #[inline]
-    fn yyxy(self) -> Self::Vec4 {
+    fn yyxy(self) -> Self::Swizzle4 {
         let yyxy = std::simd::simd_swizzle!(self.value, [1, 1, 0, 1]);
 
         Vector4 { value: yyxy }
     }
 
     #[inline]
-    fn yyxz(self) -> Self::Vec4 {
+    fn yyxz(self) -> Self::Swizzle4 {
         let yyxz = std::simd::simd_swizzle!(self.value, [1, 1, 0, 2]);
 
         Vector4 { value: yyxz }
     }
 
     #[inline]
-    fn yyyx(self) -> Self::Vec4 {
+    fn yyyx(self) -> Self::Swizzle4 {
         let yyyx = std::simd::simd_swizzle!(self.value, [1, 1, 1, 0]);
 
         Vector4 { value: yyyx }
     }
 
     #[inline]
-    fn yyyy(self) -> Self::Vec4 {
+    fn yyyy(self) -> Self::Swizzle4 {
         Vector4::splat(self.y())
     }
 
     #[inline]
-    fn yyyz(self) -> Self::Vec4 {
+    fn yyyz(self) -> Self::Swizzle4 {
         let yyyz = std::simd::simd_swizzle!(self.value, [1, 1, 1, 2]);
 
         Vector4 { value: yyyz }
     }
 
     #[inline]
-    fn yyzx(self) -> Self::Vec4 {
+    fn yyzx(self) -> Self::Swizzle4 {
         let yyzx = std::simd::simd_swizzle!(self.value, [1, 1, 2, 0]);
 
         Vector4 { value: yyzx }
     }
 
     #[inline]
-    fn yyzy(self) -> Self::Vec4 {
+    fn yyzy(self) -> Self::Swizzle4 {
         let yyzy = std::simd::simd_swizzle!(self.value, [1, 1, 2, 1]);
 
         Vector4 { value: yyzy }
     }
 
     #[inline]
-    fn yyzz(self) -> Self::Vec4 {
+    fn yyzz(self) -> Self::Swizzle4 {
         let yyzz = std::simd::simd_swizzle!(self.value, [1, 1, 2, 2]);
 
         Vector4 { value: yyzz }
     }
 
     #[inline]
-    fn yzxx(self) -> Self::Vec4 {
+    fn yzxx(self) -> Self::Swizzle4 {
         let yzxx = std::simd::simd_swizzle!(self.value, [1, 2, 0, 0]);
 
         Vector4 { value: yzxx }
     }
 
     #[inline]
-    fn yzxy(self) -> Self::Vec4 {
+    fn yzxy(self) -> Self::Swizzle4 {
         let yzxy = std::simd::simd_swizzle!(self.value, [1, 2, 0, 1]);
 
         Vector4 { value: yzxy }
     }
 
     #[inline]
-    fn yzxz(self) -> Self::Vec4 {
+    fn yzxz(self) -> Self::Swizzle4 {
         let yzxz = std::simd::simd_swizzle!(self.value, [1, 2, 0, 2]);
 
         Vector4 { value: yzxz }
     }
 
     #[inline]
-    fn yzyx(self) -> Self::Vec4 {
+    fn yzyx(self) -> Self::Swizzle4 {
         let yzyx = std::simd::simd_swizzle!(self.value, [1, 2, 1, 0]);
 
         Vector4 { value: yzyx }
     }
 
     #[inline]
-    fn yzyy(self) -> Self::Vec4 {
+    fn yzyy(self) -> Self::Swizzle4 {
         let yzyy = std::simd::simd_swizzle!(self.value, [1, 2, 1, 1]);
 
         Vector4 { value: yzyy }
     }
 
     #[inline]
-    fn yzyz(self) -> Self::Vec4 {
+    fn yzyz(self) -> Self::Swizzle4 {
         let yzyz = std::simd::simd_swizzle!(self.value, [1, 2, 1, 2]);
 
         Vector4 { value: yzyz }
     }
 
     #[inline]
-    fn yzzx(self) -> Self::Vec4 {
+    fn yzzx(self) -> Self::Swizzle4 {
         let yzzx = std::simd::simd_swizzle!(self.value, [1, 2, 2, 0]);
 
         Vector4 { value: yzzx }
     }
 
     #[inline]
-    fn yzzy(self) -> Self::Vec4 {
+    fn yzzy(self) -> Self::Swizzle4 {
         let yzzy = std::simd::simd_swizzle!(self.value, [1, 2, 2, 1]);
 
         Vector4 { value: yzzy }
     }
 
     #[inline]
-    fn yzzz(self) -> Self::Vec4 {
+    fn yzzz(self) -> Self::Swizzle4 {
         let yzzz = std::simd::simd_swizzle!(self.value, [1, 2, 2, 2]);
 
         Vector4 { value: yzzz }
     }
 
     #[inline]
-    fn zxxx(self) -> Self::Vec4 {
+    fn zxxx(self) -> Self::Swizzle4 {
         let zxxx = std::simd::simd_swizzle!(self.value, [2, 0, 0, 0]);
 
         Vector4 { value: zxxx }
     }
 
     #[inline]
-    fn zxxy(self) -> Self::Vec4 {
+    fn zxxy(self) -> Self::Swizzle4 {
         let zxxy = std::simd::simd_swizzle!(self.value, [2, 0, 0, 1]);
 
         Vector4 { value: zxxy }
     }
 
     #[inline]
-    fn zxxz(self) -> Self::Vec4 {
+    fn zxxz(self) -> Self::Swizzle4 {
         let zxxz = std::simd::simd_swizzle!(self.value, [2, 0, 0, 2]);
 
         Vector4 { value: zxxz }
     }
 
     #[inline]
-    fn zxyx(self) -> Self::Vec4 {
+    fn zxyx(self) -> Self::Swizzle4 {
         let zxyx = std::simd::simd_swizzle!(self.value, [2, 0, 1, 0]);
 
         Vector4 { value: zxyx }
     }
 
     #[inline]
-    fn zxyy(self) -> Self::Vec4 {
+    fn zxyy(self) -> Self::Swizzle4 {
         let zxyy = std::simd::simd_swizzle!(self.value, [2, 0, 1, 1]);
 
         Vector4 { value: zxyy }
     }
 
     #[inline]
-    fn zxyz(self) -> Self::Vec4 {
+    fn zxyz(self) -> Self::Swizzle4 {
         let zxyz = std::simd::simd_swizzle!(self.value, [2, 0, 1, 2]);
 
         Vector4 { value: zxyz }
     }
 
     #[inline]
-    fn zxzx(self) -> Self::Vec4 {
+    fn zxzx(self) -> Self::Swizzle4 {
         let zxzx = std::simd::simd_swizzle!(self.value, [2, 0, 2, 0]);
 
         Vector4 { value: zxzx }
     }
 
     #[inline]
-    fn zxzy(self) -> Self::Vec4 {
+    fn zxzy(self) -> Self::Swizzle4 {
         let zxzy = std::simd::simd_swizzle!(self.value, [2, 0, 2, 1]);
 
         Vector4 { value: zxzy }
     }
 
     #[inline]
-    fn zxzz(self) -> Self::Vec4 {
+    fn zxzz(self) -> Self::Swizzle4 {
         let zxzz = std::simd::simd_swizzle!(self.value, [2, 0, 2, 2]);
 
         Vector4 { value: zxzz }
     }
 
     #[inline]
-    fn zyxx(self) -> Self::Vec4 {
+    fn zyxx(self) -> Self::Swizzle4 {
         let zyxx = std::simd::simd_swizzle!(self.value, [2, 1, 0, 0]);
 
         Vector4 { value: zyxx }
     }
 
     #[inline]
-    fn zyxy(self) -> Self::Vec4 {
+    fn zyxy(self) -> Self::Swizzle4 {
         let zyxy = std::simd::simd_swizzle!(self.value, [2, 1, 0, 1]);
 
         Vector4 { value: zyxy }
     }
 
     #[inline]
-    fn zyxz(self) -> Self::Vec4 {
+    fn zyxz(self) -> Self::Swizzle4 {
         let zyxz = std::simd::simd_swizzle!(self.value, [2, 1, 0, 2]);
 
         Vector4 { value: zyxz }
     }
 
     #[inline]
-    fn zyyx(self) -> Self::Vec4 {
+    fn zyyx(self) -> Self::Swizzle4 {
         let zyyx = std::simd::simd_swizzle!(self.value, [2, 1, 1, 0]);
 
         Vector4 { value: zyyx }
     }
 
     #[inline]
-    fn zyyy(self) -> Self::Vec4 {
+    fn zyyy(self) -> Self::Swizzle4 {
         let zyyy = std::simd::simd_swizzle!(self.value, [2, 1, 1, 1]);
 
         Vector4 { value: zyyy }
     }
 
     #[inline]
-    fn zyyz(self) -> Self::Vec4 {
+    fn zyyz(self) -> Self::Swizzle4 {
         let zyyz = std::simd::simd_swizzle!(self.value, [2, 1, 1, 2]);
 
         Vector4 { value: zyyz }
     }
 
     #[inline]
-    fn zyzx(self) -> Self::Vec4 {
+    fn zyzx(self) -> Self::Swizzle4 {
         let zyzx = std::simd::simd_swizzle!(self.value, [2, 1, 2, 0]);
 
         Vector4 { value: zyzx }
     }
 
     #[inline]
-    fn zyzy(self) -> Self::Vec4 {
+    fn zyzy(self) -> Self::Swizzle4 {
         let zyzy = std::simd::simd_swizzle!(self.value, [2, 1, 2, 1]);
 
         Vector4 { value: zyzy }
     }
 
     #[inline]
-    fn zyzz(self) -> Self::Vec4 {
+    fn zyzz(self) -> Self::Swizzle4 {
         let zyzz = std::simd::simd_swizzle!(self.value, [2, 1, 2, 2]);
 
         Vector4 { value: zyzz }
     }
 
     #[inline]
-    fn zzxx(self) -> Self::Vec4 {
+    fn zzxx(self) -> Self::Swizzle4 {
         let zzxx = std::simd::simd_swizzle!(self.value, [2, 2, 0, 0]);
 
         Vector4 { value: zzxx }
     }
 
     #[inline]
-    fn zzxy(self) -> Self::Vec4 {
+    fn zzxy(self) -> Self::Swizzle4 {
         let zzxy = std::simd::simd_swizzle!(self.value, [2, 2, 0, 1]);
 
         Vector4 { value: zzxy }
     }
 
     #[inline]
-    fn zzxz(self) -> Self::Vec4 {
+    fn zzxz(self) -> Self::Swizzle4 {
         let zzxz = std::simd::simd_swizzle!(self.value, [2, 2, 0, 2]);
 
         Vector4 { value: zzxz }
     }
 
     #[inline]
-    fn zzyx(self) -> Self::Vec4 {
+    fn zzyx(self) -> Self::Swizzle4 {
         let zzyx = std::simd::simd_swizzle!(self.value, [2, 2, 1, 0]);
 
         Vector4 { value: zzyx }
     }
 
     #[inline]
-    fn zzyy(self) -> Self::Vec4 {
+    fn zzyy(self) -> Self::Swizzle4 {
         let zzyy = std::simd::simd_swizzle!(self.value, [2, 2, 1, 1]);
 
         Vector4 { value: zzyy }
     }
 
     #[inline]
-    fn zzyz(self) -> Self::Vec4 {
+    fn zzyz(self) -> Self::Swizzle4 {
         let zzyz = std::simd::simd_swizzle!(self.value, [2, 2, 1, 2]);
 
         Vector4 { value: zzyz }
     }
 
     #[inline]
-    fn zzzx(self) -> Self::Vec4 {
+    fn zzzx(self) -> Self::Swizzle4 {
         let zzzx = std::simd::simd_swizzle!(self.value, [2, 2, 2, 0]);
 
         Vector4 { value: zzzx }
     }
 
     #[inline]
-    fn zzzy(self) -> Self::Vec4 {
+    fn zzzy(self) -> Self::Swizzle4 {
         let zzzy = std::simd::simd_swizzle!(self.value, [2, 2, 2, 1]);
 
         Vector4 { value: zzzy }
     }
 
     #[inline]
-    fn zzzz(self) -> Self::Vec4 {
+    fn zzzz(self) -> Self::Swizzle4 {
         Vector4::splat(self.z())
     }
 }
