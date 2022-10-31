@@ -24,6 +24,23 @@ impl Default for Matrix3x3 {
     }
 }
 
+
+impl Matrix3x3 {
+    pub const IDENTITY: Matrix3x3 = Matrix3x3 {
+        column_x: Vector3::set(1.0, 0.0, 0.0),
+        column_y: Vector3::set(0.0, 1.0, 0.0),
+        column_z: Vector3::set(0.0, 0.0, 1.0)
+    };
+
+
+    pub const ZERO : Matrix3x3 = Matrix3x3{
+        column_x: Vector3::ZERO,
+        column_y: Vector3::ZERO,
+        column_z: Vector3::ZERO,
+    };
+}
+
+
 impl Matrix3x3 {
     #[inline]
     pub const fn set_from_columns(
@@ -70,15 +87,6 @@ impl Matrix3x3 {
     pub const fn to_diagonal(self) -> Vector3 {
         Vector3::set(self.column_x.x(), self.column_y.y(), self.column_z.z())
     }
-}
-
-impl Matrix3x3 {
-    #[rustfmt::skip]
-    pub const IDENTITY: Matrix3x3 = Matrix3x3 {
-        column_x: Vector3::set(1.0, 0.0, 0.0),
-        column_y: Vector3::set(0.0, 1.0, 0.0),
-        column_z: Vector3::set(0.0, 0.0, 1.0)
-    };
 }
 
 

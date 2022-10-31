@@ -7,6 +7,7 @@ pub struct Aperture {
     pub aperture_size_x: f32,
     pub aperture_size_y: f32,
 }
+
 impl Aperture {
     pub fn new(width: f32, height: f32) -> Self {
         Self {

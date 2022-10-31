@@ -5,45 +5,40 @@ use crate::math_trait::Swizzles2;
 use std::fmt::Display;
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct Bool2 {
-   pub value : [bool; 2]
+    pub value: [bool; 2],
 }
 
-impl Default for Bool2{
-    fn default() -> Self {
-        Bool2 { value: [false;2] }
-    }
-}
 
-impl Bool2{
+impl Bool2 {
     #[inline(always)]
-    pub const fn set(x : bool, y : bool) -> Bool2 {
-        Bool2 { value: [x,y] }
+    pub const fn set(x: bool, y: bool) -> Bool2 {
+        Bool2 { value: [x, y] }
     }
 
     #[inline]
-    pub const fn splat(val : bool) -> Bool2 {
+    pub const fn splat(val: bool) -> Bool2 {
         Bool2 { value: [val; 2] }
     }
 
     #[inline]
-    pub fn all(self) -> bool{
+    pub fn all(self) -> bool {
         self.y() & self.x()
     }
 
     #[inline]
-    pub fn any(self) -> bool{
+    pub fn any(self) -> bool {
         self.y() | self.y()
     }
 
     #[inline]
-    pub const fn to_primitive(self) -> [bool;2] {
+    pub const fn to_primitive(self) -> [bool; 2] {
         self.value
     }
 
     #[inline]
-    pub const fn from_primitive(array : [bool;2]) -> Bool2 {
+    pub const fn from_primitive(array: [bool; 2]) -> Bool2 {
         Bool2 { value: array }
     }
 
@@ -58,23 +53,25 @@ impl Bool2{
     }
 
     #[inline]
-    pub fn to_mask(self) -> std::simd::mask32x4{
+    pub fn to_mask(self) -> std::simd::mask32x4 {
         std::simd::mask32x4::from_array([self.x(), self.y(), false, false])
     }
 }
 
-impl Display for Bool2{
+impl Display for Bool2 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Bool2 (x : {}, y : {})", self.x(), self.y())
     }
 }
 
-impl BitAnd<bool> for Bool2{
+impl BitAnd<bool> for Bool2 {
     type Output = Bool2;
 
     #[inline]
     fn bitand(self, rhs: bool) -> Self::Output {
-        Bool2{ value: [self.x() & rhs, self.y() & rhs] }
+        Bool2 {
+            value: [self.x() & rhs, self.y() & rhs],
+        }
     }
 }
 
@@ -83,11 +80,13 @@ impl BitAnd<Bool2> for Bool2 {
 
     #[inline]
     fn bitand(self, rhs: Bool2) -> Self::Output {
-        Bool2{ value: [self.x() & rhs.x(), self.y() & rhs.y()] }
+        Bool2 {
+            value: [self.x() & rhs.x(), self.y() & rhs.y()],
+        }
     }
 }
 
-impl BitAndAssign<bool> for Bool2{
+impl BitAndAssign<bool> for Bool2 {
     #[inline]
     fn bitand_assign(&mut self, rhs: bool) {
         self.value[0] &= rhs;
@@ -95,7 +94,7 @@ impl BitAndAssign<bool> for Bool2{
     }
 }
 
-impl BitAndAssign<Bool2> for Bool2{
+impl BitAndAssign<Bool2> for Bool2 {
     #[inline]
     fn bitand_assign(&mut self, rhs: Bool2) {
         self.value[0] &= rhs.x();
@@ -103,25 +102,29 @@ impl BitAndAssign<Bool2> for Bool2{
     }
 }
 
-impl BitOr<bool> for Bool2{
+impl BitOr<bool> for Bool2 {
     type Output = Bool2;
 
     #[inline]
     fn bitor(self, rhs: bool) -> Self::Output {
-        Bool2{ value: [self.x() | rhs, self.y() | rhs] }
+        Bool2 {
+            value: [self.x() | rhs, self.y() | rhs],
+        }
     }
 }
 
-impl BitOr<Bool2> for Bool2{
+impl BitOr<Bool2> for Bool2 {
     type Output = Bool2;
 
     #[inline]
     fn bitor(self, rhs: Bool2) -> Self::Output {
-        Bool2{ value: [self.x() | rhs.x(), self.y() | rhs.y()] }
+        Bool2 {
+            value: [self.x() | rhs.x(), self.y() | rhs.y()],
+        }
     }
 }
 
-impl BitOrAssign<bool> for Bool2{
+impl BitOrAssign<bool> for Bool2 {
     #[inline]
     fn bitor_assign(&mut self, rhs: bool) {
         self.value[0] |= rhs;
@@ -129,7 +132,7 @@ impl BitOrAssign<bool> for Bool2{
     }
 }
 
-impl BitOrAssign<Bool2> for Bool2{
+impl BitOrAssign<Bool2> for Bool2 {
     #[inline]
     fn bitor_assign(&mut self, rhs: Bool2) {
         self.value[0] |= rhs.x();
@@ -137,25 +140,29 @@ impl BitOrAssign<Bool2> for Bool2{
     }
 }
 
-impl BitXor<bool> for Bool2{
+impl BitXor<bool> for Bool2 {
     type Output = Bool2;
 
     #[inline]
     fn bitxor(self, rhs: bool) -> Self::Output {
-        Bool2{ value: [self.x() ^ rhs, self.y() ^ rhs] }
+        Bool2 {
+            value: [self.x() ^ rhs, self.y() ^ rhs],
+        }
     }
 }
 
-impl BitXor<Bool2> for Bool2{
+impl BitXor<Bool2> for Bool2 {
     type Output = Bool2;
 
     #[inline]
     fn bitxor(self, rhs: Bool2) -> Self::Output {
-        Bool2{ value: [self.x() ^ rhs.x(), self.y() ^ rhs.y()] }
+        Bool2 {
+            value: [self.x() ^ rhs.x(), self.y() ^ rhs.y()],
+        }
     }
 }
 
-impl BitXorAssign<bool> for Bool2{
+impl BitXorAssign<bool> for Bool2 {
     #[inline]
     fn bitxor_assign(&mut self, rhs: bool) {
         self.value[0] ^= rhs;
@@ -163,7 +170,7 @@ impl BitXorAssign<bool> for Bool2{
     }
 }
 
-impl BitXorAssign<Bool2> for Bool2{
+impl BitXorAssign<Bool2> for Bool2 {
     #[inline]
     fn bitxor_assign(&mut self, rhs: Bool2) {
         self.value[0] ^= rhs.x();

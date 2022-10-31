@@ -1,5 +1,3 @@
-
-
 const SRGB_POW_TRANSFER_FUNCTION: f32 = 1.0 / 2.4;
 
 const RCP_FALLOFF: f32 = 1.0 / 12.92;

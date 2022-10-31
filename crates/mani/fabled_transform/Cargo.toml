@@ -7,5 +7,6 @@ edition = "2018"
 
 [dependencies]
 glam = {version = "0.21.2", features = ["bytemuck"]}
+fabled_component = {path ="../fabled_component", version = "*"}
 
 #shipyard = {git = "https://github.com/leudz/shipyard", branch = "master" , features = ["thread_local", "proc", "parallel"]}
