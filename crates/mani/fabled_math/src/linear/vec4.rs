@@ -53,7 +53,7 @@ impl Vector4 {
     }
 
     #[inline]
-    pub const fn splat(val: f32) -> Vector4 {
+    pub const fn broadcast(val: f32) -> Vector4 {
         Vector4 {
             value: std::simd::f32x4::from_array([val; 4]),
         }
@@ -336,7 +336,7 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn xx(self) -> Self::Swizzle2 {
-        Vector2::splat(self.x())
+        Vector2::broadcast(self.x())
     }
 
     #[inline]
@@ -361,7 +361,7 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn yy(self) -> Self::Swizzle2 {
-        Vector2::splat(self.y())
+        Vector2::broadcast(self.y())
     }
 
     #[inline]
@@ -386,7 +386,7 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn zz(self) -> Self::Swizzle2 {
-        Vector2::splat(self.z())
+        Vector2::broadcast(self.z())
     }
 
     #[inline]
@@ -411,12 +411,12 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn ww(self) -> Self::Swizzle2 {
-        Vector2::splat(self.w())
+        Vector2::broadcast(self.w())
     }
 
     #[inline]
     fn xxx(self) -> Self::Swizzle3 {
-        Vector3::splat(self.x())
+        Vector3::broadcast(self.x())
     }
 
     #[inline]
@@ -521,7 +521,7 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn yyy(self) -> Self::Swizzle3 {
-        Vector3::splat(self.y())
+        Vector3::broadcast(self.y())
     }
 
     #[inline]
@@ -626,7 +626,7 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn zzz(self) -> Self::Swizzle3 {
-        Vector3::splat(self.z())
+        Vector3::broadcast(self.z())
     }
 
     #[inline]
@@ -731,12 +731,12 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn www(self) -> Self::Swizzle3 {
-        Vector3::splat(self.w())
+        Vector3::broadcast(self.w())
     }
 
     #[inline]
     fn xxxx(self) -> Self {
-        Vector4::splat(self.x())
+        Vector4::broadcast(self.x())
     }
 
     #[inline]
@@ -1322,7 +1322,7 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn yyyy(self) -> Self {
-        Vector4::splat(self.y())
+        Vector4::broadcast(self.y())
     }
 
     #[inline]
@@ -1915,7 +1915,7 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn zzzz(self) -> Self {
-        Vector4::splat(self.z())
+        Vector4::broadcast(self.z())
     }
 
     #[inline]
@@ -2508,6 +2508,6 @@ impl Swizzles4 for Vector4 {
 
     #[inline]
     fn wwww(self) -> Self {
-        Vector4::splat(self.w())
+        Vector4::broadcast(self.w())
     }
 }

@@ -2,7 +2,7 @@ use crate::{Matrix3x3, Quaternion, Vector2, Vector4};
 
 use crate::math_trait::Swizzles3;
 
-use crate::matrix3x3_math::transpose;
+use crate::matrix3x3_math::transpose_mat3;
 use crate::vector_math::{component_sum, cross};
 
 use std::fmt::{Display, Formatter};
@@ -75,7 +75,7 @@ impl Vector3 {
     }
 
     #[inline]
-    pub const fn splat(val: f32) -> Vector3 {
+    pub const fn broadcast(val: f32) -> Vector3 {
         Vector3 {
             value: std::simd::f32x4::from_array([val, val, val, 0.0]),
         }
@@ -132,7 +132,7 @@ impl Mul<Quaternion> for Vector3 {
     fn mul(self, rhs: Quaternion) -> Self::Output {
         let quaternion_real: f32 = rhs.to_real();
 
-        let quaternion_scalar_vector: Vector3 = Vector3::splat(quaternion_real);
+        let quaternion_scalar_vector: Vector3 = Vector3::broadcast(quaternion_real);
 
         let t: Vector3 = Vector3 {
             value: cross(rhs.value, self.value),
@@ -156,7 +156,7 @@ impl Mul<Vector3> for Matrix3x3 {
     type Output = Vector3;
 
     fn mul(self, rhs: Vector3) -> Self::Output {
-        let row_col_matrix: Matrix3x3 = transpose(self);
+        let row_col_matrix: Matrix3x3 = transpose_mat3(self);
 
         let row_mul_col_vec_x: Vector3 = row_col_matrix.column_x * rhs;
         let row_mul_col_vec_y: Vector3 = row_col_matrix.column_y * rhs;
@@ -397,7 +397,7 @@ impl Swizzles3 for Vector3 {
 
     #[inline]
     fn xx(self) -> Self::Swizzle2 {
-        Vector2::splat(self.x())
+        Vector2::broadcast(self.x())
     }
 
     #[inline]
@@ -417,7 +417,7 @@ impl Swizzles3 for Vector3 {
 
     #[inline]
     fn yy(self) -> Self::Swizzle2 {
-        Vector2::splat(self.y())
+        Vector2::broadcast(self.y())
     }
 
     #[inline]
@@ -437,7 +437,7 @@ impl Swizzles3 for Vector3 {
 
     #[inline]
     fn zz(self) -> Self::Swizzle2 {
-        Vector2::splat(self.z())
+        Vector2::broadcast(self.z())
     }
 
     #[inline]
@@ -904,7 +904,7 @@ impl Swizzles3 for Vector3 {
 
     #[inline]
     fn yyyy(self) -> Self::Swizzle4 {
-        Vector4::splat(self.y())
+        Vector4::broadcast(self.y())
     }
 
     #[inline]
@@ -1182,6 +1182,6 @@ impl Swizzles3 for Vector3 {
 
     #[inline]
     fn zzzz(self) -> Self::Swizzle4 {
-        Vector4::splat(self.z())
+        Vector4::broadcast(self.z())
     }
 }

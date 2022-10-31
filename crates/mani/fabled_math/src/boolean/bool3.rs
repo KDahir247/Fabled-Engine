@@ -24,7 +24,7 @@ impl Bool3 {
     }
 
     #[inline]
-    pub fn splat(val: bool) -> Bool3 {
+    pub fn broadcast(val: bool) -> Bool3 {
         Bool3 {
             value: std::simd::mask32x4::from_array([val, val, val, false]),
         }
@@ -221,7 +221,7 @@ impl Swizzles3 for Bool3 {
 
     #[inline]
     fn xx(self) -> Self::Swizzle2 {
-        Bool2::splat(self.x())
+        Bool2::broadcast(self.x())
     }
 
     #[inline]
@@ -241,7 +241,7 @@ impl Swizzles3 for Bool3 {
 
     #[inline]
     fn yy(self) -> Self::Swizzle2 {
-        Bool2::splat(self.y())
+        Bool2::broadcast(self.y())
     }
 
     #[inline]
@@ -261,12 +261,12 @@ impl Swizzles3 for Bool3 {
 
     #[inline]
     fn zz(self) -> Self::Swizzle2 {
-        Bool2::splat(self.z())
+        Bool2::broadcast(self.z())
     }
 
     #[inline]
     fn xxx(self) -> Self {
-        Bool3::splat(self.x())
+        Bool3::broadcast(self.x())
     }
 
     #[inline]
@@ -370,7 +370,7 @@ impl Swizzles3 for Bool3 {
 
     #[inline]
     fn yyy(self) -> Self {
-        Bool3::splat(self.y())
+        Bool3::broadcast(self.y())
     }
 
     #[inline]
@@ -483,12 +483,12 @@ impl Swizzles3 for Bool3 {
 
     #[inline]
     fn zzz(self) -> Self {
-        Bool3::splat(self.z())
+        Bool3::broadcast(self.z())
     }
 
     #[inline]
     fn xxxx(self) -> Self::Swizzle4 {
-        Bool4::splat(self.z())
+        Bool4::broadcast(self.z())
     }
 
     #[inline]
@@ -844,7 +844,7 @@ impl Swizzles3 for Bool3 {
 
     #[inline]
     fn yyyy(self) -> Self::Swizzle4 {
-        Bool4::splat(self.y())
+        Bool4::broadcast(self.y())
     }
 
     #[inline]
@@ -1200,6 +1200,6 @@ impl Swizzles3 for Bool3 {
 
     #[inline]
     fn zzzz(self) -> Self::Swizzle4 {
-        Bool4::splat(self.z())
+        Bool4::broadcast(self.z())
     }
 }

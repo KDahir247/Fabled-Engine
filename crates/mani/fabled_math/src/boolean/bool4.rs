@@ -27,7 +27,7 @@ impl Bool4 {
     }
 
     #[inline]
-    pub fn splat(val: bool) -> Bool4 {
+    pub fn broadcast(val: bool) -> Bool4 {
         Bool4 {
             value: std::simd::mask32x4::from_array([val; 4]),
         }
@@ -224,7 +224,7 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn xx(self) -> Self::Swizzle2 {
-        Bool2::splat(self.x())
+        Bool2::broadcast(self.x())
     }
 
     #[inline]
@@ -249,7 +249,7 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn yy(self) -> Self::Swizzle2 {
-        Bool2::splat(self.y())
+        Bool2::broadcast(self.y())
     }
 
     #[inline]
@@ -274,7 +274,7 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn zz(self) -> Self::Swizzle2 {
-        Bool2::splat(self.z())
+        Bool2::broadcast(self.z())
     }
 
     #[inline]
@@ -299,12 +299,12 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn ww(self) -> Self::Swizzle2 {
-        Bool2::splat(self.w())
+        Bool2::broadcast(self.w())
     }
 
     #[inline]
     fn xxx(self) -> Self::Swizzle3 {
-        Bool3::splat(self.x())
+        Bool3::broadcast(self.x())
     }
 
     #[inline]
@@ -489,7 +489,7 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn yyy(self) -> Self::Swizzle3 {
-        Bool3::splat(self.y())
+        Bool3::broadcast(self.y())
     }
 
     #[inline]
@@ -674,7 +674,7 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn zzz(self) -> Self::Swizzle3 {
-        Bool3::splat(self.z())
+        Bool3::broadcast(self.z())
     }
 
     #[inline]
@@ -860,13 +860,13 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn www(self) -> Self::Swizzle3 {
-        Bool3::splat(self.w())
+        Bool3::broadcast(self.w())
     }
 
 
     #[inline]
     fn xxxx(self) -> Self {
-        Bool4::splat(self.x())
+        Bool4::broadcast(self.x())
     }
 
     #[inline]
@@ -1618,7 +1618,7 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn yyyy(self) -> Self {
-        Bool4::splat(self.y())
+        Bool4::broadcast(self.y())
     }
 
     #[inline]
@@ -2379,7 +2379,7 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn zzzz(self) -> Self {
-        Bool4::splat(self.y())
+        Bool4::broadcast(self.y())
     }
 
     #[inline]
@@ -3140,6 +3140,6 @@ impl Swizzles4 for Bool4 {
 
     #[inline]
     fn wwww(self) -> Self {
-        Bool4::splat(self.w())
+        Bool4::broadcast(self.w())
     }
 }

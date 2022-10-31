@@ -18,7 +18,7 @@ impl Bool2 {
     }
 
     #[inline]
-    pub const fn splat(val: bool) -> Bool2 {
+    pub const fn broadcast(val: bool) -> Bool2 {
         Bool2 { value: [val; 2] }
     }
 
@@ -184,7 +184,7 @@ impl Swizzles2 for Bool2 {
 
     #[inline]
     fn xx(self) -> Self {
-        Bool2::splat(self.x())
+        Bool2::broadcast(self.x())
     }
 
     #[inline]
@@ -194,12 +194,12 @@ impl Swizzles2 for Bool2 {
 
     #[inline]
     fn yy(self) -> Self {
-        Bool2::splat(self.y())
+        Bool2::broadcast(self.y())
     }
 
     #[inline]
     fn xxx(self) -> Self::Swizzle3 {
-        Bool3::splat(self.x())
+        Bool3::broadcast(self.x())
     }
 
     #[inline]
@@ -234,12 +234,12 @@ impl Swizzles2 for Bool2 {
 
     #[inline]
     fn yyy(self) -> Self::Swizzle3 {
-        Bool3::splat(self.y())
+        Bool3::broadcast(self.y())
     }
 
     #[inline]
     fn xxxx(self) -> Self::Swizzle4 {
-        Bool4::splat(self.x())
+        Bool4::broadcast(self.x())
     }
 
     #[inline]
@@ -313,6 +313,6 @@ impl Swizzles2 for Bool2 {
 
     #[inline]
     fn yyyy(self) -> Self::Swizzle4 {
-        Bool4::splat(self.y())
+        Bool4::broadcast(self.y())
     }
 }

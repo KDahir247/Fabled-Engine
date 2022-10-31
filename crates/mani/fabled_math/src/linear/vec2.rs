@@ -40,7 +40,7 @@ impl Vector2 {
     }
 
     #[inline]
-    pub const fn splat(val: f32) -> Vector2 {
+    pub const fn broadcast(val: f32) -> Vector2 {
         Vector2 { value: [val; 2] }
     }
 
@@ -304,7 +304,7 @@ impl Swizzles2 for Vector2 {
 
     #[inline]
     fn xx(self) -> Self {
-        Vector2::splat(self.x())
+        Vector2::broadcast(self.x())
     }
 
     #[inline]
@@ -314,12 +314,12 @@ impl Swizzles2 for Vector2 {
 
     #[inline]
     fn yy(self) -> Self {
-        Vector2::splat(self.y())
+        Vector2::broadcast(self.y())
     }
 
     #[inline]
     fn xxx(self) -> Self::Swizzle3 {
-        Vector3::splat(self.x())
+        Vector3::broadcast(self.x())
     }
 
     #[inline]
@@ -354,12 +354,12 @@ impl Swizzles2 for Vector2 {
 
     #[inline]
     fn yyy(self) -> Self::Swizzle3 {
-        Vector3::splat(self.y())
+        Vector3::broadcast(self.y())
     }
 
     #[inline]
     fn xxxx(self) -> Self::Swizzle4 {
-        Vector4::splat(self.x())
+        Vector4::broadcast(self.x())
     }
 
     #[inline]
@@ -433,6 +433,6 @@ impl Swizzles2 for Vector2 {
 
     #[inline]
     fn yyyy(self) -> Self::Swizzle4 {
-        Vector4::splat(self.y())
+        Vector4::broadcast(self.y())
     }
 }

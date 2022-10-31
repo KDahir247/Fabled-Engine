@@ -32,7 +32,7 @@ impl Quaternion {
     }
 
     #[inline]
-    pub const fn splat(val: f32) -> Quaternion {
+    pub const fn broadcast(val: f32) -> Quaternion {
         Quaternion {
             value: std::simd::f32x4::from_array([val; 4]),
         }
@@ -262,7 +262,6 @@ impl MulAssign for Quaternion {
 }
 
 pub mod quaternion_math {
-    use crate::math_trait::QuaternionSwizzles;
     use crate::vector_math::{
         component_sum, cos, dot, length, length_squared, lerp, normalize, rcp, select, sin,
     };
@@ -270,48 +269,48 @@ pub mod quaternion_math {
     use std::ops::Neg;
 
     #[inline]
-    pub fn rotate_x(angle_radians: f32) -> Quaternion {
-        let half_angle: f32 = angle_radians * 0.5f32;
+    pub fn rotate_x_quat(angle_radian: f32) -> Quaternion {
+        let half_angle: f32 = angle_radian * 0.5f32;
 
         Quaternion::from_primitive([half_angle.sin(), 0.0, 0.0, half_angle.cos()])
     }
 
     #[inline]
-    pub fn rotate_y(angle_radians: f32) -> Quaternion {
-        let half_angle: f32 = angle_radians * 0.5f32;
+    pub fn rotate_y_quat(angle_radian: f32) -> Quaternion {
+        let half_angle: f32 = angle_radian * 0.5f32;
 
         Quaternion::from_primitive([0.0, half_angle.sin(), 0.0, half_angle.cos()])
     }
 
     #[inline]
-    pub fn rotate_z(angle_radians: f32) -> Quaternion {
-        let half_angle: f32 = angle_radians * 0.5f32;
+    pub fn rotate_z_quat(angle_radian: f32) -> Quaternion {
+        let half_angle: f32 = angle_radian * 0.5f32;
 
         Quaternion::from_primitive([0.0, 0.0, half_angle.sin(), half_angle.cos()])
     }
 
     #[inline]
-    pub fn to_angle_axis_mag(quaternion: Quaternion) -> Vector3 {
-        let axis_rot_angle: Vector4 = to_angle_axis(quaternion);
+    pub fn to_angle_axis_mag_vec3(quaternion: Quaternion) -> Vector3 {
+        let axis_rot_angle: Vector4 = to_angle_axis_vec4(quaternion);
 
         axis_rot_angle.trunc_vec3() * axis_rot_angle.w()
     }
 
     #[inline]
-    pub fn from_angle_axis_mag(axis_mag: Vector3) -> Quaternion {
+    pub fn from_angle_axis_mag_quat(axis_mag: Vector3) -> Quaternion {
         let angle: f32 = length(axis_mag.value);
 
         let rcp_angle: f32 = angle.recip();
 
         let axis: Vector3 = axis_mag * rcp_angle;
 
-        from_angle_axis(axis, angle)
+        from_angle_axis_quat(axis, angle)
     }
 
 
     #[inline]
-    pub fn from_angle_axis(normalized_axis: Vector3, angle_radians: f32) -> Quaternion {
-        let half_angle: f32 = angle_radians * 0.5f32;
+    pub fn from_angle_axis_quat(normalized_axis: Vector3, angle_radian: f32) -> Quaternion {
+        let half_angle: f32 = angle_radian * 0.5f32;
 
         let quaternion_pure: Vector3 = normalized_axis * half_angle.sin();
 
@@ -321,7 +320,7 @@ pub mod quaternion_math {
     }
 
     #[inline]
-    pub fn to_angle_axis(quaternion: Quaternion) -> Vector4 {
+    pub fn to_angle_axis_vec4(quaternion: Quaternion) -> Vector4 {
         let quaternion_real: f32 = quaternion.to_real();
 
         let angle: f32 = 2.0 * quaternion_real.acos();
@@ -338,28 +337,34 @@ pub mod quaternion_math {
     }
 
     #[inline]
-    pub fn from_euler(euler_radians: Vector3, euler_order: EulerOrder) -> Quaternion {
+    pub fn from_euler_quat(euler_radians: Vector3, euler_order: EulerOrder) -> Quaternion {
         let half_euler_rad: Vector3 = euler_radians * 0.5f32;
 
         let cos_half_euler_rad: Vector3 = Vector3 {
             value: cos(half_euler_rad.value),
         };
+
         let sin_half_euler_rad: Vector3 = Vector3 {
             value: sin(half_euler_rad.value),
         };
 
+        let s_half_c = sin_half_euler_rad.x() * cos_half_euler_rad.y();
+        let c_half_s = cos_half_euler_rad.x() * sin_half_euler_rad.y();
+        let c_half_c = cos_half_euler_rad.x() * cos_half_euler_rad.y();
+        let s_half_s = sin_half_euler_rad.x() * sin_half_euler_rad.y();
+
         let rhs_quaternion_equation: Quaternion = Quaternion::set(
-            sin_half_euler_rad.x() * cos_half_euler_rad.y() * cos_half_euler_rad.z(),
-            cos_half_euler_rad.x() * sin_half_euler_rad.y() * cos_half_euler_rad.z(),
-            cos_half_euler_rad.x() * cos_half_euler_rad.y() * sin_half_euler_rad.z(),
-            cos_half_euler_rad.x() * cos_half_euler_rad.y() * cos_half_euler_rad.z(),
+            s_half_c * cos_half_euler_rad.z(),
+            c_half_s * cos_half_euler_rad.z(),
+            c_half_c * sin_half_euler_rad.z(),
+            c_half_c * cos_half_euler_rad.z(),
         );
 
         let lhs_quaternion_equation: Quaternion = Quaternion::set(
-            cos_half_euler_rad.x() * sin_half_euler_rad.y() * sin_half_euler_rad.z(),
-            sin_half_euler_rad.x() * cos_half_euler_rad.y() * sin_half_euler_rad.z(),
-            sin_half_euler_rad.x() * sin_half_euler_rad.y() * cos_half_euler_rad.z(),
-            sin_half_euler_rad.x() * sin_half_euler_rad.y() * sin_half_euler_rad.z(),
+            c_half_s * sin_half_euler_rad.z(),
+            s_half_c * sin_half_euler_rad.z(),
+            s_half_s * cos_half_euler_rad.z(),
+            s_half_s * sin_half_euler_rad.z(),
         );
 
         let corrected_sign_lhs_quat_equation: Quaternion =
@@ -368,21 +373,21 @@ pub mod quaternion_math {
         rhs_quaternion_equation + corrected_sign_lhs_quat_equation
     }
 
-    pub fn from_transformation_matrix(transformation_matrix: Matrix4x4) -> Quaternion {
+    pub fn from_transformation_matrix_quat(transformation_matrix: Matrix4x4) -> Quaternion {
         let column_x_trunc: Vector3 = transformation_matrix.column_x.trunc_vec3();
         let column_y_trunc: Vector3 = transformation_matrix.column_y.trunc_vec3();
         let column_z_trunc: Vector3 = transformation_matrix.column_z.trunc_vec3();
 
-        let rotation_matrix: Matrix3x3 = Matrix3x3::set_from_columns(
+        let rotation_matrix: Matrix3x3 = Matrix3x3::set(
             column_x_trunc * length(column_x_trunc.value).recip(),
             column_y_trunc * length(column_y_trunc.value).recip(),
             column_z_trunc * length(column_z_trunc.value).recip(),
         );
 
-        from_rotation_matrix(rotation_matrix)
+        from_rotation_matrix_quat(rotation_matrix)
     }
 
-    pub fn from_rotation_matrix(rotation_matrix: Matrix3x3) -> Quaternion {
+    pub fn from_rotation_matrix_quat(rotation_matrix: Matrix3x3) -> Quaternion {
         let mut quaternion_array: std::simd::f32x4 = std::simd::f32x4::from_array([0.0; 4]);
 
         let mut _s0: f32 = 0.0;
@@ -461,61 +466,39 @@ pub mod quaternion_math {
         } * scalar
     }
 
-    #[rustfmt::skip]
-    pub fn to_rotation_matrix(quaternion: Quaternion) -> Matrix3x3 {
-        let quaternion2 = quaternion + quaternion;
-
-        let a : std::simd::f32x4 = quaternion.jiij().value * quaternion2.jjkk().value;
-
-        let b : std::simd::f32x4 = quaternion.kwww().value * quaternion2.kkji().value;
-
-        let ii2 : f32 = quaternion.i() * quaternion2.i();
-
-        let interleave = a.interleave(b);
-
-        let first : [f32;4] = interleave.0.to_array();
-        let second : [f32;4] = interleave.1.to_array();
-
-        let col_0 : Vector3 = Vector3::set(-first[1] - first[0] + 1.0,first[3] + first[2],  second[0] - second[1]);
-        let col_1 : Vector3 = Vector3::set( first[2] - first[3], -ii2 - first[1] + 1.0, second[3] + second[2]);
-        let col_2 : Vector3 = Vector3::set(second[1] + second[0],   second[2] - second[3], -ii2 - first[0] + 1.0);
-
-        Matrix3x3::set_from_columns(col_0, col_1, col_2)
-    }
-
     #[inline]
-    pub fn conjugate(quaternion: Quaternion) -> Quaternion {
+    pub fn conjugate_quat(quaternion: Quaternion) -> Quaternion {
         Quaternion {
             value: quaternion.value.neg(),
         }
     }
 
     #[inline]
-    pub fn inverse(quaternion: Quaternion) -> Quaternion {
+    pub fn inverse_quat(quaternion: Quaternion) -> Quaternion {
         Quaternion {
-            value: conjugate(quaternion).value
-                * rcp(Vector4::splat(length_squared(quaternion.value)).value),
+            value: conjugate_quat(quaternion).value
+                * rcp(Vector4::broadcast(length_squared(quaternion.value)).value),
         }
     }
 
 
     #[inline]
-    pub fn forward(quaternion: Quaternion) -> Vector3 {
+    pub fn forward_vec3(quaternion: Quaternion) -> Vector3 {
         Vector3::FORWARD * quaternion
     }
 
     #[inline]
-    pub fn right(quaternion: Quaternion) -> Vector3 {
+    pub fn right_vec3(quaternion: Quaternion) -> Vector3 {
         Vector3::RIGHT * quaternion
     }
 
     #[inline]
-    pub fn up(quaternion: Quaternion) -> Vector3 {
+    pub fn up_vec3(quaternion: Quaternion) -> Vector3 {
         Vector3::UP * quaternion
     }
 
     #[inline]
-    pub fn normalized_lerp(
+    pub fn normalized_lerp_quat(
         start_quaternion: Quaternion,
         target_quaternion: Quaternion,
         delta: f32,
@@ -531,7 +514,7 @@ pub mod quaternion_math {
         let linear_interpolated_quaternion: std::simd::f32x4 = lerp(
             start_quaternion.value,
             target_quaternion,
-            Vector4::splat(delta).value,
+            Vector4::broadcast(delta).value,
         );
 
         Quaternion {
@@ -540,7 +523,7 @@ pub mod quaternion_math {
     }
 
     #[inline]
-    pub fn slerp(
+    pub fn slerp_quat(
         start_quaternion: Quaternion,
         target_quaternion: Quaternion,
         delta: f32,
@@ -553,16 +536,16 @@ pub mod quaternion_math {
 
         let delta_difference: f32 = 1.0 - delta;
 
-        let delta_mul_angle: f32 = delta * angle;
-        let delta_diff_mul_angle: f32 = delta_difference * angle;
+        let delta_mul_angle_sin: f32 = (delta * angle).sin();
+        let delta_diff_mul_angle_sin: f32 = (delta_difference * angle).sin();
 
-        let weight_start: f32 = delta_diff_mul_angle.sin() * rcp_sin_angle;
-        let weight_target: f32 = delta_mul_angle.sin() * rcp_sin_angle;
+        let weight_start: f32 = delta_diff_mul_angle_sin * rcp_sin_angle;
+        let weight_target: f32 = delta_mul_angle_sin * rcp_sin_angle;
 
         (start_quaternion * weight_start) + (target_quaternion * weight_target)
     }
 
-    pub fn quaternion_log(quaternion: Quaternion) -> Quaternion {
+    pub fn log_quat(quaternion: Quaternion) -> Quaternion {
         let quaternion_real: f32 = quaternion.to_real();
 
         let quaternion_pure: Vector3 = quaternion.to_pure();
@@ -579,7 +562,7 @@ pub mod quaternion_math {
         Quaternion::from_additive_form(real_quaternion, pure_quaternion)
     }
 
-    pub fn quaternion_exp(quaternion: Quaternion) -> Quaternion {
+    pub fn exp_quat(quaternion: Quaternion) -> Quaternion {
         let quaternion_real: f32 = quaternion.to_real();
         let quaternion_pure: Vector3 = quaternion.to_pure();
 
@@ -601,7 +584,7 @@ pub mod quaternion_math {
 impl QuaternionSwizzles for Quaternion {
     #[inline]
     fn iiii(self) -> Self {
-        Quaternion::splat(self.i())
+        Quaternion::broadcast(self.i())
     }
 
     #[inline]
@@ -1187,7 +1170,7 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn jjjj(self) -> Self {
-        Quaternion::splat(self.j())
+        Quaternion::broadcast(self.j())
     }
 
     #[inline]
@@ -1780,7 +1763,7 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn kkkk(self) -> Self {
-        Quaternion::splat(self.k())
+        Quaternion::broadcast(self.k())
     }
 
     #[inline]
@@ -2373,6 +2356,6 @@ impl QuaternionSwizzles for Quaternion {
 
     #[inline]
     fn wwww(self) -> Self {
-        Quaternion::splat(self.w())
+        Quaternion::broadcast(self.w())
     }
 }
