@@ -23,12 +23,12 @@ impl Bool2 {
     }
 
     #[inline]
-    pub fn all(self) -> bool {
+    pub const fn all(self) -> bool {
         self.y() & self.x()
     }
 
     #[inline]
-    pub fn any(self) -> bool {
+    pub const fn any(self) -> bool {
         self.y() | self.y()
     }
 

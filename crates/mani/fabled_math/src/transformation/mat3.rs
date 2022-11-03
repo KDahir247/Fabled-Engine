@@ -57,6 +57,7 @@ impl Matrix3x3 {
         }
     }
 
+    #[inline]
     pub const fn from_primitive(array: [f32; 9]) -> Matrix3x3 {
         let z_column: [f32; 3] = [array[2], array[5], array[8]];
         let y_column: [f32; 3] = [array[1], array[4], array[7]];
@@ -257,12 +258,14 @@ impl MulAssign for Matrix3x3 {
 pub mod matrix3x3_math {
     use crate::{EulerOrder, Matrix3x3, Quaternion, Vector2, Vector3, Vector4};
 
+    use crate::quaternion_math::from_euler_quat;
     use crate::vector_math::{cross, dot};
+
 
     use crate::math_trait::{QuaternionSwizzles, Swizzles3};
 
     #[inline]
-    pub fn transpose_mat3(matrix_3x3: Matrix3x3) -> Matrix3x3 {
+    pub const fn transpose_mat3(matrix_3x3: Matrix3x3) -> Matrix3x3 {
         let x_column: Vector3 = matrix_3x3.column_x;
         let y_column: Vector3 = matrix_3x3.column_y;
         let z_column: Vector3 = matrix_3x3.column_z;
@@ -275,7 +278,7 @@ pub mod matrix3x3_math {
     }
 
     #[inline]
-    pub fn from_scale_mat3(scalar_vector: Vector2) -> Matrix3x3 {
+    pub const fn from_scale_mat3(scalar_vector: Vector2) -> Matrix3x3 {
         Matrix3x3::set(
             Vector3::set(scalar_vector.x(), 0.0, 0.0),
             Vector3::set(0.0, scalar_vector.y(), 0.0),
@@ -284,7 +287,7 @@ pub mod matrix3x3_math {
     }
 
     #[inline]
-    pub fn from_translation_mat3(translation_vector: Vector3) -> Matrix3x3 {
+    pub const fn from_translation_mat3(translation_vector: Vector3) -> Matrix3x3 {
         Matrix3x3::set(Vector3::RIGHT, Vector3::UP, translation_vector)
     }
 
@@ -331,12 +334,12 @@ pub mod matrix3x3_math {
     pub fn from_angle_axis_mat3(axis_normalized: Vector3, angle_radian: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radian.sin_cos();
 
-        let axis_sqr = axis_normalized * axis_normalized;
+        let axis_sqr : Vector3 = axis_normalized * axis_normalized;
 
         let zy: f32 = axis_normalized.z() * axis_normalized.y();
         let xz: f32 = axis_normalized.x() * axis_normalized.z();
         let yx: f32 = axis_normalized.y() * axis_normalized.x();
-        let axis_mul_sin = axis_normalized * sin_angle;
+        let axis_mul_sin: Vector3 = axis_normalized * sin_angle;
 
         let one_min_cos: f32 = 1.0 - cos_angle;
 
@@ -344,25 +347,23 @@ pub mod matrix3x3_math {
         let xz_theta: f32 = xz * one_min_cos;
         let zy_theta: f32 = zy * one_min_cos;
 
-        let axisx_theta: f32 = axis_sqr.x() * one_min_cos;
-        let axisy_theta: f32 = axis_sqr.y() * one_min_cos;
-        let axisz_theta: f32 = axis_sqr.z() * one_min_cos;
+        let axis_theta: Vector3 = axis_sqr * one_min_cos;
 
         Matrix3x3::set(
             Vector3::set(
-                axisx_theta + cos_angle,
+                axis_theta.x() + cos_angle,
                 yx_theta + axis_mul_sin.z(),
                 xz_theta - axis_mul_sin.y(),
             ),
             Vector3::set(
                 yx_theta - axis_mul_sin.z(),
-                axisy_theta + cos_angle,
+                axis_theta.y() + cos_angle,
                 zy_theta + axis_mul_sin.x(),
             ),
             Vector3::set(
                 xz_theta + axis_mul_sin.y(),
                 zy_theta - axis_mul_sin.x(),
-                axisz_theta + cos_angle,
+                axis_theta.z() + cos_angle,
             ),
         )
     }
@@ -397,9 +398,10 @@ pub mod matrix3x3_math {
     }
 
     #[rustfmt::skip]
+    #[inline]
     pub fn from_quat_mat3(quaternion: Quaternion) -> Matrix3x3 {
 
-        let quaternion2 = quaternion + quaternion;
+        let quaternion2: Quaternion = quaternion + quaternion;
 
         let a : std::simd::f32x4 = quaternion.jiij().value * quaternion2.jjkk().value;
 
@@ -412,21 +414,21 @@ pub mod matrix3x3_math {
         let first : Vector4 = Vector4{ value: interleave.0 };
         let second : Vector4 = Vector4 { value: interleave.1 };
 
-        let col_0 : Vector3 = Vector3::set(-first.y() - first.x() + 1.0, first.w() + first.z(),  second.x() - second.y());
-        let col_1 : Vector3 = Vector3::set( first.z() - first.w(), -ii2 - first.y() + 1.0, second.w() + second.z());
-        let col_2 : Vector3 = Vector3::set(second.y() + second.x(),   second.z() - second.w(), -ii2 - first.x() + 1.0);
+        let column_0 : Vector3 = Vector3::set(-first.y() - first.x() + 1.0, first.w() + first.z(),  second.x() - second.y());
+        let column_1 : Vector3 = Vector3::set( first.z() - first.w(), -ii2 - first.y() + 1.0, second.w() + second.z());
+        let column_2 : Vector3 = Vector3::set(second.y() + second.x(),   second.z() - second.w(), -ii2 - first.x() + 1.0);
 
-        Matrix3x3::set(col_0, col_1, col_2)
+        Matrix3x3::set(column_0, column_1, column_2)
     }
 
-    pub fn from_euler_mat3(euler_radians: Vector3, euler_order: EulerOrder) -> Matrix3x3 {
-        let quaternion = crate::quaternion_math::from_euler_quat(euler_radians, euler_order);
+    #[inline]
+    pub fn from_euler_mat3(euler_radian: Vector3, euler_order: EulerOrder) -> Matrix3x3 {
+        let quaternion = from_euler_quat(euler_radian, euler_order);
 
-        let rotation_matrix = from_quat_mat3(quaternion);
-
-        rotation_matrix
+        from_quat_mat3(quaternion)
     }
 
+    #[inline]
     pub fn determinant_mat3(matrix: Matrix3x3) -> f32 {
         dot(
             matrix.column_z.value,
@@ -434,6 +436,7 @@ pub mod matrix3x3_math {
         )
     }
 
+    #[inline]
     pub fn inverse_mat3(matrix: Matrix3x3) -> Matrix3x3 {
         let x: Vector3 = Vector3 {
             value: cross(matrix.column_y.value, matrix.column_z.value),

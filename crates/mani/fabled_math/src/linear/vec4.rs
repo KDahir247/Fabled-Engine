@@ -1,6 +1,9 @@
-use crate::{Vector2, Vector3};
+use crate::{Vector2, Vector3, Matrix4x4};
 
 use crate::math_trait::Swizzles4;
+
+use crate::matrix4x4_math::transpose_mat4;
+use crate::vector_math::component_sum;
 
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
@@ -24,13 +27,50 @@ impl Default for Vector4 {
 }
 
 impl Vector4 {
-    pub const ZERO: Vector4 = Vector4 {
-        value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 0.0]),
+    pub const W: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 1.0]),
+    };
+
+    pub const NEG_W: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, -1.0]),
+    };
+
+    pub const BACKWARD: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([0.0, 0.0, -1.0, 0.0]),
+    };
+
+    pub const FORWARD: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([0.0, 0.0, 1.0, 0.0]),
+    };
+
+    pub const UP: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([0.0, 1.0, 0.0, 0.0]),
+    };
+
+    pub const DOWN: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([0.0, -1.0, 0.0, 0.0]),
+    };
+
+    pub const RIGHT: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([1.0, 0.0, 0.0, 0.0]),
+    };
+
+    pub const LEFT: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([-1.0, 0.0, 0.0, 0.0]),
     };
 
     pub const ONE: Vector4 = Vector4 {
         value: std::simd::f32x4::from_array([1.0, 1.0, 1.0, 1.0]),
     };
+
+    pub const NEG_ONE: Vector4 = Vector4{
+        value: std::simd::f32x4::from_array([-1.0, -1.0, -1.0, -1.0]),
+    };
+
+    pub const ZERO: Vector4 = Vector4 {
+        value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 0.0]),
+    };
+
 
     #[inline]
     pub fn trunc_vec3(self) -> Vector3 {
@@ -113,6 +153,35 @@ impl Display for Vector4 {
     }
 }
 
+
+impl Mul<Vector4> for Matrix4x4{
+    type Output = Vector4;
+
+    #[inline]
+    fn mul(self, rhs: Vector4) -> Self::Output {
+        let transpose_matrix : Matrix4x4 = transpose_mat4(self);
+
+        let transpose_x : Vector4 = transpose_matrix.column_x * rhs;
+        let transpose_y : Vector4 = transpose_matrix.column_y * rhs;
+        let transpose_z : Vector4 = transpose_matrix.column_z * rhs;
+        let transpose_w : Vector4 = transpose_matrix.column_w * rhs;
+
+        Vector4::set(
+            component_sum(transpose_x.value),
+            component_sum(transpose_y.value),
+            component_sum(transpose_z.value),
+            component_sum(transpose_w.value)
+        )
+    }
+}
+
+
+impl MulAssign<Matrix4x4> for Vector4{
+    #[inline]
+    fn mul_assign(&mut self, rhs: Matrix4x4) {
+        self.value = (rhs * *self).value;
+    }
+}
 
 // Component-Wise
 impl Mul<Vector4> for Vector4 {

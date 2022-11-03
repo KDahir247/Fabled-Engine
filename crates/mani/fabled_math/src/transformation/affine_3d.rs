@@ -3,7 +3,7 @@ use std::{
     ops::{Mul, MulAssign},
 };
 
-use crate::{Matrix3x3, Vector3};
+use crate::{Matrix3x3, Vector3, Matrix4x4};
 
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct Affine3 {
@@ -92,6 +92,28 @@ impl Affine3 {
             rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], translation[1],
             rotation_matrix[6], rotation_matrix[7], rotation_matrix[8], translation[2],
         ]
+    }
+
+    #[inline]
+    pub const fn to_mat4(self) -> Matrix4x4{
+
+        todo!()
+    }
+
+    #[inline]
+    pub const fn from_mat4(matrix4: Matrix4x4) -> Affine3{
+        todo!()
+    }
+
+
+    #[inline]
+    pub const fn to_mat3(self) -> Matrix3x3{
+        todo!()
+    }
+
+    #[inline]
+    pub const fn from_mat3(matrix3 : Matrix3x3) -> Affine3{
+        todo!()
     }
 }
 
@@ -232,7 +254,7 @@ pub mod affine3_math {
     }
 
     #[inline]
-    pub fn from_translation_affine3(translation: Vector3) -> Affine3 {
+    pub const fn from_translation_affine3(translation: Vector3) -> Affine3 {
         Affine3 {
             translation,
             matrix3: Matrix3x3::IDENTITY,
@@ -240,7 +262,7 @@ pub mod affine3_math {
     }
 
     #[inline]
-    pub fn from_scale_affine3(scale: Vector3) -> Affine3 {
+    pub const fn from_scale_affine3(scale: Vector3) -> Affine3 {
         let x_scaled_column: Vector3 = Vector3::set(scale.x(), 0.0, 0.0);
         let y_scaled_column: Vector3 = Vector3::set(0.0, scale.y(), 0.0);
         let z_scaled_column: Vector3 = Vector3::set(0.0, 0.0, scale.z());

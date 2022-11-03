@@ -156,16 +156,16 @@ impl Mul<Vector3> for Matrix3x3 {
     type Output = Vector3;
 
     fn mul(self, rhs: Vector3) -> Self::Output {
-        let row_col_matrix: Matrix3x3 = transpose_mat3(self);
+        let transpose_matrix: Matrix3x3 = transpose_mat3(self);
 
-        let row_mul_col_vec_x: Vector3 = row_col_matrix.column_x * rhs;
-        let row_mul_col_vec_y: Vector3 = row_col_matrix.column_y * rhs;
-        let row_mul_col_vec_z: Vector3 = row_col_matrix.column_z * rhs;
+        let transpose_x: Vector3 = transpose_matrix.column_x * rhs;
+        let transpose_y: Vector3 = transpose_matrix.column_y * rhs;
+        let transpose_z: Vector3 = transpose_matrix.column_z * rhs;
 
         Vector3::set(
-            component_sum(row_mul_col_vec_x.value),
-            component_sum(row_mul_col_vec_y.value),
-            component_sum(row_mul_col_vec_z.value),
+            component_sum(transpose_x.value),
+            component_sum(transpose_y.value),
+            component_sum(transpose_z.value),
         )
     }
 }
