@@ -1,4 +1,4 @@
-use crate::Vector3;
+use crate::{Vector3, Matrix4x4};
 
 use crate::matrix3x3_math::transpose_mat3;
 
@@ -103,6 +103,17 @@ impl Display for Matrix3x3 {
             "Matrix3x3\n[\n\t{}\n\t{}\n\t{}\n]",
             self.column_x, self.column_y, self.column_z,
         )
+    }
+}
+
+impl From<Matrix4x4> for Matrix3x3{
+    #[inline]
+    fn from(value: Matrix4x4) -> Self {
+        Matrix3x3 {
+            column_x: value.column_x.trunc_vec3(),
+            column_y: value.column_y.trunc_vec3(),
+            column_z: value.column_z.trunc_vec3()
+        }
     }
 }
 

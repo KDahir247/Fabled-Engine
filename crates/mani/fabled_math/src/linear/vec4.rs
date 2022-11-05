@@ -11,8 +11,6 @@ use std::ops::{
 
 use std::fmt::{Display, Formatter};
 
-use std::simd::Which::*;
-
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vector4 {
     pub value: std::simd::f32x4,
@@ -71,18 +69,9 @@ impl Vector4 {
         value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 0.0]),
     };
 
-
     #[inline]
-    pub fn trunc_vec3(self) -> Vector3 {
-        const ZERO_VEC: Vector4 = Vector4::ZERO;
-
-        let swizzle_vec: std::simd::f32x4 = std::simd::simd_swizzle!(
-            self.value,
-            ZERO_VEC.value,
-            [First(0), First(1), First(2), Second(0)]
-        );
-
-        Vector3 { value: swizzle_vec }
+    pub const fn trunc_vec3(self) -> Vector3 {
+        Vector3::set(self.x(), self.y(), self.z())
     }
 
     #[inline(always)]

@@ -1,9 +1,9 @@
+use crate::{Matrix3x3, Vector3, Matrix4x4, Vector4};
+
 use std::{
     fmt::Display,
     ops::{Mul, MulAssign},
 };
-
-use crate::{Matrix3x3, Vector3, Matrix4x4};
 
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct Affine3 {
@@ -96,24 +96,39 @@ impl Affine3 {
 
     #[inline]
     pub const fn to_mat4(self) -> Matrix4x4{
-
-        todo!()
+        Matrix4x4{
+            column_x: Vector4{ value: self.matrix3.column_x.value },
+            column_y: Vector4 { value: self.matrix3.column_y.value },
+            column_z: Vector4 { value: self.matrix3.column_z.value },
+            column_w: Vector4 { value: self.translation.value },
+        }
     }
 
     #[inline]
     pub const fn from_mat4(matrix4: Matrix4x4) -> Affine3{
-        todo!()
+
+        Affine3 {
+            translation: matrix4.column_w.trunc_vec3(),
+            matrix3: Matrix3x3::set(
+                matrix4.column_x.trunc_vec3(),
+                matrix4.column_y.trunc_vec3(),
+                matrix4.column_z.trunc_vec3()
+            )
+        }
     }
 
 
     #[inline]
     pub const fn to_mat3(self) -> Matrix3x3{
-        todo!()
+        self.matrix3
     }
 
     #[inline]
     pub const fn from_mat3(matrix3 : Matrix3x3) -> Affine3{
-        todo!()
+        Affine3 {
+            translation: Vector3::ZERO,
+            matrix3
+        }
     }
 }
 
@@ -343,7 +358,6 @@ pub mod affine3_math {
 
         let quaternion: Quaternion =
             from_rotation_matrix_quat(Matrix3x3::set(column_x, column_y, column_z));
-
 
         (quaternion, scale)
     }
