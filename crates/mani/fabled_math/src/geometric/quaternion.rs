@@ -8,7 +8,7 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 use std::fmt::{Display, Formatter};
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Copy, Clone)]
 pub struct Quaternion {
     pub value: std::simd::f32x4,
 }
@@ -450,11 +450,12 @@ pub mod quaternion_math {
 
         let t: f32 = (_s0 * diagonal_col_x) + (_s1 * diagonal_col_y) + (_s2 * diagonal_col_z) + 1.0;
 
+        
         let s2_yx: f32 = _s2 * rotation_matrix.column_y.x();
         let s1_xz: f32 = _s1 * rotation_matrix.column_x.z();
         let s0_zy: f32 = _s0 * rotation_matrix.column_z.y();
 
-        quaternion_array[_k1] = rotation_matrix.column_x.y() - s2_yx;
+        quaternion_array[_k1] =rotation_matrix.column_x.y() - s2_yx;
         quaternion_array[_k2] = rotation_matrix.column_z.x() - s1_xz;
         quaternion_array[_k3] = rotation_matrix.column_y.z() - s0_zy;
         quaternion_array[_k0] = t;
@@ -480,7 +481,6 @@ pub mod quaternion_math {
                 * rcp(Vector4::broadcast(length_squared(quaternion.value)).value),
         }
     }
-
 
     #[inline]
     pub fn forward_vec3(quaternion: Quaternion) -> Vector3 {
@@ -547,7 +547,6 @@ pub mod quaternion_math {
 
     pub fn log_quat(quaternion: Quaternion) -> Quaternion {
         let quaternion_real: f32 = quaternion.to_real();
-
         let quaternion_pure: Vector3 = quaternion.to_pure();
 
         let quaternion_length: f32 = length(quaternion.value);

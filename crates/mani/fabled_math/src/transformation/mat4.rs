@@ -6,7 +6,7 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 use std::fmt::Display;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone)]
 pub struct Matrix4x4 {
     pub column_x: Vector4,
     pub column_y: Vector4,
@@ -74,10 +74,11 @@ impl Matrix4x4 {
 
     #[inline]
     pub const fn from_primitive(array: [f32; 16]) -> Matrix4x4 {
-        let w_column = [array[3], array[7], array[11], array[15]];
-        let x_column = [array[0], array[4], array[8], array[12]];
-        let y_column = [array[1], array[5], array[9], array[13]];
-        let z_column = [array[2], array[6], array[10], array[14]];
+
+        let w_column = [array[12], array[13], array[14], array[15]];
+        let x_column = [array[0], array[1], array[2], array[3]];
+        let y_column = [array[4], array[5], array[6], array[7]];
+        let z_column = [array[8], array[9], array[10], array[11]];
 
         Matrix4x4 {
             column_x: Vector4::from_primitive(x_column),
@@ -96,10 +97,10 @@ impl Matrix4x4 {
         let w_column = self.column_w;
 
         [
-            x_column.x(), y_column.x(), z_column.x(), w_column.x(),
-            x_column.y(), y_column.y(), z_column.y(), w_column.y(),
-            x_column.z(), y_column.z(), z_column.z(), w_column.z(),
-            x_column.w(), y_column.w(), z_column.w(), w_column.w(),
+            x_column.x(), x_column.y(), x_column.z(), x_column.w(),
+            y_column.x(), y_column.y(), y_column.z(), y_column.w(),
+            z_column.x(), z_column.y(), z_column.z(), z_column.w(),
+            w_column.x(), w_column.y(), w_column.z(), w_column.w(),
         ]
     }
 
@@ -267,10 +268,10 @@ impl Sub for Matrix4x4 {
     #[inline]
     fn sub(self, rhs: Self) -> Self::Output {
         Matrix4x4 {
-            column_x: self.column_x + rhs.column_x,
-            column_y: self.column_y + rhs.column_y,
-            column_z: self.column_z + rhs.column_z,
-            column_w: self.column_w + rhs.column_w,
+            column_x: self.column_x - rhs.column_x,
+            column_y: self.column_y - rhs.column_y,
+            column_z: self.column_z - rhs.column_z,
+            column_w: self.column_w - rhs.column_w,
         }
     }
 }
@@ -350,19 +351,12 @@ impl MulAssign<Affine3> for Matrix4x4 {
     }
 }
 
-
 pub mod matrix4x4_math {
-
-    // todo remove
-    #[cfg(target_arch = "x86")]
-    use core::arch::x86::*;
-    #[cfg(target_arch = "x86_64")]
-    use core::arch::x86_64::*;
 
     use crate::{EulerOrder, Matrix4x4, Quaternion, Vector3, Vector4};
 
-    use crate::quaternion_math::from_euler_quat;
-    use crate::vector_math::{dot, rcp};
+    use crate::quaternion_math::{from_euler_quat, from_rotation_matrix_quat};
+    use crate::vector_math::{dot, length, rcp};
 
     use crate::math_trait::{QuaternionSwizzles, Swizzles4};
 
@@ -542,13 +536,46 @@ pub mod matrix4x4_math {
         from_quat_mat4(quaternion)
     }
 
-    // add decomposition and composition.
+    #[inline]
+    pub fn compose_trs_mat4(translation : Vector3, rotation : Quaternion, scale : Vector3) -> Matrix4x4{
+        let translation_vector = Vector4{ value: translation.value } + Vector4::W;
+        let scale_vector = Vector4::set(scale.x(), scale.y(), scale.z(), 0.0);
+        let rotation_matrix = from_quat_mat4(rotation);
 
-    pub fn decompose_trs_mat4(matrix: Matrix4x4) -> (Vector3, Quaternion, Vector3) {
-        todo!()
+        Matrix4x4{
+            column_x: rotation_matrix.column_x * scale_vector,
+            column_y: rotation_matrix.column_y * scale_vector,
+            column_z: rotation_matrix.column_z * scale_vector,
+            column_w: translation_vector,
+        }
     }
 
-    // todo organize
+    #[inline]
+    pub fn decompose_trs_mat4(matrix: Matrix4x4) -> (Vector3, Quaternion, Vector3) {
+        let determinant = determinant_mat4(matrix);
+
+        let scale = Vector3::set(
+            length(matrix.column_x.value) * determinant.signum(),
+            length(matrix.column_y.value),
+            length(matrix.column_z.value)
+        );
+
+        let inverse_scale = Vector3{
+            value: rcp(scale.value),
+        };
+
+        let column_x = matrix.column_x * inverse_scale.x();
+        let column_y = matrix.column_y * inverse_scale.y();
+        let column_z = matrix.column_z * inverse_scale.z();
+
+
+        let quaternion = from_rotation_matrix_quat(Matrix4x4::set(column_x, column_y, column_z, Vector4::ZERO).into());
+
+        let translation = matrix.column_w.trunc_vec3();
+
+        (translation, quaternion, scale)
+    }
+
     pub fn determinant_mat4(matrix: Matrix4x4) -> f32 {
         const NEG_Y_W : Vector4 = Vector4::set(1.0, -1.0, 1.0, -1.0);
 
@@ -756,4 +783,38 @@ pub mod matrix4x4_math {
             column_w: xyz_inverse * rcp_dot,
         }
     }
+
+    #[inline]
+    pub fn multiply_point3_mat4(matrix : Matrix4x4, point3 : Vector3) -> Vector3{
+        let x_axis = matrix.column_x.trunc_vec3() * point3.x();
+        let y_axis = matrix.column_y.trunc_vec3() * point3.y();
+        let z_axis = matrix.column_z.trunc_vec3() * point3.z();
+
+        let w_axis = matrix.column_w.trunc_vec3() + Vector3::RIGHT;
+
+        (x_axis + y_axis) + (z_axis + w_axis)
+    }
+
+    #[inline]
+    pub fn multiply_vector3_mat4(matrix : Matrix4x4, vector3 : Vector3) -> Vector3{
+        let x_axis = matrix.column_x.trunc_vec3() * vector3.x();
+        let y_axis = matrix.column_y.trunc_vec3() * vector3.y();
+        let z_axis = matrix.column_z.trunc_vec3() * vector3.z();
+
+        x_axis + y_axis + z_axis
+    }
+
+
+    #[inline]
+    pub fn project_point3_mat4(matrix: Matrix4x4, point3 : Vector3) -> Vector3{
+        let x_axis = matrix.column_x * point3.x();
+        let y_axis = matrix.column_y * point3.y();
+        let z_axis = matrix.column_z * point3.z();
+        let w_axis = matrix.column_w;
+
+        let result = (x_axis + y_axis) + (z_axis + w_axis);
+
+        (result * Vector4::broadcast(result.w().recip())).trunc_vec3()
+    }
+
 }

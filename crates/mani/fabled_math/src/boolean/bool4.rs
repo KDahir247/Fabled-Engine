@@ -1471,7 +1471,7 @@ impl Swizzles4 for Bool4 {
             value: unsafe { std::simd::mask32x4::from_int_unchecked(yxyx) },
         }
     }
-
+    
     #[inline]
     fn yxyy(self) -> Self {
         let yxyy = std::simd::simd_swizzle!(self.value.to_int(), [1, 0, 1, 1]);

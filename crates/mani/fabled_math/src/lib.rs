@@ -248,8 +248,9 @@ pub mod vector_math {
         let simd_yzx = std::simd::simd_swizzle!(simd_vector, BIT_SHUFFLE_MASK);
         let simd1_yzx = std::simd::simd_swizzle!(simd_vector1, BIT_SHUFFLE_MASK);
 
-        let b = simd_vector1 * simd_yzx;
         let a = simd_vector * simd1_yzx;
+        let b = simd_vector1 * simd_yzx;
+
         let res = a - b;
 
         std::simd::simd_swizzle!(res, BIT_SHUFFLE_MASK)
@@ -351,10 +352,9 @@ pub mod vector_math {
 
         let time = saturate(un_clamp_time);
 
-        let time_sqr = time * time;
         let time_mul_two = time * TWO_VEC;
 
-        time_sqr * (THREE_VEC - time_mul_two)
+        (time * time) * (THREE_VEC - time_mul_two)
     }
 
     #[inline]

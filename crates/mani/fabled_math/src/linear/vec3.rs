@@ -10,7 +10,7 @@ use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone)]
 pub struct Vector3 {
     pub value: std::simd::f32x4,
 }
@@ -132,7 +132,7 @@ impl Mul<Quaternion> for Vector3 {
     fn mul(self, rhs: Quaternion) -> Self::Output {
         let quaternion_real: f32 = rhs.to_real();
 
-        let quaternion_scalar_vector: Vector3 = Vector3::broadcast(quaternion_real);
+        let quaternion_real_vector: Vector3 = Vector3::broadcast(quaternion_real);
 
         let t: Vector3 = Vector3 {
             value: cross(rhs.value, self.value),
@@ -141,7 +141,7 @@ impl Mul<Quaternion> for Vector3 {
             value: cross(rhs.value, t.value),
         };
 
-        (quaternion_scalar_vector * t) + (intermediate + self)
+        (quaternion_real_vector * t) + (intermediate + self)
     }
 }
 

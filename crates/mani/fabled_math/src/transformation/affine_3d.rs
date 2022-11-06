@@ -5,7 +5,7 @@ use std::{
     ops::{Mul, MulAssign},
 };
 
-#[derive(Copy, Clone, PartialEq, Debug, Default)]
+#[derive(Copy, Clone,    Default)]
 pub struct Affine3 {
     pub translation: Vector3,
     pub matrix3: Matrix3x3,

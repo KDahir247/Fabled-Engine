@@ -6,7 +6,7 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone)]
 pub struct Matrix3x3 {
     pub column_x: Vector3,
     pub column_y: Vector3,
@@ -59,9 +59,9 @@ impl Matrix3x3 {
 
     #[inline]
     pub const fn from_primitive(array: [f32; 9]) -> Matrix3x3 {
-        let z_column: [f32; 3] = [array[2], array[5], array[8]];
-        let y_column: [f32; 3] = [array[1], array[4], array[7]];
-        let x_column: [f32; 3] = [array[0], array[3], array[6]];
+        let x_column: [f32; 3] = [array[0], array[1], array[2]];
+        let y_column: [f32; 3] = [array[3], array[4], array[5]];
+        let z_column: [f32; 3] = [array[6], array[7], array[8]];
 
         Matrix3x3 {
             column_x: Vector3::from_primitive(x_column),
@@ -77,15 +77,9 @@ impl Matrix3x3 {
         let z_column: Vector3 = self.column_z;
 
         [
-            x_column.x(),
-            y_column.x(),
-            z_column.x(),
-            x_column.y(),
-            y_column.y(),
-            z_column.y(),
-            x_column.z(),
-            y_column.z(),
-            z_column.z(),
+            x_column.x(), x_column.y(), x_column.z(),
+            y_column.x(), y_column.y(), y_column.z(),
+            z_column.x(), z_column.y(), z_column.z(),
         ]
     }
 
