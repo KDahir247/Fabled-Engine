@@ -7,18 +7,12 @@ use std::{
     ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign},
 };
 
-
 #[derive(Copy, Clone, Default)]
 pub struct Bool4 {
     pub value: std::simd::Mask<i32, 4>,
 }
 
 impl Bool4 {
-    #[inline]
-    pub fn trunc_bool3(self) -> Bool3 {
-        Bool3::set(self.x(), self.y(), self.z())
-    }
-
     #[inline(always)]
     pub fn set(x: bool, y: bool, z: bool, w: bool) -> Bool4 {
         Bool4 {
@@ -26,11 +20,44 @@ impl Bool4 {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn broadcast(val: bool) -> Bool4 {
         Bool4 {
             value: std::simd::mask32x4::from_array([val; 4]),
         }
+    }
+
+    #[inline(always)]
+    pub fn x(self) -> bool {
+        let bool_mask = self.value.to_array();
+
+        bool_mask[0]
+    }
+
+    #[inline(always)]
+    pub fn y(self) -> bool {
+        let bool_mask = self.value.to_array();
+
+        bool_mask[1]
+    }
+
+    #[inline(always)]
+    pub fn z(self) -> bool {
+        let bool_mask = self.value.to_array();
+
+        bool_mask[2]
+    }
+
+    #[inline(always)]
+    pub fn w(self) -> bool {
+        let bool_mask = self.value.to_array();
+
+        bool_mask[3]
+    }
+
+    #[inline]
+    pub fn trunc_bool3(self) -> Bool3 {
+        Bool3::set(self.x(), self.y(), self.z())
     }
 
     #[inline]
@@ -53,34 +80,6 @@ impl Bool4 {
         Bool4 {
             value: std::simd::mask32x4::from_array(array),
         }
-    }
-
-    #[inline]
-    pub fn x(self) -> bool {
-        let bool_mask = self.value.to_array();
-
-        bool_mask[0]
-    }
-
-    #[inline]
-    pub fn y(self) -> bool {
-        let bool_mask = self.value.to_array();
-
-        bool_mask[1]
-    }
-
-    #[inline]
-    pub fn z(self) -> bool {
-        let bool_mask = self.value.to_array();
-
-        bool_mask[2]
-    }
-
-    #[inline]
-    pub fn w(self) -> bool {
-        let bool_mask = self.value.to_array();
-
-        bool_mask[3]
     }
 }
 

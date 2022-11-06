@@ -17,9 +17,19 @@ impl Bool2 {
         Bool2 { value: [x, y] }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn broadcast(val: bool) -> Bool2 {
         Bool2 { value: [val; 2] }
+    }
+
+    #[inline(always)]
+    pub const fn x(self) -> bool {
+        self.value[0]
+    }
+
+    #[inline(always)]
+    pub const fn y(self) -> bool {
+        self.value[1]
     }
 
     #[inline]
@@ -40,16 +50,6 @@ impl Bool2 {
     #[inline]
     pub const fn from_primitive(array: [bool; 2]) -> Bool2 {
         Bool2 { value: array }
-    }
-
-    #[inline]
-    pub const fn x(self) -> bool {
-        self.value[0]
-    }
-
-    #[inline]
-    pub const fn y(self) -> bool {
-        self.value[1]
     }
 
     #[inline]

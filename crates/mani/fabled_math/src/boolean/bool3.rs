@@ -23,11 +23,32 @@ impl Bool3 {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn broadcast(val: bool) -> Bool3 {
         Bool3 {
             value: std::simd::mask32x4::from_array([val, val, val, false]),
         }
+    }
+
+    #[inline(always)]
+    pub fn x(self) -> bool {
+        let bool_mask = self.value.to_array();
+
+        bool_mask[0]
+    }
+
+    #[inline(always)]
+    pub fn y(self) -> bool {
+        let bool_mask = self.value.to_array();
+
+        bool_mask[1]
+    }
+
+    #[inline(always)]
+    pub fn z(self) -> bool {
+        let bool_mask = self.value.to_array();
+
+        bool_mask[2]
     }
 
     #[inline]
@@ -58,27 +79,6 @@ impl Bool3 {
     #[inline]
     pub fn from_primitive(array: [bool; 3]) -> Bool3 {
         Bool3::set(array[0], array[1], array[2])
-    }
-
-    #[inline]
-    pub fn x(self) -> bool {
-        let bool_mask = self.value.to_array();
-
-        bool_mask[0]
-    }
-
-    #[inline]
-    pub fn y(self) -> bool {
-        let bool_mask = self.value.to_array();
-
-        bool_mask[1]
-    }
-
-    #[inline]
-    pub fn z(self) -> bool {
-        let bool_mask = self.value.to_array();
-
-        bool_mask[2]
     }
 }
 

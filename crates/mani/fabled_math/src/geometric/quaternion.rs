@@ -436,9 +436,7 @@ pub mod quaternion_math {
 
     #[inline]
     pub fn conjugate_quat(quaternion: Quaternion) -> Quaternion {
-        Quaternion {
-            value: quaternion.value.neg(),
-        }
+        Quaternion::set(-quaternion.i(), -quaternion.j(), -quaternion.k(), quaternion.w())
     }
 
     #[inline]
