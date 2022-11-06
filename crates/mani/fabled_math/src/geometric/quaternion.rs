@@ -2,7 +2,7 @@ use crate::{Vector3, Vector4};
 
 use crate::math_trait::QuaternionSwizzles;
 
-use crate::vector_math::{cross, dot};
+use crate::vector_math::{cross, component_sum};
 
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
@@ -31,11 +31,61 @@ impl Quaternion {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn broadcast(val: f32) -> Quaternion {
         Quaternion {
             value: std::simd::f32x4::from_array([val; 4]),
         }
+    }
+
+    #[inline(always)]
+    pub const fn i(self) -> f32 {
+        let array_vec3: [f32; 4] = self.value.to_array();
+
+        array_vec3[0]
+    }
+
+    #[inline(always)]
+    pub const fn j(self) -> f32 {
+        let array_vec3: [f32; 4] = self.value.to_array();
+
+        array_vec3[1]
+    }
+
+    #[inline(always)]
+    pub const fn k(self) -> f32 {
+        let array_vec3: [f32; 4] = self.value.to_array();
+
+        array_vec3[2]
+    }
+
+    #[inline(always)]
+    pub const fn w(self) -> f32 {
+        let array_vec3: [f32; 4] = self.value.to_array();
+
+        array_vec3[3]
+    }
+
+    #[inline(always)]
+    pub const fn to_pure(self) -> Vector3 {
+        Vector3::set(self.i(), self.j(), self.k())
+    }
+
+    #[inline(always)]
+    pub const fn to_real(self) -> f32 {
+        self.w()
+    }
+
+    #[inline(always)]
+    pub const fn from_additive_form(real: f32, pure: Vector3) -> Quaternion {
+        Quaternion {
+            value: std::simd::f32x4::from_array([pure.x(), pure.y(), pure.z(), real]),
+        }
+    }
+
+    #[inline]
+    pub const fn to_primitive(self) -> [f32; 4] {
+        self.value.to_array()
     }
 
     #[inline]
@@ -46,73 +96,10 @@ impl Quaternion {
     }
 
     #[inline]
-    pub const fn to_primitive(self) -> [f32; 4] {
-        self.value.to_array()
-    }
-
-    #[inline]
-    pub const fn to_pure(self) -> Vector3 {
-        Vector3::set(self.i(), self.j(), self.k())
-    }
-
-    #[inline]
-    pub const fn to_real(self) -> f32 {
-        self.w()
-    }
-
-    #[inline]
-    pub fn from_additive_form(real: f32, pure: Vector3) -> Quaternion {
-        use std::simd::Which;
-
-        let real: std::simd::f32x4 = std::simd::f32x4::from_array([0.0, 0.0, 0.0, real]);
-
-        Quaternion {
-            value: std::simd::simd_swizzle!(
-                real,
-                pure.value,
-                [
-                    Which::Second(0),
-                    Which::Second(1),
-                    Which::Second(2),
-                    Which::First(3)
-                ]
-            ),
-        }
-    }
-
-    #[inline]
     pub fn scale_quaternion(self, scale_vector4: Vector4) -> Quaternion {
         Quaternion {
             value: self.value * scale_vector4.value,
         }
-    }
-
-    #[inline]
-    pub const fn i(self) -> f32 {
-        let array_vec3: [f32; 4] = self.value.to_array();
-
-        array_vec3[0]
-    }
-
-    #[inline]
-    pub const fn j(self) -> f32 {
-        let array_vec3: [f32; 4] = self.value.to_array();
-
-        array_vec3[1]
-    }
-
-    #[inline]
-    pub const fn k(self) -> f32 {
-        let array_vec3: [f32; 4] = self.value.to_array();
-
-        array_vec3[2]
-    }
-
-    #[inline]
-    pub const fn w(self) -> f32 {
-        let array_vec3: [f32; 4] = self.value.to_array();
-
-        array_vec3[3]
     }
 }
 
@@ -244,12 +231,9 @@ impl Mul for Quaternion {
         let rhs_real: f32 = rhs.to_real();
 
         Quaternion::from_additive_form(
-            (lhs_real * rhs_real) - (dot(lhs_pure_vector.value, rhs_pure_vector.value)),
-            (rhs_pure_vector * lhs_real)
-                + (lhs_pure_vector * rhs_real)
-                + Vector3 {
-                    value: cross(lhs_pure_vector.value, rhs_pure_vector.value),
-                },
+            (lhs_real * rhs_real) - component_sum(lhs_pure_vector.value * rhs_pure_vector.value),
+            (rhs_pure_vector * lhs_real) + (lhs_pure_vector * rhs_real)
+                + Vector3 { value: cross(lhs_pure_vector.value, rhs_pure_vector.value),},
         )
     }
 }
@@ -262,8 +246,10 @@ impl MulAssign for Quaternion {
 }
 
 pub mod quaternion_math {
+    use crate::Bool4;
+
     use crate::vector_math::{
-        component_sum, cos, dot, length, length_squared, lerp, normalize, rcp, select, sin,
+        component_sum, cos, dot, length, length_squared, lerp, normalize, rcp, select, sin, mul_add,
     };
     use crate::{EulerOrder, Matrix3x3, Matrix4x4, Quaternion, Vector3, Vector4};
     use std::ops::Neg;
@@ -290,23 +276,27 @@ pub mod quaternion_math {
     }
 
     #[inline]
+    pub fn to_angle_axis_vec4(quaternion: Quaternion) -> Vector4 {
+        let quaternion_real_acos = quaternion.to_real().acos();
+
+        let angle: f32 = quaternion_real_acos + quaternion_real_acos;
+        let scale: f32 = 1.0 - (quaternion.to_real() * quaternion.to_real());
+
+        let mut axis: Vector3 = quaternion.to_pure() * scale.sqrt().recip();
+
+        if std::intrinsics::unlikely(scale < f32::EPSILON) {
+            axis = Vector3::RIGHT;
+        }
+
+        Vector4::set(axis.x(), axis.y(), axis.z(), angle)
+    }
+
+    #[inline]
     pub fn to_angle_axis_mag_vec3(quaternion: Quaternion) -> Vector3 {
         let axis_rot_angle: Vector4 = to_angle_axis_vec4(quaternion);
 
         axis_rot_angle.trunc_vec3() * axis_rot_angle.w()
     }
-
-    #[inline]
-    pub fn from_angle_axis_mag_quat(axis_mag: Vector3) -> Quaternion {
-        let angle: f32 = length(axis_mag.value);
-
-        let rcp_angle: f32 = angle.recip();
-
-        let axis: Vector3 = axis_mag * rcp_angle;
-
-        from_angle_axis_quat(axis, angle)
-    }
-
 
     #[inline]
     pub fn from_angle_axis_quat(normalized_axis: Vector3, angle_radian: f32) -> Quaternion {
@@ -320,20 +310,12 @@ pub mod quaternion_math {
     }
 
     #[inline]
-    pub fn to_angle_axis_vec4(quaternion: Quaternion) -> Vector4 {
-        let quaternion_real: f32 = quaternion.to_real();
+    pub fn from_angle_axis_mag_quat(axis_mag: Vector3) -> Quaternion {
+        let angle: f32 = length(axis_mag.value);
 
-        let angle: f32 = 2.0 * quaternion_real.acos();
+        let axis: Vector3 = axis_mag * angle.recip();
 
-        let scale: f32 = 1.0 - quaternion_real * quaternion_real;
-
-        let mut axis: Vector3 = quaternion.to_pure() * scale.sqrt().recip();
-
-        if std::intrinsics::unlikely(scale < f32::EPSILON) {
-            axis = Vector3::RIGHT;
-        }
-
-        Vector4::set(axis.x(), axis.y(), axis.z(), angle)
+        from_angle_axis_quat(axis, angle)
     }
 
     #[inline]
@@ -348,10 +330,10 @@ pub mod quaternion_math {
             value: sin(half_euler_rad.value),
         };
 
-        let s_half_c = sin_half_euler_rad.x() * cos_half_euler_rad.y();
-        let c_half_s = cos_half_euler_rad.x() * sin_half_euler_rad.y();
-        let c_half_c = cos_half_euler_rad.x() * cos_half_euler_rad.y();
-        let s_half_s = sin_half_euler_rad.x() * sin_half_euler_rad.y();
+        let s_half_c: f32 = sin_half_euler_rad.x() * cos_half_euler_rad.y();
+        let c_half_s: f32 = cos_half_euler_rad.x() * sin_half_euler_rad.y();
+        let c_half_c: f32 = cos_half_euler_rad.x() * cos_half_euler_rad.y();
+        let s_half_s: f32 = sin_half_euler_rad.x() * sin_half_euler_rad.y();
 
         let rhs_quaternion_equation: Quaternion = Quaternion::set(
             s_half_c * cos_half_euler_rad.z(),
@@ -367,28 +349,21 @@ pub mod quaternion_math {
             s_half_s * sin_half_euler_rad.z(),
         );
 
-        let corrected_sign_lhs_quat_equation: Quaternion =
-            lhs_quaternion_equation.scale_quaternion(euler_order.0);
-
-        rhs_quaternion_equation + corrected_sign_lhs_quat_equation
+        Quaternion{ value: mul_add(lhs_quaternion_equation.value, euler_order.0.value, rhs_quaternion_equation.value) }
     }
 
     pub fn from_transformation_matrix_quat(transformation_matrix: Matrix4x4) -> Quaternion {
-        let column_x_trunc: Vector3 = transformation_matrix.column_x.trunc_vec3();
-        let column_y_trunc: Vector3 = transformation_matrix.column_y.trunc_vec3();
-        let column_z_trunc: Vector3 = transformation_matrix.column_z.trunc_vec3();
+        let column_x_normalized: Vector3 = Vector3 { value: normalize(transformation_matrix.column_x.trunc_vec3().value) };
+        let column_y_normalized: Vector3 = Vector3 { value: normalize(transformation_matrix.column_y.trunc_vec3().value) };
+        let column_z_normalized: Vector3 = Vector3 { value: normalize(transformation_matrix.column_z.trunc_vec3().value) };
 
-        let rotation_matrix: Matrix3x3 = Matrix3x3::set(
-            column_x_trunc * length(column_x_trunc.value).recip(),
-            column_y_trunc * length(column_y_trunc.value).recip(),
-            column_z_trunc * length(column_z_trunc.value).recip(),
-        );
+        let rotation_matrix: Matrix3x3 = Matrix3x3::set(column_x_normalized, column_y_normalized, column_z_normalized);
 
         from_rotation_matrix_quat(rotation_matrix)
     }
 
     pub fn from_rotation_matrix_quat(rotation_matrix: Matrix3x3) -> Quaternion {
-        let mut quaternion_array: std::simd::f32x4 = std::simd::f32x4::from_array([0.0; 4]);
+        let mut quaternion_unscaled: std::simd::f32x4 = std::simd::f32x4::from_array([0.0; 4]);
 
         let mut _s0: f32 = 0.0;
         let mut _s1: f32 = 0.0;
@@ -399,18 +374,9 @@ pub mod quaternion_math {
         let mut _k2: usize = 0;
         let mut _k3: usize = 0;
 
-        let diagonal_col_x: f32 = rotation_matrix.column_x.x();
-        let diagonal_col_y: f32 = rotation_matrix.column_y.y();
-        let diagonal_col_z: f32 = rotation_matrix.column_z.z();
+        let diagonal_col = Vector3::set(rotation_matrix.column_x.x(), rotation_matrix.column_y.y(), rotation_matrix.column_z.z());
 
-        let sum_diagonal: f32 = component_sum(std::simd::f32x4::from_array([
-            diagonal_col_x,
-            diagonal_col_y,
-            diagonal_col_z,
-            0.0,
-        ]));
-
-        if sum_diagonal > 0.0 {
+        if component_sum(diagonal_col.value) > 0.0 {
             _k0 = 3;
             _k1 = 2;
             _k2 = 1;
@@ -419,7 +385,7 @@ pub mod quaternion_math {
             _s0 = 1.0;
             _s1 = 1.0;
             _s2 = 1.0;
-        } else if diagonal_col_x > diagonal_col_y && diagonal_col_x > diagonal_col_z {
+        } else if diagonal_col.x() > diagonal_col.y() && diagonal_col.x() > diagonal_col.z() {
             _k0 = 0;
             _k1 = 1;
             _k2 = 2;
@@ -428,7 +394,7 @@ pub mod quaternion_math {
             _s0 = 1.0;
             _s1 = -1.0;
             _s2 = -1.0;
-        } else if diagonal_col_y > diagonal_col_z {
+        } else if diagonal_col.y() > diagonal_col.z() {
             _k0 = 1;
             _k1 = 0;
             _k2 = 3;
@@ -448,22 +414,23 @@ pub mod quaternion_math {
             _s2 = 1.0;
         }
 
-        let t: f32 = (_s0 * diagonal_col_x) + (_s1 * diagonal_col_y) + (_s2 * diagonal_col_z) + 1.0;
+        let s_vector : Vector3 = Vector3::set(_s0, _s1, _s2);
 
-        
-        let s2_yx: f32 = _s2 * rotation_matrix.column_y.x();
-        let s1_xz: f32 = _s1 * rotation_matrix.column_x.z();
-        let s0_zy: f32 = _s0 * rotation_matrix.column_z.y();
+        let t: f32 = component_sum((s_vector * diagonal_col).value) + 1.0;
 
-        quaternion_array[_k1] =rotation_matrix.column_x.y() - s2_yx;
-        quaternion_array[_k2] = rotation_matrix.column_z.x() - s1_xz;
-        quaternion_array[_k3] = rotation_matrix.column_y.z() - s0_zy;
-        quaternion_array[_k0] = t;
+        let s2_yx: f32 = s_vector.z() * rotation_matrix.column_y.x();
+        let s1_xz: f32 = s_vector.y() * rotation_matrix.column_x.z();
+        let s0_zy: f32 = s_vector.x() * rotation_matrix.column_z.y();
+
+        quaternion_unscaled[_k1] = rotation_matrix.column_x.y() - s2_yx;
+        quaternion_unscaled[_k2] = rotation_matrix.column_z.x() - s1_xz;
+        quaternion_unscaled[_k3] = rotation_matrix.column_y.z() - s0_zy;
+        quaternion_unscaled[_k0] = t;
 
         let scalar: f32 = t.sqrt().recip() * 0.5f32;
 
         Quaternion {
-            value: quaternion_array,
+            value: quaternion_unscaled,
         } * scalar
     }
 
@@ -506,9 +473,7 @@ pub mod quaternion_math {
         let target_quaternion: std::simd::f32x4 = select(
             target_quaternion.value,
             -target_quaternion.value,
-            std::simd::mask32x4::splat(
-                dot(start_quaternion.value, target_quaternion.value).ge(&0.0),
-            ),
+            Bool4::broadcast(dot(start_quaternion.value, target_quaternion.value).ge(&0.0)).value,
         );
 
         let linear_interpolated_quaternion: std::simd::f32x4 = lerp(

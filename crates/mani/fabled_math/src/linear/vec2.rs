@@ -39,9 +39,19 @@ impl Vector2 {
         Vector2 { value: [x, y] }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn broadcast(val: f32) -> Vector2 {
         Vector2 { value: [val; 2] }
+    }
+
+    #[inline(always)]
+    pub const fn x(self) -> f32 {
+        self.value[0]
+    }
+
+    #[inline(always)]
+    pub const fn y(self) -> f32 {
+        self.value[1]
     }
 
     #[inline]
@@ -54,15 +64,6 @@ impl Vector2 {
         Vector2 { value: array }
     }
 
-    #[inline]
-    pub const fn x(self) -> f32 {
-        self.value[0]
-    }
-
-    #[inline]
-    pub const fn y(self) -> f32 {
-        self.value[1]
-    }
 
     #[inline]
     pub const fn to_simd(self) -> std::simd::f32x4 {

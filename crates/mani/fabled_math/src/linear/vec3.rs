@@ -58,14 +58,6 @@ impl Vector3 {
         value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 0.0]),
     };
 
-    #[inline]
-    pub fn trunc_vec2(self) -> Vector2 {
-        let a = self.value.to_array();
-
-        Vector2 {
-            value: [a[0], a[1]],
-        }
-    }
 
     #[inline(always)]
     pub const fn set(x: f32, y: f32, z: f32) -> Vector3 {
@@ -74,10 +66,40 @@ impl Vector3 {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn broadcast(val: f32) -> Vector3 {
         Vector3 {
             value: std::simd::f32x4::from_array([val, val, val, 0.0]),
+        }
+    }
+
+    #[inline(always)]
+    pub const fn x(self) -> f32 {
+        let array_vec3: [f32; 4] = self.value.to_array();
+
+        array_vec3[0]
+    }
+
+    #[inline(always)]
+    pub const fn y(self) -> f32 {
+        let array_vec3: [f32; 4] = self.value.to_array();
+
+        array_vec3[1]
+    }
+
+    #[inline(always)]
+    pub const fn z(self) -> f32 {
+        let array_vec3: [f32; 4] = self.value.to_array();
+
+        array_vec3[2]
+    }
+
+    #[inline]
+    pub fn trunc_vec2(self) -> Vector2 {
+        let a = self.value.to_array();
+
+        Vector2 {
+            value: [a[0], a[1]],
         }
     }
 
@@ -89,27 +111,6 @@ impl Vector3 {
     #[inline]
     pub const fn from_primitive(array: [f32; 3]) -> Vector3 {
         Vector3::set(array[0], array[1], array[2])
-    }
-
-    #[inline]
-    pub const fn x(self) -> f32 {
-        let array_vec3: [f32; 4] = self.value.to_array();
-
-        array_vec3[0]
-    }
-
-    #[inline]
-    pub const fn y(self) -> f32 {
-        let array_vec3: [f32; 4] = self.value.to_array();
-
-        array_vec3[1]
-    }
-
-    #[inline]
-    pub const fn z(self) -> f32 {
-        let array_vec3: [f32; 4] = self.value.to_array();
-
-        array_vec3[2]
     }
 }
 
@@ -134,14 +135,15 @@ impl Mul<Quaternion> for Vector3 {
 
         let quaternion_real_vector: Vector3 = Vector3::broadcast(quaternion_real);
 
-        let t: Vector3 = Vector3 {
-            value: cross(rhs.value, self.value),
-        } * 2.0;
+        let t = cross(rhs.value, self.value);
+
+        let lhs: Vector3 = Vector3 { value: t + t };
+
         let intermediate: Vector3 = Vector3 {
-            value: cross(rhs.value, t.value),
+            value: cross(rhs.value, lhs.value),
         };
 
-        (quaternion_real_vector * t) + (intermediate + self)
+        (quaternion_real_vector * lhs) + (intermediate + self)
     }
 }
 

@@ -5,7 +5,7 @@ use std::{
     ops::{Mul, MulAssign},
 };
 
-#[derive(Copy, Clone,    Default)]
+#[derive(Copy, Clone, Default)]
 pub struct Affine3 {
     pub translation: Vector3,
     pub matrix3: Matrix3x3,
@@ -46,7 +46,7 @@ impl Affine3 {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn broadcast(val: f32) -> Affine3 {
         Affine3 {
             translation: Vector3::broadcast(val),
@@ -54,7 +54,7 @@ impl Affine3 {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn splat(val: Vector3) -> Affine3 {
         Affine3 {
             translation: val,
@@ -64,6 +64,19 @@ impl Affine3 {
                 column_z: val,
             },
         }
+    }
+
+    #[rustfmt::skip]
+    #[inline]
+    pub const fn to_primitive(self) -> [f32; 12] {
+        let translation: [f32; 3] = self.translation.to_primitive();
+        let rotation_matrix: [f32; 9] = self.matrix3.to_primitive();
+
+        [
+            rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], translation[0],
+            rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], translation[1],
+            rotation_matrix[6], rotation_matrix[7], rotation_matrix[8], translation[2],
+            ]
     }
 
     #[inline]
@@ -81,18 +94,6 @@ impl Affine3 {
         }
     }
 
-    #[rustfmt::skip]
-    #[inline]
-    pub const fn to_primitive(self) -> [f32; 12] {
-        let translation: [f32; 3] = self.translation.to_primitive();
-        let rotation_matrix: [f32; 9] = self.matrix3.to_primitive();
-
-        [
-            rotation_matrix[0], rotation_matrix[1], rotation_matrix[2], translation[0],
-            rotation_matrix[3], rotation_matrix[4], rotation_matrix[5], translation[1],
-            rotation_matrix[6], rotation_matrix[7], rotation_matrix[8], translation[2],
-        ]
-    }
 
     #[inline]
     pub const fn to_mat4(self) -> Matrix4x4{
@@ -163,6 +164,8 @@ impl MulAssign for Affine3 {
         self.matrix3 = self.matrix3 * rhs.matrix3;
     }
 }
+
+// add component wise operator.
 
 pub mod affine3_math {
 

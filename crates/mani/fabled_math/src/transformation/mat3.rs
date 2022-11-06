@@ -37,7 +37,7 @@ impl Matrix3x3 {
 
 
 impl Matrix3x3 {
-    #[inline]
+    #[inline(always)]
     pub const fn set(column_x: Vector3, column_y: Vector3, column_z: Vector3) -> Matrix3x3 {
         Matrix3x3 {
             column_x,
@@ -46,7 +46,7 @@ impl Matrix3x3 {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn broadcast(val: f32) -> Matrix3x3 {
         let splat_vector3: Vector3 = Vector3::broadcast(val);
 
@@ -57,17 +57,9 @@ impl Matrix3x3 {
         }
     }
 
-    #[inline]
-    pub const fn from_primitive(array: [f32; 9]) -> Matrix3x3 {
-        let x_column: [f32; 3] = [array[0], array[1], array[2]];
-        let y_column: [f32; 3] = [array[3], array[4], array[5]];
-        let z_column: [f32; 3] = [array[6], array[7], array[8]];
-
-        Matrix3x3 {
-            column_x: Vector3::from_primitive(x_column),
-            column_y: Vector3::from_primitive(y_column),
-            column_z: Vector3::from_primitive(z_column),
-        }
+    #[inline(always)]
+    pub const fn to_diagonal(self) -> Vector3 {
+        Vector3::set(self.column_x.x(), self.column_y.y(), self.column_z.z())
     }
 
     #[inline]
@@ -80,12 +72,21 @@ impl Matrix3x3 {
             x_column.x(), x_column.y(), x_column.z(),
             y_column.x(), y_column.y(), y_column.z(),
             z_column.x(), z_column.y(), z_column.z(),
-        ]
+            ]
     }
 
+
     #[inline]
-    pub const fn to_diagonal(self) -> Vector3 {
-        Vector3::set(self.column_x.x(), self.column_y.y(), self.column_z.z())
+    pub const fn from_primitive(array: [f32; 9]) -> Matrix3x3 {
+        let x_column: [f32; 3] = [array[0], array[1], array[2]];
+        let y_column: [f32; 3] = [array[3], array[4], array[5]];
+        let z_column: [f32; 3] = [array[6], array[7], array[8]];
+
+        Matrix3x3 {
+            column_x: Vector3::from_primitive(x_column),
+            column_y: Vector3::from_primitive(y_column),
+            column_z: Vector3::from_primitive(z_column),
+        }
     }
 }
 
@@ -352,23 +353,23 @@ pub mod matrix3x3_math {
         let xz_theta: f32 = xz * one_min_cos;
         let zy_theta: f32 = zy * one_min_cos;
 
-        let axis_theta: Vector3 = axis_sqr * one_min_cos;
+        let axis_theta: Vector3 = axis_sqr * one_min_cos + cos_angle;
 
         Matrix3x3::set(
             Vector3::set(
-                axis_theta.x() + cos_angle,
+                axis_theta.x(),
                 yx_theta + axis_mul_sin.z(),
                 xz_theta - axis_mul_sin.y(),
             ),
             Vector3::set(
                 yx_theta - axis_mul_sin.z(),
-                axis_theta.y() + cos_angle,
+                axis_theta.y(),
                 zy_theta + axis_mul_sin.x(),
             ),
             Vector3::set(
                 xz_theta + axis_mul_sin.y(),
                 zy_theta - axis_mul_sin.x(),
-                axis_theta.z() + cos_angle,
+                axis_theta.z(),
             ),
         )
     }

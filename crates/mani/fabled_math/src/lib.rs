@@ -103,7 +103,7 @@ pub mod vector_math {
         let length = length(simd_vector);
         let length_vector = std::simd::f32x4::from_array([length; 4]);
 
-        simd_vector / length_vector
+        simd_vector * rcp(length_vector)
     }
 
     #[inline(always)]
@@ -113,12 +113,6 @@ pub mod vector_math {
         add_vector: std::simd::f32x4,
     ) -> std::simd::f32x4 {
         simd_vector.mul_add(mul_vector, add_vector)
-    }
-
-    // todo add slerp
-    #[inline(always)]
-    pub fn slerp(src : std::simd::f32x4, dst : std::simd::f32x4 , t : f32) -> std::simd::f32x4{
-        todo!()
     }
 
     #[inline(always)]
@@ -244,7 +238,6 @@ pub mod vector_math {
     ) -> std::simd::f32x4 {
         const BIT_SHUFFLE_MASK: [usize; 4] = [1, 2, 0, 3];
 
-        // simd_vector
         let simd_yzx = std::simd::simd_swizzle!(simd_vector, BIT_SHUFFLE_MASK);
         let simd1_yzx = std::simd::simd_swizzle!(simd_vector1, BIT_SHUFFLE_MASK);
 

@@ -69,11 +69,6 @@ impl Vector4 {
         value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 0.0]),
     };
 
-    #[inline]
-    pub const fn trunc_vec3(self) -> Vector3 {
-        Vector3::set(self.x(), self.y(), self.z())
-    }
-
     #[inline(always)]
     pub const fn set(x: f32, y: f32, z: f32, w: f32) -> Vector4 {
         Vector4 {
@@ -81,12 +76,46 @@ impl Vector4 {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub const fn broadcast(val: f32) -> Vector4 {
         Vector4 {
             value: std::simd::f32x4::from_array([val; 4]),
         }
     }
+
+    #[inline(always)]
+    pub const fn x(self) -> f32 {
+        let array_vec4: [f32; 4] = self.value.to_array();
+
+        array_vec4[0]
+    }
+
+    #[inline(always)]
+    pub const fn y(self) -> f32 {
+        let array_vec4: [f32; 4] = self.value.to_array();
+
+        array_vec4[1]
+    }
+
+    #[inline(always)]
+    pub const fn z(self) -> f32 {
+        let array_vec4: [f32; 4] = self.value.to_array();
+
+        array_vec4[2]
+    }
+
+    #[inline(always)]
+    pub const fn w(self) -> f32 {
+        let array_vec4: [f32; 4] = self.value.to_array();
+
+        array_vec4[3]
+    }
+
+    #[inline]
+    pub const fn trunc_vec3(self) -> Vector3 {
+        Vector3::set(self.x(), self.y(), self.z())
+    }
+
 
     #[inline]
     pub const fn to_primitive(self) -> [f32; 4] {
@@ -98,34 +127,6 @@ impl Vector4 {
         Vector4 {
             value: std::simd::f32x4::from_array(array),
         }
-    }
-
-    #[inline]
-    pub const fn x(self) -> f32 {
-        let array_vec4: [f32; 4] = self.value.to_array();
-
-        array_vec4[0]
-    }
-
-    #[inline]
-    pub const fn y(self) -> f32 {
-        let array_vec4: [f32; 4] = self.value.to_array();
-
-        array_vec4[1]
-    }
-
-    #[inline]
-    pub const fn z(self) -> f32 {
-        let array_vec4: [f32; 4] = self.value.to_array();
-
-        array_vec4[2]
-    }
-
-    #[inline]
-    pub const fn w(self) -> f32 {
-        let array_vec4: [f32; 4] = self.value.to_array();
-
-        array_vec4[3]
     }
 }
 

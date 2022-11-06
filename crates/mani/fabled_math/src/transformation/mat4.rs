@@ -44,7 +44,7 @@ impl Matrix4x4 {
 }
 
 impl Matrix4x4 {
-    #[inline]
+    #[inline(always)]
     pub const fn set(
         column_x: Vector4,
         column_y: Vector4,
@@ -60,7 +60,7 @@ impl Matrix4x4 {
     }
 
 
-    #[inline]
+    #[inline(always)]
     pub const fn broadcast(val: f32) -> Matrix4x4 {
         let splat_vector4: Vector4 = Vector4::broadcast(val);
 
@@ -70,6 +70,32 @@ impl Matrix4x4 {
             column_z: splat_vector4,
             column_w: splat_vector4,
         }
+    }
+
+    #[inline(always)]
+    pub const fn to_diagonal(self) -> Vector4 {
+        Vector4::set(
+                self.column_x.x(),
+        self.column_y.y(),
+        self.column_z.z(),
+        self.column_w.w(),
+        )
+    }
+
+    #[rustfmt::skip]
+    #[inline]
+    pub const fn to_primitive(self) -> [f32; 16] {
+        let x_column = self.column_x;
+        let y_column = self.column_y;
+        let z_column = self.column_y;
+        let w_column = self.column_w;
+
+        [
+            x_column.x(), x_column.y(), x_column.z(), x_column.w(),
+            y_column.x(), y_column.y(), y_column.z(), y_column.w(),
+            z_column.x(), z_column.y(), z_column.z(), z_column.w(),
+            w_column.x(), w_column.y(), w_column.z(), w_column.w(),
+            ]
     }
 
     #[inline]
@@ -86,32 +112,6 @@ impl Matrix4x4 {
             column_z: Vector4::from_primitive(z_column),
             column_w: Vector4::from_primitive(w_column),
         }
-    }
-
-    #[rustfmt::skip]
-    #[inline]
-    pub const fn to_primitive(self) -> [f32; 16] {
-        let x_column = self.column_x;
-        let y_column = self.column_y;
-        let z_column = self.column_y;
-        let w_column = self.column_w;
-
-        [
-            x_column.x(), x_column.y(), x_column.z(), x_column.w(),
-            y_column.x(), y_column.y(), y_column.z(), y_column.w(),
-            z_column.x(), z_column.y(), z_column.z(), z_column.w(),
-            w_column.x(), w_column.y(), w_column.z(), w_column.w(),
-        ]
-    }
-
-    #[inline]
-    pub const fn to_diagonal(self) -> Vector4 {
-        Vector4::set(
-            self.column_x.x(),
-            self.column_y.y(),
-            self.column_z.z(),
-            self.column_w.w(),
-        )
     }
 }
 
@@ -462,26 +462,25 @@ pub mod matrix4x4_math {
         let yx_theta: f32 = yx * one_min_cos;
         let xz_theta: f32 = xz * one_min_cos;
         let zy_theta: f32 = zy * one_min_cos;
-
-        let axis_theta: Vector3 = axis_sqr * one_min_cos;
+        let axis_theta: Vector3 = axis_sqr * one_min_cos + cos_angle;
 
         Matrix4x4::set(
             Vector4::set(
-                axis_theta.x() + cos_angle,
+                axis_theta.x(),
                 yx_theta + axis_mul_sin.z(),
                 xz_theta - axis_mul_sin.y(),
                 0.0,
             ),
             Vector4::set(
                 yx_theta - axis_mul_sin.z(),
-                axis_theta.y() + cos_angle,
+                axis_theta.y(),
                 zy_theta + axis_mul_sin.x(),
                 0.0,
             ),
             Vector4::set(
                 xz_theta + axis_mul_sin.y(),
                 zy_theta - axis_mul_sin.x(),
-                axis_theta.z() + cos_angle,
+                axis_theta.z(),
                 0.0,
             ),
             Vector4::W,
