@@ -107,7 +107,7 @@ pub mod dual_quaternion_math{
     use crate::quaternion_math::conjugate_quat;
 
     pub fn conjugate(dual_quaternion : DualQuaternion) -> DualQuaternion{
-        DualQuaternion { real: dual_quaternion.real, dual: conjugate_quat(dual_quaternion.dual) }
+        DualQuaternion { real: conjugate_quat(dual_quaternion.real), dual: conjugate_quat(dual_quaternion.dual) }
     }
 
 
