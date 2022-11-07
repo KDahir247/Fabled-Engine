@@ -1,11 +1,18 @@
 use crate::{Quaternion, Vector3};
 
-use std::{ops::{Add, AddAssign, Mul, MulAssign}, fmt::Display};
+use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::fmt::Display;
 
 #[derive(Copy, Clone)]
 pub struct DualQuaternion{
     pub real : Quaternion,
     pub dual : Quaternion
+}
+
+impl Default for DualQuaternion{
+    fn default() -> Self {
+        DualQuaternion { real: Quaternion::IDENTITY, dual: Quaternion::ZERO }
+    }
 }
 
 impl DualQuaternion{
@@ -79,14 +86,14 @@ impl AddAssign for DualQuaternion{
     }
 }
 
-// σ1 ⊗ σ2 = p1p2 + ǫ(p1 . q2 + q1 . p2).
+// σ1 ⊗ σ2 = p1p2 + ǫ(p1 * q2 + q1 * p2).
 impl Mul for DualQuaternion{
     type Output = DualQuaternion;
 
     #[inline]
     fn mul(self, rhs: Self) -> Self::Output {
         DualQuaternion{
-            real: self.real + rhs.real,
+            real: self.real * rhs.real,
             dual: (self.real * rhs.dual) + (self.dual * rhs.real),
         }
     }
@@ -95,20 +102,69 @@ impl Mul for DualQuaternion{
 impl MulAssign for DualQuaternion{
     #[inline]
     fn mul_assign(&mut self, rhs: Self) {
-        self.real += rhs.real;
+        self.real *= rhs.real;
         self.dual = (self.real * rhs.dual) + (self.dual * rhs.real);
     }
 }
 
 pub mod dual_quaternion_math{
 
-    use crate::DualQuaternion;
+    use crate::{DualQuaternion, Vector3, Quaternion, Vector4};
 
     use crate::quaternion_math::conjugate_quat;
 
-    pub fn conjugate(dual_quaternion : DualQuaternion) -> DualQuaternion{
+    use crate::vector_math::dot;
+
+    //Q = p* + q*
+    #[inline]
+    pub fn conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
         DualQuaternion { real: conjugate_quat(dual_quaternion.real), dual: conjugate_quat(dual_quaternion.dual) }
     }
 
+    //Qr = r
+    //Qd = 0.5 . quat(t, 0) . r
+    #[inline]
+    pub fn from_translation_rotation_dual_quat(translation : Vector3, rotation : Quaternion) -> DualQuaternion{
+        let dual_quaternion = Quaternion::set(translation.x(), translation.y(), translation.z(), 0.0);
 
+        DualQuaternion{
+            real: rotation,
+            dual:  (dual_quaternion * rotation) * 0.5,
+        }
+    }
+
+    // Q = [0,0,0,1] [tx/2, ty/2, tz/2, 0]
+    #[inline]
+    pub fn from_translation_dual_quat(translation : Vector3) -> DualQuaternion{
+        let dual_quaternion = Quaternion::set(translation.x(), translation.y(), translation.z(), 0.0);
+
+        DualQuaternion {
+            real: Quaternion::IDENTITY,
+            dual: dual_quaternion.scale_quaternion(Vector4::broadcast(0.5))
+        }
+    }
+
+    // Q = [nx * sin(theta/2), ny * sin(theta/2), nz * sin(theta/2), cos(theta/2)] [0,0,0,0]
+    #[inline]
+    pub fn from_rotation_dual_quat(normalized_axis : Vector3, angle_radian : f32) -> DualQuaternion{
+        let extended_axis = Vector4::set(normalized_axis.x(), normalized_axis.y(), normalized_axis.z(), 1.0);
+
+        let theta = angle_radian * 0.5f32;
+
+        let (sin_theta, cos_theta) = theta.sin_cos();
+
+        let theta_vector = Vector4::set(sin_theta, sin_theta, sin_theta, cos_theta);
+
+        DualQuaternion { real: Quaternion { value: (extended_axis * theta_vector).value }, dual: Quaternion::ZERO }
+    }
+
+    //d = Qr . Q1r
+    #[inline]
+    pub fn dot_dual_quat(dual_quaternion0 : DualQuaternion, dual_quaternion1 : DualQuaternion) -> f32{
+        dot(dual_quaternion0.real.value, dual_quaternion1.real.value)
+    }
+
+    //TODO
+    // Normalize, Get translation, Get rotation, magnitude, Get Matrix (translation, rotation, NO SCALE), maybe composition.
+    // This is not set in stone and more function may be added if needed (ex rotation velocity and transitional velocity).
 }

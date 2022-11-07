@@ -24,6 +24,10 @@ impl Quaternion {
         value: std::simd::f32x4::from_array([0.0, 0.0, 0.0, 1.0]),
     };
 
+    pub const ZERO : Quaternion = Quaternion{
+        value: std::simd::f32x4::from_array([0.0; 4]),
+    };
+
     #[inline(always)]
     pub const fn set(i: f32, j: f32, k: f32, w: f32) -> Quaternion {
         Quaternion {
@@ -252,7 +256,6 @@ pub mod quaternion_math {
         component_sum, cos, dot, length, length_squared, lerp, normalize, rcp, select, sin, mul_add,
     };
     use crate::{EulerOrder, Matrix3x3, Matrix4x4, Quaternion, Vector3, Vector4};
-    use std::ops::Neg;
 
     #[inline]
     pub fn rotate_x_quat(angle_radian: f32) -> Quaternion {
