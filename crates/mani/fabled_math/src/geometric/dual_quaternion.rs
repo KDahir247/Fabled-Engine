@@ -113,7 +113,7 @@ pub mod dual_quaternion_math{
 
     use crate::quaternion_math::conjugate_quat;
 
-    use crate::vector_math::dot;
+    use crate::vector_math::{dot, length};
 
     //Q = p* + q*
     #[inline]
@@ -164,7 +164,62 @@ pub mod dual_quaternion_math{
         dot(dual_quaternion0.real.value, dual_quaternion1.real.value)
     }
 
+    //t = 2 * Qd * conjugate(Qr)
+    #[inline]
+    pub fn get_translation_dual_quat(dual_quaternion : DualQuaternion) -> Vector3{
+
+        const TWO_VEC : Vector4 = Vector4::broadcast(2.0);
+
+        let translation_vec = dual_quaternion.dual.scale_quaternion(TWO_VEC) * conjugate_quat(dual_quaternion.real);
+
+        Vector3::set(translation_vec.i(), translation_vec.j(), translation_vec.k())
+    }
+
+    // R = Qr
+    #[inline]
+    pub fn get_rotation_dual_quat(dual_quaternion : DualQuaternion) -> Quaternion{
+        dual_quaternion.real
+    }
+
+    // |q| = q.r / ||q.real|| + q.d / ||q.real||
+    #[inline]
+    pub fn normalize_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+
+        let real_length_recip = length(dual_quaternion.real.value).recip();
+
+        DualQuaternion {
+            real: dual_quaternion.real * real_length_recip,
+            dual: dual_quaternion.dual * real_length_recip
+        }
+
+    }
+
+    // |q|^2 = qq*
+    #[inline]
+    pub fn norm_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+        dual_quaternion * conjugate_dual_quat(dual_quaternion)
+    }
+
+    //||q||^2 = qq*.r scalar
+    #[inline]
+    pub fn magnitude_sqr_dual_quat(dual_quaternion : DualQuaternion) -> f32{
+        norm_dual_quat(dual_quaternion).real.w()
+    }
+
+
+    // ||q|| = sqrt(qq*.r scalar)
+    #[inline]
+    pub fn magnitude_dual_quat(dual_quaternion : DualQuaternion) -> f32{
+        norm_dual_quat(dual_quaternion).real.w().sqrt()
+    }
+
+    // q-1 = q* / |q|^2
+    #[inline]
+    pub fn inverse_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+        todo!()
+    }
+
     //TODO
-    // Normalize, Get translation, Get rotation, magnitude, Get Matrix (translation, rotation, NO SCALE), maybe composition.
+    // Normalize, magnitude, Get Matrix (translation, rotation, NO SCALE), maybe composition.
     // This is not set in stone and more function may be added if needed (ex rotation velocity and transitional velocity).
 }
