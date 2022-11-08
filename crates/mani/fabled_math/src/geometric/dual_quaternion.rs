@@ -121,6 +121,19 @@ pub mod dual_quaternion_math{
         DualQuaternion { real: conjugate_quat(dual_quaternion.real), dual: conjugate_quat(dual_quaternion.dual) }
     }
 
+    //Q = p - q
+    #[inline]
+    pub fn dual_number_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+        DualQuaternion{ real: dual_quaternion.real, dual: -dual_quaternion.dual }
+
+    }
+
+    //Q = p* - q*
+    #[inline]
+    pub fn combined_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+        DualQuaternion{ real: conjugate_quat(dual_quaternion.real), dual: -conjugate_quat(dual_quaternion.dual) }
+    }
+
     //Qr = r
     //Qd = 0.5 . quat(t, 0) . r
     #[inline]
@@ -158,11 +171,11 @@ pub mod dual_quaternion_math{
         DualQuaternion { real: Quaternion { value: (extended_axis * theta_vector).value }, dual: Quaternion::ZERO }
     }
 
-    //d = Qr . Q1r
-    #[inline]
-    pub fn dot_dual_quat(dual_quaternion0 : DualQuaternion, dual_quaternion1 : DualQuaternion) -> f32{
-        dot(dual_quaternion0.real.value, dual_quaternion1.real.value)
-    }
+//    //d = Qr . Q1r
+//    #[inline]
+//    pub fn dot_dual_quat(dual_quaternion0 : DualQuaternion, dual_quaternion1 : DualQuaternion) -> f32{
+//        dot(dual_quaternion0.real.value, dual_quaternion1.real.value)
+//    }
 
     //t = 2 * Qd * conjugate(Qr)
     #[inline]
@@ -194,28 +207,41 @@ pub mod dual_quaternion_math{
 
     }
 
-    // |q|^2 = qq*
-    #[inline]
-    pub fn norm_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
-        dual_quaternion * conjugate_dual_quat(dual_quaternion)
-    }
-
-    //||q||^2 = qq*.r scalar
-    #[inline]
-    pub fn magnitude_sqr_dual_quat(dual_quaternion : DualQuaternion) -> f32{
-        norm_dual_quat(dual_quaternion).real.w()
-    }
-
-
-    // ||q|| = sqrt(qq*.r scalar)
-    #[inline]
-    pub fn magnitude_dual_quat(dual_quaternion : DualQuaternion) -> f32{
-        norm_dual_quat(dual_quaternion).real.w().sqrt()
-    }
+//    // |q|^2 = qq*
+//    #[inline]
+//    pub fn norm_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+//        dual_quaternion * conjugate_dual_quat(dual_quaternion)
+//    }
+//
+//    //||q||^2 = qq*.r scalar
+//    #[inline]
+//    pub fn magnitude_sqr_dual_quat(dual_quaternion : DualQuaternion) -> f32{
+//        norm_dual_quat(dual_quaternion).real.w()
+//    }
+//
+//
+//    // ||q|| = sqrt(qq*.r scalar)
+//    #[inline]
+//    pub fn magnitude_dual_quat(dual_quaternion : DualQuaternion) -> f32{
+//        norm_dual_quat(dual_quaternion).real.w().sqrt()
+//    }
 
     // q-1 = q* / |q|^2
     #[inline]
     pub fn inverse_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+        todo!()
+    }
+
+    // q` = qpq*
+    #[inline]
+    pub fn transform_point3_dual_quat(dual_quaternion : DualQuaternion, point3 : Vector3) -> DualQuaternion{
+        let point_dual_quat = DualQuaternion{ real: Quaternion::IDENTITY, dual: Quaternion::set(point3.x(), point3.y(), point3.z(), 0.0) };
+
+        dual_quaternion * point_dual_quat * combined_conjugate_dual_quat(dual_quaternion)
+    }
+
+    #[inline]
+    pub fn linear_blending_dual_quat(start : DualQuaternion, end : DualQuaternion, t : f32) -> DualQuaternion{
         todo!()
     }
 

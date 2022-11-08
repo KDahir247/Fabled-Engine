@@ -4,7 +4,7 @@ use crate::math_trait::QuaternionSwizzles;
 
 use crate::vector_math::{cross, component_sum};
 
-use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Neg};
 
 use std::fmt::{Display, Formatter};
 
@@ -246,6 +246,15 @@ impl MulAssign for Quaternion {
     #[inline]
     fn mul_assign(&mut self, rhs: Self) {
         self.value = (*self * rhs).value;
+    }
+}
+
+impl Neg for Quaternion{
+    type Output = Quaternion;
+
+    #[inline]
+    fn neg(self) -> Self::Output {
+        Quaternion{ value: self.value.neg() }
     }
 }
 
