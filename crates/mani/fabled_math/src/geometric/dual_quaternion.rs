@@ -1,6 +1,6 @@
-use crate::{Quaternion, Vector3};
+use crate::{Quaternion, Vector3, DualNumber};
 
-use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Div, DivAssign, Sub, SubAssign};
 use std::fmt::Display;
 
 #[derive(Copy, Clone)]
@@ -60,12 +60,91 @@ impl DualQuaternion{
 
 impl Display for DualQuaternion{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Real {} \nDual {}", self.real, self.dual)
+        write!(f, "Dual Quaternion(\nReal {} \nDual {}\n)", self.real, self.dual)
+    }
+}
+// Component-Wise
+impl Add<f32> for DualQuaternion{
+    type Output = DualQuaternion;
+
+    #[inline]
+    fn add(self, rhs: f32) -> Self::Output {
+        DualQuaternion{
+            real:  self.real + rhs,
+            dual: self.dual + rhs,
+        }
     }
 }
 
-//σ = p + ǫq
-//σ1 + σ2 = (p1 + p2) + ǫ(q1 + q2)
+impl AddAssign<f32> for DualQuaternion{
+    #[inline]
+    fn add_assign(&mut self, rhs: f32) {
+        self.real += rhs;
+        self.dual += rhs;
+    }
+}
+
+impl Sub<f32> for DualQuaternion{
+    type Output = DualQuaternion;
+
+    #[inline]
+    fn sub(self, rhs: f32) -> Self::Output {
+        DualQuaternion{
+            real: self.real - rhs,
+            dual: self.dual - rhs,
+        }
+    }
+}
+
+impl SubAssign<f32> for DualQuaternion{
+    #[inline]
+    fn sub_assign(&mut self, rhs: f32) {
+        self.real -= rhs;
+        self.dual -= rhs;
+    }
+}
+
+impl Mul<f32> for DualQuaternion{
+    type Output = DualQuaternion;
+
+    #[inline]
+    fn mul(self, rhs: f32) -> Self::Output {
+        DualQuaternion{
+            real: self.real * rhs,
+            dual: self.dual * rhs,
+        }
+    }
+}
+
+impl MulAssign<f32> for DualQuaternion{
+    #[inline]
+    fn mul_assign(&mut self, rhs: f32) {
+        self.real *= rhs;
+        self.dual *= rhs;
+    }
+}
+
+impl Div<f32> for DualQuaternion{
+    type Output = DualQuaternion;
+
+    #[inline]
+    fn div(self, rhs: f32) -> Self::Output {
+        DualQuaternion{
+            real: self.real / rhs,
+            dual: self.dual / rhs,
+        }
+    }
+}
+
+impl DivAssign<f32> for DualQuaternion{
+    #[inline]
+    fn div_assign(&mut self, rhs: f32) {
+        self.real /= rhs;
+        self.dual /= rhs;
+    }
+}
+
+// DualQuaternion-Wise
 impl Add for DualQuaternion{
     type Output = DualQuaternion;
 
@@ -107,37 +186,57 @@ impl MulAssign for DualQuaternion{
     }
 }
 
+impl Div<DualNumber> for DualQuaternion{
+    type Output = DualQuaternion;
+
+    #[inline]
+    fn div(self, rhs: DualNumber) -> Self::Output {
+        let s = rhs.value.x() * rhs.value.x();
+        DualQuaternion{
+            real:  self.real * rhs.value.x(),
+            dual: (self.dual * rhs.value.x()) - (self.real * rhs.value.y()),
+        } / s
+    }
+}
+
+impl DivAssign<DualNumber> for DualQuaternion{
+    #[inline]
+    fn div_assign(&mut self, rhs: DualNumber) {
+        let s = (rhs.value.x() * rhs.value.x()).recip();
+        self.real = self.real * rhs.value.x();
+        self.dual = (self.dual * rhs.value.x()) - (self.real * rhs.value.y());
+
+        self.real *= s;
+        self.dual *= s;
+    }
+}
+
 pub mod dual_quaternion_math{
 
-    use crate::{DualQuaternion, Vector3, Quaternion, Vector4};
+    use crate::{DualQuaternion, Vector3, Quaternion, Vector4, DualNumber};
 
-    use crate::quaternion_math::conjugate_quat;
+    use crate::quaternion_math::{conjugate_quat, inverse_quat};
 
-    use crate::vector_math::{dot, length};
+    use crate::vector_math::{dot, length, length_squared};
 
-    //Q = p* + q*
     #[inline]
     pub fn conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
         DualQuaternion { real: conjugate_quat(dual_quaternion.real), dual: conjugate_quat(dual_quaternion.dual) }
     }
 
-    //Q = p - q
-    #[inline]
-    pub fn dual_number_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+#[inline]
+pub fn dual_number_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
         DualQuaternion{ real: dual_quaternion.real, dual: -dual_quaternion.dual }
 
     }
 
-    //Q = p* - q*
-    #[inline]
-    pub fn combined_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+#[inline]
+pub fn combined_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
         DualQuaternion{ real: conjugate_quat(dual_quaternion.real), dual: -conjugate_quat(dual_quaternion.dual) }
     }
 
-    //Qr = r
-    //Qd = 0.5 . quat(t, 0) . r
-    #[inline]
-    pub fn from_translation_rotation_dual_quat(translation : Vector3, rotation : Quaternion) -> DualQuaternion{
+#[inline]
+pub fn from_translation_rotation_dual_quat(translation : Vector3, rotation : Quaternion) -> DualQuaternion{
         let dual_quaternion = Quaternion::set(translation.x(), translation.y(), translation.z(), 0.0);
 
         DualQuaternion{
@@ -146,9 +245,8 @@ pub mod dual_quaternion_math{
         }
     }
 
-    // Q = [0,0,0,1] [tx/2, ty/2, tz/2, 0]
-    #[inline]
-    pub fn from_translation_dual_quat(translation : Vector3) -> DualQuaternion{
+#[inline]
+pub fn from_translation_dual_quat(translation : Vector3) -> DualQuaternion{
         let dual_quaternion = Quaternion::set(translation.x(), translation.y(), translation.z(), 0.0);
 
         DualQuaternion {
@@ -157,9 +255,8 @@ pub mod dual_quaternion_math{
         }
     }
 
-    // Q = [nx * sin(theta/2), ny * sin(theta/2), nz * sin(theta/2), cos(theta/2)] [0,0,0,0]
-    #[inline]
-    pub fn from_rotation_dual_quat(normalized_axis : Vector3, angle_radian : f32) -> DualQuaternion{
+#[inline]
+pub fn from_rotation_dual_quat(normalized_axis : Vector3, angle_radian : f32) -> DualQuaternion{
         let extended_axis = Vector4::set(normalized_axis.x(), normalized_axis.y(), normalized_axis.z(), 1.0);
 
         let theta = angle_radian * 0.5f32;
@@ -171,15 +268,8 @@ pub mod dual_quaternion_math{
         DualQuaternion { real: Quaternion { value: (extended_axis * theta_vector).value }, dual: Quaternion::ZERO }
     }
 
-//    //d = Qr . Q1r
-//    #[inline]
-//    pub fn dot_dual_quat(dual_quaternion0 : DualQuaternion, dual_quaternion1 : DualQuaternion) -> f32{
-//        dot(dual_quaternion0.real.value, dual_quaternion1.real.value)
-//    }
-
-    //t = 2 * Qd * conjugate(Qr)
-    #[inline]
-    pub fn get_translation_dual_quat(dual_quaternion : DualQuaternion) -> Vector3{
+#[inline]
+pub fn get_translation_dual_quat(dual_quaternion : DualQuaternion) -> Vector3{
 
         const TWO_VEC : Vector4 = Vector4::broadcast(2.0);
 
@@ -188,15 +278,13 @@ pub mod dual_quaternion_math{
         Vector3::set(translation_vec.i(), translation_vec.j(), translation_vec.k())
     }
 
-    // R = Qr
-    #[inline]
-    pub fn get_rotation_dual_quat(dual_quaternion : DualQuaternion) -> Quaternion{
+#[inline]
+pub fn get_rotation_dual_quat(dual_quaternion : DualQuaternion) -> Quaternion{
         dual_quaternion.real
     }
 
-    // |q| = q.r / ||q.real|| + q.d / ||q.real||
-    #[inline]
-    pub fn normalize_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+#[inline]
+pub fn normalize_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
 
         let real_length_recip = length(dual_quaternion.real.value).recip();
 
@@ -204,48 +292,48 @@ pub mod dual_quaternion_math{
             real: dual_quaternion.real * real_length_recip,
             dual: dual_quaternion.dual * real_length_recip
         }
-
     }
 
-//    // |q|^2 = qq*
-//    #[inline]
-//    pub fn norm_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
-//        dual_quaternion * conjugate_dual_quat(dual_quaternion)
-//    }
-//
-//    //||q||^2 = qq*.r scalar
-//    #[inline]
-//    pub fn magnitude_sqr_dual_quat(dual_quaternion : DualQuaternion) -> f32{
-//        norm_dual_quat(dual_quaternion).real.w()
-//    }
-//
-//
-//    // ||q|| = sqrt(qq*.r scalar)
-//    #[inline]
-//    pub fn magnitude_dual_quat(dual_quaternion : DualQuaternion) -> f32{
-//        norm_dual_quat(dual_quaternion).real.w().sqrt()
-//    }
+#[inline]
+pub fn length_dual_quat(dual_quaternion : DualQuaternion) -> DualNumber{
+        let real = length(dual_quaternion.real.value);
+        let real_pure = dual_quaternion.real.to_pure();
+        let dual_pure = dual_quaternion.dual.to_pure();
 
-    // q-1 = q* / |q|^2
-    #[inline]
-    pub fn inverse_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
-        todo!()
+        DualNumber::set(real, ((dual_quaternion.real.to_real() * dual_quaternion.dual.to_real()) + dot(real_pure.value, dual_pure.value)) / real)
     }
 
-    // q` = qpq*
-    #[inline]
-    pub fn transform_point3_dual_quat(dual_quaternion : DualQuaternion, point3 : Vector3) -> DualQuaternion{
+#[inline]
+pub fn length_sqr_dual_quat(dual_quaternion : DualQuaternion) -> DualNumber{
+        let real_pure = dual_quaternion.real.to_pure();
+        let dual_pure = dual_quaternion.dual.to_pure();
+        DualNumber::set(length_squared(dual_quaternion.real.value), 2.0 * (dual_quaternion.real.to_real() *dual_quaternion.dual.to_real() + dot(real_pure.value, dual_pure.value)))
+    }
+
+#[inline]
+pub fn inverse_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+
+        let inverse_real = inverse_quat(dual_quaternion.real);
+
+        DualQuaternion{
+            real: inverse_real,
+            dual: -inverse_real * dual_quaternion.dual * inverse_real,
+        }
+    }
+
+#[inline]
+pub fn transform_point3_dual_quat(dual_quaternion : DualQuaternion, point3 : Vector3) -> DualQuaternion{
         let point_dual_quat = DualQuaternion{ real: Quaternion::IDENTITY, dual: Quaternion::set(point3.x(), point3.y(), point3.z(), 0.0) };
 
         dual_quaternion * point_dual_quat * combined_conjugate_dual_quat(dual_quaternion)
     }
 
-    #[inline]
-    pub fn linear_blending_dual_quat(start : DualQuaternion, end : DualQuaternion, t : f32) -> DualQuaternion{
-        todo!()
-    }
+//https://www.cs.utah.edu/~ladislav/kavan06dual/kavan06dual.pdf
+pub fn linear_blending_dual_quat(start : DualQuaternion, end : DualQuaternion, t : f32) -> DualQuaternion{
+        let time = 1.0 - t;
 
-    //TODO
-    // Normalize, magnitude, Get Matrix (translation, rotation, NO SCALE), maybe composition.
-    // This is not set in stone and more function may be added if needed (ex rotation velocity and transitional velocity).
+        let combined =  start * time + end * t;
+        let dual_length = length_dual_quat(combined);
+        combined / dual_length
+    }
 }

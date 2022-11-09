@@ -4,7 +4,7 @@ use crate::math_trait::QuaternionSwizzles;
 
 use crate::vector_math::{cross, component_sum};
 
-use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Neg};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Neg, Div, DivAssign};
 
 use std::fmt::{Display, Formatter};
 
@@ -168,6 +168,7 @@ impl SubAssign<f32> for Quaternion {
 impl Mul<f32> for Quaternion {
     type Output = Quaternion;
 
+    #[inline]
     fn mul(self, rhs: f32) -> Self::Output {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
@@ -178,10 +179,33 @@ impl Mul<f32> for Quaternion {
 }
 
 impl MulAssign<f32> for Quaternion {
+    #[inline]
     fn mul_assign(&mut self, rhs: f32) {
         let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
 
         self.value *= splat_f32x4;
+    }
+}
+
+impl Div<f32> for Quaternion{
+    type Output = Quaternion;
+
+    #[inline]
+    fn div(self, rhs: f32) -> Self::Output {
+        let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
+
+        Quaternion{
+            value: self.value / splat_f32x4,
+        }
+    }
+}
+
+impl DivAssign<f32> for Quaternion{
+    #[inline]
+    fn div_assign(&mut self, rhs: f32) {
+        let splat_f32x4: std::simd::f32x4 = std::simd::f32x4::splat(rhs);
+
+        self.value /= splat_f32x4;
     }
 }
 
@@ -246,6 +270,22 @@ impl MulAssign for Quaternion {
     #[inline]
     fn mul_assign(&mut self, rhs: Self) {
         self.value = (*self * rhs).value;
+    }
+}
+
+impl Div for Quaternion{
+    type Output = Quaternion;
+
+    #[inline]
+    fn div(self, rhs: Self) -> Self::Output {
+        self * crate::quaternion_math::inverse_quat(rhs)
+    }
+}
+
+impl DivAssign for Quaternion{
+    #[inline]
+    fn div_assign(&mut self, rhs: Self) {
+        self.value = (*self * crate::quaternion_math::inverse_quat(rhs)).value;
     }
 }
 
