@@ -6,7 +6,7 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Matrix3x3 {
     pub column_x: Vector3,
     pub column_y: Vector3,

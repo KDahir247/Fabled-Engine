@@ -1,4 +1,4 @@
-Add BiVec,  Rotor,  and dual quaternion to geometric folder
+Add BiVec,  Rotor,  to geometric folder
 
 
 Add Easing function;
@@ -9,10 +9,6 @@ EaseInOutQuart EaseInQuint, EaseOutQuint, EaseInOutQuint, EaseInExpo,
 EaseOutExpo, EaseInOutExpo, EaseInCirc, EaseOutCirc, EaseInOutCirc,
 EaseInBack, EaseOutBack, EaseInOutBack, EaseInElastic, EaseOutElastic,
 EaseInOutElastic, EaseInBounce, EaseOutBounce, EaseInOutBounce
-
-
-linear interpolation, spherical interpolation, normalized linear
-interpolation
 
 
 Add Vector2 Math

@@ -5,7 +5,7 @@ use crate::math_trait::Swizzles2;
 use std::fmt::Display;
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign};
 
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone, Default, PartialEq)]
 pub struct Bool2 {
     pub value: [bool; 2],
 }

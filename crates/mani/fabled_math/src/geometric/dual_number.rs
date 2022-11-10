@@ -3,7 +3,7 @@ use crate::Vector2;
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign};
 
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct DualNumber{
     // real, img
     pub value : Vector2
@@ -118,7 +118,7 @@ impl DivAssign for DualNumber{
 
         self.value = Vector2::set(
             self.value.x() / rhs.value.x(),
-           ((self.value.y() * rhs.value.x()) - (self.value.x() * rhs.value.y())) / (rhs.value.x() * rhs.value.x())
+            ((self.value.y() * rhs.value.x()) - (self.value.x() * rhs.value.y())) / (rhs.value.x() * rhs.value.x())
         )
     }
 }

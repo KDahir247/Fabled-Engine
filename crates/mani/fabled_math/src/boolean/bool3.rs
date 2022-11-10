@@ -5,7 +5,7 @@ use crate::{Bool2, Bool4};
 
 use crate::math_trait::Swizzles3;
 
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone, Default, PartialEq)]
 pub struct Bool3 {
     pub value: std::simd::Mask<i32, 4>,
 }

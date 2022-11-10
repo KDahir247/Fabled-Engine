@@ -1,7 +1,7 @@
 use crate::Vector4;
 
 #[non_exhaustive]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct EulerOrder(pub(crate) Vector4);
 
 impl Default for EulerOrder {

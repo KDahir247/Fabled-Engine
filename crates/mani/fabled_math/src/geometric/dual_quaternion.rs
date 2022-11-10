@@ -3,7 +3,7 @@ use crate::{Quaternion, Vector3, DualNumber};
 use std::ops::{Add, AddAssign, Mul, MulAssign, Div, DivAssign, Sub, SubAssign};
 use std::fmt::Display;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct DualQuaternion{
     pub real : Quaternion,
     pub dual : Quaternion
@@ -165,7 +165,6 @@ impl AddAssign for DualQuaternion{
     }
 }
 
-// σ1 ⊗ σ2 = p1p2 + ǫ(p1 * q2 + q1 * p2).
 impl Mul for DualQuaternion{
     type Output = DualQuaternion;
 
@@ -224,19 +223,19 @@ pub mod dual_quaternion_math{
         DualQuaternion { real: conjugate_quat(dual_quaternion.real), dual: conjugate_quat(dual_quaternion.dual) }
     }
 
-#[inline]
-pub fn dual_number_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+    #[inline]
+    pub fn dual_number_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
         DualQuaternion{ real: dual_quaternion.real, dual: -dual_quaternion.dual }
 
     }
 
-#[inline]
-pub fn combined_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+    #[inline]
+    pub fn combined_conjugate_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
         DualQuaternion{ real: conjugate_quat(dual_quaternion.real), dual: -conjugate_quat(dual_quaternion.dual) }
     }
 
-#[inline]
-pub fn from_translation_rotation_dual_quat(translation : Vector3, rotation : Quaternion) -> DualQuaternion{
+    #[inline]
+    pub fn from_translation_rotation_dual_quat(translation : Vector3, rotation : Quaternion) -> DualQuaternion{
         let dual_quaternion = Quaternion::set(translation.x(), translation.y(), translation.z(), 0.0);
 
         DualQuaternion{
@@ -245,8 +244,8 @@ pub fn from_translation_rotation_dual_quat(translation : Vector3, rotation : Qua
         }
     }
 
-#[inline]
-pub fn from_translation_dual_quat(translation : Vector3) -> DualQuaternion{
+    #[inline]
+    pub fn from_translation_dual_quat(translation : Vector3) -> DualQuaternion{
         let dual_quaternion = Quaternion::set(translation.x(), translation.y(), translation.z(), 0.0);
 
         DualQuaternion {
@@ -255,8 +254,8 @@ pub fn from_translation_dual_quat(translation : Vector3) -> DualQuaternion{
         }
     }
 
-#[inline]
-pub fn from_rotation_dual_quat(normalized_axis : Vector3, angle_radian : f32) -> DualQuaternion{
+    #[inline]
+    pub fn from_rotation_dual_quat(normalized_axis : Vector3, angle_radian : f32) -> DualQuaternion{
         let extended_axis = Vector4::set(normalized_axis.x(), normalized_axis.y(), normalized_axis.z(), 1.0);
 
         let theta = angle_radian * 0.5f32;
@@ -268,8 +267,8 @@ pub fn from_rotation_dual_quat(normalized_axis : Vector3, angle_radian : f32) ->
         DualQuaternion { real: Quaternion { value: (extended_axis * theta_vector).value }, dual: Quaternion::ZERO }
     }
 
-#[inline]
-pub fn get_translation_dual_quat(dual_quaternion : DualQuaternion) -> Vector3{
+    #[inline]
+    pub fn get_translation_dual_quat(dual_quaternion : DualQuaternion) -> Vector3{
 
         const TWO_VEC : Vector4 = Vector4::broadcast(2.0);
 
@@ -278,13 +277,13 @@ pub fn get_translation_dual_quat(dual_quaternion : DualQuaternion) -> Vector3{
         Vector3::set(translation_vec.i(), translation_vec.j(), translation_vec.k())
     }
 
-#[inline]
-pub fn get_rotation_dual_quat(dual_quaternion : DualQuaternion) -> Quaternion{
+    #[inline]
+    pub fn get_rotation_dual_quat(dual_quaternion : DualQuaternion) -> Quaternion{
         dual_quaternion.real
     }
 
-#[inline]
-pub fn normalize_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+    #[inline]
+    pub fn normalize_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
 
         let real_length_recip = length(dual_quaternion.real.value).recip();
 
@@ -294,8 +293,8 @@ pub fn normalize_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
         }
     }
 
-#[inline]
-pub fn length_dual_quat(dual_quaternion : DualQuaternion) -> DualNumber{
+    #[inline]
+    pub fn length_dual_quat(dual_quaternion : DualQuaternion) -> DualNumber{
         let real = length(dual_quaternion.real.value);
         let real_pure = dual_quaternion.real.to_pure();
         let dual_pure = dual_quaternion.dual.to_pure();
@@ -303,15 +302,15 @@ pub fn length_dual_quat(dual_quaternion : DualQuaternion) -> DualNumber{
         DualNumber::set(real, ((dual_quaternion.real.to_real() * dual_quaternion.dual.to_real()) + dot(real_pure.value, dual_pure.value)) / real)
     }
 
-#[inline]
-pub fn length_sqr_dual_quat(dual_quaternion : DualQuaternion) -> DualNumber{
+    #[inline]
+    pub fn length_sqr_dual_quat(dual_quaternion : DualQuaternion) -> DualNumber{
         let real_pure = dual_quaternion.real.to_pure();
         let dual_pure = dual_quaternion.dual.to_pure();
         DualNumber::set(length_squared(dual_quaternion.real.value), 2.0 * (dual_quaternion.real.to_real() *dual_quaternion.dual.to_real() + dot(real_pure.value, dual_pure.value)))
     }
 
-#[inline]
-pub fn inverse_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
+    #[inline]
+    pub fn inverse_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
 
         let inverse_real = inverse_quat(dual_quaternion.real);
 
@@ -321,19 +320,83 @@ pub fn inverse_dual_quat(dual_quaternion : DualQuaternion) -> DualQuaternion{
         }
     }
 
-#[inline]
-pub fn transform_point3_dual_quat(dual_quaternion : DualQuaternion, point3 : Vector3) -> DualQuaternion{
+    #[inline]
+    pub fn transform_point3_dual_quat(dual_quaternion : DualQuaternion, point3 : Vector3) -> DualQuaternion{
         let point_dual_quat = DualQuaternion{ real: Quaternion::IDENTITY, dual: Quaternion::set(point3.x(), point3.y(), point3.z(), 0.0) };
 
         dual_quaternion * point_dual_quat * combined_conjugate_dual_quat(dual_quaternion)
     }
 
-//https://www.cs.utah.edu/~ladislav/kavan06dual/kavan06dual.pdf
-pub fn linear_blending_dual_quat(start : DualQuaternion, end : DualQuaternion, t : f32) -> DualQuaternion{
+    //https://www.cs.utah.edu/~ladislav/kavan06dual/kavan06dual.pdf
+    #[inline]
+    pub fn linear_blending_dual_quat(start : DualQuaternion, end : DualQuaternion, t : f32) -> DualQuaternion{
         let time = 1.0 - t;
 
         let combined =  start * time + end * t;
         let dual_length = length_dual_quat(combined);
         combined / dual_length
     }
+
+    // Not 100 percent sure implementation below is valid nor invalid. Use with caution :)
+
+    #[inline]
+    pub fn exp_dual_quaternion(dual_quaternion : DualQuaternion) -> DualQuaternion{
+        let real = crate::quaternion_math::exp_quat(dual_quaternion.real);
+        let dual = dual_quaternion.dual * real;
+
+        DualQuaternion {
+            real,
+            dual
+        }
+    }
+
+    #[inline]
+    pub fn pow_dual_quaternion(dual_quaternion : DualQuaternion, exponent : f32) -> DualQuaternion{
+
+        let theta = 2.0 * dual_quaternion.real.w().acos();
+
+        let mut dual_quat = DualQuaternion::IDENTITY;
+
+        let half_theta = theta * 0.5;
+
+        let rcp_half_theta_sin = half_theta.sin().recip();
+        let (exp_half_theta_sin, exp_half_theta_cos) = (exponent * half_theta).sin_cos();
+
+        if std::intrinsics::unlikely(theta < 0.0) {
+            dual_quat = from_translation_dual_quat(get_translation_dual_quat(dual_quaternion) * exponent);
+        }
+
+        let s0 = dual_quaternion.real.to_pure() * rcp_half_theta_sin;
+        let d = -2.0 * dual_quaternion.dual.w() * rcp_half_theta_sin;
+        let half_d = d * 0.5;
+
+        let se = (dual_quaternion.dual.to_pure() - s0 * half_d * (half_theta).cos()) * rcp_half_theta_sin;
+
+        let real = Quaternion::from_additive_form(exp_half_theta_cos, s0 * exp_half_theta_sin);
+
+        let dual = Quaternion::from_additive_form(-exponent * half_d * exp_half_theta_sin, s0 * exponent * half_d  * exp_half_theta_cos + se * exp_half_theta_sin);
+
+        dual_quat = DualQuaternion::new(real, dual);
+
+        dual_quat
+    }
+
+
+    #[inline]
+    pub fn screw_linear_blending_dual_quat(start : DualQuaternion, end : DualQuaternion, time : f32) -> DualQuaternion{
+        crate::dual_quaternion_math::pow_dual_quaternion(start * (crate::dual_quaternion_math::inverse_dual_quat(start) * end), time)
+    }
+
+
+    // Might Implement or not will decide tomorrow.
+    #[inline]
+    pub fn from_screw() -> DualQuaternion{
+        todo!()
+    }
+
+    #[inline]
+    pub fn to_screw() {
+        todo!()
+    }
+
 }

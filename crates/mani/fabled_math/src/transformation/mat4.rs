@@ -6,7 +6,7 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 use std::fmt::Display;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Matrix4x4 {
     pub column_x: Vector4,
     pub column_y: Vector4,

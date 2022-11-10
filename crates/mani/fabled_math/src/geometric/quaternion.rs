@@ -8,7 +8,7 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Neg, Div, DivAssi
 
 use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Quaternion {
     pub value: std::simd::f32x4,
 }

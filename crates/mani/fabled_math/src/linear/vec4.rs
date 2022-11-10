@@ -11,7 +11,7 @@ use std::ops::{
 
 use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Vector4 {
     pub value: std::simd::f32x4,
 }
