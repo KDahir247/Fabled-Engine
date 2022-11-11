@@ -6,3 +6,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# running thread on different core
+core_affinity = {version = "0.5.10"}
+# thread priority
+thread_priority = {version = "0.10.0"}

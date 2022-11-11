@@ -2,6 +2,8 @@
 mod tests {
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
+        let a= core_affinity::get_core_ids();
+
+        println!("{:?}", a);
     }
 }

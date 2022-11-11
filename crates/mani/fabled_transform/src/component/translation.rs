@@ -1,13 +1,28 @@
-#[derive(Copy, Clone, Debug)]
+use fabled_math::Vector3;
+use fabled_component::{Component, All};
+
+use std::fmt::Display;
+
+#[derive(Copy, Clone)]
 pub struct Translation {
-    pub value: [f32; 4],
+    pub value: Vector3,
 }
 
 
 impl Default for Translation {
     fn default() -> Self {
         Self {
-            value: [0.0, 0.0, 0.0, 1.0],
+            value : Vector3::ZERO
         }
     }
+}
+
+impl Display for Translation{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Translation({})", self.value)
+    }
+}
+
+impl Component for Translation{
+    type Tracking = All;
 }

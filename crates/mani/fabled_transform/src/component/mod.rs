@@ -22,7 +22,7 @@ mod data_test {
 
     #[test]
     fn data_size() {
-        let child_size = std::mem::size_of::<Child>();
+    let child_size = std::mem::size_of::<Child>();
         assert_eq!(child_size & (child_size - 1), 0);
 
         let local_world_size = std::mem::size_of::<LocalToWorld>();

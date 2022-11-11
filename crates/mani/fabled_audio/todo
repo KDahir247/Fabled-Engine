@@ -12,3 +12,6 @@ on the affine3d of the camera listener.
 added a decibel file for audio that will convert db to linear and other helpers.
 remove self and be explicit eg. -> Self to -> StructName
 remove rayon.
+
+
+Use asset manager for audio extension loading.

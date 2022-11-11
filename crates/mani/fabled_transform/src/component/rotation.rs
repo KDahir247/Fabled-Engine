@@ -1,18 +1,27 @@
-#[derive(Copy, Clone, Debug)]
+use std::fmt::Display;
+
+use fabled_component::{Component, All};
+use fabled_math::Quaternion;
+
+#[derive(Copy, Clone)]
 pub struct Rotation {
-    pub value: [f32; 4],
+    pub value: Quaternion,
 }
 
 impl Default for Rotation {
     fn default() -> Self {
         Self {
-            value: [0.0, 0.0, 0.0, 1.0],
+            value : Quaternion::IDENTITY
         }
     }
 }
 
-impl From<[f32; 4]> for Rotation {
-    fn from(rot: [f32; 4]) -> Self {
-        Self { value: rot }
+impl Display for Rotation{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Rotation({})", self.value)
     }
+}
+
+impl Component for Rotation{
+    type Tracking = All;
 }

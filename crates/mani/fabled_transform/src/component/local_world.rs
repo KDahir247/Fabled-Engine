@@ -1,17 +1,27 @@
-#[derive(Copy, Clone, Debug)]
+use fabled_math::Matrix4x4;
+use fabled_component::{Component, All};
+
+use std::fmt::Display;
+
+#[derive(Copy, Clone)]
 pub struct LocalToWorld {
-    pub value: [f32; 16],
+    pub value: Matrix4x4,
 }
 
 impl Default for LocalToWorld {
     fn default() -> Self {
         Self {
-            value: [
-                1.0, 0.0, 0.0, 0.0, // col 0
-                0.0, 1.0, 0.0, 0.0, // col 1
-                0.0, 0.0, 1.0, 0.0, // col 2
-                0.0, 0.0, 0.0, 1.0, // col 3
-            ],
+           value : Matrix4x4::IDENTITY
         }
     }
+}
+
+impl Display for LocalToWorld{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f,"LocalToWorld(\n{}\n)", self.value)
+    }
+}
+
+impl Component for LocalToWorld{
+    type Tracking = All;
 }

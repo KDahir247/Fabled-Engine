@@ -386,17 +386,4 @@ pub mod dual_quaternion_math{
     pub fn screw_linear_blending_dual_quat(start : DualQuaternion, end : DualQuaternion, time : f32) -> DualQuaternion{
         crate::dual_quaternion_math::pow_dual_quaternion(start * (crate::dual_quaternion_math::inverse_dual_quat(start) * end), time)
     }
-
-
-    // Might Implement or not will decide tomorrow.
-    #[inline]
-    pub fn from_screw() -> DualQuaternion{
-        todo!()
-    }
-
-    #[inline]
-    pub fn to_screw() {
-        todo!()
-    }
-
 }

@@ -7,7 +7,7 @@ use std::{
     ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign},
 };
 
-#[derive(Copy, Clone, Default, Eq, PartialEq)]
+#[derive(Copy, Clone, Default, PartialEq)]
 pub struct Bool4 {
     pub value: std::simd::Mask<i32, 4>,
 }

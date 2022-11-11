@@ -1,36 +1,42 @@
-use crate::camera::{ClippingPlane, Oblique, Orthographic, Projection, ViewPort};
-use fabled_transform::{Rotation, Translation};
+use fabled_math::{Matrix4x4, Vector3, Vector4};
 
-use fabled_math::Matrix4x4;
-#[derive(Copy, Clone, Default, Debug)]
+use crate::camera::{ClippingPlane, Oblique, Orthographic, Projection, ViewPort};
+
+#[derive(Copy, Clone, Default)]
 pub struct MatrixDescriptor {
-    pub projection: [f32; 16],
-    pub view: [f32; 16],
-    pub model: [f32; 16],
+    pub projection: Matrix4x4,
+    pub view: Matrix4x4,
+    pub model: Matrix4x4,
 }
 
 pub fn project(
-    target: [f32; 3],
+    target: Vector3,
     viewport: &ViewPort,
     matrix_descriptor: MatrixDescriptor,
-) -> [f32; 3] {
-    let model = glam::Mat4::from_cols_array(&matrix_descriptor.model);
-    let projection = glam::Mat4::from_cols_array(&matrix_descriptor.projection);
-    let view = glam::Mat4::from_cols_array(&matrix_descriptor.view);
+) -> Vector3 {
 
     let t_mvp_target_vector =
-        projection * view * model * glam::Vec4::new(target[0], target[1], target[2], 1.0);
+        matrix_descriptor.projection * matrix_descriptor.view * matrix_descriptor.model * Vector4::set(target.x(), target.y(), target.z(), 1.0);
 
-    let normalized_factor = 1.0 / t_mvp_target_vector.w;
+    let normalized_factor = 1.0 / t_mvp_target_vector.w();
 
-    assert!(normalized_factor.ne(&0.0));
+    let x = t_mvp_target_vector.x() * normalized_factor;
+    let y = -t_mvp_target_vector.y() * normalized_factor;
+    let z = t_mvp_target_vector.z() * normalized_factor;
 
-    [
-        (((t_mvp_target_vector.x * normalized_factor + 1.0) * 0.5) * viewport.w) + viewport.x,
-        (((-t_mvp_target_vector.y * normalized_factor + 1.0) * 0.5) * viewport.h) + viewport.y,
-        (t_mvp_target_vector.z * normalized_factor * (viewport.max_depth - viewport.min_depth))
-            + viewport.min_depth,
-    ]
+    let x_p_one = x + 1.0;
+    let y_p_one = y + 1.0;
+    let viewport_diff = viewport.max_depth - viewport.min_depth;
+
+    let half_x_p_one = x_p_one * 0.5;
+    let half_y_p_one = y_p_one * 0.5;
+    let z_mul_viewport_diff = z * viewport_diff;
+
+    Vector3::set(
+        (half_x_p_one * viewport.w) + viewport.x,
+        (half_y_p_one * viewport.h) + viewport.y,
+        z_mul_viewport_diff + viewport.min_depth
+    )
 }
 
 pub fn unproject(

@@ -3,10 +3,6 @@ name = "fabled_transform"
 version = "0.1.0"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-glam = {version = "0.21.2", features = ["bytemuck"]}
 fabled_component = {path ="../fabled_component", version = "*"}
-
-#shipyard = {git = "https://github.com/leudz/shipyard", branch = "master" , features = ["thread_local", "proc", "parallel"]}
+fabled_math = {path = "../fabled_math", version = "*"}
