@@ -1,6 +1,4 @@
-mod core;
-mod test;
-
 fn main() {
-    core::State::run();
+    // fabled_core::run_application()
+    // Test builder run....
 }

@@ -8,9 +8,10 @@ use crate::camera::{FStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUATION};
 // value 10.6 and 13.4
 // 12.5 (Canon, Nikon, Sekonic) and 14.0 (Minolta, Kenko, Pentax)
 
-
+// Only take into account Aperture and Shutter speed not sensitivity.
 // EV = log2 (LS / K)
 // (LS / K) is equivalent to N^2 / t, thus EV = log2 (N^2 / t)
+// Ev100
 pub fn compute_exposure_value(f_stop: FStop) -> f32 {
     let shutter = Shutter::compute_shutter_speed(f_stop);
 
@@ -18,6 +19,8 @@ pub fn compute_exposure_value(f_stop: FStop) -> f32 {
 
     f32::log2(f_number * f_number / shutter.speed)
 }
+
+// We want to compute exposure value with Sensitivity.
 
 // EV100 = log2(N^2 / t) - log2(S / 100.0)
 pub fn calculate_ev_100(f_stop: FStop, iso_speed: ISOSpeed) -> f32 {

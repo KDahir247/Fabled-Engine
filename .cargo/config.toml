@@ -1,2 +1,4 @@
 [build]
-rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+rustflags = ["-C", "link-arg=-fuse-ld=lld", ]
+[net]
+git-fetch-with-cli = true
