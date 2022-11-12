@@ -9,4 +9,4 @@ edition = "2018"
 # running thread on different core
 core_affinity = {version = "0.5.10"}
 # thread priority
-thread_priority = {version = "0.10.0"}
+thread-priority = {version = "0.10.0"}

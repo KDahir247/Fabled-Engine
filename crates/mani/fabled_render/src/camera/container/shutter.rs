@@ -17,7 +17,7 @@ impl Shutter {
     pub fn compute_shutter_speed(f_stop: FStop) -> Self {
         let mut shutter = 4000.0;
 
-        for _ in 0..f_stop.get_step() {
+        for _ in 0..f_stop.step {
             shutter /= 2.0;
         }
         Self {

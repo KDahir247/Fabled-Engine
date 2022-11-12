@@ -15,7 +15,7 @@ use crate::camera::{FStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUATION};
 pub fn compute_exposure_value(f_stop: FStop) -> f32 {
     let shutter = Shutter::compute_shutter_speed(f_stop);
 
-    let f_number = f_stop.get_f_number();
+    let f_number = f_stop.f_stop;
 
     f32::log2(f_number * f_number / shutter.speed)
 }
@@ -30,6 +30,8 @@ pub fn calculate_ev_100(f_stop: FStop, iso_speed: ISOSpeed) -> f32 {
 
 
 // EV100' = EV100 - EC
+// Allow user to apply compensation in order to over-expose (brighten) or
+// under-expose (darken)
 pub fn ev100_compensation(ev100: f32, exposure_compensation: f32) -> f32 {
     ev100 - exposure_compensation
 }
@@ -42,6 +44,7 @@ pub fn ev100_compensation(ev100: f32, exposure_compensation: f32) -> f32 {
 // N is the relative aperture (f-number)
 // S is the ISO arithmetic speed
 
+// Convert EV100 to Exposure for shader
 // The SI unit for luminance is candela per square metre (cd/m2)
 // L' =L*1/Lmax
 // Lmax = (N^2/t) * (78 / q * S)
@@ -52,5 +55,5 @@ pub fn calculate_exposure_normalization_factor(
     iso_speed: ISOSpeed,
 ) -> f32 {
     let len_attenuation = len_attenuation.unwrap_or(LENS_VIGNETTING_ATTENUATION);
-    1.0 / (2.0f32.powf(ev100) * (78.0 / len_attenuation * iso_speed.arithmetic_speed))
+    1.0 / (2.0f32.powf(ev100) * (78.0 / (len_attenuation * iso_speed.arithmetic_speed)))
 }

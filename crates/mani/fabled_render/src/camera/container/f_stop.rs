@@ -10,10 +10,11 @@
 // the lower the F-stop the more blurry the background will be. This will affect
 // Depth of Field
 
+#[non_exhaustive]
 #[derive(Copy, Clone, Debug)]
 pub struct FStop {
-    f_stop: f32,
-    step: i32,
+    pub f_stop: f32,
+    pub step: i32,
 }
 
 impl Default for FStop {
@@ -97,15 +98,4 @@ impl FStop {
         f_stop: 32.0,
         step: 10,
     };
-}
-
-
-impl FStop {
-    pub const fn get_f_number(&self) -> f32 {
-        self.f_stop
-    }
-
-    pub const fn get_step(&self) -> i32 {
-        self.step
-    }
 }

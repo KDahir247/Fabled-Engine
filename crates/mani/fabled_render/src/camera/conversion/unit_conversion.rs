@@ -10,7 +10,6 @@ pub fn meter_to_millimeter(meter: f32) -> f32 {
     meter * 1000.0
 }
 
-
 pub fn inch_to_meter(inch: f32) -> f32 {
     inch * RCP_39
 }
