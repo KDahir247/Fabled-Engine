@@ -1,4 +1,4 @@
-use crate::camera::{FishLens, Fov, FovAxis};
+use crate::camera::{Aperture, FishLens, Fov, FovAxis};
 
 // all angle are in radians
 
@@ -8,13 +8,13 @@ use crate::camera::{FishLens, Fov, FovAxis};
 // fov axis is vertical (set the other to zero.)
 pub fn focal_length_to_fov(
     focal_length: f32,
-    frame_aperture: f32,
+    frame_aperture: Aperture,
     fov_axis: FovAxis,
     focus_distance: Option<f32>,
     crop_factor: Option<f32>,
     lens_type: FishLens,
 ) -> (Fov, f32) {
-    let frame_size = (frame_aperture * frame_aperture).sqrt();
+    let frame_size = (frame_aperture.aperture_size_x * frame_aperture.aperture_size_x).sqrt();
 
     let crop_focal_length = focal_length * crop_factor.unwrap_or(1.0);
 
@@ -32,13 +32,14 @@ pub fn focal_length_to_fov(
 
 pub fn focal_length_to_directional_fov(
     focal_length: f32,
-    frame_aperture: [f32; 2],
+    frame_aperture: Aperture,
     focus_distance: Option<f32>,
     crop_factor: Option<f32>,
     lens_type: FishLens,
 ) -> (f32, f32) {
-    let frame_size =
-        (frame_aperture[0] * frame_aperture[0] + frame_aperture[1] * frame_aperture[1]).sqrt();
+    let frame_size = (frame_aperture.aperture_size_x * frame_aperture.aperture_size_x
+        + frame_aperture.aperture_size_y * frame_aperture.aperture_size_y)
+        .sqrt();
 
     internal_focal_to_fov(
         focal_length * crop_factor.unwrap_or(1.0),
@@ -72,13 +73,14 @@ fn internal_focal_to_fov(
 
 pub fn fov_to_focal_length(
     field_of_view: f32,
-    frame_aperture: [f32; 2],
+    frame_aperture: Aperture,
     crop_factor: Option<f32>,
     magnification: f32,
     lens_type: FishLens,
 ) -> f32 {
-    let frame_size =
-        (frame_aperture[0] * frame_aperture[0] + frame_aperture[1] * frame_aperture[1]).sqrt();
+    let frame_size = (frame_aperture.aperture_size_x * frame_aperture.aperture_size_x
+        + frame_aperture.aperture_size_y * frame_aperture.aperture_size_y)
+        .sqrt();
 
     let focal_length = match lens_type {
         FishLens::Rectilinear => {
@@ -119,15 +121,19 @@ pub fn compute_horizontal_focal_length(aperture_size_x: f32, field_of_view: Fov)
 
 pub fn compute_focal_length(
     distance_image_plane: f32,
-    optical_axis_angle: f32,
+    optical_axis_angle_rad: f32,
     lens_type: FishLens,
 ) -> f32 {
     match lens_type {
-        FishLens::Rectilinear => distance_image_plane / optical_axis_angle.atan(),
-        FishLens::Stereographic => distance_image_plane / 2.0 * (optical_axis_angle / 2.0).tan(),
-        FishLens::Equidistant => distance_image_plane / optical_axis_angle,
-        FishLens::EquisolidAngle => distance_image_plane / (2.0 * (optical_axis_angle / 2.0).sin()),
-        FishLens::Orthographic => distance_image_plane / optical_axis_angle.sin(),
+        FishLens::Rectilinear => distance_image_plane / optical_axis_angle_rad.atan(),
+        FishLens::Stereographic => {
+            distance_image_plane / 2.0 * (optical_axis_angle_rad / 2.0).tan()
+        }
+        FishLens::Equidistant => distance_image_plane / optical_axis_angle_rad,
+        FishLens::EquisolidAngle => {
+            distance_image_plane / (2.0 * (optical_axis_angle_rad / 2.0).sin())
+        }
+        FishLens::Orthographic => distance_image_plane / optical_axis_angle_rad.sin(),
     }
 }
 
@@ -146,7 +152,7 @@ pub fn compute_distance_image_plane_from_optical_axis(
 }
 
 
-pub fn compute_magnification(focal_length: f32, focus_distance: f32) -> f32 {
+pub fn compute_exact_magnification(focal_length: f32, focus_distance: f32) -> f32 {
     let r = ((focus_distance * focus_distance) / 4.0 - focal_length * focus_distance).sqrt();
     let object_distance = focus_distance / 2.0 + r;
     let image_distance = focus_distance / 2.0 - r;
@@ -163,8 +169,8 @@ pub fn compute_approx_magnification(focal_length: f32, focus_distance: f32) -> f
 mod len_mapping {
     use crate::camera::{
         compute_approx_magnification, compute_distance_image_plane_from_optical_axis,
-        compute_focal_length, compute_magnification, focal_length_to_directional_fov,
-        focal_length_to_fov, fov_to_focal_length, FishLens, FovAxis,
+        compute_exact_magnification, compute_focal_length, focal_length_to_directional_fov,
+        focal_length_to_fov, fov_to_focal_length, Aperture, FishLens, FovAxis,
     };
 
     #[test]
@@ -172,12 +178,12 @@ mod len_mapping {
         const ERROR_THRESHOLD: f32 = 0.09;
         // precise calculation for magnification will return nan if values are
         // incorrect.
-        assert!(compute_magnification(90.0, 200.0).is_nan());
+        assert!(compute_exact_magnification(90.0, 200.0).is_nan());
         // approximate calculation for magnification will never return nan if if the
         // values are incorrect
         assert!(!compute_approx_magnification(90.0, 200.0).is_nan());
 
-        let precise_magnification = compute_magnification(20.0, 500.0);
+        let precise_magnification = compute_exact_magnification(20.0, 500.0);
         let approx_magnification = compute_approx_magnification(20.0, 500.0);
 
         assert!((precise_magnification - approx_magnification).abs() < ERROR_THRESHOLD);
@@ -192,7 +198,7 @@ mod len_mapping {
 
         let (vertical_fov, _) = focal_length_to_fov(
             focal_length,
-            28.0,
+            Aperture::new(28.0, 0.0),
             FovAxis::Vertical,
             None,
             None,
@@ -201,7 +207,7 @@ mod len_mapping {
 
         let (diagonal_fov, _) = focal_length_to_directional_fov(
             focal_length,
-            [28.0, 0.0],
+            Aperture::new(28.0, 0.0),
             None,
             None,
             FishLens::Rectilinear,
@@ -225,7 +231,7 @@ mod len_mapping {
 
         let (full_frame_fov, magnification) = focal_length_to_directional_fov(
             focal_length,
-            [36., 24.],
+            Aperture::new(36., 24.),
             None,
             None,
             FishLens::Rectilinear,
@@ -235,7 +241,7 @@ mod len_mapping {
 
         let full_frame_focal_length = fov_to_focal_length(
             full_frame_fov,
-            [36., 24.],
+            Aperture::new(36., 24.),
             None,
             magnification,
             FishLens::Rectilinear,
@@ -254,7 +260,7 @@ mod len_mapping {
 
         let focal_length = fov_to_focal_length(
             fov,
-            [36., 24.],
+            Aperture::new(36., 24.),
             Some(CROP_FACTOR),
             1.0,
             FishLens::Rectilinear,
@@ -263,7 +269,7 @@ mod len_mapping {
 
         let (resulting_fov, _) = focal_length_to_directional_fov(
             focal_length,
-            [36., 24.],
+            Aperture::new(36., 24.),
             None,
             Some(CROP_FACTOR),
             FishLens::Rectilinear,
