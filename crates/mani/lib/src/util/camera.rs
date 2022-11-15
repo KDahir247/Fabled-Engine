@@ -21,6 +21,7 @@ pub fn calc_proj_matrix(projection: &camera_component::Projection) -> glam::Mat4
     let w = h / projection.aspect;
     let near_min_far = projection.znear - projection.zfar;
 
+
     glam::mat4(
         glam::vec4(w, 0.0, 0.0, 0.0),
         glam::vec4(0.0, h, 0.0, 0.0),

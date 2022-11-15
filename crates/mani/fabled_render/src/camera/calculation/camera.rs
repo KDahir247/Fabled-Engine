@@ -4,7 +4,9 @@ use fabled_math::matrix4x4_math::{compose_trs_mat4, from_translation_mat4, inver
 use fabled_math::quaternion_math::{forward_vec3, inverse_quat};
 use fabled_math::vector_math::{cross, dot, normalize};
 
-use crate::camera::{ClippingPlane, Oblique, Orthographic, Perspective, ViewPort};
+use crate::camera::{
+    AspectRatio, ClippingPlane, FovAxis, Oblique, Orthographic, Perspective, ViewPort, SENSOR_SIZE,
+};
 
 #[derive(Copy, Clone, Default)]
 pub struct MatrixDescriptor {
@@ -120,22 +122,61 @@ pub fn compute_arc_ball_matrix(
 
 #[rustfmt::skip]
 pub fn compute_perspective_matrix(perspective: Perspective, clipping_plane : ClippingPlane) -> Matrix4x4{
+
     let far_plane = clipping_plane.far;
     let near_plane = clipping_plane.near;
     
     let near_min_far = near_plane - far_plane;
 
-    let h = 1.0 / (perspective.fov.radian * 0.5).tan();
-    let w = h / perspective.aspect.get_aspect();
+    let mut h = 0.0;
+    let mut w = 0.0;
 
+    let s =(perspective.fov.radian * 0.5).tan() * near_plane;
+    
+    match perspective.fov.axis {
+        FovAxis::Horizontal => {
+            w = s;
+            h = s * perspective.aspect.get_aspect();
+        }
+        FovAxis::Vertical => {
+            h = s;
+            w = s / perspective.aspect.get_aspect();
+        }
+    }
 
     let inv_near_min_far = 1.0 / near_min_far;
+    let r = far_plane * inv_near_min_far;
+    Matrix4x4::set(
+        Vector4::set(w, 0.0, 0.0, 0.0),
+        Vector4::set(0.0, h, 0.0, 0.0),
+        Vector4::set(0.0, 0.0, r, -1.0),
+        Vector4::set(0.0, 0.0, r * near_plane, 0.0)
+    )
+}
+
+// not sure if this works... Use the focal to fov mapping function. the use
+// compute_perspective_matrix fn It is more explicit
+pub fn compute_len_perspective_matrix(
+    focal_length: f32,
+    aspect_ratio: AspectRatio,
+    clipping_plane: ClippingPlane,
+) -> Matrix4x4 {
+    let far_plane = clipping_plane.far;
+    let near_plane = clipping_plane.near;
+
+    let near_min_far = near_plane - far_plane;
+
+    let h = (0.5 * clipping_plane.near) * ((SENSOR_SIZE * 1000.0) / focal_length);
+    let w = h * aspect_ratio.get_aspect();
+
+    let inv_near_min_far = 1.0 / near_min_far;
+    let r = far_plane * inv_near_min_far;
 
     Matrix4x4::set(
         Vector4::set(w, 0.0, 0.0, 0.0),
         Vector4::set(0.0, h, 0.0, 0.0),
-        Vector4::set(0.0, 0.0, far_plane * inv_near_min_far, -1.0),
-        Vector4::set(0.0, 0.0, near_plane * inv_near_min_far, 0.0)
+        Vector4::set(0.0, 0.0, r, -1.0),
+        Vector4::set(0.0, 0.0, r * near_plane, 0.0),
     )
 }
 
