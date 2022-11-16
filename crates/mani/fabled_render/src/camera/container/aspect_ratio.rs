@@ -1,3 +1,5 @@
+use crate::camera::AspectRatioMode;
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct AspectRatio {
     pub horizontal: f32,
@@ -13,8 +15,9 @@ impl Default for AspectRatio {
     }
 }
 
+// todo do this tomorrow implementation for mode is not complete..
 impl AspectRatio {
-    pub fn new(horizontal: f32, vertical: f32) -> Self {
+    pub fn new(horizontal: f32, vertical: f32, mode: AspectRatioMode) -> Self {
         let horizontal = horizontal.max(1.0);
         let vertical = vertical.max(1.0);
 
@@ -31,11 +34,11 @@ impl AspectRatio {
 
 #[cfg(test)]
 mod aspect_ration_test {
-    use crate::camera::AspectRatio;
+    use crate::camera::{AspectRatio, AspectRatioMode};
 
     #[test]
     fn invalid_aspect_ratio() {
-        let aspect_ratio = AspectRatio::new(0.0, 0.0);
+        let aspect_ratio = AspectRatio::new(0.0, 0.0, AspectRatioMode::WindowSize);
 
         assert!(aspect_ratio.get_aspect().eq(&1.0));
 

@@ -4,9 +4,7 @@ use fabled_math::matrix4x4_math::{compose_trs_mat4, from_translation_mat4, inver
 use fabled_math::quaternion_math::{forward_vec3, inverse_quat};
 use fabled_math::vector_math::{cross, dot, normalize};
 
-use crate::camera::{
-    AspectRatio, ClippingPlane, FovAxis, Oblique, Orthographic, Perspective, ViewPort, SENSOR_SIZE,
-};
+use crate::camera::{ClippingPlane, FovAxis, Oblique, Orthographic, Perspective, ViewPort};
 
 #[derive(Copy, Clone, Default)]
 pub struct MatrixDescriptor {
@@ -17,7 +15,7 @@ pub struct MatrixDescriptor {
 
 pub fn project(
     target: Vector3,
-    viewport: &ViewPort,
+    viewport: ViewPort,
     matrix_descriptor: MatrixDescriptor,
 ) -> Vector3 {
     let t_mvp_target_vector = matrix_descriptor.projection
@@ -25,30 +23,30 @@ pub fn project(
         * matrix_descriptor.model
         * Vector4::set(target.x(), target.y(), target.z(), 1.0);
 
-    let normalized_factor = 1.0 / t_mvp_target_vector.w();
+    let mvp_target_scalar_rcp = 1.0 / t_mvp_target_vector.w();
 
-    let x = t_mvp_target_vector.x() * normalized_factor;
-    let y = -t_mvp_target_vector.y() * normalized_factor;
-    let z = t_mvp_target_vector.z() * normalized_factor;
+    let x = t_mvp_target_vector.x() * mvp_target_scalar_rcp;
+    let y = -t_mvp_target_vector.y() * mvp_target_scalar_rcp;
+    let z = t_mvp_target_vector.z() * mvp_target_scalar_rcp;
 
     let x_p_one = x + 1.0;
     let y_p_one = y + 1.0;
-    let viewport_diff = viewport.max_depth - viewport.min_depth;
+    let depth_diff = viewport.max_depth - viewport.min_depth;
 
     let half_x_p_one = x_p_one * 0.5;
     let half_y_p_one = y_p_one * 0.5;
-    let z_mul_viewport_diff = z * viewport_diff;
+    let z_mul_depth_diff = z * depth_diff;
 
     Vector3::set(
         (half_x_p_one * viewport.w) + viewport.x,
         (half_y_p_one * viewport.h) + viewport.y,
-        z_mul_viewport_diff + viewport.min_depth,
+        z_mul_depth_diff + viewport.min_depth,
     )
 }
 
 pub fn unproject(
     target: Vector3,
-    viewport: &ViewPort,
+    viewport: ViewPort,
     matrix_descriptor: MatrixDescriptor,
 ) -> Vector3 {
     let matrix = inverse_mat4(
@@ -56,12 +54,13 @@ pub fn unproject(
     );
 
     let x = target.x() - viewport.x;
+    let x_mul_two = x + x;
     let y = target.y() - viewport.y;
+    let y_mul_two = y + y;
+
     let z = target.z() - viewport.min_depth;
     let depth_difference = (viewport.max_depth - viewport.min_depth).recip();
 
-    let x_mul_two = x * 2.0;
-    let y_mul_two = y * 2.0;
     let z_mul_depth_diff = z * depth_difference;
 
     let vector = matrix
@@ -75,6 +74,7 @@ pub fn unproject(
     vector.trunc_vec3()
 }
 
+// todo this is +X=RIGHT, +Y=UP, +Z=BACK we want +Z=FORWARD.
 pub fn compute_look_at_matrix(translation: Vector3, rotation: Quaternion) -> Matrix4x4 {
     const Y_VEC3: Vector3 = Vector3::UP;
 
@@ -114,69 +114,72 @@ pub fn compute_arc_ball_matrix(
     rotation: Quaternion,
     center: Vector3,
 ) -> Matrix4x4 {
-    let transformation_matrx = compose_trs_mat4(-translation, inverse_quat(rotation), Vector3::ONE);
+    let transformation_matrix =
+        compose_trs_mat4(-translation, inverse_quat(rotation), Vector3::ONE);
     let translation_to_center = from_translation_mat4(-center);
 
-    transformation_matrx * translation_to_center
+    transformation_matrix * translation_to_center
 }
 
 #[rustfmt::skip]
 pub fn compute_perspective_matrix(perspective: Perspective, clipping_plane : ClippingPlane) -> Matrix4x4{
-
-    let far_plane = clipping_plane.far;
-    let near_plane = clipping_plane.near;
-    
-    let near_min_far = near_plane - far_plane;
-
     let mut h = 0.0;
     let mut w = 0.0;
+    
+    let inv_near_min_far = (clipping_plane.near - clipping_plane.far).recip();
 
-    let s =(perspective.fov.radian * 0.5).tan() * near_plane;
+    let hal_fov = perspective.fov.radian * 0.5;
+    let r = clipping_plane.far * inv_near_min_far;
+    let d = r * clipping_plane.near;
+    let s =hal_fov.tan() * clipping_plane.near;
+
+    let aspect_ratio = perspective.aspect.get_aspect();
     
     match perspective.fov.axis {
         FovAxis::Horizontal => {
             w = s;
-            h = s * perspective.aspect.get_aspect();
+            h = s * aspect_ratio;
         }
         FovAxis::Vertical => {
             h = s;
-            w = s / perspective.aspect.get_aspect();
+            w = s / aspect_ratio;
         }
     }
 
-    let inv_near_min_far = 1.0 / near_min_far;
-    let r = far_plane * inv_near_min_far;
     Matrix4x4::set(
         Vector4::set(w, 0.0, 0.0, 0.0),
         Vector4::set(0.0, h, 0.0, 0.0),
         Vector4::set(0.0, 0.0, r, -1.0),
-        Vector4::set(0.0, 0.0, r * near_plane, 0.0)
+        Vector4::set(0.0, 0.0, d, 0.0)
     )
 }
 
-// not sure if this works... Use the focal to fov mapping function. the use
-// compute_perspective_matrix fn It is more explicit
-pub fn compute_len_perspective_matrix(
-    focal_length: f32,
-    aspect_ratio: AspectRatio,
+pub fn compute_infinite_perspective_matrix(
+    perspective: Perspective,
     clipping_plane: ClippingPlane,
 ) -> Matrix4x4 {
-    let far_plane = clipping_plane.far;
-    let near_plane = clipping_plane.near;
+    let mut w = 0.0;
+    let mut h = 0.0;
 
-    let near_min_far = near_plane - far_plane;
+    let half_fov = perspective.fov.radian * 0.5;
+    let f = clipping_plane.near * half_fov.tan();
 
-    let h = (0.5 * clipping_plane.near) * ((SENSOR_SIZE * 1000.0) / focal_length);
-    let w = h * aspect_ratio.get_aspect();
-
-    let inv_near_min_far = 1.0 / near_min_far;
-    let r = far_plane * inv_near_min_far;
+    match perspective.fov.axis {
+        FovAxis::Horizontal => {
+            w = f;
+            h = f * perspective.aspect.get_aspect();
+        }
+        FovAxis::Vertical => {
+            w = f / perspective.aspect.get_aspect();
+            h = f;
+        }
+    }
 
     Matrix4x4::set(
         Vector4::set(w, 0.0, 0.0, 0.0),
         Vector4::set(0.0, h, 0.0, 0.0),
-        Vector4::set(0.0, 0.0, r, -1.0),
-        Vector4::set(0.0, 0.0, r * near_plane, 0.0),
+        Vector4::set(0.0, 0.0, -1.0, -1.0),
+        Vector4::set(0.0, 0.0, -clipping_plane.near, 0.0),
     )
 }
 
@@ -184,27 +187,25 @@ pub fn compute_orthographic_matrix(
     orthographic: Orthographic,
     clipping_plane: ClippingPlane,
 ) -> Matrix4x4 {
-    let far_plane = clipping_plane.far;
-    let near_plane = clipping_plane.near;
+    let neg_near_plane_min_far_plane_rcp = -(clipping_plane.near - clipping_plane.far).recip();
 
-    let near_plane_min_far_plane_rcp = (near_plane - far_plane).recip();
+    let right_min_left = orthographic.right - orthographic.left;
+    let right_min_left_mul_2 = right_min_left + right_min_left;
+    let top_min_bot = orthographic.top - orthographic.bottom;
+    let top_min_bot_mul_2 = top_min_bot + top_min_bot;
 
-    let right_min_left_rcp = orthographic.right - orthographic.left;
     let right_plus_left = orthographic.right + orthographic.left;
-
-    let top_min_bot_rcp = orthographic.top - orthographic.bottom;
     let top_plus_bot = orthographic.top + orthographic.bottom;
 
+    let w_x = right_plus_left * right_min_left;
+    let w_y = top_plus_bot * top_min_bot;
+    let w_z = clipping_plane.far * neg_near_plane_min_far_plane_rcp;
+
     Matrix4x4::set(
-        Vector4::set(2.0 * right_min_left_rcp, 0.0, 0.0, 0.0),
-        Vector4::set(0.0, 2.0 * top_min_bot_rcp, 0.0, 0.0),
-        Vector4::set(0.0, 0.0, -1.0 * near_plane_min_far_plane_rcp, 0.0),
-        Vector4::set(
-            -(right_plus_left * right_min_left_rcp),
-            -(top_plus_bot * top_min_bot_rcp),
-            -(far_plane * near_plane_min_far_plane_rcp),
-            1.0,
-        ),
+        Vector4::set(right_min_left_mul_2, 0.0, 0.0, 0.0),
+        Vector4::set(0.0, top_min_bot_mul_2, 0.0, 0.0),
+        Vector4::set(0.0, 0.0, neg_near_plane_min_far_plane_rcp, 0.0),
+        Vector4::set(-w_x, -w_y, w_z, 1.0),
     )
 }
 
@@ -215,10 +216,13 @@ pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique
 
     let projection = compute_orthographic_matrix(orthographic, clipping_plane);
 
-    let size = oblique.vertical_position / orthographic.top;
-
-    let rotation_x = size * -oblique.angle_rad.sin();
-    let rotation_y = -size * -oblique.angle_rad.cos();
+    let ortho_top_rcp = orthographic.top.recip();
+    
+    let (oblique_angle_sin, oblique_angle_cos_cos) = oblique.angle_rad.sin_cos();
+    
+    let size = oblique.vertical_position * ortho_top_rcp;
+    let rotation_x = size * -oblique_angle_sin;
+    let rotation_y = -size * -oblique_angle_cos_cos;
 
     let depth_offset_x = -oblique.depth_offset * rotation_x;
     let depth_offset_y = -oblique.depth_offset * rotation_y;
@@ -226,7 +230,7 @@ pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique
     Matrix4x4::set(
         Vector4::set(projection.column_x.x(), projection.column_x.y(), rotation_x, depth_offset_x),
         Vector4::set(projection.column_y.x(), projection.column_y.y(), rotation_y, depth_offset_y),
-        Vector4::set(projection.column_z.x(), projection.column_z.y(), projection.column_z.z(), projection.column_z.w()),
-        Vector4::set(projection.column_w.x(), projection.column_w.y(), projection.column_w.z(), projection.column_w.w())
+        projection.column_z,
+        projection.column_w
     )
 }

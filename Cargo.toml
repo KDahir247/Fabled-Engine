@@ -7,8 +7,7 @@ resolver = "2"
 [profile.dev]
 debug = true
 
-[profile.release]
-debug = true
+
 
 #[profile.release]
 #debug = false
@@ -17,48 +16,13 @@ debug = true
 #panic = "abort"
 #strip = "true"
 
-[lib]
-name = "lib"
-path = "crates/mani/lib/src/lib.rs"
 
 [workspace]
-members = ["crates/mani/*"]
+members = [
+    "crates/mani/fabled_math",
+    "crates/mani/fabled_transform",
+    "crates/mani/fabled_component",
+    "crates/mani/fabled_render",
+    "crates/mani/fabled_audio"
 
-
-[dependencies.env_logger]
-version = "*"
-optional = true
-
-[dependencies.log]
-version = "*"
-optional = true
-
-[features]
-logger = ["log" ,"env_logger"]
-
-[dependencies]
-fabled_gltf = {path = "crates/mani/fabled_gltf", version = "*"}
-fabled_render = {path = "crates/mani/fabled_render", version = "*"}
-fabled_audio = {path = "crates/mani/fabled_audio", version = "*"}
-#fabled_fbx = {path = "crates/mani/fabled_fbx", version = "*"}
-fabled_obj = {path = "crates/mani/fabled_obj", version = "*"}
-
-# todo others remove
-image = "*"
-winit = "*"
-wgpu = "0.8"
-futures = "*"
-bytemuck = {version = "*", features = ["derive"]}
-tobj = "*"
-anyhow = "*"
-rayon = "1.4"
-glam = {version = "*", features = ["bytemuck"]}
-shipyard = {version = "*", features = ["default", "thread_local"]}
-superluminal-perf = "*"
-naga = {version = "0.4.2", features = ["spv-in", "spv-out", "wgsl-in", "wgsl-out"]} #testing naga
-serde = {version = "*", features = ["derive"], optional = true}
-
-[dependencies.gltf]
-version = "1.0"
-features = ["KHR_materials_unlit", "KHR_materials_pbrSpecularGlossiness", "extras", "names", "utils", "import"]
-
+]
