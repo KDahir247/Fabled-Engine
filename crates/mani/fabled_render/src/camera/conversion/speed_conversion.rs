@@ -11,7 +11,7 @@ pub fn arithmetic_to_logarithmic_speed(arithmetic_speed: f32) -> f32 {
 // Conversion from logarithmic speed to arithmetic speed
 // S = 10^((So - 1)/ 10)
 pub fn logarithmic_to_arithmetic_speed(logarithmic_speed: f32) -> f32 {
-    10.0f32.powf((logarithmic_speed - 1.0) / 10.0)
+    10.0f32.powf((logarithmic_speed - 1.0) * 0.1)
 }
 
 #[cfg(test)]
