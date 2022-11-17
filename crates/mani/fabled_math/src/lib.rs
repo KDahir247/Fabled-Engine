@@ -17,7 +17,7 @@ pub use boolean::*;
 pub use easing::*;
 pub use geometric::*;
 pub use linear::*;
-
+pub use math_trait::*;
 pub use transformation::*;
 
 
@@ -351,7 +351,7 @@ pub mod vector_math {
     }
 
     #[inline]
-    pub fn sin_cos(simd_vector: std::simd::f32x4) -> (std::simd::f32x4, std::simd::f32x4){
+    pub fn sin_cos(simd_vector: std::simd::f32x4) -> (std::simd::f32x4, std::simd::f32x4) {
         (sin(simd_vector), cos(simd_vector))
     }
 
@@ -515,7 +515,7 @@ pub mod vector_math {
     }
 
     #[inline]
-    pub fn ldexp(mul_vector : std::simd::f32x4, power_vector : std::simd::f32x4) -> std::simd::f32x4{
+    pub fn ldexp(mul_vector: std::simd::f32x4, power_vector: std::simd::f32x4) -> std::simd::f32x4 {
         mul_vector * exp2(power_vector)
     }
 }
