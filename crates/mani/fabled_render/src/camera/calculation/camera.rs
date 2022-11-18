@@ -13,6 +13,7 @@ pub struct MatrixDescriptor {
     pub model: Matrix4x4,
 }
 
+// todo re-look at.
 pub fn project(
     target: Vector3,
     viewport: ViewPort,
@@ -44,6 +45,8 @@ pub fn project(
     )
 }
 
+
+// todo re-look at.
 pub fn unproject(
     target: Vector3,
     viewport: ViewPort,
@@ -182,6 +185,8 @@ pub fn compute_infinite_perspective_matrix(
         Vector4::set(0.0, 0.0, -clipping_plane.near, 0.0),
     )
 }
+
+// todo infinite reverse projection rhs
 
 pub fn compute_orthographic_matrix(
     orthographic: Orthographic,
