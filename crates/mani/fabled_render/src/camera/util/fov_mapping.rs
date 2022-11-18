@@ -14,7 +14,7 @@ pub fn focal_length_to_fov(
     crop_factor: Option<f32>,
     lens_type: FishLens,
 ) -> (Fov, f32) {
-    let frame_size = (frame_aperture.aperture_size_x * frame_aperture.aperture_size_x).sqrt();
+    let frame_size = (frame_aperture.aperture_size.x() * frame_aperture.aperture_size.x()).sqrt();
 
     let crop_focal_length = focal_length * crop_factor.unwrap_or(1.0);
 
@@ -37,9 +37,9 @@ pub fn focal_length_to_directional_fov(
     crop_factor: Option<f32>,
     lens_type: FishLens,
 ) -> (f32, f32) {
-    let frame_size = (frame_aperture.aperture_size_x * frame_aperture.aperture_size_x
-        + frame_aperture.aperture_size_y * frame_aperture.aperture_size_y)
-        .sqrt();
+    let frame_size = (frame_aperture.aperture_size.x() * frame_aperture.aperture_size.x()
+        + frame_aperture.aperture_size.y() * frame_aperture.aperture_size.y())
+    .sqrt();
 
     internal_focal_to_fov(
         focal_length * crop_factor.unwrap_or(1.0),
@@ -78,9 +78,9 @@ pub fn fov_to_focal_length(
     magnification: f32,
     lens_type: FishLens,
 ) -> f32 {
-    let frame_size = (frame_aperture.aperture_size_x * frame_aperture.aperture_size_x
-        + frame_aperture.aperture_size_y * frame_aperture.aperture_size_y)
-        .sqrt();
+    let frame_size = (frame_aperture.aperture_size.x() * frame_aperture.aperture_size.x()
+        + frame_aperture.aperture_size.y() * frame_aperture.aperture_size.y())
+    .sqrt();
 
     let focal_length = match lens_type {
         FishLens::Rectilinear => {
