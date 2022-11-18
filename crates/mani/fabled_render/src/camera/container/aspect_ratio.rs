@@ -21,6 +21,7 @@ impl AspectRatio {
         let horizontal = horizontal.max(1.0);
         let vertical = vertical.max(1.0);
 
+
         Self {
             horizontal,
             vertical,

@@ -6,23 +6,13 @@ use fabled_math::vector_math::{cross, dot, normalize};
 
 use crate::camera::{ClippingPlane, FovAxis, Oblique, Orthographic, Perspective, ViewPort};
 
-#[derive(Copy, Clone, Default)]
-pub struct MatrixDescriptor {
-    pub projection: Matrix4x4,
-    pub view: Matrix4x4,
-    pub model: Matrix4x4,
-}
-
-// todo re-look at.
 pub fn project(
     target: Vector3,
     viewport: ViewPort,
-    matrix_descriptor: MatrixDescriptor,
+    model_view_projection: Matrix4x4,
 ) -> Vector3 {
-    let t_mvp_target_vector = matrix_descriptor.projection
-        * matrix_descriptor.view
-        * matrix_descriptor.model
-        * Vector4::set(target.x(), target.y(), target.z(), 1.0);
+    let t_mvp_target_vector =
+        model_view_projection * Vector4::set(target.x(), target.y(), target.z(), 1.0);
 
     let mvp_target_scalar_rcp = 1.0 / t_mvp_target_vector.w();
 
@@ -45,16 +35,12 @@ pub fn project(
     )
 }
 
-
-// todo re-look at.
 pub fn unproject(
     target: Vector3,
     viewport: ViewPort,
-    matrix_descriptor: MatrixDescriptor,
+    model_view_projection: Matrix4x4,
 ) -> Vector3 {
-    let matrix = inverse_mat4(
-        matrix_descriptor.projection * (matrix_descriptor.view * matrix_descriptor.model),
-    );
+    let inverse_mvp = inverse_mat4(model_view_projection, );
 
     let x = target.x() - viewport.x;
     let x_mul_two = x + x;
@@ -65,11 +51,16 @@ pub fn unproject(
     let depth_difference = (viewport.max_depth - viewport.min_depth).recip();
 
     let z_mul_depth_diff = z * depth_difference;
+    let x_two_half_width = x_mul_two / viewport.w;
+    let y_two_half_height = y_mul_two / viewport.h;
 
-    let vector = matrix
+    let vector_x = x_two_half_width - 1.0;
+    let vector_y = -(y_two_half_height - 1.0);
+
+    let vector = inverse_mvp
         * Vector4::set(
-            (x_mul_two / viewport.w) - 1.0,
-            -((y_mul_two / viewport.h) - 1.0),
+            vector_x,
+            vector_y,
             z_mul_depth_diff,
             1.0,
         );
@@ -186,7 +177,31 @@ pub fn compute_infinite_perspective_matrix(
     )
 }
 
-// todo infinite reverse projection rhs
+pub fn perspective_infinite_reverse_projection(perspective: Perspective, clipping_plane: ClippingPlane) -> Matrix4x4{
+    let mut w = 0.0;
+    let mut h = 0.0;
+
+    let half_fov = perspective.fov.radian * 0.5;
+    let f = clipping_plane.near * half_fov.tan();
+
+    match perspective.fov.axis {
+        FovAxis::Horizontal => {
+            w = f;
+            h = f * perspective.aspect.get_aspect();
+        }
+        FovAxis::Vertical => {
+            w = f / perspective.aspect.get_aspect();
+            h = f;
+        }
+    }
+
+    Matrix4x4::set(
+        Vector4::set(w, 0.0, 0.0, 0.0),
+        Vector4::set(0.0, h, 0.0, 0.0),
+        Vector4::set(0.0, 0.0, 0.0, -1.0),
+        Vector4::set(0.0, 0.0, clipping_plane.near, 0.0)
+    )
+}
 
 pub fn compute_orthographic_matrix(
     orthographic: Orthographic,
