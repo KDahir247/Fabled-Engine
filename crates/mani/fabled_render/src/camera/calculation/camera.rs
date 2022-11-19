@@ -1,10 +1,10 @@
 use fabled_math::{Matrix4x4, Quaternion, Vector3, Vector4};
 
-use fabled_math::matrix4x4_math::{compose_trs_mat4, from_translation_mat4, inverse_mat4};
-use fabled_math::quaternion_math::{forward_vec3, inverse_quat};
+use fabled_math::matrix4x4_math::{inverse_mat4};
+use fabled_math::quaternion_math::{forward_vec3};
 use fabled_math::vector_math::{cross, dot, normalize};
 
-use crate::camera::{ClippingPlane, FovAxis, Oblique, Orthographic, Perspective, ViewPort};
+use crate::camera::{FovAxis, Oblique, Orthographic, Perspective, ViewPort};
 
 pub fn project(
     target: Vector3,
@@ -102,16 +102,16 @@ pub fn compute_look_at_matrix(translation: Vector3, rotation: Quaternion) -> Mat
 }
 
 #[rustfmt::skip]
-pub fn compute_perspective_matrix(perspective: Perspective, clipping_plane : ClippingPlane) -> Matrix4x4{
+pub fn compute_perspective_matrix(perspective: Perspective) -> Matrix4x4{
     let mut h = 0.0;
     let mut w = 0.0;
     
-    let inv_near_min_far = (clipping_plane.near - clipping_plane.far).recip();
+    let inv_near_min_far = (perspective.depth.near - perspective.depth.far).recip();
 
     let hal_fov = perspective.fov.radian * 0.5;
-    let r = clipping_plane.far * inv_near_min_far;
-    let d = r * clipping_plane.near;
-    let s =hal_fov.tan() * clipping_plane.near;
+    let r = perspective.depth.far * inv_near_min_far;
+    let d = r * perspective.depth.near;
+    let s =hal_fov.tan() * perspective.depth.near;
 
     let aspect_ratio = perspective.aspect.get_aspect();
     
@@ -134,15 +134,12 @@ pub fn compute_perspective_matrix(perspective: Perspective, clipping_plane : Cli
     )
 }
 
-pub fn compute_infinite_perspective_matrix(
-    perspective: Perspective,
-    clipping_plane: ClippingPlane,
-) -> Matrix4x4 {
+pub fn compute_infinite_perspective_matrix(perspective: Perspective) -> Matrix4x4 {
     let mut w = 0.0;
     let mut h = 0.0;
 
     let half_fov = perspective.fov.radian * 0.5;
-    let f = clipping_plane.near * half_fov.tan();
+    let f = perspective.depth.near * half_fov.tan();
 
     match perspective.fov.axis {
         FovAxis::Horizontal => {
@@ -159,16 +156,16 @@ pub fn compute_infinite_perspective_matrix(
         Vector4::set(w, 0.0, 0.0, 0.0),
         Vector4::set(0.0, h, 0.0, 0.0),
         Vector4::set(0.0, 0.0, -1.0, -1.0),
-        Vector4::set(0.0, 0.0, -clipping_plane.near, 0.0),
+        Vector4::set(0.0, 0.0, -perspective.depth.near, 0.0),
     )
 }
 
-pub fn perspective_infinite_reverse_projection(perspective: Perspective, clipping_plane: ClippingPlane) -> Matrix4x4{
+pub fn perspective_infinite_reverse_projection(perspective: Perspective) -> Matrix4x4{
     let mut w = 0.0;
     let mut h = 0.0;
 
     let half_fov = perspective.fov.radian * 0.5;
-    let f = clipping_plane.near * half_fov.tan();
+    let f = perspective.depth.near * half_fov.tan();
 
     match perspective.fov.axis {
         FovAxis::Horizontal => {
@@ -185,15 +182,12 @@ pub fn perspective_infinite_reverse_projection(perspective: Perspective, clippin
         Vector4::set(w, 0.0, 0.0, 0.0),
         Vector4::set(0.0, h, 0.0, 0.0),
         Vector4::set(0.0, 0.0, 0.0, -1.0),
-        Vector4::set(0.0, 0.0, clipping_plane.near, 0.0)
+        Vector4::set(0.0, 0.0, perspective.depth.near, 0.0)
     )
 }
 
-pub fn compute_orthographic_matrix(
-    orthographic: Orthographic,
-    clipping_plane: ClippingPlane,
-) -> Matrix4x4 {
-    let neg_near_plane_min_far_plane_rcp = -(clipping_plane.near - clipping_plane.far).recip();
+pub fn compute_orthographic_matrix(orthographic: Orthographic) -> Matrix4x4 {
+    let neg_near_plane_min_far_plane_rcp = -(orthographic.depth.near - orthographic.depth.far).recip();
 
     let right_min_left = orthographic.right - orthographic.left;
     let right_min_left_mul_2 = right_min_left + right_min_left;
@@ -205,7 +199,7 @@ pub fn compute_orthographic_matrix(
 
     let w_x = right_plus_left * right_min_left;
     let w_y = top_plus_bot * top_min_bot;
-    let w_z = clipping_plane.far * neg_near_plane_min_far_plane_rcp;
+    let w_z = orthographic.depth.far * neg_near_plane_min_far_plane_rcp;
 
     Matrix4x4::set(
         Vector4::set(right_min_left_mul_2, 0.0, 0.0, 0.0),
@@ -217,10 +211,9 @@ pub fn compute_orthographic_matrix(
 
 
 #[rustfmt::skip]
-pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique
-: Oblique, clipping_plane: ClippingPlane) -> Matrix4x4{
+pub fn compute_oblique_projection_matrix(orthographic : Orthographic, oblique: Oblique) -> Matrix4x4{
 
-    let projection = compute_orthographic_matrix(orthographic, clipping_plane);
+    let projection = compute_orthographic_matrix(orthographic);
 
     let ortho_top_rcp = orthographic.top.recip();
     

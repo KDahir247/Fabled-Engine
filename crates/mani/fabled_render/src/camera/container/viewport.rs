@@ -1,81 +1,44 @@
-// Will be convert to a Rect when implemented in the math module
-#[derive(Debug, Copy, Clone, PartialEq)]
-#[repr(align(16))]
+use crate::camera::ClippingPlane;
+use fabled_math::Vector4;
+use std::fmt::{Display, Formatter};
+
+#[derive(Copy, Clone, PartialEq)]
 pub struct ViewPort {
-    pub x: f32,
-    pub y: f32,
-    pub w: f32,
-    pub h: f32,
-    pub min_depth: f32,
-    pub max_depth: f32,
+    pub rect: Vector4,
+    pub depth: ClippingPlane,
 }
 
 impl Default for ViewPort {
     fn default() -> Self {
         Self {
-            x: 0.0,
-            y: 0.0,
-            w: 1.0,
-            h: 1.0,
-            min_depth: 0.0,
-            max_depth: 1.0,
+            rect: Vector4::set(0.0, 0.0, 1.0, 1.0),
+            depth: Default::default(),
         }
     }
 }
 
 impl ViewPort {
-    pub fn new(
-        x: f32,
-        y: f32,
-        width: f32,
-        height: f32,
-        min_depth: f32,
-        max_depth: f32,
-    ) -> ViewPort {
+    pub fn new(rect: Vector4, min_depth: f32, max_depth: f32) -> ViewPort {
+        let near_depth = min_depth.max(0.01);
         let max_depth = max_depth.max(min_depth + 0.1);
 
         Self {
-            x,
-            y,
-            w: width,
-            h: height,
-            min_depth,
-            max_depth,
+            rect,
+            depth: ClippingPlane::new(max_depth, near_depth),
         }
     }
 }
 
-#[cfg(test)]
-mod viewport_tests {
-    use crate::camera::ViewPort;
-
-    #[test]
-    fn invalid_viewport() {
-        let viewport = ViewPort::new(0.0, 0.0, 1.0, 1.0, 1.0, 0.0);
-        println!(
-            "min depth {} max depth {}",
-            viewport.min_depth, viewport.max_depth
-        );
-        assert!(viewport.max_depth > viewport.min_depth);
-    }
-
-    #[test]
-    fn invalid_ignore_viewport() {
-        let viewport = ViewPort {
-            x: 0.0,
-            y: 0.0,
-            w: 1.0,
-            h: 1.0,
-            min_depth: 1.0,
-            max_depth: 0.1,
-        };
-
-        assert!(viewport.min_depth.gt(&viewport.max_depth));
-    }
-
-    #[test]
-    fn correct_calculation() {
-        let viewport = ViewPort::default();
-        print!("{:?}", viewport);
+impl Display for ViewPort {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Viewport(\n\tx : {}, y : {}\n\twidth : {}, height : {}\n)\n{}",
+            self.rect.x(),
+            self.rect.y(),
+            self.rect.z(),
+            self.rect.w(),
+            self.depth,
+        )
     }
 }

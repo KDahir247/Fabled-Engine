@@ -1,4 +1,6 @@
 use crate::camera::FStop;
+use std::fmt::{Display, Formatter};
+
 // longer shutter speed result in blurrier image.
 // shorter shutter speed will capture fasting-moving action and eliminate motion
 // blur
@@ -7,8 +9,7 @@ use crate::camera::FStop;
 // exposure on sensor. While having a slow shutter speed will increase the
 // exposure on sensor depending on how slow the shutter speed is.
 
-
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Shutter {
     pub speed: f32,
 }
@@ -32,6 +33,11 @@ impl Shutter {
     }
 }
 
+impl Display for Shutter {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Shutter(speed : {})", self.speed)
+    }
+}
 
 #[cfg(test)]
 mod shutter_test {
