@@ -1,5 +1,6 @@
 use crate::camera::{
-    focal_length_to_directional_fov, AnamorphicLen, AspectRatio, FovScalingAlgorithm,
+    focal_length_to_directional_fov, AnamorphicDescriptor, AnamorphicLen, AspectRatio,
+    AspectRatioMode, FovScalingAlgorithm,
 };
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -37,78 +38,73 @@ impl Fov {
         }
     }
 
-    pub fn new_with_algorithm(horizontal_radian: f32, fov_algorithm: FovScalingAlgorithm) -> Self {
+    pub fn new_with_algorithm(
+        horizontal_radian: f32,
+        fov_algorithm: FovScalingAlgorithm,
+    ) -> (Fov, AspectRatio) {
         match fov_algorithm {
             FovScalingAlgorithm::HorizontalPlus {
                 target_aspect,
                 current_aspect,
-            } => Self::horizontal_plus_fov(horizontal_radian, target_aspect, current_aspect),
+            } => {
+                let horizontal_plus_fov =
+                    Self::horizontal_plus_fov(horizontal_radian, target_aspect, current_aspect);
+
+                (horizontal_plus_fov, current_aspect)
+            }
             FovScalingAlgorithm::Anamorphic {
                 len_type,
                 frame_aperture,
                 anamorphic_descriptor,
             } => {
-                let focal_length_horizontal = Self::anamorphic_fov(
-                    anamorphic_descriptor.focal_length,
-                    anamorphic_descriptor.crop_factor,
-                    anamorphic_descriptor.focal_reducer,
-                    anamorphic_descriptor.anamorphic_adapter,
-                    anamorphic_descriptor.sensor_aspect_ratio,
-                    anamorphic_descriptor.single_focus_solution,
-                    anamorphic_descriptor.focus_distance,
-                );
-
+                let (focal_length_horizontal, aspect_w) =
+                    Self::anamorphic_fov(anamorphic_descriptor);
 
                 let (horizontal_fov, _horizontal_magnification) = focal_length_to_directional_fov(
-                    focal_length_horizontal,
+                    focal_length_horizontal.0,
                     frame_aperture,
                     Some(anamorphic_descriptor.focus_distance),
                     anamorphic_descriptor.crop_factor,
                     len_type,
                 );
 
-                Fov {
+                let res_fov = Fov {
                     radian: horizontal_fov,
                     axis: FovAxis::Horizontal,
-                }
+                };
+
+                let res_aspect = AspectRatio::new(aspect_w, 1.0, AspectRatioMode::WindowSize);
+
+                (res_fov, res_aspect)
             }
-        }
-
-
-        Self {
-            radian: horizontal_radian,
-            axis: FovAxis::Horizontal,
         }
     }
 
-    fn anamorphic_fov(
-        focal_length: f32,
-        crop_factor: Option<f32>,
-        focal_reducer: Option<f32>,
-        adapter: f32,
-        sensor_aspect_ratio: AspectRatio,
-        solution: AnamorphicLen,
-        focus_distance: f32,
-    ) -> f32 {
-        let clamped_focus_distance = focus_distance.clamp(0.0, 100.0);
+    fn anamorphic_fov(anamorphic_descriptor: AnamorphicDescriptor) -> (f32, f32) {
+        let clamped_focus_distance = anamorphic_descriptor.focus_distance.clamp(0.0, 100.0);
 
-        let crop_factor = crop_factor.unwrap_or(1.0);
-        let focal_reducer = focal_reducer.unwrap_or(1.0);
+        let crop_factor = anamorphic_descriptor.crop_factor.unwrap_or(1.0);
+        let focal_reducer = anamorphic_descriptor.focal_reducer.unwrap_or(1.0);
 
         let rev_flip_focus_distance = (clamped_focus_distance - 100.0) * 0.1;
-        let rev_aspect_ratio_rcp = (sensor_aspect_ratio.get_aspect() / 1.78).recip();
+        let rev_aspect_ratio_rcp =
+            (anamorphic_descriptor.sensor_aspect_ratio.get_aspect() / 1.78).recip();
 
 
-        let square_fit_wide = (1.0 - solution.0) * rev_flip_focus_distance.powf(2.0);
+        let square_fit_wide =
+            (1.0 - anamorphic_descriptor.solution.0) * rev_flip_focus_distance.powf(2.0);
 
-        let adapter_rcp = adapter.recip();
+        let adapter_rcp = anamorphic_descriptor.adapter.recip();
 
-        let mut horizontal_focal_length =
-            ((crop_factor * focal_reducer) * (focal_length * adapter_rcp)) * rev_aspect_ratio_rcp;
+        let mut horizontal_focal_length = ((crop_factor * focal_reducer)
+            * (anamorphic_descriptor.focal_length * adapter_rcp))
+            * rev_aspect_ratio_rcp;
 
         horizontal_focal_length *= 1.0 - square_fit_wide;
 
-        horizontal_focal_length
+        let aspect_ratio =
+            anamorphic_descriptor.sensor_aspect_ratio.get_aspect() * anamorphic_descriptor.adapter;
+        (horizontal_focal_length, aspect_ratio)
     }
 
     fn horizontal_plus_fov(
