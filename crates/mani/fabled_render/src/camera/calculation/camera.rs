@@ -101,20 +101,6 @@ pub fn compute_look_at_matrix(translation: Vector3, rotation: Quaternion) -> Mat
     )
 }
 
-#[deprecated(note = "Calculate arc ball matrix function has not been
-tested.")]
-pub fn compute_arc_ball_matrix(
-    translation: Vector3,
-    rotation: Quaternion,
-    center: Vector3,
-) -> Matrix4x4 {
-    let transformation_matrix =
-        compose_trs_mat4(-translation, inverse_quat(rotation), Vector3::ONE);
-    let translation_to_center = from_translation_mat4(-center);
-
-    transformation_matrix * translation_to_center
-}
-
 #[rustfmt::skip]
 pub fn compute_perspective_matrix(perspective: Perspective, clipping_plane : ClippingPlane) -> Matrix4x4{
     let mut h = 0.0;
