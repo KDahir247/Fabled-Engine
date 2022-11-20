@@ -27,5 +27,7 @@ impl Display for FishLens {
             FishLens::EquisolidAngle => "EquisolidAngle",
             FishLens::Orthographic => "Orthographic",
         };
+
+        f.write_str(string_repr)
     }
 }

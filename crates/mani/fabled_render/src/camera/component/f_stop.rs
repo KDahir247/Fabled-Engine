@@ -10,6 +10,7 @@
 // the lower the F-stop the more blurry the background will be. This will affect
 // Depth of Field
 
+use fabled_component::{Component, Modification};
 use std::fmt::{Display, Formatter};
 
 #[non_exhaustive]
@@ -20,14 +21,14 @@ pub struct FStop {
 }
 
 impl Default for FStop {
-    fn default() -> Self {
+    fn default() -> FStop {
         FStop::F4_STOP
     }
 }
 
 impl FStop {
-    pub fn new(f_number: f32, f_step: i32) -> Self {
-        Self {
+    pub const fn new(f_number: f32, f_step: i32) -> FStop {
+        FStop {
             f_stop: f_number,
             step: f_step,
         }
@@ -100,6 +101,10 @@ impl FStop {
         f_stop: 32.0,
         step: 10,
     };
+}
+
+impl Component for FStop {
+    type Tracking = Modification;
 }
 
 impl Display for FStop {

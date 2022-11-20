@@ -13,7 +13,7 @@ pub fn compute_saturation_based_exposure(
         .recip();
 
     let f_stop_sqr = aperture.f_stop * aperture.f_stop;
-    let denominator_rcp = (shutter.speed * iso.arithmetic_speed).recip();
+    let denominator_rcp = (shutter.speed_second * iso.arithmetic_speed).recip();
 
     let sat_speed_rate = (78.0 * vignetting_rcp) * (f_stop_sqr * denominator_rcp);
 
@@ -38,7 +38,7 @@ pub fn compute_standard_based_exposure(
 
     let f_number_sqr = aperture.f_stop * aperture.f_stop;
 
-    let denominator_rcp = (shutter.speed * iso.arithmetic_speed).recip();
+    let denominator_rcp = (shutter.speed_second * iso.arithmetic_speed).recip();
 
     let stan_speed_rate = (10.0 * vignetting_rcp) * (f_number_sqr * denominator_rcp);
 

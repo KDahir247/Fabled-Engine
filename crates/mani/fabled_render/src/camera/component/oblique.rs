@@ -1,8 +1,11 @@
 // vertical_position get the vertical position relative to angle_rad
 // depth_offset get the z position relative to angle_rad
 
+use fabled_component::{Component, Untracked};
 use fabled_math::Vector3;
 use std::fmt::{Display, Formatter};
+
+// Optional add component if camera is Orthographic.
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct Oblique {
@@ -11,15 +14,15 @@ pub struct Oblique {
 }
 
 impl Default for Oblique {
-    fn default() -> Self {
-        Self {
+    fn default() -> Oblique {
+        Oblique {
             value: Vector3::set(std::f32::consts::FRAC_PI_4, 0.05, 10.0),
         }
     }
 }
 
 impl Oblique {
-    pub fn new(angle_degree: f32, vertical_position: f32, depth_offset: f32) -> Self {
+    pub fn new(angle_degree: f32, vertical_position: f32, depth_offset: f32) -> Oblique {
         let angle = angle_degree.clamp(-180.0, 180.0);
         let vertical = vertical_position.clamp(-1.0, 1.0);
 
@@ -27,6 +30,10 @@ impl Oblique {
             value: Vector3::set(angle.to_radians(), vertical, depth_offset),
         }
     }
+}
+
+impl Component for Oblique {
+    type Tracking = Untracked;
 }
 
 impl Display for Oblique {

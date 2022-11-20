@@ -9,7 +9,6 @@ pub enum FovScalingAlgorithm {
     Anamorphic {
         len_type: FishLens,
         frame_aperture: Aperture,
-        //
         anamorphic_descriptor: AnamorphicDescriptor,
     },
 }

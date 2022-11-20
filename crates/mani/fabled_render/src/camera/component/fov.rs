@@ -1,10 +1,12 @@
 use crate::camera::{
-    focal_length_to_directional_fov, AnamorphicDescriptor, AspectRatio, AspectRatioMode,
-    FovScalingAlgorithm,
+    focal_length_to_directional_fov, AnamorphicDescriptor, AspectRatio, FovScalingAlgorithm,
 };
+use fabled_component::{Component, Modification};
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+// Optional add component if camera is Perspective.
+
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum FovAxis {
     Horizontal = 0,
     Vertical = 1,
@@ -27,15 +29,15 @@ impl Display for FovAxis {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Fov {
     pub radian: f32,
     pub axis: FovAxis,
 }
 
 impl Default for Fov {
-    fn default() -> Self {
-        Self {
+    fn default() -> Fov {
+        Fov {
             radian: 60.0f32.to_radians(),
             axis: Default::default(),
         }
@@ -43,7 +45,7 @@ impl Default for Fov {
 }
 
 impl Fov {
-    pub fn new(fov_radian: f32, fov_axis: FovAxis) -> Self {
+    pub const fn new(fov_radian: f32, fov_axis: FovAxis) -> Fov {
         Fov {
             radian: fov_radian,
             axis: fov_axis,
@@ -60,7 +62,7 @@ impl Fov {
                 current_aspect,
             } => {
                 let horizontal_plus_fov =
-                    Self::horizontal_plus_fov(horizontal_radian, target_aspect, current_aspect);
+                    Fov::horizontal_plus_fov(horizontal_radian, target_aspect, current_aspect);
 
                 (horizontal_plus_fov, current_aspect)
             }
@@ -70,7 +72,7 @@ impl Fov {
                 anamorphic_descriptor,
             } => {
                 let (focal_length_horizontal, aspect_w) =
-                    Self::anamorphic_fov(anamorphic_descriptor);
+                    Fov::anamorphic_fov(anamorphic_descriptor);
 
                 let (horizontal_fov, _horizontal_magnification) = focal_length_to_directional_fov(
                     focal_length_horizontal.0,
@@ -85,7 +87,7 @@ impl Fov {
                     axis: FovAxis::Horizontal,
                 };
 
-                let res_aspect = AspectRatio::new(aspect_w, 1.0, AspectRatioMode::WindowSize);
+                let res_aspect = AspectRatio::new(aspect_w, 1.0);
 
                 (res_fov, res_aspect)
             }
@@ -154,10 +156,13 @@ impl Fov {
                 }
             }
 
-
             self.radian = 2.0 * ((self.radian / 2.0).tan() * axis_instructions).atan();
         }
     }
+}
+
+impl Component for Fov {
+    type Tracking = Modification;
 }
 
 impl Display for Fov {

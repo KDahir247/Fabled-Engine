@@ -1,4 +1,5 @@
 use crate::camera::{logarithmic_to_arithmetic_speed, ISOSpeedUnit, ISO_ARITHMETIC_STANDARD};
+use fabled_component::{Component, Modification};
 use std::fmt::{Display, Formatter};
 // The higher the film speed number (ISO Speed), the greater the film
 // sensitivity to light. Having a low film speed number will result in the film
@@ -14,27 +15,27 @@ pub struct ISOSpeed {
 }
 
 impl Default for ISOSpeed {
-    fn default() -> Self {
-        Self {
+    fn default() -> ISOSpeed {
+        ISOSpeed {
             arithmetic_speed: 100.0,
         }
     }
 }
 
 impl ISOSpeed {
-    pub fn new(iso_speed: f32, unit_type: ISOSpeedUnit) -> Self {
+    pub fn new(iso_speed: f32, unit_type: ISOSpeedUnit) -> ISOSpeed {
         let mut iso_speed = iso_speed;
 
         if let ISOSpeedUnit::Logarithmic = unit_type {
             iso_speed = logarithmic_to_arithmetic_speed(iso_speed);
         };
 
-        Self {
+        ISOSpeed {
             arithmetic_speed: iso_speed,
         }
     }
 
-    pub fn new_standard(iso_speed: f32, unit_type: ISOSpeedUnit) -> Self {
+    pub fn new_standard(iso_speed: f32, unit_type: ISOSpeedUnit) -> ISOSpeed {
         let mut iso_speed = iso_speed;
 
 
@@ -46,7 +47,7 @@ impl ISOSpeed {
             iso_speed = 100.0
         };
 
-        Self {
+        ISOSpeed {
             arithmetic_speed: iso_speed,
         }
     }
@@ -54,6 +55,10 @@ impl ISOSpeed {
     pub fn is_standard(&self) -> bool {
         ISO_ARITHMETIC_STANDARD.contains(&self.arithmetic_speed)
     }
+}
+
+impl Component for ISOSpeed {
+    type Tracking = Modification;
 }
 
 impl Display for ISOSpeed {

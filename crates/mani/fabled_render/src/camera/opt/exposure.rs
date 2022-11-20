@@ -1,4 +1,4 @@
-use crate::camera::{FStop, ISOSpeed, ISOSpeedUnit, Shutter, LENS_VIGNETTING_ATTENUATION};
+use crate::camera::{FStop, ISOSpeed, Shutter, LENS_VIGNETTING_ATTENUATION};
 
 // N is the relative aperture (f-number)
 // t is the exposure time ("shutter speed") in seconds
@@ -6,7 +6,7 @@ use crate::camera::{FStop, ISOSpeed, ISOSpeedUnit, Shutter, LENS_VIGNETTING_ATTE
 // S is the ISO arithmetic speed
 // K is the reflected-light meter calibration constant ISO 2720:1974 recommended
 // value 10.6 and 13.4
-// 12.5 (Canon, Nikon, Sekonic) and 14.0 (Minolta, Kenko, Pentax)
+// 12.5 (Canon, Nikon, Sekonic) and 14.0 (Minolta, Ken-ko, Pentax)
 
 // Only take into account Aperture and Shutter speed not sensitivity.
 // EV = log2 (LS / K)
@@ -17,7 +17,7 @@ pub fn compute_exposure_value(f_stop: FStop, shutter: Option<Shutter>) -> f32 {
 
     let f_number = f_stop.f_stop;
 
-    f32::log2(f_number * f_number / shutter.speed)
+    f32::log2(f_number * f_number / shutter.speed_second)
 }
 
 pub fn compute_ev_100_with_camera_properties(
@@ -27,7 +27,7 @@ pub fn compute_ev_100_with_camera_properties(
 ) -> f32 {
     let f_stop_sqr = aperture.f_stop * aperture.f_stop;
 
-    ((f_stop_sqr * 100.0) / (shutter.speed * iso_speed.arithmetic_speed)).log2()
+    ((f_stop_sqr * 100.0) / (shutter.speed_second * iso_speed.arithmetic_speed)).log2()
 }
 
 // We want to compute exposure value with Sensitivity.
@@ -86,7 +86,8 @@ pub fn compute_exposure_normalization_factor(
     let len_attenuation = len_attenuation.unwrap_or(LENS_VIGNETTING_ATTENUATION);
 
     // todo since we specify ev100 in parameter we should conform iso to iso 100
-    //  too so (78.9 / (len_atten * iso_speed.arithmetic_speed should be 1.2)).
+    //  too so (78.9 / (len_attenuation * iso_speed.arithmetic_speed should be
+    // 1.2)).
 
     1.0 / (2.0f32.powf(ev100) * (78.0 / (len_attenuation * iso_speed.arithmetic_speed)))
 }

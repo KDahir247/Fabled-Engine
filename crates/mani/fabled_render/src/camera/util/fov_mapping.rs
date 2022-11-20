@@ -14,7 +14,7 @@ pub fn focal_length_to_fov(
     crop_factor: Option<f32>,
     lens_type: FishLens,
 ) -> (Fov, f32) {
-    let frame_size = (frame_aperture.aperture_size.x() * frame_aperture.aperture_size.x()).sqrt();
+    let frame_size = (frame_aperture.aperture_x_mm * frame_aperture.aperture_x_mm).sqrt();
 
     let crop_focal_length = focal_length * crop_factor.unwrap_or(1.0);
 
@@ -37,9 +37,9 @@ pub fn focal_length_to_directional_fov(
     crop_factor: Option<f32>,
     lens_type: FishLens,
 ) -> (f32, f32) {
-    let frame_size = (frame_aperture.aperture_size.x() * frame_aperture.aperture_size.x()
-        + frame_aperture.aperture_size.y() * frame_aperture.aperture_size.y())
-    .sqrt();
+    let frame_size = (frame_aperture.aperture_x_mm * frame_aperture.aperture_x_mm
+        + frame_aperture.aperture_y_mm * frame_aperture.aperture_y_mm)
+        .sqrt();
 
     internal_focal_to_fov(
         focal_length * crop_factor.unwrap_or(1.0),
@@ -78,9 +78,9 @@ pub fn fov_to_focal_length(
     magnification: f32,
     lens_type: FishLens,
 ) -> f32 {
-    let frame_size = (frame_aperture.aperture_size.x() * frame_aperture.aperture_size.x()
-        + frame_aperture.aperture_size.y() * frame_aperture.aperture_size.y())
-    .sqrt();
+    let frame_size = (frame_aperture.aperture_x_mm * frame_aperture.aperture_x_mm
+        + frame_aperture.aperture_y_mm * frame_aperture.aperture_y_mm)
+        .sqrt();
 
     let focal_length = match lens_type {
         FishLens::Rectilinear => {
@@ -399,7 +399,7 @@ mod len_mapping {
         const ERROR_THRESHOLD: f32 = 0.000002;
 
         // circular APS-C (r = 8.4 mm)
-        // Sterographic 4.2
+        // Stereographic 4.2
         // Equidistant 5.3476057
         // EquisolidAngle 5.939697
         // Orthographic 8.4
@@ -423,7 +423,7 @@ mod len_mapping {
         }
 
         // circular 135 (r = 12.0 mm)
-        // Sterographic 6.0
+        // Stereographic 6.0
         // Equidistant 7.639437
         // EquisolidAngle 8.485282
         // Orthographic 12.0
@@ -446,7 +446,7 @@ mod len_mapping {
         }
 
         // circular 6x6 (r = 28.0)
-        // Sterographic 14.0
+        // Stereographic 14.0
         // Equidistant 17.825354
         // EquisolidAngle 19.79899
         // Orthographic 28.0
@@ -468,7 +468,7 @@ mod len_mapping {
         }
 
         // full frame APS-C (r = 15.1 mm)
-        // Sterographic 7.55
+        // Stereographic 7.55
         // Equidistant 9.612959
         // EquisolidAngle 10.677313
         // Orthographic 15.1
@@ -491,7 +491,7 @@ mod len_mapping {
         }
 
         // full frame 135 (r = 21.7 mm)
-        // Sterographic 10.85
+        // Stereographic 10.85
         // Equidistant 13.81465
         // EquisolidAngle 15.344218
         // Orthographic 21.7
@@ -514,7 +514,7 @@ mod len_mapping {
         }
 
         // full frame 6x6 (r = 39.6)
-        // Sterographic 19.8
+        // Stereographic 19.8
         // Equidistant 25.210142
         // EquisolidAngle 28.001429
         // Orthographic 39.6

@@ -15,7 +15,7 @@ pub fn compute_iso_speed(aperture: FStop, shutter: Shutter, ev100: f32) -> ISOSp
 
     let two_pow_ev = 2.0f32.powf(ev100);
 
-    let iso_speed = (f_stop_sqr * 100.0) / (shutter.speed * two_pow_ev);
+    let iso_speed = (f_stop_sqr * 100.0) / (shutter.speed_second * two_pow_ev);
 
     ISOSpeed::new(iso_speed, ISOSpeedUnit::Arithmetic)
 }
@@ -34,7 +34,7 @@ pub fn apply_aperture_priority(
 
     let ev_diff = target_ev - compute_ev_100_with_camera_properties(aperture, shutter, iso);
 
-    let shutter_speed_exact = (shutter.speed * 2.0f32.powf(-ev_diff)).clamp(
+    let shutter_speed_exact = (shutter.speed_second * 2.0f32.powf(-ev_diff)).clamp(
         SHUTTER_SPEED_STANDARD[0],
         SHUTTER_SPEED_STANDARD[SHUTTER_SPEED_STANDARD.len() - 1],
     );
@@ -87,7 +87,7 @@ pub fn compute_camera_properties(focal_length: f32, target_ev: f32) -> (FStop, S
 
     let ev_diff = target_ev - compute_ev_100_with_camera_properties(res_aperture, shutter, res_iso);
 
-    let res_shutter_speed = shutter.speed
+    let res_shutter_speed = shutter.speed_second
         * 2.0f32.powf(-ev_diff).clamp(
             SHUTTER_SPEED_STANDARD[0],
             SHUTTER_SPEED_STANDARD[SHUTTER_SPEED_STANDARD.len() - 1],
