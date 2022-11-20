@@ -1,6 +1,7 @@
 use crate::camera::AspectRatioMode;
+use std::fmt::{Display, Formatter};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct AspectRatio {
     pub horizontal: f32,
     pub vertical: f32,
@@ -30,6 +31,16 @@ impl AspectRatio {
 
     pub fn get_aspect(&self) -> f32 {
         self.horizontal / self.vertical
+    }
+}
+
+impl Display for AspectRatio {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "AspectRatio(horizontal : {}, vertical : {})",
+            self.horizontal, self.vertical
+        )
     }
 }
 

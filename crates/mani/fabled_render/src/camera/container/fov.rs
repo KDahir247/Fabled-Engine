@@ -1,7 +1,8 @@
 use crate::camera::{
-    focal_length_to_directional_fov, AnamorphicDescriptor, AnamorphicLen, AspectRatio,
-    AspectRatioMode, FovScalingAlgorithm,
+    focal_length_to_directional_fov, AnamorphicDescriptor, AspectRatio, AspectRatioMode,
+    FovScalingAlgorithm,
 };
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum FovAxis {
@@ -12,6 +13,17 @@ pub enum FovAxis {
 impl Default for FovAxis {
     fn default() -> Self {
         Self::Vertical
+    }
+}
+
+impl Display for FovAxis {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let string_repr = match self {
+            FovAxis::Horizontal => "Horizontal",
+            FovAxis::Vertical => "Vertical",
+        };
+
+        f.write_str(string_repr)
     }
 }
 
@@ -108,12 +120,12 @@ impl Fov {
     }
 
     fn horizontal_plus_fov(
-        target_fovh_rad: f32,
+        target_fov_h_rad: f32,
         target_aspect: AspectRatio,
         current_aspect: AspectRatio,
     ) -> Fov {
         let mut fov_res = Fov {
-            radian: target_fovh_rad,
+            radian: target_fov_h_rad,
             axis: FovAxis::Horizontal,
         };
         fov_res.convert_axis(FovAxis::Vertical, target_aspect);
@@ -145,6 +157,16 @@ impl Fov {
 
             self.radian = 2.0 * ((self.radian / 2.0).tan() * axis_instructions).atan();
         }
+    }
+}
+
+impl Display for Fov {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Fov(angle radian : {}, axis : {})",
+            self.radian, self.axis
+        )
     }
 }
 

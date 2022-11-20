@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 #[derive(Copy, Clone, Debug)]
 pub enum FishLens {
     // Normal
@@ -13,5 +15,17 @@ pub enum FishLens {
 impl Default for FishLens {
     fn default() -> Self {
         Self::Rectilinear
+    }
+}
+
+impl Display for FishLens {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let string_repr = match self {
+            FishLens::Rectilinear => "Rectilinear",
+            FishLens::Stereographic => "Stereographic",
+            FishLens::Equidistant => "Equidistant",
+            FishLens::EquisolidAngle => "EquisolidAngle",
+            FishLens::Orthographic => "Orthographic",
+        };
     }
 }

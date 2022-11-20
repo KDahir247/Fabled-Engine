@@ -10,8 +10,10 @@
 // the lower the F-stop the more blurry the background will be. This will affect
 // Depth of Field
 
+use std::fmt::{Display, Formatter};
+
 #[non_exhaustive]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct FStop {
     pub f_stop: f32,
     pub step: i32,
@@ -98,4 +100,14 @@ impl FStop {
         f_stop: 32.0,
         step: 10,
     };
+}
+
+impl Display for FStop {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "FStop(full stop : {}, step : {})",
+            self.f_stop, self.step
+        )
+    }
 }

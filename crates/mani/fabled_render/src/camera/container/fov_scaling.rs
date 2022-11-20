@@ -14,7 +14,7 @@ pub enum FovScalingAlgorithm {
     },
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct AnamorphicDescriptor {
     pub sensor_aspect_ratio: AspectRatio,
     pub single_focus_solution: AnamorphicLen,
@@ -28,7 +28,21 @@ pub struct AnamorphicDescriptor {
     pub focus_distance: f32,
 }
 
-#[derive(Copy, Clone, PartialEq)]
+impl Default for AnamorphicDescriptor {
+    fn default() -> Self {
+        AnamorphicDescriptor {
+            sensor_aspect_ratio: Default::default(),
+            single_focus_solution: Default::default(),
+            crop_factor: None,
+            focal_reducer: Some(0.71),
+            focal_length: 50.0,
+            anamorphic_adapter: 1.5,
+            focus_distance: 50.0,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[non_exhaustive]
 pub struct AnamorphicLen(pub f32);
 
@@ -43,5 +57,11 @@ impl AnamorphicLen {
 impl AnamorphicLen {
     pub const fn custom(val: f32) -> AnamorphicLen {
         AnamorphicLen(val)
+    }
+}
+
+impl Default for AnamorphicLen {
+    fn default() -> Self {
+        AnamorphicLen::NONE
     }
 }

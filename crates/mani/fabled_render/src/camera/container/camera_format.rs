@@ -1,4 +1,6 @@
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+use std::fmt::{Display, Formatter};
+
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum CameraFormat {
     CustomFormat,
     // D1 NTSC,
@@ -77,4 +79,25 @@ pub enum CameraFormat {
     R128x128,
     // User Monitor configuration
     FullScreen,
+}
+
+
+impl Display for CameraFormat {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let camera_fmt = match self {
+            CameraFormat::CustomFormat => "CustomFormat",
+            CameraFormat::D1NTSC => "D1NTSC",
+            CameraFormat::NTSC => "NSTC",
+            CameraFormat::PAL => "PAL",
+            CameraFormat::D1PAL => "D1PAL",
+            CameraFormat::HD => "HD",
+            CameraFormat::R640x480 => "R640x480",
+            CameraFormat::R320x200 => "R320x200",
+            CameraFormat::R320x240 => "R320x240",
+            CameraFormat::R128x128 => "R128x128",
+            CameraFormat::FullScreen => "FullScreen",
+        };
+
+        f.write_str(camera_fmt)
+    }
 }

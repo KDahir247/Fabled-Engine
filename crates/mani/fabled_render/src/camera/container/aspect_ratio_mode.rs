@@ -14,6 +14,7 @@ pub enum AspectRatioMode {
     FixedHeight,
 }
 
+
 #[non_exhaustive]
 pub struct ResolutionCommon(pub Vector2);
 
