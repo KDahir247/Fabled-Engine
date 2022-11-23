@@ -1,6 +1,6 @@
 use crate::camera::ISOSpeed;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum IntensityUnit {
     Lumen,
     Candela,

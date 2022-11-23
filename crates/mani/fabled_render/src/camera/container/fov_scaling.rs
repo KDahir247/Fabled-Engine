@@ -13,7 +13,7 @@ pub enum FovScalingAlgorithm {
     },
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct AnamorphicDescriptor {
     pub sensor_aspect_ratio: AspectRatio,
     pub single_focus_solution: AnamorphicLen,

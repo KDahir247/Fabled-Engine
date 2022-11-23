@@ -273,6 +273,34 @@ pub mod vector_math {
     }
 
     #[inline(always)]
+    pub fn component_gt(simd_vector: std::simd::f32x4, component: f32) -> std::simd::mask32x4 {
+        let component_vector3: std::simd::f32x4 = std::simd::f32x4::from_array([component; 4]);
+
+        simd_vector.simd_gt(component_vector3)
+    }
+
+    #[inline(always)]
+    pub fn component_ge(simd_vector: std::simd::f32x4, component: f32) -> std::simd::mask32x4 {
+        let component_vector3: std::simd::f32x4 = std::simd::f32x4::from_array([component; 4]);
+
+        simd_vector.simd_ge(component_vector3)
+    }
+
+    #[inline(always)]
+    pub fn component_le(simd_vector: std::simd::f32x4, component: f32) -> std::simd::mask32x4 {
+        let component_vector3: std::simd::f32x4 = std::simd::f32x4::from_array([component; 4]);
+
+        simd_vector.simd_le(component_vector3)
+    }
+
+    #[inline(always)]
+    pub fn component_lt(simd_vector: std::simd::f32x4, component: f32) -> std::simd::mask32x4 {
+        let component_vector3: std::simd::f32x4 = std::simd::f32x4::from_array([component; 4]);
+
+        simd_vector.simd_lt(component_vector3)
+    }
+
+    #[inline(always)]
     pub fn component_max(simd_vector: std::simd::f32x4) -> f32 {
         simd_vector.reduce_max()
     }

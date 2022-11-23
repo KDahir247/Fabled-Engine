@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum FishLens {
     // Normal
     Rectilinear,

@@ -75,7 +75,7 @@ impl Fov {
                     Fov::anamorphic_fov(anamorphic_descriptor);
 
                 let (horizontal_fov, _horizontal_magnification) = focal_length_to_directional_fov(
-                    focal_length_horizontal.0,
+                    focal_length_horizontal,
                     frame_aperture,
                     Some(anamorphic_descriptor.focus_distance),
                     anamorphic_descriptor.crop_factor,
@@ -105,10 +105,10 @@ impl Fov {
             (anamorphic_descriptor.sensor_aspect_ratio.get_aspect() / 1.78).recip();
 
 
-        let square_fit_wide =
-            (1.0 - anamorphic_descriptor.solution.0) * rev_flip_focus_distance.powf(2.0);
+        let square_fit_wide = (1.0 - anamorphic_descriptor.single_focus_solution.0)
+            * rev_flip_focus_distance.powf(2.0);
 
-        let adapter_rcp = anamorphic_descriptor.adapter.recip();
+        let adapter_rcp = anamorphic_descriptor.anamorphic_adapter.recip();
 
         let mut horizontal_focal_length = ((crop_factor * focal_reducer)
             * (anamorphic_descriptor.focal_length * adapter_rcp))
@@ -116,8 +116,8 @@ impl Fov {
 
         horizontal_focal_length *= 1.0 - square_fit_wide;
 
-        let aspect_ratio =
-            anamorphic_descriptor.sensor_aspect_ratio.get_aspect() * anamorphic_descriptor.adapter;
+        let aspect_ratio = anamorphic_descriptor.sensor_aspect_ratio.get_aspect()
+            * anamorphic_descriptor.anamorphic_adapter;
         (horizontal_focal_length, aspect_ratio)
     }
 

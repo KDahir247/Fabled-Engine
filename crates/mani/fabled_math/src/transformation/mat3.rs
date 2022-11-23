@@ -1,6 +1,6 @@
-use crate::{Vector3, Matrix4x4};
+use crate::{Matrix4x4, Vector3};
 
-use crate::matrix3x3_math::transpose_mat3;
+use crate::matrix3x3_math::{inverse_mat3, transpose_mat3};
 
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
@@ -69,10 +69,16 @@ impl Matrix3x3 {
         let z_column: Vector3 = self.column_z;
 
         [
-            x_column.x(), x_column.y(), x_column.z(),
-            y_column.x(), y_column.y(), y_column.z(),
-            z_column.x(), z_column.y(), z_column.z(),
-            ]
+            x_column.x(),
+            x_column.y(),
+            x_column.z(),
+            y_column.x(),
+            y_column.y(),
+            y_column.z(),
+            z_column.x(),
+            z_column.y(),
+            z_column.z(),
+        ]
     }
 
 
@@ -101,13 +107,13 @@ impl Display for Matrix3x3 {
     }
 }
 
-impl From<Matrix4x4> for Matrix3x3{
+impl From<Matrix4x4> for Matrix3x3 {
     #[inline]
     fn from(value: Matrix4x4) -> Self {
         Matrix3x3 {
             column_x: value.column_x.trunc_vec3(),
             column_y: value.column_y.trunc_vec3(),
-            column_z: value.column_z.trunc_vec3()
+            column_z: value.column_z.trunc_vec3(),
         }
     }
 }
@@ -340,7 +346,7 @@ pub mod matrix3x3_math {
     pub fn from_angle_axis_mat3(axis_normalized: Vector3, angle_radian: f32) -> Matrix3x3 {
         let (sin_angle, cos_angle) = angle_radian.sin_cos();
 
-        let axis_sqr : Vector3 = axis_normalized * axis_normalized;
+        let axis_sqr: Vector3 = axis_normalized * axis_normalized;
 
         let zy: f32 = axis_normalized.z() * axis_normalized.y();
         let xz: f32 = axis_normalized.x() * axis_normalized.z();
@@ -461,4 +467,22 @@ pub mod matrix3x3_math {
 
         adjugate_matrix * inverse_determinant
     }
+}
+
+
+#[test]
+fn inverse() {
+    const M1: Matrix3x3 = Matrix3x3::set(
+        Vector3::set(0.8189330101, 0.0329845436, 0.0482003018),
+        Vector3::set(0.3618667424, 0.9293118715, 0.2643662691),
+        Vector3::set(-0.1288597137, 0.0361456387, 0.6338517070),
+    );
+
+    const M2: Matrix3x3 = Matrix3x3::set(
+        Vector3::set(0.2104542553, 1.9779984951, 0.0259040371),
+        Vector3::set(0.7936177850, -2.4285922050, 0.7827717662),
+        Vector3::set(-0.0040720468, 0.4505937099, -0.8086757660),
+    );
+
+    println!("{}", inverse_mat3(M2));
 }

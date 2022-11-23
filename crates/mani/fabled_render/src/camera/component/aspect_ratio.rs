@@ -19,7 +19,6 @@ impl Default for AspectRatio {
     }
 }
 
-// todo do this tomorrow implementation for mode is not complete..
 impl AspectRatio {
     pub fn new(horizontal: f32, vertical: f32) -> AspectRatio {
         let horizontal = horizontal.max(1.0);

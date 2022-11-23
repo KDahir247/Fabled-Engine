@@ -9,6 +9,7 @@ use crate::camera::{AspectRatio, ClippingPlane, Fov, FovAxis, Oblique, ViewPort}
 pub fn project(
     target: Vector3,
     viewport: ViewPort,
+    clipping_plane : ClippingPlane,
     model_view_projection: Matrix4x4,
 ) -> Vector3 {
     let t_mvp_target_vector =
@@ -22,37 +23,38 @@ pub fn project(
 
     let x_p_one = x + 1.0;
     let y_p_one = y + 1.0;
-    let depth_diff = viewport.max_depth - viewport.min_depth;
+    let depth_diff = clipping_plane.far - clipping_plane.near;
 
     let half_x_p_one = x_p_one * 0.5;
     let half_y_p_one = y_p_one * 0.5;
     let z_mul_depth_diff = z * depth_diff;
 
     Vector3::set(
-        (half_x_p_one * viewport.w) + viewport.x,
-        (half_y_p_one * viewport.h) + viewport.y,
-        z_mul_depth_diff + viewport.min_depth,
+        (half_x_p_one * viewport.rect.z()) + viewport.rect.x(),
+        (half_y_p_one * viewport.rect.w()) + viewport.rect.y(),
+        z_mul_depth_diff + clipping_plane.near,
     )
 }
 
 pub fn un_project(
     target: Vector3,
     viewport: ViewPort,
+    clipping_plane : ClippingPlane,
     model_view_projection: Matrix4x4,
 ) -> Vector3 {
     let inverse_mvp = inverse_mat4(model_view_projection, );
 
-    let x = target.x() - viewport.x;
+    let x = target.x() - viewport.rect.x();
     let x_mul_two = x + x;
-    let y = target.y() - viewport.y;
+    let y = target.y() - viewport.rect.y();
     let y_mul_two = y + y;
 
-    let z = target.z() - viewport.min_depth;
-    let depth_difference = (viewport.max_depth - viewport.min_depth).recip();
+    let z = target.z() - clipping_plane.near;
+    let depth_difference = (clipping_plane.far - clipping_plane.near).recip();
 
     let z_mul_depth_diff = z * depth_difference;
-    let x_two_half_width = x_mul_two / viewport.w;
-    let y_two_half_height = y_mul_two / viewport.h;
+    let x_two_half_width = x_mul_two / viewport.rect.z();
+    let y_two_half_height = y_mul_two / viewport.rect.w();
 
     let vector_x = x_two_half_width - 1.0;
     let vector_y = -(y_two_half_height - 1.0);
@@ -217,14 +219,14 @@ pub fn compute_oblique_projection_matrix(orientation : Vector4,clipping_plane : 
 
     let orthographic_top_rcp = orientation.z().recip();
     
-    let (oblique_angle_sin, oblique_angle_cos_cos) = oblique.angle_rad.sin_cos();
+    let (oblique_angle_sin, oblique_angle_cos_cos) = oblique.value.x().sin_cos();
     
-    let size = oblique.vertical_position * orthographic_top_rcp;
+    let size = oblique.value.y() * orthographic_top_rcp;
     let rotation_x = size * -oblique_angle_sin;
     let rotation_y = -size * -oblique_angle_cos_cos;
 
-    let depth_offset_x = -oblique.depth_offset * rotation_x;
-    let depth_offset_y = -oblique.depth_offset * rotation_y;
+    let depth_offset_x = -oblique.value.z() * rotation_x;
+    let depth_offset_y = -oblique.value.z() * rotation_y;
 
     Matrix4x4::set(
         Vector4::set(projection.column_x.x(), projection.column_x.y(), rotation_x, depth_offset_x),

@@ -42,7 +42,8 @@ pub fn view_to_world_point(
     view_projection: Matrix4x4,
     viewport: ViewPort,
 ) -> Vector3 {
-    let point_viewport_space = view_point.trunc_vec2() / Vector2::set(viewport.w, viewport.h);
+    let point_viewport_space =
+        view_point.trunc_vec2() / Vector2::set(viewport.rect.z(), viewport.rect.w());
 
     let point_viewport_norm = (point_viewport_space + point_viewport_space) - Vector2::ONE;
     let point_cam_space = point_viewport_norm * view_point.z();
@@ -69,19 +70,20 @@ pub fn world_to_view_point(
     let point = Vector4::set(world_point.x(), world_point.y(), world_point.z(), 1.0);
     let ndc_point = world_to_ndc_space(point, view_projection);
 
-    let viewpoint = (ndc_point.trunc_vec2() + 1.0) * 0.5 * Vector2::set(viewport.w, viewport.h);
+    let viewpoint =
+        (ndc_point.trunc_vec2() + 1.0) * 0.5 * Vector2::set(viewport.rect.z(), viewport.rect.w());
 
     Vector3::set(viewpoint.x(), viewpoint.y(), world_point.z())
 }
 
 pub fn view_to_viewport_point(view_point: Vector2, viewport: ViewPort) -> Vector2 {
-    let dim_vec2 = Vector2::set(viewport.w, viewport.h);
+    let dim_vec2 = Vector2::set(viewport.rect.z(), viewport.rect.w());
 
     view_point / dim_vec2
 }
 
 pub fn viewport_to_view_point(viewport_point: Vector2, viewport: ViewPort) -> Vector2 {
-    let dim_vec2 = Vector2::set(viewport.w, viewport.h);
+    let dim_vec2 = Vector2::set(viewport.rect.z(), viewport.rect.w());
 
     viewport_point * dim_vec2
 }

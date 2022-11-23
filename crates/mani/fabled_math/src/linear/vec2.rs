@@ -67,8 +67,7 @@ impl Vector2 {
 
     #[inline]
     pub const fn to_simd(self) -> std::simd::f32x4 {
-        let y = self.value[1];
-        std::simd::f32x4::from_array([self.value[0], y, 0.0, 0.0])
+        std::simd::f32x4::from_array([self.x(), self.y(), 0.0, 0.0])
     }
 }
 

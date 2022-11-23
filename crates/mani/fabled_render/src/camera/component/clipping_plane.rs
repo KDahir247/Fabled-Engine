@@ -31,11 +31,6 @@ impl Component for ClippingPlane {
 
 impl Display for ClippingPlane {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "ClippingPlane(near : {}, far : {})",
-            self.depth.x(),
-            self.depth.y()
-        )
+        write!(f, "ClippingPlane(near : {}, far : {})", self.near, self.far)
     }
 }
