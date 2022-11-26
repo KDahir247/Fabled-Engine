@@ -1,6 +1,6 @@
 use crate::{Matrix4x4, Vector3};
 
-use crate::matrix3x3_math::{inverse_mat3, transpose_mat3};
+use crate::matrix3x3_math::transpose_mat3;
 
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
@@ -467,22 +467,4 @@ pub mod matrix3x3_math {
 
         adjugate_matrix * inverse_determinant
     }
-}
-
-
-#[test]
-fn inverse() {
-    const M1: Matrix3x3 = Matrix3x3::set(
-        Vector3::set(0.8189330101, 0.0329845436, 0.0482003018),
-        Vector3::set(0.3618667424, 0.9293118715, 0.2643662691),
-        Vector3::set(-0.1288597137, 0.0361456387, 0.6338517070),
-    );
-
-    const M2: Matrix3x3 = Matrix3x3::set(
-        Vector3::set(0.2104542553, 1.9779984951, 0.0259040371),
-        Vector3::set(0.7936177850, -2.4285922050, 0.7827717662),
-        Vector3::set(-0.0040720468, 0.4505937099, -0.8086757660),
-    );
-
-    println!("{}", inverse_mat3(M2));
 }
