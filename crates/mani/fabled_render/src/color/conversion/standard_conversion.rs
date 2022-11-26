@@ -1,16 +1,17 @@
-#[rustfmt::skip]
-const S_RGB_TO_XYZ: [f32; 9] = [
-    0.41238656, 0.21263682, 0.01933062,
-    0.35759149, 0.71518298, 0.11919716,
-    0.18045049, 0.0721802, 0.950_372_6
-];
+use fabled_math::vector_math::component_sum;
+use fabled_math::{Matrix3x3, Vector3};
 
-#[rustfmt::skip]
-const XYZ_TO_S_RGB: [f32; 9] = [
-    3.241_003_3, -0.969_224_3, 0.05563942,
-    -1.537_398_9, 1.875_93, -0.2040112,
-    -0.49861587, 0.04155422, 1.057_148_9 
-];
+pub const SRGB_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
+    Vector3::set(0.41238656, 0.21263682, 0.01933062),
+    Vector3::set(0.35759149, 0.71518298, 0.11919716),
+    Vector3::set(0.18045049, 0.0721802, 0.950_372_6),
+);
+
+pub const XYZ_TO_SRGB_MATRX: Matrix3x3 = Matrix3x3::set(
+    Vector3::set(3.241_003_3, -0.969_224_3, 0.05563942),
+    Vector3::set(-1.537_398_9, 1.875_93, -0.2040112),
+    Vector3::set(-0.49861587, 0.04155422, 1.057_148_9),
+);
 
 
 #[rustfmt::skip]
@@ -152,22 +153,33 @@ const REC2020_TO_CIECAT16 : [f32; 9] = [
 // rec2020 to oaklab_lms
 
 
-pub fn xyz_to_xy_y(xyz: [f32; 3]) -> [f32; 3] {
-    let [x, y, z] = xyz;
+pub fn xy_y_to_xyz(xy_y: Vector3) -> Vector3 {
+    // Y / y
+    let a = xy_y.z() / xy_y.y();
+    let b = 1.0 - xy_y.x() - xy_y.y();
 
-    let chromatic_denominator: f32 = 1.0 / (x + y + z).max(0.00001);
+    // x * (Y / y)
+    let x = xy_y.x() * a;
+    // Z = (1-x-y)Y / y
+    let z = b * a;
+    // Y = Y
+    let y = xy_y.z();
 
-    
-
-    [x * chromatic_denominator, y * chromatic_denominator, y]
+    Vector3::set(x, y, z)
 }
 
-/// Return the same nominal range as input Y
-pub fn xy_y_to_xyz(xy_y: [f32; 3]) -> [f32; 3] {
-    let rcp_y = xy_y[2] / xy_y[1].max(0.00001);
+pub fn xyz_to_xy_y(xyz: Vector3) -> Vector3 {
+    // 1.0 / (X + Y + Z)
+    let intermediate = 1.0 / (component_sum(xyz.value));
 
+    // x = X / (X + Y + Z)
+    let x = xyz.x() * intermediate;
+    // y = Y / (X + Y + Z)
+    let y = xyz.y() * intermediate;
+    // Y = Y
+    let _y = xyz.y();
 
-    [rcp_y * xy_y[0], xy_y[2], rcp_y * (1.0 - xy_y[0] - xy_y[1])]
+    Vector3::set(x, y, _y)
 }
 
 

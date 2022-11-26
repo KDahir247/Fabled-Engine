@@ -1,5 +1,5 @@
-mod color_conversion_matrices;
-mod hdr;
+mod hdr_conversion;
+mod standard_conversion;
 
-pub use color_conversion_matrices::*;
-pub use hdr::*;
+pub use hdr_conversion::*;
+pub use standard_conversion::*;
