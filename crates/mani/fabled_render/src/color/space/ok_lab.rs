@@ -48,57 +48,6 @@ impl OkLab {
         }
     }
 
-
-    pub fn cie_xyz_to_oklab(xyz: Vector3) -> OkLab {
-        const M1: Matrix3x3 = Matrix3x3::set(
-            Vector3::set(0.8189330101, 0.0329845436, 0.0482003018),
-            Vector3::set(0.3618667424, 0.9293118715, 0.2643662691),
-            Vector3::set(-0.1288597137, 0.0361456387, 0.6338517070),
-        );
-
-        const M2: Matrix3x3 = Matrix3x3::set(
-            Vector3::set(0.2104542553, 1.9779984951, 0.0259040371),
-            Vector3::set(0.7936177850, -2.4285922050, 0.7827717662),
-            Vector3::set(-0.0040720468, 0.4505937099, -0.8086757660),
-        );
-
-        let lms_cone = M1 * xyz;
-
-        const CUBE_ROOT_EXPO: Vector3 = Vector3::broadcast(0.33333333333333333333333333333333);
-
-        let non_linearity_lms_cone = Vector3 {
-            value: pow(lms_cone.value, CUBE_ROOT_EXPO.value),
-        };
-
-        let lab_vec3 = M2 * non_linearity_lms_cone;
-
-        OkLab { value: lab_vec3 }
-    }
-
-    pub fn oklab_to_cie_xyz(self) -> Vector3 {
-        const M1_INVERSE: Matrix3x3 = Matrix3x3::set(
-            Vector3::set(1.2270138, -0.040580176, -0.07638129),
-            Vector3::set(-0.5578, 1.1122569, -0.42148197),
-            Vector3::set(0.28125614, -0.07167668, 1.5861632),
-        );
-
-        const M2_INVERSE: Matrix3x3 = Matrix3x3::set(
-            Vector3::set(1.0000001, 1.0, 1.0000001),
-            Vector3::set(0.39633784, -0.105561346, -0.08948418),
-            Vector3::set(0.21580376, -0.06385418, -1.2914855),
-        );
-
-        let non_linearity_lms_cone = M2_INVERSE * self.value;
-
-        const THREE_VEC3: Vector3 = Vector3::broadcast(3.0);
-
-        let lms_cone = Vector3 {
-            value: pow(non_linearity_lms_cone.value, THREE_VEC3.value),
-        };
-
-        M1_INVERSE * lms_cone
-    }
-
     pub fn linear_srgb_to_oklab(linear_srgb: Vector3) -> OkLab {
         let long_cone = 0.4122214708 * linear_srgb.x()
             + 0.5363325363 * linear_srgb.y()

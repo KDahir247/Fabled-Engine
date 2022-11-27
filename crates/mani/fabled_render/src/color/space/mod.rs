@@ -5,3 +5,4 @@ mod xv_ycc;
 mod ycb_cr;
 
 pub use ok_lab::*;
+pub use srgb::*;

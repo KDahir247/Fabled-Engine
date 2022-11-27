@@ -179,6 +179,10 @@ pub fn xyz_to_xy_y(xyz: Vector3) -> Vector3 {
     Vector3::set(x, y, _y)
 }
 
+// We need the tristimulus illuminant and the rgb native illuminant.
+// we might make user pass the illuminant type for rgb since there are multiple
+// rgb type. pub fn xyz_to_rgb(tri_stimulus : Vector3, rgb : Vector3, )
+
 
 // OkLab conversion
 pub fn oklab_to_xyz(oklab: OkLab) -> Vector3 {
@@ -192,11 +196,22 @@ pub fn oklab_to_xyz(oklab: OkLab) -> Vector3 {
         }
 }
 
+pub fn oklab_to_srgb(oklab: OkLab) -> Vector3 {
+    let lms_oklab = OKLAB_TO_OKLAB_LMS_MATRIX * oklab.value;
+
+    let pow_3_lms_oklab = pow(lms_oklab.value, Vector3::broadcast(3.0).value);
+
+    OKLAB_LMS_TO_SRGB_MATRIX
+        * Vector3 {
+            value: pow_3_lms_oklab,
+        }
+}
+
 pub fn xyz_to_oklab(tri_stimulus: Vector3) -> OkLab {
-    let oklab_lms = XYZ_TO_OKLAB_LMS_MATRIX * tri_stimulus;
+    let lms_oklab = XYZ_TO_OKLAB_LMS_MATRIX * tri_stimulus;
 
     let cbrt_lms_oklab = pow(
-        oklab_lms.value,
+        lms_oklab.value,
         Vector3::broadcast(0.33333333333333333333333333333333).value,
     );
 
@@ -208,21 +223,18 @@ pub fn xyz_to_oklab(tri_stimulus: Vector3) -> OkLab {
     }
 }
 
-#[cfg(test)]
-mod space_conversion_test {
-    use crate::color::{xy_y_to_xyz, xyz_to_xy_y};
-    use fabled_math::Vector3;
+pub fn srgb_to_oklab(srgb: Vector3) -> OkLab {
+    let lms_oklab = SRGB_TO_OKLAB_LMS_MATRIX * srgb;
 
-    #[test]
-    fn xyz_xyy_test() {
-        let xy_y = Vector3::set(0.642, 0.327, 22.62);
+    let cbrt_lms_oklab = pow(
+        lms_oklab.value,
+        Vector3::broadcast(0.33333333333333333333333333333333).value,
+    );
 
-        let xyz = xy_y_to_xyz(xy_y);
-
-        let result_xy_y = xyz_to_xy_y(xyz);
-
-        assert!(xy_y[0].eq(&result_xy_y.x()));
-        assert!(xy_y[1].eq(&result_xy_y.y()));
-        assert!(xy_y[2].eq(&result_xy_y.z()));
+    OkLab {
+        value: OKLAB_LMS_TO_OKLAB
+            * Vector3 {
+                value: cbrt_lms_oklab,
+            },
     }
 }
