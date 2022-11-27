@@ -1,5 +1,5 @@
 use crate::color::OkLab;
-use fabled_math::vector_math::component_sum;
+use fabled_math::vector_math::{component_sum, pow};
 use fabled_math::{Matrix3x3, Vector3};
 
 pub const SRGB_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
@@ -149,7 +149,7 @@ pub const SRGB_TO_DCI_P3_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(0.000000000000000018120205, 0.0019555648, 0.95920974),
 );
 
-
+// primitive conversion
 pub fn xy_y_to_xyz(xy_y: Vector3) -> Vector3 {
     // Y / y
     let a = xy_y.z() / xy_y.y();
@@ -181,33 +181,48 @@ pub fn xyz_to_xy_y(xyz: Vector3) -> Vector3 {
 
 
 // OkLab conversion
+pub fn oklab_to_xyz(oklab: OkLab) -> Vector3 {
+    let lms_oklab = OKLAB_TO_OKLAB_LMS_MATRIX * oklab.value;
 
-pub fn srgb_to_oklab(srgb: Vector3) -> OkLab {
-    let tri_stimulus = SRGB_TO_XYZ_MATRIX * srgb;
+    let pow_3_lms_oklab = pow(lms_oklab.value, Vector3::broadcast(3.0).value);
 
-    OkLab::cie_xyz_to_oklab(tri_stimulus)
+    OKLAB_LMS_TO_XYZ_MATRIX
+        * Vector3 {
+            value: pow_3_lms_oklab,
+        }
 }
 
-pub fn oklab_to_srgb(ok_lab: OkLab) -> Vector3 {
-    let ok_lab_lms = OKLAB_TO_OKLAB_LMS_MATRIX * ok_lab.value;
+pub fn xyz_to_oklab(tri_stimulus: Vector3) -> OkLab {
+    let oklab_lms = XYZ_TO_OKLAB_LMS_MATRIX * tri_stimulus;
 
-    OKLAB_LMS_TO_SRGB_MATRIX * ok_lab_lms
+    let cbrt_lms_oklab = pow(
+        oklab_lms.value,
+        Vector3::broadcast(0.33333333333333333333333333333333).value,
+    );
+
+    OkLab {
+        value: OKLAB_LMS_TO_OKLAB
+            * Vector3 {
+                value: cbrt_lms_oklab,
+            },
+    }
 }
 
 #[cfg(test)]
 mod space_conversion_test {
     use crate::color::{xy_y_to_xyz, xyz_to_xy_y};
+    use fabled_math::Vector3;
 
     #[test]
     fn xyz_xyy_test() {
-        let xy_y = [0.642, 0.327, 22.62];
+        let xy_y = Vector3::set(0.642, 0.327, 22.62);
 
         let xyz = xy_y_to_xyz(xy_y);
 
         let result_xy_y = xyz_to_xy_y(xyz);
 
-        assert!(xy_y[0].eq(&result_xy_y[0]));
-        assert!(xy_y[1].eq(&result_xy_y[1]));
-        assert!(xy_y[2].eq(&result_xy_y[2]));
+        assert!(xy_y[0].eq(&result_xy_y.x()));
+        assert!(xy_y[1].eq(&result_xy_y.y()));
+        assert!(xy_y[2].eq(&result_xy_y.z()));
     }
 }
