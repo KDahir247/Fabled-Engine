@@ -2,11 +2,11 @@
 // do I want the logic in the struct or separate like the math folder?
 
 use fabled_math::vector_math::{length, pow};
-use fabled_math::{Matrix3x3, Swizzles3, Vector3};
+use fabled_math::{Swizzles3, Vector3};
 
+use crate::color::Illuminant;
 use std::fmt::{Display, Formatter};
 
-// Oklab uses D65 white point.
 #[derive(Copy, Clone, PartialEq)]
 pub struct OkLab {
     // L : perceived lightness.
@@ -16,6 +16,8 @@ pub struct OkLab {
 }
 
 impl OkLab {
+    pub const ILLUMINANT: Illuminant = Illuminant::D65;
+
     pub const fn new(l: f32, a: f32, b: f32) -> OkLab {
         OkLab {
             value: Vector3::set(l, a, b),

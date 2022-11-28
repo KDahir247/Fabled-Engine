@@ -1,4 +1,6 @@
-use crate::color::OkLab;
+use crate::color::{
+    apply_adaption_matrix_tristimulus, linear_to_s_rgb, s_rgb_to_linear, OkLab, BRADFORD,
+};
 use fabled_math::vector_math::{component_sum, pow};
 use fabled_math::{Matrix3x3, Vector3};
 
@@ -179,9 +181,49 @@ pub fn xyz_to_xy_y(xyz: Vector3) -> Vector3 {
     Vector3::set(x, y, _y)
 }
 
-// We need the tristimulus illuminant and the rgb native illuminant.
-// we might make user pass the illuminant type for rgb since there are multiple
-// rgb type. pub fn xyz_to_rgb(tri_stimulus : Vector3, rgb : Vector3, )
+
+pub fn srgb_to_xyz(
+    srgb_nonlinear: Vector3,
+    src_tristimulus_white_point: Vector3,
+    dst_tristmulus_white_point: Vector3,
+) -> Vector3 {
+    let srgb_linear = s_rgb_to_linear(srgb_nonlinear);
+
+    let mut tri_stimulus = SRGB_TO_XYZ_MATRIX * srgb_linear;
+
+    if src_tristimulus_white_point != dst_tristmulus_white_point {
+        tri_stimulus = apply_adaption_matrix_tristimulus(
+            tri_stimulus,
+            src_tristimulus_white_point,
+            dst_tristmulus_white_point,
+            BRADFORD,
+        );
+    }
+
+    tri_stimulus
+}
+
+pub fn xyz_to_srgb(
+    tri_stimulus: Vector3,
+    src_tristimulus_white_point: Vector3,
+    dst_tristmulus_white_point: Vector3,
+) -> Vector3 {
+    let mut tri_stimulus = tri_stimulus;
+
+    if src_tristimulus_white_point == dst_tristmulus_white_point {
+        tri_stimulus = apply_adaption_matrix_tristimulus(
+            tri_stimulus,
+            src_tristimulus_white_point,
+            dst_tristmulus_white_point,
+            BRADFORD,
+        );
+    }
+
+    let srgb_linear = XYZ_TO_SRGB_MATRIX * tri_stimulus;
+
+
+    linear_to_s_rgb(srgb_linear)
+}
 
 
 // OkLab conversion

@@ -1,8 +1,6 @@
 use fabled_math::matrix3x3_math::inverse_mat3;
 use fabled_math::vector_math::rcp;
 use fabled_math::{Matrix3x3, Vector3};
-use crate::color
-use crate::color::{s_rgb_to_linear, SRGB_TO_XYZ_MATRIX, XYZ_TO_SRGB_MATRIX};
 
 // Look below for equation.
 // http://brucelindbloom.com/index.html?Eqn_ChromAdapt.html
@@ -45,24 +43,4 @@ pub fn apply_adaption_matrix_tristimulus(
     );
 
     transform_matrix * tristimulus
-}
-
-
-pub fn apply_adaption_matrix_srgb(
-    srgb_linear: Vector3,
-    dst_tristimulus_white_point: Vector3,
-    adaption_matrix: Matrix3x3,
-) -> Vector3 {
-
-
-    //SRGB D65
-    let src_tristimulus = Vector3::set(0.9504559271, 1.0, 1.089057751);
-
-    let tristimulus = SRGB_TO_XYZ_MATRIX * srgb_linear;
-
-
-    let adapted_tristimulus = apply_adaption_matrix_tristimulus(tristimulus, src_tristimulus, dst_tristimulus_white_point, adaption_matrix);
-
-
-    XYZ_TO_SRGB_MATRIX * adapted_tristimulus
 }
