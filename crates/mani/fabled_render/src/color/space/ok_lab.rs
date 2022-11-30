@@ -50,6 +50,7 @@ impl OkLab {
         }
     }
 
+    // todo remove
     pub fn linear_srgb_to_oklab(linear_srgb: Vector3) -> OkLab {
         let long_cone = 0.4122214708 * linear_srgb.x()
             + 0.5363325363 * linear_srgb.y()

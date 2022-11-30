@@ -62,9 +62,20 @@ pub fn eotf_s_rgb(s_rgb: Vector3) -> Vector3 {
 }
 
 
-// linear to pq
 pub fn pq_oetf(linear_val: Vector3) -> Vector3 {
-    todo!()
+    let l = linear_val / PQ_MAX;
+
+    let lm1 = Vector3 {
+        value: pow(l.value, Vector3::broadcast(PQ_M1).value),
+    };
+
+    let x = (lm1 * PQ_C2 + PQ_C1) / (lm1 * PQ_C3 + 1.0);
+
+    let pq_val = Vector3 {
+        value: pow(x.value, Vector3::broadcast(PQ_M2).value),
+    };
+
+    pq_val
 }
 
 // pq to linear
