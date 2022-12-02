@@ -1,7 +1,3 @@
-// tri_stimulus not chromatic coordinates
-// formula look at math_op script "chromatic_coord_to_tri_stimulus_white"
-// x/y, 1.0, (1-x-y)/y
-
 pub mod two_degree_observer {
     use fabled_math::Vector3;
 

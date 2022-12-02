@@ -1,33 +1,7 @@
-use crate::color::{pq_eotf, pq_oetf, SRGB_TO_XYZ_MATRIX, XYZ_TO_SRGB_MATRIX};
 use fabled_math::vector_math::{component_max, sqrt};
-use fabled_math::{Matrix3x3, Vector3, Vector4};
+use fabled_math::{Vector3, Vector4};
 
 // HDR Encoding decoding
-
-const ICTCP_TO_ICTCP_NORM_LMS_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(1.0, 1.0, 1.0),
-    Vector3::set(0.009, -0.009, 0.56),
-    Vector3::set(0.111, -0.111, -0.321),
-);
-
-pub const ICTCP_NORM_LMS_TO_ICTCP_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(0.5, 0.5, 0.0),
-    Vector3::set(1.614, -3.323, 1.710),
-    Vector3::set(4.378, -4.246, -0.135),
-);
-
-const ICTCP_LMS_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(2.071, 0.365, -0.049),
-    Vector3::set(-1.327, 0.681, -0.050),
-    Vector3::set(0.207, -0.045, 1.188),
-);
-
-const XYZ_TO_ICTCP_LMS_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(0.359, -0.192, 0.007),
-    Vector3::set(0.696, 1.100, 0.075),
-    Vector3::set(-0.036, 0.075, 0.843),
-);
-
 pub fn screen_referred_to_rgbe(screen_referred_color: Vector3) -> Vector4 {
     let maximum_luminance = component_max(screen_referred_color.value);
 
@@ -79,28 +53,4 @@ pub fn rgb_m_to_linear(rgbm: Vector4) -> Vector3 {
     let rgb_linear = rgbm.trunc_vec3() * intermediate_step;
 
     rgb_linear * rgb_linear
-}
-
-// HDR conversion
-
-// ICTCP is defined by Rec. 2100 as being derived from linear RGB
-pub fn srgb_to_ictcp(linear_srgb: Vector3) -> Vector3 {
-    let xyz = SRGB_TO_XYZ_MATRIX * linear_srgb;
-
-    let lms = XYZ_TO_ICTCP_LMS_MATRIX * xyz;
-
-    let non_linearity_lms = pq_oetf(lms);
-
-    ICTCP_NORM_LMS_TO_ICTCP_MATRIX * non_linearity_lms
-}
-
-
-pub fn ictcp_to_srgb(ictcp: Vector3) -> Vector3 {
-    let non_linear_lms = ICTCP_TO_ICTCP_NORM_LMS_MATRIX * ictcp;
-
-    let lms = pq_eotf(non_linear_lms);
-
-    let xyz = ICTCP_LMS_TO_XYZ_MATRIX * lms;
-
-    XYZ_TO_SRGB_MATRIX * xyz
 }

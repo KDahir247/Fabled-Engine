@@ -210,7 +210,7 @@ pub fn xyz_to_srgb(
 ) -> Vector3 {
     let mut tri_stimulus = tri_stimulus;
 
-    if src_tristimulus_white_point == dst_tristmulus_white_point {
+    if src_tristimulus_white_point != dst_tristmulus_white_point {
         tri_stimulus = apply_adaption_matrix_tristimulus(
             tri_stimulus,
             src_tristimulus_white_point,

@@ -468,14 +468,3 @@ pub mod matrix3x3_math {
         adjugate_matrix * inverse_determinant
     }
 }
-
-
-#[test]
-fn a() {
-    const XYZ_TO_ICTCP_LMS_MATRIX: Matrix3x3 = Matrix3x3::set(
-        Vector3::set(0.359, -0.192, 0.007),
-        Vector3::set(0.696, 1.100, 0.075),
-        Vector3::set(-0.036, 0.075, 0.843),
-    );
-    println!("{}", transpose_mat3(XYZ_TO_ICTCP_LMS_MATRIX));
-}
