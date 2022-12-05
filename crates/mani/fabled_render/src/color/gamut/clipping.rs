@@ -1,4 +1,4 @@
-use crate::color::{saturate, OkLab};
+use crate::color::OkLab;
 use fabled_math::vector_math::{
     component_ge, component_gt, component_lt, component_max, component_min, select,
 };

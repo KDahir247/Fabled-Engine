@@ -1,8 +1,6 @@
-use crate::color::{
-    apply_adaption_matrix_tristimulus, linear_to_s_rgb, s_rgb_to_linear, OkLab, BRADFORD,
-};
-use fabled_math::vector_math::{component_sum, pow};
-use fabled_math::{Matrix3x3, Vector3};
+use crate::color::{apply_adaption_matrix_tristimulus, eotf_s_rgb, oetf_s_rgb, BRADFORD};
+use fabled_math::vector_math::{component_sum, length, pow};
+use fabled_math::{Matrix3x3, Swizzles3, Vector3};
 
 pub const SRGB_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(0.41238656, 0.21263682, 0.01933062),
@@ -187,7 +185,7 @@ pub fn srgb_to_xyz(
     src_tristimulus_white_point: Vector3,
     dst_tristmulus_white_point: Vector3,
 ) -> Vector3 {
-    let srgb_linear = s_rgb_to_linear(srgb_nonlinear);
+    let srgb_linear = eotf_s_rgb(srgb_nonlinear);
 
     let mut tri_stimulus = SRGB_TO_XYZ_MATRIX * srgb_linear;
 
@@ -222,12 +220,12 @@ pub fn xyz_to_srgb(
     let srgb_linear = XYZ_TO_SRGB_MATRIX * tri_stimulus;
 
 
-    linear_to_s_rgb(srgb_linear)
+    oetf_s_rgb(srgb_linear)
 }
 
 
 // OkLab conversion
-pub fn oklab_to_xyz(oklab: OkLab) -> Vector3 {
+pub fn oklab_to_xyz(oklab: Vector3) -> Vector3 {
     let lms_oklab = OKLAB_TO_OKLAB_LMS_MATRIX * oklab.value;
 
     let pow_3_lms_oklab = pow(lms_oklab.value, Vector3::broadcast(3.0).value);
@@ -238,7 +236,7 @@ pub fn oklab_to_xyz(oklab: OkLab) -> Vector3 {
         }
 }
 
-pub fn oklab_to_srgb(oklab: OkLab) -> Vector3 {
+pub fn oklab_to_srgb(oklab: Vector3) -> Vector3 {
     let lms_oklab = OKLAB_TO_OKLAB_LMS_MATRIX * oklab.value;
 
     let pow_3_lms_oklab = pow(lms_oklab.value, Vector3::broadcast(3.0).value);
@@ -249,7 +247,7 @@ pub fn oklab_to_srgb(oklab: OkLab) -> Vector3 {
         }
 }
 
-pub fn xyz_to_oklab(tri_stimulus: Vector3) -> OkLab {
+pub fn xyz_to_oklab(tri_stimulus: Vector3) -> Vector3 {
     let lms_oklab = XYZ_TO_OKLAB_LMS_MATRIX * tri_stimulus;
 
     let cbrt_lms_oklab = pow(
@@ -257,15 +255,13 @@ pub fn xyz_to_oklab(tri_stimulus: Vector3) -> OkLab {
         Vector3::broadcast(0.33333333333333333333333333333333).value,
     );
 
-    OkLab {
-        value: OKLAB_LMS_TO_OKLAB
-            * Vector3 {
-                value: cbrt_lms_oklab,
-            },
-    }
+    OKLAB_LMS_TO_OKLAB
+        * Vector3 {
+            value: cbrt_lms_oklab,
+        }
 }
 
-pub fn srgb_to_oklab(srgb: Vector3) -> OkLab {
+pub fn srgb_to_oklab(srgb: Vector3) -> Vector3 {
     let lms_oklab = SRGB_TO_OKLAB_LMS_MATRIX * srgb;
 
     let cbrt_lms_oklab = pow(
@@ -273,10 +269,32 @@ pub fn srgb_to_oklab(srgb: Vector3) -> OkLab {
         Vector3::broadcast(0.33333333333333333333333333333333).value,
     );
 
-    OkLab {
-        value: OKLAB_LMS_TO_OKLAB
-            * Vector3 {
-                value: cbrt_lms_oklab,
-            },
-    }
+    OKLAB_LMS_TO_OKLAB
+        * Vector3 {
+            value: cbrt_lms_oklab,
+        }
+}
+
+pub fn oklab_to_lch(oklab: Vector3) -> Vector3 {
+    let lightness = oklab.x();
+
+    let ab_vector = Vector3 {
+        value: oklab.yzx().trunc_vec2().to_simd(),
+    };
+
+    let chroma = length(ab_vector.value);
+    let hue = ab_vector.y().atan2(ab_vector.x());
+
+
+    Vector3::set(lightness, chroma, hue)
+}
+
+pub fn ok_lab_from_lch(lch: Vector3) -> Vector3 {
+    let (hue_sin, hue_cos) = lch.z().sin_cos();
+    let chroma = lch.y();
+    let l = lch.x();
+    let a = chroma * hue_cos;
+    let b = chroma * hue_sin;
+
+    Vector3::set(l, a, b)
 }

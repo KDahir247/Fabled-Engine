@@ -3,7 +3,6 @@ use fabled_component::{Component, All};
 use std::fmt::Display;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-
 pub struct Child {
     pub value: u64,
 }

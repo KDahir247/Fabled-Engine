@@ -1,3 +1,5 @@
+// todo add all illumination white point.
+
 pub mod two_degree_observer {
     use fabled_math::Vector3;
 

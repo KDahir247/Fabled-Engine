@@ -1,15 +1,14 @@
 mod adaption;
+mod component;
 mod constant;
-mod container;
 mod conversion;
 mod gamut;
-mod space;
+mod grading;
 mod util;
 
 pub use adaption::*;
 pub use constant::*;
-pub use container::*;
 pub use conversion::*;
 pub use gamut::*;
-pub use space::*;
+pub use grading::*;
 pub use util::*;

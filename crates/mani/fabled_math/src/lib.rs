@@ -41,11 +41,22 @@ extern "C" {
     fn log10_v4f32(x: std::simd::f32x4) -> std::simd::f32x4;
 }
 
+pub mod float_math {
+    pub fn saturate(val: f32) -> f32 {
+        let rhs = val + 1.0;
+        let lhs = val - 1.0;
+
+        let temp = rhs - lhs.abs();
+        (temp + temp.abs()) * 0.25
+    }
+}
+
 pub mod vector_math {
     use std::simd::{SimdFloat, SimdInt, SimdPartialOrd, StdFloat};
 
     use crate::{
         cos_v4f32, exp2_v4f32, exp_v4f32, log10_v4f32, log2_v4f32, log_v4f32, pow_v4f32, sin_v4f32,
+        Vector3,
     };
 
     #[inline(always)]
@@ -357,6 +368,54 @@ pub mod vector_math {
     #[inline(always)]
     pub fn is_nan(simd_vector: std::simd::f32x4) -> std::simd::mask32x4 {
         simd_vector.is_nan()
+    }
+
+    #[inline]
+    pub fn bias(simd_vector: std::simd::f32x4, bias_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        const ONE_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([1.0; 4]);
+        const TWO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([2.0; 4]);
+        let bias_vector_rcp = rcp(bias_vector);
+
+        let a = bias_vector_rcp - TWO_VEC;
+        let b = ONE_VEC - simd_vector;
+
+        simd_vector / (a * b + ONE_VEC)
+    }
+
+    #[inline]
+    pub fn gain(simd_vector: std::simd::f32x4, gain: std::simd::f32x4) -> std::simd::f32x4 {
+        const TWO_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([2.0; 4]);
+        const ONE_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([1.0; 4]);
+        const HALF_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([0.5; 4]);
+
+        let lhs = bias(a * TWO_VEC, gain) * HALF_VEC;
+        let rhs = bias(a * TWO_VEC - ONE_VEC, ONE_VEC - gain) * HALF_VEC + HALF_VEC;
+
+        let mask = component_lt(simd_vector, 0.5);
+
+        select(lhs, rhs, mask)
+    }
+
+    #[inline]
+    pub fn orthogonal(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        let k = (simd_vector[0].abs() + 0.5).fract();
+
+        Vector3::set(
+            -simd_vector[1],
+            simd_vector[0] - k * simd_vector[2],
+            k * simd_vector[1],
+        )
+        .value
+    }
+
+    #[inline]
+    pub fn orthonormalize(
+        simd_vector: std::simd::f32x4,
+        simd_vector1: std::simd::f32x4,
+    ) -> std::simd::f32x4 {
+        normalize(
+            simd_vector - simd_vector1 * Vector3::broadcast(dot(simd_vector, simd_vector1)).value,
+        )
     }
 
 
