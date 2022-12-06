@@ -1,4 +1,4 @@
-use fabled_math::vector_math::{component_le, component_min, cos, pow, select};
+use fabled_math::vector_math::{abs, component_le, component_min, cos, pow, select, sqrt};
 use fabled_math::Vector3;
 
 pub fn create_palette(time: f32, a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> Vector3 {
@@ -78,4 +78,29 @@ pub fn color_dodge_blend(a: Vector3, b: Vector3) -> Vector3 {
     }
 
     target
+}
+
+pub fn soft_light_blend(a: Vector3, b: Vector3) -> Vector3 {
+    const HALF_VEC: Vector3 = Vector3::broadcast(0.5);
+
+    let blend_func = if a <= 0.25 {
+        ((Vector3::broadcast(16.0) * a - Vector3::broadcast(12.0)) * a + Vector3::broadcast(4.0))
+            * a
+    } else {
+        Vector3 {
+            value: sqrt(a.value),
+        }
+    };
+
+    if b <= 0.5 {
+        a - (Vector3::broadcast(1.0) - Vector3::broadcast(2.0) * b)
+            * a
+            * (Vector3::broadcast(1.0) - a)
+    } else {
+        a + (Vector3::broadcast(2.0) * b - Vector3::broadcast(1.0)) * (blend_func - a)
+    }
+}
+
+pub fn difference_blend(a: Vector3, b: Vector3) -> Vector3 {
+    Vector3 { value: abs(a - b) }
 }

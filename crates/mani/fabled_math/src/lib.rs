@@ -332,8 +332,18 @@ pub mod vector_math {
     }
 
     #[inline]
-    pub fn sign(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
-        simd_vector.signum()
+    pub fn sign(simd_vector: std::simd::f32x4) -> f32 {
+        let sum = component_sum(simd_vector);
+
+        let clamped_len: std::simd::f32x4 = clamp(
+            simd_vector,
+            std::simd::f32x4::from_array([0.0; 4]),
+            std::simd::f32x4::from_array([1.0; 4]),
+        );
+
+        let len = component_sum(clamped_len);
+
+        sum / len
     }
 
     #[inline(always)]
@@ -394,6 +404,11 @@ pub mod vector_math {
         let mask = component_lt(simd_vector, 0.5);
 
         select(lhs, rhs, mask)
+    }
+
+    #[inline]
+    pub fn mean(simd_vector: std::simd::f32x4) -> f32 {
+        sign()
     }
 
     #[inline]
