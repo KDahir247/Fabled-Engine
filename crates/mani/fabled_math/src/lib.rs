@@ -398,8 +398,8 @@ pub mod vector_math {
         const ONE_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([1.0; 4]);
         const HALF_VEC: std::simd::f32x4 = std::simd::f32x4::from_array([0.5; 4]);
 
-        let lhs = bias(a * TWO_VEC, gain) * HALF_VEC;
-        let rhs = bias(a * TWO_VEC - ONE_VEC, ONE_VEC - gain) * HALF_VEC + HALF_VEC;
+        let lhs = bias(simd_vector * TWO_VEC, gain) * HALF_VEC;
+        let rhs = bias(simd_vector * TWO_VEC - ONE_VEC, ONE_VEC - gain) * HALF_VEC + HALF_VEC;
 
         let mask = component_lt(simd_vector, 0.5);
 
@@ -408,7 +408,11 @@ pub mod vector_math {
 
     #[inline]
     pub fn mean(simd_vector: std::simd::f32x4) -> f32 {
-        sign()
+        let sum = component_sum(simd_vector);
+        let lengths = simd_vector.simd_max(std::simd::f32x4::from_array([1.0; 4]));
+        let len = component_sum(lengths);
+
+        sum / len
     }
 
     #[inline]

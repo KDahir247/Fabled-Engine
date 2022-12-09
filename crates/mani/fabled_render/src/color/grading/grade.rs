@@ -1,4 +1,4 @@
-use fabled_math::vector_math::clamp;
+use fabled_math::vector_math::{clamp, pow, saturate};
 use fabled_math::{Matrix3x3, Vector3};
 
 // https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
@@ -44,4 +44,28 @@ pub fn tone_map(hdr: Vector3) -> Vector3 {
     Vector3 {
         value: clamp(ldr.value, Vector3::ZERO.value, Vector3::ONE.value),
     }
+}
+
+
+// We will implement two LiftGammaGain Function and try both out. I will remove
+// the one that I like least with reason.
+
+// pub fn apply_lift_gamma_gain(a: Vector3, lift: Vector3, gamma: Vector3, gain:
+// Vector3) -> Vector3 {     let lift = a * (Vector3::broadcast(1.5) -
+// Vector3::broadcast(0.5) * lift)         + Vector3::broadcast(0.5) * lift
+//         - Vector3::broadcast(0.5);
+//     let lift_gain = lift * gain;
+//     let lift_gain_gamma = Vector3 {
+//         value: pow(lift_gain.value, (Vector3::broadcast(1.0) / gamma).value),
+//     };
+//
+//     lift_gain_gamma
+// }
+
+pub fn apply_lift_gamma_gain(a: Vector3, lift: Vector3, gamma: Vector3, gain: Vector3) -> Vector3 {
+    let one_vec = Vector3::broadcast(1.0).value;
+
+    let lerp_a = saturate(pow(a.value, one_vec / gamma.value));
+    let res = gain.value * lerp_a + lift.value * (one_vec - lerp_a);
+    Vector3 { value: res }
 }
