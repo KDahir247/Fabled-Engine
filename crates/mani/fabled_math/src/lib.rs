@@ -52,12 +52,19 @@ pub mod float_math {
 }
 
 pub mod vector_math {
-    use std::simd::{SimdFloat, SimdInt, SimdPartialOrd, StdFloat};
+    use std::simd::{SimdFloat, SimdInt, SimdPartialOrd, SimdUint, StdFloat};
 
     use crate::{
         cos_v4f32, exp2_v4f32, exp_v4f32, log10_v4f32, log2_v4f32, log_v4f32, pow_v4f32, sin_v4f32,
         Vector3,
     };
+
+    #[inline(always)]
+    pub fn cast<C: std::simd::SimdElement, T: std::simd::SimdElement>(
+        simd_vector: std::simd::Simd<C, 4>,
+    ) -> std::simd::Simd<T, 4> {
+        simd_vector.cast::<T>()
+    }
 
     #[inline(always)]
     pub fn degrees(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
@@ -623,5 +630,15 @@ pub mod vector_math {
     #[inline]
     pub fn ldexp(mul_vector: std::simd::f32x4, power_vector: std::simd::f32x4) -> std::simd::f32x4 {
         mul_vector * exp2(power_vector)
+    }
+
+
+    #[inline]
+    pub fn reduce_or(simd_vector: std::simd::Simd<usize, 4>) -> usize {
+        simd_vector.reduce_or()
+    }
+
+    pub fn reduce_sum(simd_vector: std::simd::Simd<usize, 4>) -> usize {
+        simd_vector.reduce_sum()
     }
 }
