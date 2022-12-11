@@ -25,15 +25,16 @@ pub fn oetf_s_rgb(linear: Vector3) -> Vector3 {
     };
 
     let b = a * 1.055;
+    let c = b - 0.055;
+
     let d = linear * 12.92;
 
-    let c = b - 0.055;
 
     let mask = component_ge(linear.value, 0.0031308);
 
-    let non_linear = select(c.value, d.value, mask);
+    let gamma = select(c.value, d.value, mask);
 
-    Vector3 { value: non_linear }
+    Vector3 { value: gamma }
 }
 
 

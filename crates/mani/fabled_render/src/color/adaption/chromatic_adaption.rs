@@ -7,7 +7,7 @@ use fabled_math::{Matrix3x3, Vector3};
 
 // Look below for equation.
 // http://brucelindbloom.com/index.html?Eqn_ChromAdapt.html
-pub fn compute_adapton_matrix(
+pub fn compute_adaption_matrix(
     src_tristimulus_white_point: Vector3,
     dst_tristmulus_white_point: Vector3,
     adaption_matrix: Matrix3x3,
@@ -78,7 +78,6 @@ pub fn apply_adaption_matrix_tristimulus(
         dst_tristmulus_white_point,
         adaption_matrix,
     );
-
 
     // XYZ TO SRGB * XYZ
     transform_matrix.1 * tristimulus

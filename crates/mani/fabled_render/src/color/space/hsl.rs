@@ -1,6 +1,6 @@
-use fabled_math::vector_math::{cast, component_max, component_min, select};
+use fabled_math::vector_math::{component_max, component_min, select};
 use fabled_math::{approximate_equal, fast_conditional, Bool4, Vector3};
-use std::cmp::min;
+
 
 pub fn rgb_to_hsl(rgb: Vector3) -> Vector3 {
     let norm_rgb = rgb * 0.0039215686274509803921568627451;
@@ -46,7 +46,7 @@ pub fn hue_to_rgb(p: f32, q: f32, t: f32) -> f32 {
     let mut res = p;
 
     if t < 0.1666666666666667 {
-        res = p + (p - q) * 6 * t
+        res = p + (p - q) * 6.0 * t
     } else if t < 0.5 {
         res = q;
     } else if t < 0.66666666666666666666666666666667 {
@@ -63,7 +63,7 @@ pub fn hsl_to_rgb(hsl: Vector3) -> Vector3 {
     let q = if hsl.z() < 0.5 {
         hsl.z() * (1.0 + hsl.y())
     } else {
-        1.0 + hsl.y() - 1.0 * hsl.y();
+        1.0 + hsl.y() - 1.0 * hsl.y()
     };
 
     let p = 2.0 * hsl.y() - q;
