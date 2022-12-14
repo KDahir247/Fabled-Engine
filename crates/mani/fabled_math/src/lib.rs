@@ -91,6 +91,17 @@ pub mod vector_math {
         unsafe { pow_v4f32(vector_simd, exponent_simd) }
     }
 
+
+    #[inline(always)]
+    pub fn max(simd_vector: std::simd::f32x4, simd_vector1: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.simd_max(simd_vector1)
+    }
+
+    #[inline(always)]
+    pub fn min(simd_vector: std::simd::f32x4, simd_vector1: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.simd_min(simd_vector1)
+    }
+
     #[inline(always)]
     pub fn clamp(
         simd_vector: std::simd::f32x4,
@@ -336,6 +347,11 @@ pub mod vector_math {
     #[inline(always)]
     pub fn component_product(simd_vector: std::simd::f32x4) -> f32 {
         simd_vector.reduce_product()
+    }
+
+    #[inline]
+    pub fn signum(simd_vector: std::simd::f32x4) -> std::simd::f32x4 {
+        simd_vector.signum()
     }
 
     #[inline]
@@ -638,6 +654,7 @@ pub mod vector_math {
         simd_vector.reduce_or()
     }
 
+    #[inline]
     pub fn reduce_sum(simd_vector: std::simd::Simd<usize, 4>) -> usize {
         simd_vector.reduce_sum()
     }

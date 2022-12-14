@@ -1,31 +1,36 @@
-use fabled_math::vector_math::{clamp, pow, saturate};
+use fabled_math::vector_math::{clamp, max, saturate};
 use fabled_math::{Matrix3x3, Vector3};
 
 // https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
-// For the original ACES curve just multiply input (x) by 0.6
-pub fn fast_tonemap(hdr: Vector3) -> Vector3 {
-    let aces_hdr = hdr * 0.6;
-    const A: Vector3 = Vector3::broadcast(2.51);
-    const B: Vector3 = Vector3::broadcast(0.3);
-    const C: Vector3 = Vector3::broadcast(2.43);
-    const D: Vector3 = Vector3::broadcast(0.59);
-    const E: Vector3 = Vector3::broadcast(0.14);
+pub fn aces_filmic_tonemap(color: Vector3) -> Vector3 {
+    let aces_color = color * 0.6;
 
-    let ldr_unclamped = (aces_hdr * (A * aces_hdr + B)) / (aces_hdr * (C * aces_hdr + D) + E);
+    let ldr_unclamped =
+        (aces_color * (aces_color * 2.51 + 0.3)) / (aces_color * (aces_color * 2.43 + 0.59) + 0.14);
 
     Vector3 {
         value: clamp(ldr_unclamped.value, Vector3::ZERO.value, Vector3::ONE.value),
     }
 }
 
-pub const ACES_INPUT_MATRIX: Matrix3x3 = Matrix3x3::set(
+// https://twitter.com/jimhejl/status/1137568973367783424/photo/1
+pub fn filmic_alu_tonemap(color: Vector3) -> Vector3 {
+    let color = Vector3 {
+        value: max(Vector3::ZERO.value, (color - 0.004f32).value),
+    };
+
+    (color * (color * 6.2 + 0.5)) / (color * (color * 6.2 + 1.7) + 0.06)
+}
+
+
+const ACES_INPUT_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(0.59719, 0.07600, 0.02840),
     Vector3::set(0.35458, 0.90834, 0.13383),
     Vector3::set(0.04823, 0.01566, 0.83777),
 );
 
 
-pub const ACES_OUTPUT_MATRIX: Matrix3x3 = Matrix3x3::set(
+const ACES_OUTPUT_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(1.60475, -0.10208, -0.00327),
     Vector3::set(-0.53108, 1.10813, -0.07276),
     Vector3::set(-0.07367, -0.00605, 1.07602),
@@ -38,12 +43,22 @@ fn rrt_and_odt_fit(v: Vector3) -> Vector3 {
     a / b
 }
 
-pub fn tone_map(hdr: Vector3) -> Vector3 {
-    let ldr = ACES_OUTPUT_MATRIX * rrt_and_odt_fit(ACES_INPUT_MATRIX * hdr);
+// https://github.com/TheRealMJP/BakingLab/blob/master/BakingLab/ACES.hlsl
+pub fn aces_fitted_tonemap(color: Vector3) -> Vector3 {
+    let color = ACES_OUTPUT_MATRIX * rrt_and_odt_fit(ACES_INPUT_MATRIX * color);
 
     Vector3 {
-        value: clamp(ldr.value, Vector3::ZERO.value, Vector3::ONE.value),
+        value: saturate(color.value),
     }
 }
 
-pub fn evaluate_curve_segment(x: f32) -> f32 {}
+// http://www.oscars.org/science-technology/sci-tech-projects/aces
+pub fn aces_tonemap(color: Vector3) -> Vector3 {
+    let color = ACES_INPUT_MATRIX * color;
+    let a = color * (color + 0.0245786) - 0.000090537;
+    let b = color * (color * 0.983729 + 0.4329510) + 0.238081;
+
+    Vector3 {
+        value: clamp((a / b).value, Vector3::ZERO.value, Vector3::ONE.value),
+    }
+}

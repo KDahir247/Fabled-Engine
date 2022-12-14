@@ -11,6 +11,8 @@ pub fn create_palette(time: f32, a: Vector3, b: Vector3, c: Vector3, d: Vector3)
     }
 }
 
+// todo rework the blending with opacity.
+
 pub fn multiply_blend(a: Vector3, b: Vector3) -> Vector3 {
     a * b
 }

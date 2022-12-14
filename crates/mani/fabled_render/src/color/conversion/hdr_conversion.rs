@@ -72,6 +72,90 @@ pub const XYZ_TO_AP1_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(-0.2364246952, 0.0167563477, 0.9883948585),
 );
 
+// ACEScc and ACEScct are primarily used for color grading
+fn acescct_from_linear_single(lin: f32) -> f32 {
+    if lin <= 0.0078125 {
+        10.5402377416545 * lin + 0.0729055341958355
+    } else {
+        (lin.log2() + 9.72) / 17.5
+    }
+}
+
+// convert aces2025 to acescct
+pub fn acescct_from_linear(lin: Vector3) -> Vector3 {
+    Vector3::set(
+        acescct_from_linear_single(lin.x()),
+        acescct_from_linear_single(lin.y()),
+        acescct_from_linear_single(lin.z()),
+    )
+}
+
+fn linear_from_acescct_single(cct: f32) -> f32 {
+    if cct > 0.155251141552511 {
+        2.0f32.powf(cct * 17.52 - 9.72)
+    } else {
+        (cct - 0.0729055341958355) / 10.5402377416545
+    }
+}
+
+pub fn linear_from_acescct(cct: Vector3) -> Vector3 {
+    Vector3::set(
+        linear_from_acescct_single(cct.x()),
+        linear_from_acescct_single(cct.y()),
+        linear_from_acescct_single(cct.z()),
+    )
+}
+
+// When ACES values are matrixed into the smaller AP1 space, colors outside
+// the AP1 gamut can generate negative values even before the log encoding.
+// store negative value to have a lossless conversion if needed.
+fn acescc_from_linear_single(lin: f32) -> f32 {
+    if lin <= 0.0 {
+        -0.3584474886
+    } else if lin < 2.0f32.powf(-15.0) {
+        ((2.0f32.powf(-16.0) + lin * 0.5).log2() + 9.72) / 17.52
+    } else {
+        (lin.log2() + 9.72) / 17.52
+    }
+}
+
+pub fn acescc_from_linear(lin: Vector3) -> Vector3 {
+    Vector3::set(
+        acescc_from_linear_single(lin.x()),
+        acescc_from_linear_single(lin.y()),
+        acescc_from_linear_single(lin.z()),
+    )
+}
+
+fn linear_from_acescc_single(cc: f32) -> f32 {
+    const HALF_MAX: f32 = 65504.0;
+
+    if cc < -0.3013698630 {
+        (2.0f32.powf(cc * 17.52 - 9.72) - 2.0f32.powf(-16.0)) * 2.0
+    } else if cc < (HALF_MAX.log2() + 9.72) / 17.52 {
+        2.0f32.powf(cc * 17.52 - 9.72)
+    } else {
+        HALF_MAX
+    }
+}
+
+pub fn linear_from_acescc(cc: Vector3) -> Vector3 {
+    Vector3::set(
+        linear_from_acescc_single(cc.x()),
+        linear_from_acescc_single(cc.y()),
+        linear_from_acescc_single(cc.z()),
+    )
+}
+
+// todo this should go to the shader. placing here since we haven't decided if
+//  we are using wgsl, rustgpu, glsl, spirv or others. This is what we want
+pub fn linear_to_acescg(lin: Vector3) -> Vector3 {
+    AP0_TO_AP1_MATRIX * lin
+}
+
+pub fn acescg_to_linear(acescg: Vector3) -> Vector3 {
+    AP1_TO_AP0_MATRIX * acescg
+}
 
 // HDR Encoding decoding
 pub fn screen_referred_to_rgbe(screen_referred_color: Vector3) -> Vector4 {
