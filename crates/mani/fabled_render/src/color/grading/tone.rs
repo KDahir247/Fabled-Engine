@@ -1,5 +1,5 @@
 use fabled_math::vector_math::{clamp, max, saturate};
-use fabled_math::{Matrix3x3, Vector3};
+use fabled_math::{Matrix3x3, Vector2, Vector3};
 
 // https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 pub fn aces_filmic_tonemap(color: Vector3) -> Vector3 {
@@ -61,4 +61,44 @@ pub fn aces_tonemap(color: Vector3) -> Vector3 {
     Vector3 {
         value: clamp((a / b).value, Vector3::ZERO.value, Vector3::ONE.value),
     }
+}
+
+
+// linear_vertical should be less then shoulder_vertical
+// linear_horizontal should be between toe and shoulder_horizontal
+// shoulder_vertical should be between 0 and 1
+// shoulder_horizontal should be greater than linear_horizontal
+
+fn pwc(
+    x: f32,
+    toe: f32,
+    linear: Vector2,   // horizontal, vertical
+    shoulder: Vector2, // horizontal, vertical
+) -> f32 {
+    if x < toe {
+        0.0
+    } else if x < linear.x() {
+        linear.y()
+            * ((x - toe) / (linear.x() - toe)).powf(
+                (shoulder.y() - linear.y()) * (linear.x() - toe)
+                    / (linear.y() * (shoulder.x() - linear.x())),
+            )
+    } else if x < shoulder.x() {
+        (shoulder.y() - linear.y()) / (shoulder.x() - linear.x()) * x
+            - linear.x() * (shoulder.y() - linear.y()) / (shoulder.x() - linear.x())
+            + linear.y()
+    } else {
+        shoulder.y()
+            + (1.0 - shoulder.y()) * (shoulder.y() - linear.y()) * (x - shoulder.x())
+                / ((shoulder.y() - linear.y()) * (x - shoulder.x())
+                    + (shoulder.x() - linear.x()) * (1.0 - shoulder.y()))
+    }
+}
+
+pub fn pwc_tonemap(color: Vector3, toe: f32, linear: Vector2, shoulder: Vector2) -> Vector3 {
+    Vector3::set(
+        pwc(color.x(), toe, linear, shoulder),
+        pwc(color.y(), toe, linear, shoulder),
+        pwc(color.z(), toe, linear, shoulder),
+    )
 }
