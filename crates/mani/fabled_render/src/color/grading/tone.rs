@@ -95,6 +95,7 @@ fn pwc(
     }
 }
 
+// https://www.shadertoy.com/user/0x1D
 pub fn pwc_tonemap(color: Vector3, toe: f32, linear: Vector2, shoulder: Vector2) -> Vector3 {
     Vector3::set(
         pwc(color.x(), toe, linear, shoulder),
