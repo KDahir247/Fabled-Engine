@@ -302,31 +302,35 @@ pub mod vector_math {
     }
 
     #[inline(always)]
-    pub fn component_gt(simd_vector: std::simd::f32x4, component: f32) -> std::simd::mask32x4 {
-        let component_vector3: std::simd::f32x4 = std::simd::f32x4::from_array([component; 4]);
-
-        simd_vector.simd_gt(component_vector3)
+    pub fn gt(
+        simd_vector: std::simd::f32x4,
+        simd_vector1: std::simd::f32x4,
+    ) -> std::simd::mask32x4 {
+        simd_vector.simd_gt(simd_vector1)
     }
 
     #[inline(always)]
-    pub fn component_ge(simd_vector: std::simd::f32x4, component: f32) -> std::simd::mask32x4 {
-        let component_vector3: std::simd::f32x4 = std::simd::f32x4::from_array([component; 4]);
-
-        simd_vector.simd_ge(component_vector3)
+    pub fn ge(
+        simd_vector: std::simd::f32x4,
+        simd_vector1: std::simd::f32x4,
+    ) -> std::simd::mask32x4 {
+        simd_vector.simd_ge(simd_vector1)
     }
 
     #[inline(always)]
-    pub fn component_le(simd_vector: std::simd::f32x4, component: f32) -> std::simd::mask32x4 {
-        let component_vector3: std::simd::f32x4 = std::simd::f32x4::from_array([component; 4]);
-
-        simd_vector.simd_le(component_vector3)
+    pub fn le(
+        simd_vector: std::simd::f32x4,
+        simd_vector1: std::simd::f32x4,
+    ) -> std::simd::mask32x4 {
+        simd_vector.simd_le(simd_vector1)
     }
 
     #[inline(always)]
-    pub fn component_lt(simd_vector: std::simd::f32x4, component: f32) -> std::simd::mask32x4 {
-        let component_vector3: std::simd::f32x4 = std::simd::f32x4::from_array([component; 4]);
-
-        simd_vector.simd_lt(component_vector3)
+    pub fn lt(
+        simd_vector: std::simd::f32x4,
+        simd_vector1: std::simd::f32x4,
+    ) -> std::simd::mask32x4 {
+        simd_vector.simd_lt(simd_vector1)
     }
 
     #[inline(always)]
@@ -424,7 +428,7 @@ pub mod vector_math {
         let lhs = bias(simd_vector * TWO_VEC, gain) * HALF_VEC;
         let rhs = bias(simd_vector * TWO_VEC - ONE_VEC, ONE_VEC - gain) * HALF_VEC + HALF_VEC;
 
-        let mask = component_lt(simd_vector, 0.5);
+        let mask = lt(simd_vector, std::simd::f32x4::from_array([0.5; 4]));
 
         select(lhs, rhs, mask)
     }

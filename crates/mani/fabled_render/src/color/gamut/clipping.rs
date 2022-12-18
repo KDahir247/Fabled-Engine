@@ -1,7 +1,5 @@
-use crate::color::OkLab;
-use fabled_math::vector_math::{
-    component_ge, component_gt, component_lt, component_max, component_min, select,
-};
+use crate::color::{oklab_to_srgb, srgb_to_oklab};
+use fabled_math::vector_math::{component_max, component_min, ge, gt, lt, select};
 use fabled_math::{Bool3, Vector2, Vector3};
 
 
@@ -85,7 +83,7 @@ pub fn compute_max_saturation(a: f32, b: f32) -> f32 {
 pub fn find_cusp(a: f32, b: f32) -> Vector2 {
     let s_cusp = compute_max_saturation(a, b);
 
-    let rgb_at_max = OkLab::oklab_to_linear_srgb(OkLab::new(1.0, s_cusp * a, s_cusp * b));
+    let rgb_at_max = oklab_to_srgb(Vector3::set(1.0, s_cusp * a, s_cusp * b));
 
     let l_cusp = (1.0 / component_max(rgb_at_max.value)).cbrt();
     let c_cusp = l_cusp * s_cusp;
@@ -167,7 +165,7 @@ pub fn find_gamut_intersection(a: f32, b: f32, l1: f32, c1: f32, l0: f32) -> f32
                 let max_vector3 = Vector3::broadcast(f32::MAX);
 
 
-                let mask = component_ge(u_rgb.value, 0.0);
+                let mask = ge(u_rgb.value, Vector3::broadcast(0.0).value);
 
                 let t_rgb = select(t_rgb.value, max_vector3.value, mask);
 
@@ -183,28 +181,28 @@ pub fn gamut_clip_adaptive_l0_0_5(rgb: Vector3, alpha: Option<f32>) -> Vector3 {
     let alpha = alpha.unwrap_or(0.05);
 
     let normalized_min = Bool3 {
-        value: component_lt(rgb.value, 1.0),
+        value: lt(rgb.value, Vector3::broadcast(1.0).value),
     };
     let normalized_max = Bool3 {
-        value: component_gt(rgb.value, 0.0),
+        value: gt(rgb.value, Vector3::broadcast(0.0).value),
     };
 
     if normalized_min.all() & normalized_max.all() {
         return rgb;
     }
 
-    let lab = OkLab::linear_srgb_to_oklab(rgb);
+    let lab = srgb_to_oklab(rgb);
 
-    let l = lab.value.x();
+    let l = lab.x();
 
-    let length = ((lab.value.y() * lab.value.y()) + (lab.value.z() * lab.value.z()))
+    let length = ((lab.y() * lab.y()) + (lab.z() * lab.z()))
         .sqrt()
         .max(f32::EPSILON);
 
     let rcp_length = length.recip();
 
-    let a_ = lab.value.y() * rcp_length;
-    let b_ = lab.value.z() * rcp_length;
+    let a_ = lab.y() * rcp_length;
+    let b_ = lab.z() * rcp_length;
 
     let ld = l - 0.5;
     let ld_abs = ld.abs();
@@ -222,5 +220,5 @@ pub fn gamut_clip_adaptive_l0_0_5(rgb: Vector3, alpha: Option<f32>) -> Vector3 {
     let a = c_clipped * a_;
     let b = c_clipped * b_;
 
-    OkLab::oklab_to_linear_srgb(OkLab::new(l_clipped, a, b))
+    oklab_to_srgb(Vector3::set(l_clipped, a, b))
 }

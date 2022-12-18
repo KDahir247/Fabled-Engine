@@ -10,6 +10,13 @@ pub fn apply_lift_gamma_gain(a: Vector3, lift: Vector3, gamma: Vector3, gain: Ve
 }
 
 
+pub fn apply_asc_cdl(a: Vector3, slope: Vector3, offset: Vector3, power: Vector3) -> Vector3 {
+    //
+
+    //
+}
+
+
 // value of channel should be greater than or equal to -2 or less than or equal
 // to 2.0;
 pub fn channel_mixer(c: Vector3, red: Vector3, green: Vector3, blue: Vector3) -> Vector3 {

@@ -1,0 +1,21 @@
+Personal notes.
+
+The color grading will be using ACES. ACES has four different type of space we will be using (excluding ACESProxy).
+Color grading will be done using the ACEScc or ACEScct depending on preference. ACEScct and ACEScc both use log space,
+so we will not need to have a function that will convert a color from linear space to log space and from log space to linear.
+
+Note that for color grading we will need to convert ACES2025 and/or ACEScg to ACEScc or ACEScct depending on preference.
+
+Watching da vinci color tutorial it look like it does contrast in log space.
+
+
+srgb to ACES-2025 -> ACES2025 to log (cc or cct) -> cdl (color decision list) -> contrast -> log (cc or cct) to ACES2025
+
+for cdl refer to https://en.wikipedia.org/wiki/ASC_CDL
+
+formula = output = (i x s + o) ^ p
+
+where i is the input pixel
+      s is the slope
+      o is the offset
+      p is the power

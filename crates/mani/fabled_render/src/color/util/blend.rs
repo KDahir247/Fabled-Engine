@@ -1,4 +1,4 @@
-use fabled_math::vector_math::{abs, component_le, component_min, cos, pow, select, sqrt};
+use fabled_math::vector_math::{abs, component_min, cos, le, pow, select, sqrt};
 use fabled_math::Vector3;
 
 pub fn create_palette(time: f32, a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> Vector3 {
@@ -51,7 +51,7 @@ pub fn hardlight_blend(a: Vector3, b: Vector3) -> Vector3 {
 
     let screen = screen_blend(a, b * 2.0 - 1.0);
 
-    let mask = component_le(b.value, 0.5);
+    let mask = le(b.value, Vector3::broadcast(0.5).value);
 
     Vector3 {
         value: select(mul.value, screen.value, mask),

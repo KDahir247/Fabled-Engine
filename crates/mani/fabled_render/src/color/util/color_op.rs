@@ -1,5 +1,8 @@
-use crate::camera::FStop;
-use fabled_math::vector_math::{clamp, component_ge, dot, exp2, gain, lerp, log2, pow, select};
+use crate::camera::{compute_exposure_value, FStop, Shutter};
+use fabled_math::vector_math::{
+    clamp, component_max, component_min, dot, exp2, gain, le, lerp, log2, lt, pow, rcp, select,
+    sign, signum,
+};
 use fabled_math::{Vector2, Vector3};
 
 pub fn chromatic_coord_to_tri_stimulus_white(chromaticity_coord: Vector2) -> Vector3 {
@@ -89,7 +92,7 @@ pub fn desaturate(linear_srgb: Vector3, factor: Vector3) -> Vector3 {
     }
 }
 
-pub fn saturate(linear_srgb: Vector3, factor: f32) -> Vector3 {
+pub fn saturate(linear_srgb: Vector3, factor: Vector3) -> Vector3 {
     let max_luminance = srgb_compute_luminance(linear_srgb);
 
     let gray = Vector3::broadcast(max_luminance);
@@ -108,14 +111,13 @@ pub fn saturate(linear_srgb: Vector3, factor: f32) -> Vector3 {
 
 // http://filmicworlds.com/blog/minimal-color-grading-tools/
 pub fn color_exposure(linear: Vector3, f_stop: FStop) -> Vector3 {
+    // todo the powi should take exposure value if ev stop
     linear * 2.0f32.powi(f_stop.step)
 }
 
 // gray should be 0.18 for linear and 0.5 for gamma
 pub fn linear_contrast(srgb: Vector3, gray: f32, contrast: f32) -> Vector3 {
-    const GRAY_VEC3: Vector3 = Vector3::broadcast(gray);
-
-    gray + (srgb - gray) * contrast
+    (srgb - gray) * contrast + gray
 }
 
 // gray should be 0.18 for linear and 0.5 for gamma
@@ -133,4 +135,49 @@ pub fn log_contrast(srgb: Vector3, gray: f32, contrast: f32) -> Vector3 {
     Vector3 {
         value: exp2(adjusted.value) - f32::EPSILON,
     }
+}
+
+pub fn curve(
+    color: Vector3,
+    shadow_gamma: Vector3,
+    midpoint: Vector3,
+    highlight_scale: Vector3,
+) -> Vector3 {
+    let d = Vector3 {
+        value: pow(color.value, shadow_gamma.value)
+            * rcp(pow(midpoint.value, (shadow_gamma - 1.0).value)),
+    };
+
+    let l = highlight_scale * (color - midpoint) + midpoint;
+
+    let mask = le(color.value, midpoint.value);
+
+    Vector3 {
+        value: select(d.value, l.value, mask),
+    }
+}
+
+pub fn vibrance(srgb: Vector3, luminance: Vector3, balance: Vector3, vibrance: f32) -> Vector3 {
+    // let luma = srgb_compute_luminance(srgb);
+    //
+    // let max_color = component_max(srgb.value);
+    // let min_color = component_min(srgb.value);
+
+    let luma = Vector3::broadcast(srgb_compute_luminance(srgb));
+    let color_saturation = saturate(srgb, balance);
+
+    let coeff_vibrance = balance * vibrance;
+    let color = lerp(
+        luma.value,
+        srgb.value,
+        (Vector3::broadcast(1.0)
+            + (coeff_vibrance
+                * (Vector3::broadcast(1.0)
+                    - (Vector3 {
+                        value: signum(coeff_vibrance.value),
+                    }) * color_saturation)))
+            .value,
+    );
+
+    todo!()
 }

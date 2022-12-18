@@ -1,4 +1,4 @@
-use fabled_math::vector_math::{component_ge, pow, select};
+use fabled_math::vector_math::{ge, pow, select};
 use fabled_math::Vector3;
 
 // HDR ICTCP transfer function param
@@ -30,7 +30,7 @@ pub fn oetf_s_rgb(linear: Vector3) -> Vector3 {
     let d = linear * 12.92;
 
 
-    let mask = component_ge(linear.value, 0.0031308);
+    let mask = ge(linear.value, Vector3::broadcast(0.0031308).value);
 
     let gamma = select(c.value, d.value, mask);
 
@@ -46,7 +46,7 @@ pub fn eotf_s_rgb(s_rgb: Vector3) -> Vector3 {
 
     let c = pow(b.value, Vector3::broadcast(2.4).value);
 
-    let mask = component_ge(s_rgb.value, 0.04045);
+    let mask = ge(s_rgb.value, Vector3::broadcast(0.04045).value);
 
     let linear = select(c, d.value, mask);
 
@@ -84,7 +84,7 @@ pub fn pq_eotf(pq_val: Vector3) -> Vector3 {
     } - PQ_C1;
 
     const ZERO_VEC3: Vector3 = Vector3::broadcast(0.0);
-    let mask = component_ge(n.value, 0.0);
+    let mask = ge(n.value, Vector3::broadcast(0.0).value);
 
     let clamped_n = Vector3 {
         value: select(n.value, ZERO_VEC3.value, mask),
