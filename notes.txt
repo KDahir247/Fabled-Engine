@@ -50,4 +50,457 @@ Crate that will be used
 - ThisError
 - Either Unroll or Crunchy
 
+//working progress
+// Lincense: CC0 (https://creativecommons.org/publicdomain/zero/1.0/)
 
+/*
+Good intro to ACES: https://chrisbrejon.com/cg-cinematography/chapter-1-5-academy-color-encoding-system-aces/
+
+On Average the rendering with sharp RGB primaries produces results closer to the spectral refrence:
+https://computergraphics.stackexchange.com/questions/8152/for-shader-math-why-should-linear-rgb-keep-the-gamut-of-srgb
+
+Rendering in ACEScg retains bounce colors better than rendering in sRGB.
+That is because the AP1 primaries (i.e. ACEScg RGB primaries) cover a wider gamut than the Rec. 709 primaries which sRGB uses.
+This means that saturated sRGB colors are not fully saturated in ACEScg.
+You can still get strongly saturated colors by picking colors in ACEScg directly instead of doing so in sRGB.
+
+However, picking colors in sRGB and converting them to ACEScg before rendering has two advantages.
+
+First, the sRGB gamut lies largely inside and covers a decent portion of the Pointer's gamut, a comprehensive sampling of naturally occuring albedos.
+So using sRGB to pick albedos ensures your values to be reasonable.
+(see Rec. 709 / sRGB section here: https://www.tftcentral.co.uk/articles/pointers_gamut.htm)
+
+Second, since ACEScg has a wider gamut than sRGB, there is no guarantee that your rendering results will be in gamut (for LDR displays).
+Picking colors in sRGB mitigates that problem even if it doesn't completely solve it.
+For example bounce colors can still get saturated to a point where they are not longer in sRGB gamut.
+So softclipping the rendering+tonemapping result before applying the inverse sRGB EOTF might be a good idea.
+
+camera controls via mouse + shift key
+light controls via WASD/Arrow keys
+
+Common:  settings
+BufferA: rendering
+Image:   tonemapping
+
+*/
+float sRGB_InvEOTF(float c)
+{
+    return c > 0.0031308 ? pow(c, 1.0/2.4) * 1.055 - 0.055 : c * 12.92;
+}
+
+float sRGB_EOTF(float c)
+{
+    return c > 0.04045 ? pow(c / 1.055 + 0.055/1.055, 2.4) : c / 12.92;
+}
+
+vec3 sRGB_InvEOTF(vec3 rgb)
+{
+    return If(greaterThan(rgb, vec3(0.0031308)), pow(rgb, vec3(1.0/2.4)) * 1.055 - 0.055, rgb * 12.92);
+}
+
+vec3 sRGB_EOTF(vec3 rgb)
+{
+    return If(greaterThan(rgb, vec3(0.04045)), pow(rgb / 1.055 + 0.055/1.055, vec3(2.4)), rgb / 12.92);
+}
+
+
+float ACEScc_from_Linear(float lin)
+{
+    if (lin <= 0.0)
+        return -0.3584474886;
+
+    if (lin < exp2(-15.0))
+    	return log2(exp2(-16.0) + lin * 0.5) / 17.52 + (9.72/17.52);
+
+    return log2(lin) / 17.52 + (9.72/17.52);
+}
+
+vec3 ACEScc_from_Linear(vec3 lin)
+{
+    return vec3(ACEScc_from_Linear(lin.r),
+                ACEScc_from_Linear(lin.g),
+                ACEScc_from_Linear(lin.b));
+}
+
+
+float Linear_from_ACEScc(float cc)
+{
+    if (cc < -0.3013698630)
+    	return exp2(cc * 17.52 - 9.72)*2.0 - exp2(-16.0)*2.0;
+
+    return exp2(cc * 17.52 - 9.72);
+}
+
+vec3 Linear_from_ACEScc(vec3 cc)
+{
+    return vec3(Linear_from_ACEScc(cc.r),
+                Linear_from_ACEScc(cc.g),
+                Linear_from_ACEScc(cc.b));
+}
+
+
+float ACEScct_from_Linear(float lin)
+{
+    if(lin > 0.0078125)
+        return log2(lin) / 17.52 + (9.72/17.52);
+
+	return lin * 10.5402377416545 + 0.0729055341958355;
+}
+
+vec3 ACEScct_from_Linear(vec3 lin)
+{
+    return vec3(ACEScct_from_Linear(lin.r),
+                ACEScct_from_Linear(lin.g),
+                ACEScct_from_Linear(lin.b));
+}
+
+
+float Linear_from_ACEScct(float cct)
+{
+    if(cct > 0.155251141552511)
+        return exp2(cct * 17.52 - 9.72);
+
+	return cct / 10.5402377416545 - (0.0729055341958355/10.5402377416545);
+}
+
+vec3 Linear_from_ACEScct(vec3 cct)
+{
+    return vec3(Linear_from_ACEScct(cct.r),
+                Linear_from_ACEScct(cct.g),
+                Linear_from_ACEScct(cct.b));
+}
+
+
+
+// ACES fit by Stephen Hill (@self_shadow)
+// https://github.com/TheRealMJP/BakingLab/blob/master/BakingLab/ACES.hlsl
+
+// sRGB => XYZ => D65_2_D60 => AP1
+const mat3 sRGBtoAP1 = mat3
+(
+	0.613097, 0.339523, 0.047379,
+	0.070194, 0.916354, 0.013452,
+	0.020616, 0.109570, 0.869815
+);
+
+const mat3 AP1toSRGB = mat3
+(
+     1.704859, -0.621715, -0.083299,
+    -0.130078,  1.140734, -0.010560,
+    -0.023964, -0.128975,  1.153013
+);
+
+// AP1 => RRT_SAT
+const mat3 RRT_SAT = mat3
+(
+	0.970889, 0.026963, 0.002148,
+	0.010889, 0.986963, 0.002148,
+	0.010889, 0.026963, 0.962148
+);
+
+
+// sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
+const mat3 ACESInputMat = mat3
+(
+    0.59719, 0.35458, 0.04823,
+    0.07600, 0.90834, 0.01566,
+    0.02840, 0.13383, 0.83777
+);
+
+// ODT_SAT => XYZ => D60_2_D65 => sRGB
+const mat3 ACESOutputMat = mat3
+(
+     1.60475, -0.53108, -0.07367,
+    -0.10208,  1.10813, -0.00605,
+    -0.00327, -0.07276,  1.07602
+);
+
+vec3 RRTAndODTFit(vec3 x)
+{
+    vec3 a = (x            + 0.0245786) * x;
+    vec3 b = (x * 0.983729 + 0.4329510) * x + 0.238081;
+
+    return a / b;
+}
+
+
+vec3 ToneTF0(vec3 x)
+{
+    vec3 a = (x            + 0.0509184) * x;
+    vec3 b = (x * 0.973854 + 0.7190130) * x + 0.0778594;
+
+    return a / b;
+}
+
+vec3 ToneTF1(vec3 x)
+{
+    vec3 a = (x          + 0.0961727) * x;
+    vec3 b = (x * 0.9797 + 0.6157480) * x + 0.213717;
+
+    return a / b;
+}
+
+vec3 ToneTF2(vec3 x)
+{
+    vec3 a = (x            + 0.0822192) * x;
+    vec3 b = (x * 0.983521 + 0.5001330) * x + 0.274064;
+
+    return a / b;
+}
+
+
+// https://twitter.com/jimhejl/status/1137559578030354437
+vec3 ToneMapFilmicALU(vec3 x)
+{
+    x *= 0.665;
+
+   #if 0
+    x = max(vec3(0.0), x - 0.004f);
+    x = (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
+
+    x = sRGB_EOTF(x);
+   #else
+    x = max(vec3(0.0), x);
+    x = (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
+
+    x = pow(x, vec3(2.2));// using gamma instead of sRGB_EOTF + without x - 0.004f looks about the same
+   #endif
+
+    return x;
+}
+
+
+vec3 Tonemap_ACESFitted(vec3 srgb)
+{
+    vec3 color = srgb * ACESInputMat;
+
+   #if 1
+    color = ToneTF2(color);
+   #else
+    color = RRTAndODTFit(color);
+   #endif
+
+    color = color * ACESOutputMat;
+
+    return color;
+}
+
+vec3 Tonemap_ACESFitted2(vec3 acescg)
+{
+    vec3 color = acescg * RRT_SAT;
+
+   #if 1
+    color = ToneTF2(color);
+   #elif 1
+    color = RRTAndODTFit(color);
+   #elif 1
+    color = ToneMapFilmicALU(color);
+   #endif
+
+    color = color * ACESOutputMat;
+    //color = ToneMapFilmicALU(color);
+
+    return color;
+}
+
+vec3 ColorGrade(vec3 col)
+{
+    col = ACEScct_from_Linear(col);
+    {
+        vec3 s = vec3(1.1, 1.2, 1.0);
+        vec3 o = vec3(0.1, 0.0, 0.1);
+        vec3 p = vec3(1.4, 1.3, 1.3);
+
+        col = pow(col * s + o, p);
+    }
+    col = Linear_from_ACEScct(col);
+
+    return col;
+}
+
+vec3 contrast1(vec3 col, float contrast, float pivot){
+
+    float curve = contrast;
+    if (curve > 0.0){
+    curve = curve * 2.0;
+    }else{
+    curve = curve;
+    }
+
+    curve = curve + 1.0;
+
+    float red = 0.0;
+
+    if (col.r <= pivot) {
+        col = ACEScct_from_Linear(col);
+
+     red = pow(col.r / pivot, curve) * pivot;
+         col = Linear_from_ACEScct(col);
+
+    }else{
+        col = ACEScct_from_Linear(col);
+
+        red = (1.0f - pow(1.0f - (col.r - pivot) / (1.0f - pivot), curve)) * (1.0f - pivot) + pivot;
+        col = Linear_from_ACEScct(col);
+
+    }
+
+
+    float green = 0.0;
+
+    if (col.g <= pivot){
+            col = ACEScct_from_Linear(col);
+
+     green = pow(col.g / pivot, curve) * pivot;
+              col = Linear_from_ACEScct(col);
+
+    }else{
+     green = (1.0f - pow(1.0f - (col.g - pivot) / (1.0f - pivot), curve)) * (1.0f - pivot) + pivot;
+    }
+
+    float blue = 0.0;
+
+    if (col.b <= pivot){
+     blue = pow(col.b / pivot, curve) * pivot;
+    }else{
+     blue = (1.0f - pow(1.0f - (col.b - pivot) / (1.0f - pivot), curve)) * (1.0f - pivot) + pivot;
+    }
+
+    col = vec3(red, green, blue);
+
+
+    return vec3(red, green, blue);
+
+
+}
+
+vec3 contrast3(vec3 col, float contrast, float pivot){
+    col = ACEScct_from_Linear(col);
+
+    vec3 mid = vec3(pivot);
+    col = mid + contrast * (col - mid);
+    col = Linear_from_ACEScct(col);
+    return col;
+}
+
+
+vec3 curve(vec3 color, vec3 shadowgamma, vec3 midpoint, vec3 high){
+    vec3 d = 1.0 / (pow(midpoint, shadowgamma - 1.0));
+    vec3 dark = pow(color, shadowgamma) * d;
+    vec3 light = high * (color - midpoint) + midpoint;
+
+    float red = 0.0;
+
+    if(color.r <= midpoint.r){
+        red = dark.r;
+    }else{
+        red = light.r;
+    }
+
+    float green = 0.0;
+    if (color.g <= midpoint.g){
+        green = dark.g;
+    }else{
+        green = light.g;
+    }
+
+    float blue = 0.0;
+
+    if (color.b <= midpoint.b){
+        blue = dark.b;
+    }else{
+        blue = light.b;
+    }
+
+
+    color = vec3(red, green, blue);
+
+    return color;
+}
+
+vec3 contrast(vec3 col, float contrast, float pivot){
+    col = ACEScct_from_Linear(col);
+
+    //vec3 mid = vec3(0.18);
+    //col = mid + contrast * (col - mid);
+
+    col = mix(vec3(pivot), col, clamp(contrast, 0.0, 1.0));
+
+	vec3 p = vec3(1.0 / clamp(2.0 - contrast, 0.0, 1.0));
+	vec3 dark = pow(col / pivot, p) * pivot;
+	vec3 ip = vec3(1.0 - pivot);
+	vec3 light = 1.0 - pow(1.0 / ip - col / ip, p) * ip;
+
+    float red = mix(dark.r, light.r, col.r > pivot);
+	float green = mix(dark.g, light.g, col.g > pivot);
+	float blue = mix(dark.b, light.b, col.b > pivot);
+
+    col = vec3(red, green, blue);
+    col = Linear_from_ACEScct(col);
+    return col;
+}
+
+vec3 contrast4(vec3 col,  float contrast, float gray){
+    col = ACEScct_from_Linear(col);
+
+    vec3 log_col = log2(col + vec3(0.0001));
+
+    vec3 log_gray = log2(vec3(gray));
+
+    vec3 adjusted = log_gray + (log_col - log_gray) * contrast;
+
+    col = exp2(adjusted) - 0.0001;
+
+    col = Linear_from_ACEScct(col);
+    return col;
+}
+
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+	vec2 tex = fragCoord.xy / iResolution.xy;
+
+    vec3 col = textureLod(iChannel0, tex, 0.0).rgb;
+
+    col *= exp2(EXPOSURE);
+
+    #ifdef DO_COLORGRADE
+	col = ColorGrade(col);
+    #endif
+
+    //col = contrast1(c qol, 0.5, 0.5);
+    col = contrast(col, 1.0, 0.18);
+    col = curve(col, vec3(1.0), vec3(0.2), vec3(0.2));
+    //if(false)
+    {
+        #if MODE == 0
+        col = Tonemap_ACESFitted2(col);
+        #elif MODE == 1
+        col = Tonemap_ACESFitted(col);
+        #else
+        col = RRTAndODTFit(col);
+        #endif
+    }
+
+    fragColor = vec4(sRGB_InvEOTF(clamp(col, 0.0, 1.0)), 0.0);
+    //fragColor = vec4(col, 0.0);
+}
+
+
+
+/*
+
+vec3 PQ(vec3 Lo)
+{
+    const float c1 = 107.0 / 128.0;
+    const float c2 = 2413.0 / 128.0;
+    const float c3 = 2392.0 / 128.0;
+    const float m1 = 1305.0 / 8192.0;
+    const float m2 = 2523.0 / 32.0;
+
+    vec3 Lp = pow(Lo, vec3(m1));
+
+    return pow((c1 + c2 * Lp) / (1.0 + c3 * Lp), vec3(m2));
+}
+
+*/

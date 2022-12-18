@@ -147,8 +147,6 @@ pub fn linear_from_acescc(cc: Vector3) -> Vector3 {
     )
 }
 
-// todo this should go to the shader. placing here since we haven't decided if
-//  we are using wgsl, rustgpu, glsl, spirv or others. This is what we want
 pub fn linear_to_acescg(lin: Vector3) -> Vector3 {
     AP0_TO_AP1_MATRIX * lin
 }

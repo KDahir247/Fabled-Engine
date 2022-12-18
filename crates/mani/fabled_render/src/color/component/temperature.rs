@@ -1,7 +1,7 @@
 use fabled_component::{Component, Modification};
 use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone, PartialEq, Hash)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Temperature {
     pub kelvin: f32,
 }

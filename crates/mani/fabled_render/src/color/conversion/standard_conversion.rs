@@ -236,17 +236,6 @@ pub fn oklab_to_xyz(oklab: Vector3) -> Vector3 {
         }
 }
 
-pub fn oklab_to_srgb(oklab: Vector3) -> Vector3 {
-    let lms_oklab = OKLAB_TO_OKLAB_LMS_MATRIX * oklab;
-
-    let pow_3_lms_oklab = pow(lms_oklab.value, Vector3::broadcast(3.0).value);
-
-    OKLAB_LMS_TO_SRGB_MATRIX
-        * Vector3 {
-            value: pow_3_lms_oklab,
-        }
-}
-
 pub fn xyz_to_oklab(tri_stimulus: Vector3) -> Vector3 {
     let lms_oklab = XYZ_TO_OKLAB_LMS_MATRIX * tri_stimulus;
 
@@ -258,6 +247,17 @@ pub fn xyz_to_oklab(tri_stimulus: Vector3) -> Vector3 {
     OKLAB_LMS_TO_OKLAB
         * Vector3 {
             value: cbrt_lms_oklab,
+        }
+}
+
+pub fn oklab_to_srgb(oklab: Vector3) -> Vector3 {
+    let lms_oklab = OKLAB_TO_OKLAB_LMS_MATRIX * oklab;
+
+    let pow_3_lms_oklab = pow(lms_oklab.value, Vector3::broadcast(3.0).value);
+
+    OKLAB_LMS_TO_SRGB_MATRIX
+        * Vector3 {
+            value: pow_3_lms_oklab,
         }
 }
 
