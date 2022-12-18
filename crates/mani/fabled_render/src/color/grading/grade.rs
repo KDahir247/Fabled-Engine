@@ -11,9 +11,9 @@ pub fn apply_lift_gamma_gain(a: Vector3, lift: Vector3, gamma: Vector3, gain: Ve
 
 
 pub fn apply_asc_cdl(a: Vector3, slope: Vector3, offset: Vector3, power: Vector3) -> Vector3 {
-    //
-
-    //
+    Vector3 {
+        value: pow((a * slope + offset).value, power.value),
+    }
 }
 
 
