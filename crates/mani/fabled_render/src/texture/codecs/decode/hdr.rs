@@ -25,6 +25,7 @@ impl HdrTextureLoader {
             .read_image_hdr()
             .map_err(CodecsError::ImageError)?;
 
+
         let mut hdr_data = Vec::with_capacity(rgb_data.len() * 16);
 
         for rgb in rgb_data {

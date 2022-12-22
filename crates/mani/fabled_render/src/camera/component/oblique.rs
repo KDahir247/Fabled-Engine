@@ -1,7 +1,7 @@
 // vertical_position get the vertical position relative to angle_rad
 // depth_offset get the z position relative to angle_rad
 
-use fabled_component::{Component, Untracked};
+use fabled_component::{Component, Modification};
 use fabled_math::Vector3;
 use std::fmt::{Display, Formatter};
 
@@ -33,7 +33,7 @@ impl Oblique {
 }
 
 impl Component for Oblique {
-    type Tracking = Untracked;
+    type Tracking = Modification;
 }
 
 impl Display for Oblique {

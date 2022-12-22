@@ -2,6 +2,7 @@ use crate::color::{oklab_to_srgb, srgb_to_oklab};
 use fabled_math::vector_math::{component_max, component_min, ge, gt, lt, select};
 use fabled_math::{Bool3, Vector2, Vector3};
 
+// todo move util function to mod.rs and constraint it to pub(crate)
 
 pub fn compute_max_saturation(a: f32, b: f32) -> f32 {
     let mut wl = 0.0;
@@ -214,7 +215,7 @@ pub fn gamut_clip_adaptive_l0_0_5(rgb: Vector3, alpha: Option<f32>) -> Vector3 {
     let t = find_gamut_intersection(a_, b_, l, length, l0);
 
     let d = 1.0 - t;
-    let l_clipped = l0 * d + t * l;
+    let l_clipped = (l0 * d) + (t * l);
     let c_clipped = t * length;
 
     let a = c_clipped * a_;

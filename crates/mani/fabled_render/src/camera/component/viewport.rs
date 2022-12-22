@@ -3,8 +3,6 @@ use fabled_component::{Component, Modification};
 use fabled_math::Vector4;
 use std::fmt::{Display, Formatter};
 
-// how can you modify a vec4
-
 #[derive(Copy, Clone, PartialEq)]
 pub struct ViewPort {
     pub rect: Vector4,

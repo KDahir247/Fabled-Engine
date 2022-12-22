@@ -1,4 +1,5 @@
-use crate::color::{apply_adaption_matrix_tristimulus, eotf_s_rgb, oetf_s_rgb, BRADFORD};
+use crate::color::component::ColorSpaceAdaption;
+use crate::color::{compute_adaption_matrix, eotf_s_rgb, oetf_s_rgb};
 use fabled_math::vector_math::{component_sum, length, pow};
 use fabled_math::{Matrix3x3, Swizzles3, Vector3};
 
@@ -12,44 +13,6 @@ pub const XYZ_TO_SRGB_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(3.241_003_3, -0.969_224_3, 0.05563942),
     Vector3::set(-1.537_398_9, 1.875_93, -0.2040112),
     Vector3::set(-0.49861587, 0.04155422, 1.057_148_9),
-);
-
-
-pub const REC_2020_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(0.636_953_53, 0.262_698_35, 4.994_071e-17),
-    Vector3::set(0.144_619_18, 0.678_008_8, 0.028_073_136),
-    Vector3::set(0.168_855_86, 0.059_292_894, 1.060_827_3),
-);
-
-pub const XYZ_TO_REC_2020_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(1.716_663_5, -0.66667384, 0.01764248),
-    Vector3::set(-0.355_673_3, 1.616_455_8, -0.04277698),
-    Vector3::set(-0.25336809, 0.0157683, 0.942_243_3),
-);
-
-
-pub const XYZ_TO_CIECAT16_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(0.401288, -0.250268, -0.002079),
-    Vector3::set(0.650173, 1.204414, 0.048952),
-    Vector3::set(-0.051461, 0.045854, 0.953127),
-);
-
-pub const CIECAT16_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(1.862_067_8, 0.387_526_54, -0.015_841_499),
-    Vector3::set(-1.011_254_7, 0.621_447_44, -0.034_122_936),
-    Vector3::set(0.149_186_78, -0.008_973_985, 1.049_964_4),
-);
-
-pub const DCI_P3_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(4.451_698e-1, 2.094_916_9e-1, -3.634_101_2e-17),
-    Vector3::set(2.771_344_2e-1, 7.215_952e-1, 4.706_056e-2),
-    Vector3::set(1.722_826_7e-1, 6.891_306_5e-2, 9.073_553_7e-1),
-);
-
-pub const XYZ_TO_DCI_P3_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(2.725_394, -0.79516803, 0.04124189),
-    Vector3::set(-1.018_003, 1.689_732_1, -0.08763902),
-    Vector3::set(-0.4401632, 0.02264719, 1.100_929_4),
 );
 
 pub const XYZ_TO_OKLAB_LMS_MATRIX: Matrix3x3 = Matrix3x3::set(
@@ -100,31 +63,7 @@ pub const REC_2020_TO_SRGB: Matrix3x3 = Matrix3x3::set(
     Vector3::set(-0.133_079_8, -0.040_130_015, 1.122_619),
 );
 
-pub const SRGB_TO_CIECAT16_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(0.075_616_91, -0.093_808_874, -0.024_049_914),
-    Vector3::set(0.707_644_2, 1.003_160_5, 0.202_653_62),
-    Vector3::set(0.167_167_41, 0.090_648_4, 0.910_296_7),
-);
-
-pub const CIECAT16_TO_SRGB_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(7.023_401_3, 0.653_153_54, 0.040_149_838),
-    Vector3::set(-4.790_22, 0.571_839_75, -0.253_862_05),
-    Vector3::set(-0.812_765_84, -0.176_889_96, 1.116_449_7),
-);
-
-pub const CIECAT16_REC2020_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(3.873_352_8, 0.250_791_58, 0.014_078_325),
-    Vector3::set(-2.303_318, 0.867_093_3, -0.094_438_13),
-    Vector3::set(-0.347_164_1, -0.096_843_37, 0.992_797_6),
-);
-
-
-pub const REC2020_TO_CIECAT16_MATRIX: Matrix3x3 = Matrix3x3::set(
-    Vector3::set(0.219_057_19, -0.064_389_475, -0.0092312672),
-    Vector3::set(0.596_577_17, 0.990_305_1, 0.085_741_3),
-    Vector3::set(0.134_794_18, 0.074_084_36, 1.012_390_4),
-);
-
+// Mix from hdr to ldr
 pub const REC2020_TO_OKLAB_LMS_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(2.1063697, 0.027053744, -0.0013475552),
     Vector3::set(0.19839457, 1.797914, 0.018029725),
@@ -187,15 +126,20 @@ pub fn srgb_to_xyz(
 ) -> Vector3 {
     let srgb_linear = eotf_s_rgb(srgb_nonlinear);
 
-    let mut tri_stimulus = SRGB_TO_XYZ_MATRIX * srgb_linear;
+    let mut tri_stimulus = Vector3::ZERO;
 
     if src_tristimulus_white_point != dst_tristmulus_white_point {
-        tri_stimulus = apply_adaption_matrix_tristimulus(
-            tri_stimulus,
+        let adapted_matrix = compute_adaption_matrix(
             src_tristimulus_white_point,
             dst_tristmulus_white_point,
-            BRADFORD,
+            ColorSpaceAdaption {
+                tri_stimulus_matrix: SRGB_TO_XYZ_MATRIX,
+                adaption_matrix: Default::default(),
+            },
         );
+        tri_stimulus = adapted_matrix * srgb_linear;
+    } else {
+        tri_stimulus = SRGB_TO_XYZ_MATRIX * srgb_linear;
     }
 
     tri_stimulus
@@ -206,19 +150,22 @@ pub fn xyz_to_srgb(
     src_tristimulus_white_point: Vector3,
     dst_tristmulus_white_point: Vector3,
 ) -> Vector3 {
-    let mut tri_stimulus = tri_stimulus;
+    let mut srgb_linear = Vector3::ZERO;
 
     if src_tristimulus_white_point != dst_tristmulus_white_point {
-        tri_stimulus = apply_adaption_matrix_tristimulus(
-            tri_stimulus,
+        let adapted_matrix = compute_adaption_matrix(
             src_tristimulus_white_point,
             dst_tristmulus_white_point,
-            BRADFORD,
+            ColorSpaceAdaption {
+                tri_stimulus_matrix: XYZ_TO_SRGB_MATRIX,
+                adaption_matrix: Default::default(),
+            },
         );
+
+        srgb_linear = adapted_matrix * tri_stimulus;
+    } else {
+        srgb_linear = XYZ_TO_SRGB_MATRIX * tri_stimulus;
     }
-
-    let srgb_linear = XYZ_TO_SRGB_MATRIX * tri_stimulus;
-
 
     oetf_s_rgb(srgb_linear)
 }

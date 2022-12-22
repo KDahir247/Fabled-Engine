@@ -1,6 +1,31 @@
 use fabled_math::vector_math::{component_max, sqrt};
 use fabled_math::{Matrix3x3, Vector3, Vector4};
 
+pub const DCI_P3_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
+    Vector3::set(4.451_698e-1, 2.094_916_9e-1, -3.634_101_2e-17),
+    Vector3::set(2.771_344_2e-1, 7.215_952e-1, 4.706_056e-2),
+    Vector3::set(1.722_826_7e-1, 6.891_306_5e-2, 9.073_553_7e-1),
+);
+
+pub const XYZ_TO_DCI_P3_MATRIX: Matrix3x3 = Matrix3x3::set(
+    Vector3::set(2.725_394, -0.79516803, 0.04124189),
+    Vector3::set(-1.018_003, 1.689_732_1, -0.08763902),
+    Vector3::set(-0.4401632, 0.02264719, 1.100_929_4),
+);
+
+pub const REC_2020_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
+    Vector3::set(0.636_953_53, 0.262_698_35, 4.994_071e-17),
+    Vector3::set(0.144_619_18, 0.678_008_8, 0.028_073_136),
+    Vector3::set(0.168_855_86, 0.059_292_894, 1.060_827_3),
+);
+
+pub const XYZ_TO_REC_2020_MATRIX: Matrix3x3 = Matrix3x3::set(
+    Vector3::set(1.716_663_5, -0.66667384, 0.01764248),
+    Vector3::set(-0.355_673_3, 1.616_455_8, -0.04277698),
+    Vector3::set(-0.25336809, 0.0157683, 0.942_243_3),
+);
+
+
 // ACEScg to ACES2025-1
 pub const AP1_TO_AP0_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(0.695452241358568, 0.044794563352499, -0.005525882558111),
@@ -153,6 +178,14 @@ pub fn linear_to_acescg(lin: Vector3) -> Vector3 {
 
 pub fn acescg_to_linear(acescg: Vector3) -> Vector3 {
     AP1_TO_AP0_MATRIX * acescg
+}
+
+pub fn standard_to_aces(srgb: Vector3) -> Vector3 {
+    SRGB_TO_AP1_MATRIX * srgb
+}
+
+pub fn aces_to_standard(acescg: Vector3) -> Vector3 {
+    AP1_TO_SRGB_MATRIX * acescg
 }
 
 // HDR Encoding decoding

@@ -1,7 +1,7 @@
-use fabled_component::Component;
+use fabled_component::{Component, Modification};
 
 use crate::camera::{inch_to_millimeter, meter_to_millimeter, MeasurementType};
-use fabled_component::Untracked;
+
 
 // Optional add component if camera is Perspective.
 
@@ -97,5 +97,5 @@ impl Aperture {
 }
 
 impl Component for Aperture {
-    type Tracking = Untracked;
+    type Tracking = Modification;
 }

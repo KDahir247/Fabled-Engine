@@ -1,7 +1,7 @@
-use fabled_math::vector_math::{ge, pow, select};
+use fabled_math::vector_math::{ge, le, lt, pow, select};
 use fabled_math::Vector3;
 
-// HDR ICTCP transfer function param
+// HDR transfer function param
 const PQ_C1: f32 = 0.8359375;
 const PQ_C2: f32 = 18.8515625;
 const PQ_C3: f32 = 18.6875;
@@ -15,7 +15,7 @@ const SRGB_POW_TRANSFER_FUNCTION: f32 = 1.0 / 2.4;
 const RCP_FALLOFF: f32 = 1.0 / 12.92;
 const RCP_LINEAR_FALLOFF: f32 = 1.0 / 1.055;
 
-
+// linear to srgb
 pub fn oetf_s_rgb(linear: Vector3) -> Vector3 {
     let a = Vector3 {
         value: pow(
@@ -38,6 +38,7 @@ pub fn oetf_s_rgb(linear: Vector3) -> Vector3 {
 }
 
 
+// srgb to linear
 pub fn eotf_s_rgb(s_rgb: Vector3) -> Vector3 {
     let a = s_rgb + 0.055;
 
@@ -53,8 +54,40 @@ pub fn eotf_s_rgb(s_rgb: Vector3) -> Vector3 {
     Vector3 { value: linear }
 }
 
+// linear to rec709
+pub fn oetf_rec709(linear: Vector3) -> Vector3 {
+    let a = linear * 4.5;
 
-pub fn pq_oetf(linear_val: Vector3) -> Vector3 {
+    let b = Vector3 {
+        value: pow(linear.value, Vector3::broadcast(0.45).value),
+    } * 1.0993
+        - 0.0993;
+
+    let mask = lt(linear.value, Vector3::broadcast(0.0181).value);
+
+    Vector3 {
+        value: select(a.value, b.value, mask),
+    }
+}
+
+pub fn eotf_rec709(rec709: Vector3) -> Vector3 {
+    let a = rec709 / 4.5;
+
+    let b = (rec709 + 0.0993) / 1.0993;
+
+    let c = Vector3 {
+        value: pow(b.value, Vector3::broadcast(1.0 / 0.45).value),
+    };
+
+    let mask = lt(rec709.value, Vector3::broadcast(0.018).value);
+
+    Vector3 {
+        value: select(a.value, c.value, mask),
+    }
+}
+
+// linear to pq
+pub fn oetf_pq(linear_val: Vector3) -> Vector3 {
     let l = linear_val / PQ_MAX;
 
     let lm1 = Vector3 {
@@ -71,7 +104,7 @@ pub fn pq_oetf(linear_val: Vector3) -> Vector3 {
 }
 
 // pq to linear
-pub fn pq_eotf(pq_val: Vector3) -> Vector3 {
+pub fn eotf_pq(pq_val: Vector3) -> Vector3 {
     let a = Vector3::broadcast(1.0 / PQ_M2);
 
     let m = Vector3 {

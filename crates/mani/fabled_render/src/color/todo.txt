@@ -1,3 +1,16 @@
 Combining gamut clipping with tone mapping can also be useful since some tone mapping techniques may still produce colors outside the target gamut
 
 Tone mapping, gamut expansion, gamut compression, gamut clipping
+
+
+It looks like PVRTex tool support the following color space:
+Linear, Srgb, BT601,  BT709, BT2020 and Oklab
+I will add DCI-P3 as well and remove BT601.
+
+BT2020 and DCI-P3 is hdr
+
+So........
+Linear, Srgb, BT709 for non-hdr,
+BT2020 and DCI-P3 for hdr,
+
+Note that ACEScg RRT+ODT can be for srgb/rec 709, DCI-P3 theater, and REC-2020 UHDTV

@@ -7,17 +7,17 @@ use fabled_math::{Matrix3x3, Vector3};
 // Look below for equation.
 // http://brucelindbloom.com/index.html?Eqn_ChromAdapt.html
 pub fn compute_adaption_matrix(
-    src_tristimulus_white_point: Vector3,
-    dst_tristmulus_white_point: Vector3,
+    src_tri_stimulus_white_point: Vector3,
+    dst_tri_stimulus_white_point: Vector3,
     adaptation_param: ColorSpaceAdaption,
-) -> (Matrix3x3, Matrix3x3) {
-    let src_cone_response_domain = adaptation_param.adaption_matrix * src_tristimulus_white_point;
+) -> Matrix3x3 {
+    let src_cone_response_domain = adaptation_param.adaption_matrix * src_tri_stimulus_white_point;
 
     let src_cone_response_domain_rcp = Vector3 {
         value: rcp(src_cone_response_domain.value),
     };
 
-    let dst_cone_response_domain = adaptation_param.adaption_matrix * dst_tristmulus_white_point;
+    let dst_cone_response_domain = adaptation_param.adaption_matrix * dst_tri_stimulus_white_point;
 
     let dst_diff_src = dst_cone_response_domain * src_cone_response_domain_rcp;
 
@@ -32,11 +32,9 @@ pub fn compute_adaption_matrix(
     let src_destination_white_points =
         inverse_adaption_matrix * diagonal_diff_matrix * adaptation_param.adaption_matrix;
 
-    // adapted srgb to xyz
-    let adapted_srgb_to_xyz = src_destination_white_points * adaptation_param.tristimulus_matrix;
+    let adapted_matrix = src_destination_white_points * adaptation_param.tri_stimulus_matrix;
 
-    // SRGB TO XYZ and XYZ TO SRGB
-    (adapted_srgb_to_xyz, inverse_mat3(adapted_srgb_to_xyz))
+    adapted_matrix
 }
 
 pub fn apply_adaption_matrix_cct(
@@ -45,37 +43,37 @@ pub fn apply_adaption_matrix_cct(
     cct_dst: f32,
     adaptation_param: ColorSpaceAdaption,
 ) -> Vector3 {
-    let tristimulus = adaptation_param.tristimulus_matrix * color;
+    let tri_stimulus = adaptation_param.tri_stimulus_matrix * color;
 
-    let src_chromaticity_coordinate = cct_to_chromatic_coord(cct_src);
-    let src_tristimulus_white_point =
-        chromatic_coord_to_tri_stimulus_white(src_chromaticity_coordinate);
+    let src_chromatic_coordinate = cct_to_chromatic_coord(cct_src);
+    let src_tri_stimulus_white_point =
+        chromatic_coord_to_tri_stimulus_white(src_chromatic_coordinate);
 
-    let dst_chromaticity_coordinate = cct_to_chromatic_coord(cct_dst);
-    let dst_tristimulus_white_point =
-        chromatic_coord_to_tri_stimulus_white(dst_chromaticity_coordinate);
+    let dst_chromatic_coordinate = cct_to_chromatic_coord(cct_dst);
+    let dst_tri_stimulus_white_point =
+        chromatic_coord_to_tri_stimulus_white(dst_chromatic_coordinate);
 
-    apply_adaption_matrix_tristimulus(
-        tristimulus,
-        src_tristimulus_white_point,
-        dst_tristimulus_white_point,
+    apply_adaption_matrix_tri_stimulus(
+        tri_stimulus,
+        src_tri_stimulus_white_point,
+        dst_tri_stimulus_white_point,
         adaptation_param,
     )
 }
 
 
-pub fn apply_adaption_matrix_tristimulus(
-    tristimulus: Vector3,
-    src_tristimulus_white_point: Vector3,
-    dst_tristmulus_white_point: Vector3,
+pub fn apply_adaption_matrix_tri_stimulus(
+    tri_stimulus: Vector3,
+    src_tri_stimulus_white_point: Vector3,
+    dst_tri_stimulus_white_point: Vector3,
     adaptation_param: ColorSpaceAdaption,
 ) -> Vector3 {
     let transform_matrix = compute_adaption_matrix(
-        src_tristimulus_white_point,
-        dst_tristmulus_white_point,
+        src_tri_stimulus_white_point,
+        dst_tri_stimulus_white_point,
         adaptation_param,
     );
 
-    // XYZ TO SRGB * XYZ
-    transform_matrix.1 * tristimulus
+
+    transform_matrix * tri_stimulus
 }

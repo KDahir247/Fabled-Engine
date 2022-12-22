@@ -1,5 +1,3 @@
-// todo add all illumination white point.
-
 pub mod two_degree_observer {
     use fabled_math::Vector3;
 
@@ -16,6 +14,9 @@ pub mod two_degree_observer {
 pub mod ten_degree_observer {
     use fabled_math::Vector3;
 
+    pub const A_WHITE_POINT: Vector3 = Vector3::set(1.111420407, 1.0, 0.3519978322);
+    pub const B_WHITE_POINT: Vector3 = Vector3::set(0.9917777148, 1.0, 0.8434930536);
+    pub const C_WHITE_POINT: Vector3 = Vector3::set(0.972856919, 1.0, 1.161448049);
     pub const D50_WHITE_POINT: Vector3 = Vector3::set(0.967206275, 1.0, 0.8142801513);
     pub const D55_WHITE_POINT: Vector3 = Vector3::set(0.9579665682, 1.0, 0.909252516);
     pub const D65_WHITE_POINT: Vector3 = Vector3::set(0.9480966767, 1.0, 1.07305136);

@@ -1,7 +1,7 @@
 use crate::camera::FStop;
 use crate::color::srgb_compute_luminance;
 use fabled_math::vector_math::{
-    abs, clamp, dot, exp2, le, lerp, log2, max, pow, rcp, saturate, select, sign, signum, step,
+    abs, clamp, dot, exp2, le, lerp, log2, max, pow, rcp, select, sign, signum, step,
 };
 use fabled_math::{Swizzles4, Vector3, Vector4};
 
