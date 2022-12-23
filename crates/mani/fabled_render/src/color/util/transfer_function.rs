@@ -1,4 +1,4 @@
-use fabled_math::vector_math::{ge, le, lt, pow, select};
+use fabled_math::vector_math::{ge, le, log10, lt, pow, select};
 use fabled_math::Vector3;
 
 // HDR transfer function param
@@ -130,4 +130,27 @@ pub fn eotf_pq(pq_val: Vector3) -> Vector3 {
     let linear = l * PQ_MAX;
 
     linear
+}
+
+pub fn linear_to_log_c(linear: Vector3) -> Vector3 {
+    const A: f32 = 5.555556;
+    const B: f32 = 0.047996;
+    const C: f32 = 0.244161;
+    const D: f32 = 0.386036;
+
+    Vector3 {
+        value: log10((linear * A + B).value),
+    } * C
+        + D
+}
+
+pub fn log_c_to_linear(log: Vector3) -> Vector3 {
+    const A: f32 = 0.179999;
+    const B: f32 = 0.047996;
+    const C: f32 = 4.095658;
+    const D: f32 = 0.386036;
+
+    Vector3 {
+        value: pow(Vector3::broadcast(10.0).value, ((log - D) * C).value),
+    } * A
 }

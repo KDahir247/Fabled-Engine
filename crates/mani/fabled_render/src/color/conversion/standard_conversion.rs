@@ -63,7 +63,7 @@ pub const REC_2020_TO_SRGB: Matrix3x3 = Matrix3x3::set(
     Vector3::set(-0.133_079_8, -0.040_130_015, 1.122_619),
 );
 
-// Mix from hdr to ldr
+
 pub const REC2020_TO_OKLAB_LMS_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(2.1063697, 0.027053744, -0.0013475552),
     Vector3::set(0.19839457, 1.797914, 0.018029725),

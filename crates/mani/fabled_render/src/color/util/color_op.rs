@@ -1,8 +1,6 @@
-use fabled_math::vector_math::{
-    clamp, component_max, component_min, dot, exp2, gain, le, lerp, log2, lt, pow, rcp, select,
-    sign, signum,
-};
+use fabled_math::vector_math::dot;
 use fabled_math::{Vector2, Vector3};
+
 
 pub fn chromatic_coord_to_tri_stimulus_white(chromaticity_coord: Vector2) -> Vector3 {
     let denometer = chromaticity_coord.y().recip();
@@ -22,11 +20,12 @@ pub fn tri_stimulus_white_to_chromatic_coord(chromatic_coord: Vector3) -> Vector
     )
 }
 
-// Find luminance (Y) from linear srgb
-// To find the luminance of a color space you need the COLORSPACE -> XYZ Matrix
-// and get the Y ROW or Y COL if your matrix is a row or column major.
-pub fn srgb_compute_luminance(linear: Vector3) -> f32 {
-    0.21263682 * linear.x() + 0.71518298 * linear.y() + 0.0721802 * linear.z()
+// ACEScct and ACEScc has relatively the same relative luminance as srgb refer
+// to https://docs.acescentral.com/specifications/acescct/#appendix-a-application-of-asc-cdl-parameters-to-acescct-image-data
+// https://docs.acescentral.com/specifications/acescc/#appendix-b-application-of-asc-cdl-parameters-to-acescc-image-data
+// Use util\mod.rs pre-determined color luminance value (DCI-P3, SRGB, AP1,)
+pub fn srgb_compute_luminance(linear: Vector3, luminance: Vector3) -> f32 {
+    dot(linear.value, luminance.value)
 }
 
 

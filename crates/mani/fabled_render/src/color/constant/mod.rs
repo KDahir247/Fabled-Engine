@@ -1,5 +1,5 @@
-mod adaption;
+mod adaption_matrix;
 mod observer;
 
-pub use adaption::*;
+pub use adaption_matrix::*;
 pub use observer::*;

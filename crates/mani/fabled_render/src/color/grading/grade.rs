@@ -59,33 +59,38 @@ pub fn apply_lift_gamma_gain(a: Vector3, lift: Vector4, gamma: Vector4, gain: Ve
     return col;
 }
 
+
 pub fn apply_asc_cdl(a: Vector3, slope: Vector3, offset: Vector3, power: Vector3) -> Vector3 {
+    let b = a * slope + offset;
+
+    let c = pow(b.value, power.value);
+
+    let mask = le(b.value, Vector3::ZERO.value);
+
     Vector3 {
-        value: pow((a * slope + offset).value, power.value),
+        value: select(b.value, c, mask),
     }
 }
 
-pub fn desaturate(a: Vector3, factor: Vector3) -> Vector3 {
-    let max_luminance = srgb_compute_luminance(a);
+pub fn desaturate(a: Vector3, luminance: Vector3, factor: f32) -> Vector3 {
+    let max_luminance = srgb_compute_luminance(a, luminance);
 
-    let grey = Vector3::broadcast(max_luminance);
+    let luminance = Vector3::broadcast(max_luminance);
 
-    Vector3 {
-        value: lerp(a.value, grey.value, factor.value),
-    }
+    (a - luminance) / factor + luminance
 }
 
-pub fn saturation(a: Vector3, factor: Vector3) -> Vector3 {
-    let max_luminance = srgb_compute_luminance(a);
+pub fn saturation(a: Vector3, luminance: Vector3, factor: f32) -> Vector3 {
+    let max_luminance = srgb_compute_luminance(a, luminance);
 
     let luminance = Vector3::broadcast(max_luminance);
 
     let diff = a - luminance;
-    let saturate = luminance * factor;
+    let saturate = diff * factor;
 
     Vector3 {
         value: clamp(
-            (saturate + diff).value,
+            (luminance + saturate).value,
             Vector3::ZERO.value,
             Vector3::ONE.value,
         ),
@@ -143,31 +148,6 @@ pub fn curve(
 pub fn color_filter(a: Vector3, b: Vector3) -> Vector3 {
     a * b
 }
-
-
-// pub fn vibrance(srgb: Vector3, luminance: Vector3, balance: Vector3,
-// vibrance: f32) -> Vector3 {     // let luma = srgb_compute_luminance(srgb);
-//     //
-//     // let max_color = component_max(srgb.value);
-//     // let min_color = component_min(srgb.value);
-//
-//     let luma = Vector3::broadcast(srgb_compute_luminance(srgb));
-//     let color_saturation = saturation(srgb, balance);
-//
-//     let coeff_vibrance = balance * vibrance;
-//     let color = lerp(
-//         luma.value,
-//         srgb.value,
-//         (Vector3::broadcast(1.0)
-//             + (coeff_vibrance
-//                 * (Vector3::broadcast(1.0)
-//                     - (Vector3 { value: signum(coeff_vibrance.value),
-//                     }) * color_saturation)))
-//             .value,
-//     );
-//
-//     todo!()
-// }
 
 
 // value of channel should be greater than or equal to -2 or less than or equal
