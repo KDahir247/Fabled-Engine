@@ -1,6 +1,6 @@
-mod clipping;
+mod gamut_op;
 
-pub use clipping::*;
+pub use gamut_op::*;
 
 use crate::color::oklab_to_srgb;
 use fabled_math::vector_math::{component_max, component_min, ge, gt, lt, select};
@@ -177,4 +177,49 @@ pub(crate) fn find_gamut_intersection(a: f32, b: f32, l1: f32, c1: f32, l0: f32)
         }
     }
     t
+}
+
+
+pub(crate) fn aces_compression_internal(
+    distance: f32,
+    limit: f32,
+    threshold: f32,
+    power: f32,
+) -> f32 {
+    let s = (limit - threshold)
+        / (((1.0 - threshold) / (limit - threshold)).powf(-power) - 1.0).powf(1.0 / power);
+
+    let c_distance = threshold
+        + s * ((distance - threshold) / s)
+            / ((1.0 + ((distance - threshold) / s).powf(power)).powf(1.0 / power));
+
+    let compression_result = [distance, c_distance];
+
+    let solution_mask = usize::from((distance < threshold) || (limit < 1.0001));
+
+    unsafe { *compression_result.get_unchecked(solution_mask) }
+}
+
+
+pub(crate) fn aces_uncompressed_internal(
+    distance: f32,
+    limit: f32,
+    threshold: f32,
+    power: f32,
+) -> f32 {
+    let s = (limit - threshold)
+        / (((1.0 - threshold) / (limit - threshold)).powf(-power) - 1.0).powf(1.0 / power);
+
+    let c_distance = threshold
+        + s * (-(((distance - threshold) / s).powf(power)
+            / (((distance - threshold) / s).powf(power) - 1.0)))
+            .powf(1.0 / power);
+
+    let decompression_result = [distance, c_distance];
+
+    let solution_mask =
+        usize::from((distance < threshold) || (limit < 1.0001) || distance > (threshold + s));
+
+
+    unsafe { *decompression_result.get_unchecked(solution_mask) }
 }

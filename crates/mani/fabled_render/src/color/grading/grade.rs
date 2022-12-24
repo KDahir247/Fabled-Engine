@@ -1,7 +1,6 @@
-use crate::camera::FStop;
 use crate::color::srgb_compute_luminance;
 use fabled_math::vector_math::{
-    abs, clamp, dot, exp2, le, lerp, log2, max, pow, rcp, select, sign, signum, step,
+    abs, clamp, dot, exp2, le, lerp, log2, max, pow, rcp, select, step,
 };
 use fabled_math::{Swizzles4, Vector3, Vector4};
 
@@ -98,9 +97,8 @@ pub fn saturation(a: Vector3, luminance: Vector3, factor: f32) -> Vector3 {
 }
 
 // http://filmicworlds.com/blog/minimal-color-grading-tools/
-pub fn color_exposure(a: Vector3, f_stop: FStop) -> Vector3 {
-    // todo the powi should take exposure value if ev stop
-    a * 2.0f32.powi(f_stop.step)
+pub fn color_exposure(a: Vector3, exposure_val: f32) -> Vector3 {
+    a * 2.0f32.powf(exposure_val)
 }
 
 // gray should be 0.18 for linear and 0.5 for gamma

@@ -1,4 +1,4 @@
-use fabled_math::vector_math::{ge, le, log10, lt, pow, select};
+use fabled_math::vector_math::{ge, log10, lt, pow, select};
 use fabled_math::Vector3;
 
 // HDR transfer function param

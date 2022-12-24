@@ -1,4 +1,4 @@
-use fabled_math::vector_math::{abs, clamp, fract, lerp, saturate, step};
+use fabled_math::vector_math::{abs, fract, lerp, saturate, step};
 use fabled_math::{Swizzles3, Swizzles4, Vector3, Vector4};
 
 pub fn rgb_to_hsv(rgb: Vector3) -> Vector3 {
