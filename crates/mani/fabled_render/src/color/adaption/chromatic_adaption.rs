@@ -68,12 +68,12 @@ pub fn apply_adaption_matrix_tri_stimulus(
     dst_tri_stimulus_white_point: Vector3,
     adaptation_param: ColorSpaceAdaption,
 ) -> Vector3 {
-    let transform_matrix = compute_adaption_matrix(
+    let adapted_transform_matrix = compute_adaption_matrix(
         src_tri_stimulus_white_point,
         dst_tri_stimulus_white_point,
         adaptation_param,
     );
 
 
-    transform_matrix * tri_stimulus
+    adapted_transform_matrix * tri_stimulus
 }

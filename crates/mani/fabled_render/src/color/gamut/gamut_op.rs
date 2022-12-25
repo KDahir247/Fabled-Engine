@@ -1,3 +1,4 @@
+use crate::color::component::ACESCompression;
 use crate::color::{
     aces_compression_internal, aces_uncompressed_internal, find_gamut_intersection, oklab_to_srgb,
     srgb_to_oklab,
@@ -7,18 +8,19 @@ use fabled_math::{approximate_equal, Bool3, Vector3};
 
 pub fn aces_gamut_compression(
     aces2025: Vector3,
-    cmy: Vector3,
-    threshold: Vector3,
-    power: f32,
+    aces_param: ACESCompression,
     invert: bool,
 ) -> Vector3 {
     // threshold is the percentage of the core gamut to protect
-    let threshold = Vector3 {
-        value: min(Vector3::broadcast(0.9999).value, threshold.value),
+    let threshold_cmy = Vector3 {
+        value: min(
+            Vector3::broadcast(0.9999).value,
+            aces_param.threshold_cmy.value,
+        ),
     };
 
     // limit is the max distance from gamut body that will be compressed.
-    let limit = cmy + 1.0;
+    let limit_cmy = aces_param.limit_cmy + 1.0;
 
     // achromatic axis
     let achromatic = Vector3::broadcast(component_max(aces2025.value));
@@ -43,16 +45,46 @@ pub fn aces_gamut_compression(
 
     // compress distance with user controlled parameterized shaper function
     let compressed_distance = Vector3::set(
-        aces_compression_internal(distance.x(), limit.x(), threshold.x(), power),
-        aces_compression_internal(distance.y(), limit.y(), threshold.y(), power),
-        aces_compression_internal(distance.z(), limit.z(), threshold.z(), power),
+        aces_compression_internal(
+            distance.x(),
+            limit_cmy.x(),
+            threshold_cmy.x(),
+            aces_param.power,
+        ),
+        aces_compression_internal(
+            distance.y(),
+            limit_cmy.y(),
+            threshold_cmy.y(),
+            aces_param.power,
+        ),
+        aces_compression_internal(
+            distance.z(),
+            limit_cmy.z(),
+            threshold_cmy.z(),
+            aces_param.power,
+        ),
     );
 
     // uncompress distance with user controlled parameterized shaper function
     let uncompressed_distance = Vector3::set(
-        aces_uncompressed_internal(distance.x(), limit.x(), threshold.x(), power),
-        aces_uncompressed_internal(distance.y(), limit.y(), threshold.y(), power),
-        aces_uncompressed_internal(distance.z(), limit.z(), threshold.z(), power),
+        aces_uncompressed_internal(
+            distance.x(),
+            limit_cmy.x(),
+            threshold_cmy.x(),
+            aces_param.power,
+        ),
+        aces_uncompressed_internal(
+            distance.y(),
+            limit_cmy.y(),
+            threshold_cmy.y(),
+            aces_param.power,
+        ),
+        aces_uncompressed_internal(
+            distance.z(),
+            limit_cmy.z(),
+            threshold_cmy.z(),
+            aces_param.power,
+        ),
     );
 
     let desired_distance = Vector3 {

@@ -1,6 +1,7 @@
 mod adaption;
 mod component;
 mod constant;
+mod container;
 mod conversion;
 mod gamut;
 mod grading;
@@ -9,12 +10,14 @@ mod util;
 
 pub use adaption::*;
 pub use constant::*;
+pub use container::*;
 pub use conversion::*;
 pub use gamut::*;
 pub use grading::*;
 pub use space::*;
 use std::ops::{BitAnd, Div, Shl, Shr};
 pub use util::*;
+
 
 use fabled_math::vector_math::{cast, reduce_or, reduce_sum};
 use fabled_math::{Vector3, Vector4};

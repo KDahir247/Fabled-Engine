@@ -1,7 +1,7 @@
 use crate::color::component::ColorSpaceAdaption;
 use crate::color::{compute_adaption_matrix, eotf_s_rgb, oetf_s_rgb};
-use fabled_math::vector_math::{component_sum, length, pow};
-use fabled_math::{Matrix3x3, Swizzles3, Vector3};
+use fabled_math::vector_math::{component_min, component_sum, length, min, pow};
+use fabled_math::{Matrix3x3, Swizzles3, Vector3, Vector4};
 
 pub const SRGB_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(0.41238656, 0.21263682, 0.01933062),
@@ -244,4 +244,28 @@ pub fn ok_lab_from_lch(lch: Vector3) -> Vector3 {
     let b = chroma * hue_sin;
 
     Vector3::set(l, a, b)
+}
+
+
+pub fn srgb_to_cmyk(srgb: Vector3) -> Vector4 {
+    let rcp_255 = 1.0 / 255.0;
+
+    let black = component_min((Vector3::ONE - srgb * rcp_255).value);
+
+    let cmy = (Vector3::ONE - (srgb * rcp_255) - black) / (1.0 - black);
+
+    Vector4::set(cmy.x(), cmy.y(), cmy.z(), black)
+}
+
+
+pub fn cmyk_to_srgb(cmyk: Vector4) -> Vector3 {
+    let cmy = cmyk.trunc_vec3();
+
+    Vector3::ONE
+        - Vector3 {
+            value: min(
+                (cmy * (Vector3::ONE * cmyk.w()) * 255.0).value,
+                Vector3::ONE.value,
+            ),
+        }
 }
