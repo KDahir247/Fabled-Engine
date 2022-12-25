@@ -80,6 +80,25 @@ impl Bool3 {
     pub fn from_primitive(array: [bool; 3]) -> Bool3 {
         Bool3::set(array[0], array[1], array[2])
     }
+
+
+    #[inline]
+    pub fn to_int(self) -> [i32; 3] {
+        let int_repr = self.value.to_int().to_array();
+        let last = int_repr[2];
+
+        [int_repr[0], int_repr[1], last]
+    }
+
+    #[inline]
+    pub fn to_simd_int(self) -> std::simd::i32x4 {
+        self.value.to_int()
+    }
+
+    #[inline]
+    pub fn to_simd_mask(self) -> std::simd::mask32x4 {
+        std::simd::mask32x4::from_array([self.x(), self.y(), self.z(), false])
+    }
 }
 
 impl Display for Bool3 {

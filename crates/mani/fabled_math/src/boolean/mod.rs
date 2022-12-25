@@ -2,7 +2,6 @@ mod bool2;
 mod bool3;
 mod bool4;
 
-use crate::vector_math::{abs, component_max};
 pub use bool2::*;
 pub use bool3::*;
 pub use bool4::*;
@@ -26,9 +25,7 @@ pub fn approximate_equal3(
     let z_cmp = approximate_equal(a[2], b[2], epsilon[2]);
     let w_cmp = approximate_equal(a[3], b[3], epsilon[3]);
 
-    let bool_mask = Bool4::set(x_cmp, y_cmp, z_cmp, w_cmp);
-
-    bool_mask
+    Bool4::set(x_cmp, y_cmp, z_cmp, w_cmp)
 }
 
 #[inline(always)]

@@ -1,6 +1,6 @@
 use crate::{Matrix4x4, Vector3};
 
-use crate::matrix3x3_math::{inverse_mat3, transpose_mat3};
+use crate::matrix3x3_math::transpose_mat3;
 
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 

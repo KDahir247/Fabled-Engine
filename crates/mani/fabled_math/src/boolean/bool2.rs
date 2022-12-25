@@ -53,7 +53,18 @@ impl Bool2 {
     }
 
     #[inline]
-    pub fn to_mask(self) -> std::simd::mask32x4 {
+    pub fn to_int(self) -> [i32; 2] {
+        [i32::from(self.x()), i32::from(self.y())]
+    }
+
+    #[inline]
+    pub fn to_simd_int(self) -> std::simd::i32x4 {
+        let int_repr = self.to_int();
+        std::simd::i32x4::from_array([int_repr[0], int_repr[1], 0, 0])
+    }
+
+    #[inline]
+    pub fn to_simd_mask(self) -> std::simd::mask32x4 {
         std::simd::mask32x4::from_array([self.x(), self.y(), false, false])
     }
 }

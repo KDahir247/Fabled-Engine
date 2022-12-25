@@ -244,7 +244,7 @@ impl DivAssign<DualNumber> for DualQuaternion {
 
 pub mod dual_quaternion_math {
 
-    use crate::{DualNumber, DualQuaternion, Quaternion, Vector3, Vector4};
+    use crate::{exp_quat, DualNumber, DualQuaternion, Quaternion, Vector3, Vector4};
 
     use crate::quaternion_math::{conjugate_quat, inverse_quat};
 
@@ -418,7 +418,7 @@ pub mod dual_quaternion_math {
 
     #[inline]
     pub fn exp_dual_quaternion(dual_quaternion: DualQuaternion) -> DualQuaternion {
-        let real = crate::quaternion_math::exp_quat(dual_quaternion.real);
+        let real = exp_quat(dual_quaternion.real);
         let dual = dual_quaternion.dual * real;
 
         DualQuaternion { real, dual }
@@ -428,17 +428,11 @@ pub mod dual_quaternion_math {
     pub fn pow_dual_quaternion(dual_quaternion: DualQuaternion, exponent: f32) -> DualQuaternion {
         let theta = 2.0 * dual_quaternion.real.w().acos();
 
-        let mut dual_quat = DualQuaternion::IDENTITY;
-
         let half_theta = theta * 0.5;
 
         let rcp_half_theta_sin = half_theta.sin().recip();
-        let (exp_half_theta_sin, exp_half_theta_cos) = (exponent * half_theta).sin_cos();
 
-        if std::intrinsics::unlikely(theta < 0.0) {
-            dual_quat =
-                from_translation_dual_quat(get_translation_dual_quat(dual_quaternion) * exponent);
-        }
+        let (exp_half_theta_sin, exp_half_theta_cos) = (exponent * half_theta).sin_cos();
 
         let s0 = dual_quaternion.real.to_pure() * rcp_half_theta_sin;
         let d = -2.0 * dual_quaternion.dual.w() * rcp_half_theta_sin;
@@ -454,9 +448,11 @@ pub mod dual_quaternion_math {
             s0 * exponent * half_d * exp_half_theta_cos + se * exp_half_theta_sin,
         );
 
-        dual_quat = DualQuaternion::new(real, dual);
-
-        dual_quat
+        if std::intrinsics::unlikely(theta < 0.0) {
+            from_translation_dual_quat(get_translation_dual_quat(dual_quaternion) * exponent)
+        } else {
+            DualQuaternion::new(real, dual)
+        }
     }
 
 
@@ -466,9 +462,6 @@ pub mod dual_quaternion_math {
         end: DualQuaternion,
         time: f32,
     ) -> DualQuaternion {
-        pow_dual_quaternion(
-            start * (crate::dual_quaternion_math::inverse_dual_quat(start) * end),
-            time,
-        )
+        pow_dual_quaternion(start * (inverse_dual_quat(start) * end), time)
     }
 }

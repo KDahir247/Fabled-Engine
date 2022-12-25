@@ -1,0 +1,268 @@
+
+Appendix C - IES-NA data interchange format
+of: Ian Ashdown, P. Eng. Research & Development Manager - Ledalite Architectural Products Incorporated 9087A - 198th Street - Langley, B.C. - Canada V1M 3B1 - Tel. (604) 888-6811 - Fax. (604) 888-0566 - e mail: iashdown@ledalite.com - URL: http://www.ledalite.com
+...
+Synopsis: The IESNA LM-63 photometric data file is an ASCII text file commonly used by North American lighting fixture manufacturers to distribute photometric information about their products.
+...
+
+The Standard File Format IES ... is an ACII text file. There are three revisions, based on LM-63-1986, LM-63-1991, and LM-63-1995.
+
+IES LM-63-1986
+The file format specification for the LM-63-1986 variant is:
+Id Description
+01 {label line 1}
+02 {label line 2}
+03 ...
+04 {label line n}
+05 TILT={file-spec} or {INCLUDE} or {NONE}
+06 {lamp-to-luminaire geometry}
+07 {# of pairs of angles and multiplying factors}
+08 {angles}
+09 {multiplying factors}
+10 {# of lamps} {lumens per lamp} {candela multiplier} {# of vertical angles} {# of horizontal angles} {photometric type} {units type} {width} {length} {height}
+11 {ballast factor} {ballast-lamp photometric factor} {input watts}
+12 {vertical angles}
+13 {horizontal angles}
+14 {candela values for all vertical angles at first horizontal angle}
+15 {candela values for all vertical angles at second horizontal angle}
+16 ...
+17 {candela values for all vertical angles at nth horizontal angle}
+A detailed description of each line is presented in the following sections.
+
+IES LM-63-1991
+The file format specification for the LM-63-1991 variant is:
+Id Description
+00 IESNA91
+01 {Keyword [TEST]}
+02 {Keyword [MANUFAC]}
+03 ...
+04 {Keyword n}
+05 TILT={file-spec} or {INCLUDE} or {NONE}
+06 {lamp-to-luminaire geometry}
+07 {# of pairs of angles and multiplying factors}
+08 {angles}
+09 {multiplying factors}
+10 vertical angles} {# of horizontal angles} {photometric type} {units type} {width} {length} {height}
+11 {ballast factor} {ballast-lamp photometric factor} {input watts}
+12 {vertical angles}
+13 {horizontal angles}
+14 {candela values for all vertical angles at first horizontal angle}
+15 {candela values for all vertical angles at second horizontal angle}
+16 ...
+17 {candela values for all vertical angles at nth horizontal angle}
+The changes between LM-63-1986 and LM-63-1991 are:
+• Identifier line 00 ("IESNA91") was added to distinguish the file from LM-63-1986 photometric data files.
+• The free-form label lines (identifiers 01 through 04) were replaced with lines that begin with user-defined keywords.
+A detailed description of each line is presented in the following sections.
+
+IES LM-63-1995
+The file format specification for the LM-63-1995 variant is:
+Id Description
+00 IESNA:LM-63-1995
+01 {Keyword 1}
+02 {Keyword 2}
+03 ...
+04 {Keyword n}
+05 TILT={file-spec} or {INCLUDE} or {NONE}
+06 {lamp-to-luminaire geometry}
+07 {# of pairs of angles and multiplying factors}
+08 {angles}
+09 {multiplying factors}
+10 {# of lamps} {lumens per lamp} {candela multiplier} {# of vertical angles} {# of horizontal angles} {photometric type} {units type} {width} {length} {height}
+11 {ballast factor} {future use} {input watts}
+12 {vertical angles}
+13 {horizontal angles}
+14 {candela values for all vertical angles at first horizontal angle}
+15 {candela values for all vertical angles at second horizontal angle}
+16 ..
+17 {candela values for all vertical angles at nth horizontal angle}
+
+The changes between LM-63-1991 and LM-63-1995 are:
+• Identifier line 00 was changed to "IESNA:LM-63-1995") to distinguish the file from LM-63-1986 and LM-63-1991 photometric data files and other (future) IESNA standard file formats.
+• The number of predefined keywords was expanded and new features (such as support for near-field photometric data) introduced via the keyword mechanism.
+• The {ballast-lamp photometric factor} was changed to {future use}.
+A detailed description of each line is presented in the following sections.
+
+IES Standard File Format - Detailed Description
+All lines shall be terminated with a {CR}{LF} pair. (This is the text file convention for MS-DOS programming environments).
+An "identifier line" as presented in Section 2, "IES Standard File Format - Specification," may be consist of one or more ASCII text lines in the photometric data file. Multiple lines are typically present when the space needed to represent the values in the identifier line exceeds the allowable line length.
+The maximum length of any label / keyword line (including the {CR}{LF} terminating pair) is 82 characters. The maximum length of any other line (including the {CR}{LF} terminating pair) is 132 characters.
+
+File Format Identifier (Identifier Line 00)
+IES LM-63-1991 and LM-63-1995 photometric data files begin with a unique file format identifier line, namely "IESNA91" or "IESNA:LM-63-1995". IES LM-63-1986 does not have a file format identifier line.
+
+Label Lines / Keywords (Identifier Lines 01 Through 04)
+Label lines contain descriptive text about the luminaire, the lamp(s) used, and other descriptive comments. Keywords, which were introduced in LM-63-1991, require that each label line begins with a defined IES keyword in square brackets. For example:
+[TEST] ABC1234 ABC Laboratories
+The keywords [TEST] and [MANUFAC] are required in LM-63-1991, but not in LM-63-1995. (Label lines are optional in LM-63-1986 and LM-63-1995.) The following keywords are a suggested minimum for LM-63-1995:
+[TEST] Test report number and laboratory
+[MANUFAC] Luminaire manufacturer
+[LUMCAT] Luminaire catalog number
+[LUMINAIRE] Luminaire description
+[LAMPCAT] Lamp catalog number
+[LAMP] Lamp description
+LM-63-1995 presents a list of predefined keywords that identify test-related data, luminaire product information, luminaire characteristics, and miscellaneous information. User-defined keywords are also permitted.
+Details regarding the syntax of user-defined keywords are presented in IES LM-63-1995. The accompanying IES Standard File parser reads and stores, but does not interpret, keyword lines.
+TILT= (Identifier Line 05)
+The lamp output may vary as a function of the luminaire tilt angle. If so, then the photometric data file may provide photometric data multipliers for various tilt angles. The "TILT=" line uniquely delimits the end of label / keyword lines in the photometric data file.
+There are three variants of this line: "TILT=NONE", "TILT=INCLUDE", and "TILT={filename}".
+
+TILT=NONE
+The lamp output (presumably) does not vary as a function of the luminaire If TILT=NONE is present, the identifier lines 06 {lamp-to-luminaire geometry}, 07 {# of pairs of angles and multiplying factors} 08 {angles}, 09 {multiplying factors} are not present in the photometric data file.
+
+TILT=INCLUDE
+The lamp output varies as a function of the luminaire tilt angle.
+If TILT=INCLUDE is present, the identifier lines 06 {lamp-to-luminaire geometry}, 07 {# of pairs of angles and multiplying factors} 08 {angles}, 09 {multiplying factors} are present in the photometric data file.
+
+TILT={filename}
+The lamp output varies as a function of the luminaire tilt angle.
+If TILT={filename} is present (where "filename" is the name of a valid TILT photometric data file), the identifier lines 06 {lamp-to-luminaire geometry}, 07 {# of pairs of angles and multiplying factors} 08 {angles}, 09 {multiplying factors} are present in the identified and separate TILT photometric data file.
+
+Lamp-to-Luminaire Geometry (Identifier Line 06)
+This integer value indicates the orientation of the lamp within the luminaire as follows:
+Value Description
+1 Lamp base is either vertical base up or vertical base down when the luminaire is aimed straight down.
+2 Lamp is horizontal and remains horizontal when the luminaire is aimed straight down or rotated about the zero-degree horizontal plane.
+3 Lamp is horizontal when the luminaire is pointed straight down, but does not remains horizontal when the luminaire is rotated about the zero-degree horizontal plane.
+The lamp-to-luminaire geometry line is absent if TILT=NONE.
+
+Number of Pairs of TILT Angles and Multiplying Factors (Identifier Line 07)
+This integer value indicates the total number of lamp tilt angles and their corresponding candela multiplying factors. It is absent if TILT=NONE.
+
+TILT Angles (Identifier Line 08)
+This line enumerates the (floating point) lamp tilt angles. It is absent if TILT=NONE.
+
+TILT Multiplying Factors (Identifier Line 09)
+This line enumerates the (floating point) candela multiplying factors for the corresponding lamp tilt angles. It is absent if TILT=NONE.
+
+Number of Lamps (Identifier Line 10)
+This integer value indicates the total number of lamps in the luminaire.
+
+Lumens Per Lamp (Identifier Line 10)
+This floating point value indicates the rated lumens per lamp on which the photometric test was based. (This value is obtained from the lamp manufacturer's published technical data for the lamp, and does not represent the actual lumens emitted by the test lamp).
+If the luminaire has two or more lamps with different rated lumens per lamp, this value represents the average lumens per lamp for the luminaire.
+In the (very rare) cases of absolute photometry, this value is -1.
+
+Candela Multiplier (Identifier Line 10)
+This floating point value indicates a multiplying factor that is to be applied to all candela values in the photometric data file (identifier lines 14 through 17).
+
+Number of Vertical Angles (Identifier Line 10)
+This integer value indicates the total number of vertical angles in the photometric data (identifier lines 14 through 17).
+
+Number of Horizontal Angles (Identifier Line 10)
+This integer value indicates the total number of horizontal angles in the photometric data (identifier lines 14 through 17).
+
+Photometric Type (Identifier Line 10)
+This integer value indicates the type of photometric web used for the photometric measurements as follows:
+Value Description
+1 Type C photometry
+2 Type B photometry
+3 Type A photometry
+Luminaries are photometered by locating the luminaire at the center of an imaginary sphere and measuring the light intensity (candela) values at grid points (the "photometric web') on the sphere's surface. The orientation of the luminary’s axes relative to that of the sphere determines the photometric type.
+Type C photometry is normally used for architectural and roadway luminaries. The polar axis of the photometric web coincides with the vertical axis of the luminaire, and the 0-180 degree photometric plane coincides with the luminary’s major axis (length).
+Type B photometry is normally used for adjustable outdoor area and sports lighting luminaries. The polar axis of the luminaire coincides with the minor axis (width) of the luminaire, and the 0-180 degree photometric plane coincides with the luminary’s vertical axis.
+Type A photometry is normally used for automotive headlights and signal lights. The polar axis of the luminaire coincides with the major axis (length) of the luminaire, and the 0-180 degree photometric plane coincides with the luminary’s vertical axis.
+It is important to note that these photometric types are *not* clearly defined in IES LM-63. All three versions refer the reader to the IES Lighting Handbook for descriptions of Type A and Type B photometry, and to CIE 27-1973 ("Photometry of Luminaries for Street Lighting") and CIE 43-1979 ("Photometry of Floodlights") for a description of Type C photometry. It then says that "Type C is the form in common use in the United States (although it was formerly referred to as Type A)."
+This is in contrast to CIE Publication 102-1993, "Recommended File format for Electronic Transfer of Luminaire Photometric Data," which clearly and unambiguously defines three types of photometry: A (alpha), B (beta), and C (gamma). The diagrams in CIE 102-1993 leave no doubt as to how their photometric webs are oriented with respect to the luminaire.
+Unfortunately, the IES LM-63 Type A photometry is equivalent to the CIE 102-1993 Type C photometry, and the IES LM-63 Type C photometry is equivalent to the CIE 102-1993 Type A photometry.
+
+Units Type (Identifier Line 10)
+This integer value indicates the units used for the dimensions of the luminous opening in the luminaire as follows:
+Value Description
+1 Feet
+2 Meters
+
+Luminous Opening Dimensions (Identifier Line 10)
+While the term "luminous opening" is somewhat ambiguous for many architectural luminaries and other light sources, it is useful in calculating average luminaire luminances and modeling the luminaries as homogeneous area light sources.
+
+Luminaire Width
+This floating point value indicates the distance across the luminous opening of the luminaire as measured along the 90-270 degree photometric plane.
+
+Luminaire Length
+This floating point value indicates the distance across the luminous opening of the luminaire as measured along the 0-180 degree photometric plane.
+
+Luminaire Height
+This floating point value indicates the average height of the luminous opening of the luminaire as measured along the vertical axis.
+
+Nonrectangular Luminous Openings
+The luminous opening is normally considered to be rectangular. However, other predefined shapes can be modeled by specifying one or more of the above dimensions as zero or negative floating point numbers as follows:
+Width Length Height Description
+0 0 0 Point
+w l h rectangular (default)
+-d 0 0 Circular (where d = diameter of circle)
+-d 0 -d Sphere (where d = diameter of circle)
+-d 0 h Vertical cylinder (d = diameter of cylinder)
+0 l -d Horizontal cylinder oriented along lum.length
+w 0 -d Horizontal cylinder oriented along lum.width
+-w l h Ellipse oriented along luminaire length
+w -l h Ellipse oriented along luminaire width
+-w l -h Ellipsoid oriented along luminaire length
+w -l -h Ellipsoid oriented along luminaire width
+
+See IES LM-63-1995 for detailed descriptions and diagrams.
+
+Ballast Factor (Identifier Line 11)
+This floating point value indicates the ratio of the lamp lumens when operated on a commercially-available ballast, to the rated lamp lumens as measured by the lamp manufacturer using a standard (reference) ballast.
+All candela values in the photometric data file (identifier lines 14 through 17) must be multiplied by the ballast factor before the candela values are used in an application program.
+
+Ballast-Lamp Photometric Factor / Future Use (Identifier Line 11)
+In LM-63-1986 and LM-63-1991, this floating point value indicates the ratio of the lamp lumen output using the given ballast and lamp type used to generate a photometric report, to the lumen output of the same luminaire with the ballast and lamp type used for photometric testing.
+In LM-63-1995, it was recognized that most lighting manufacturers incorporate the ballast-lamp photometric factor in the preceding ballast factor and set the ballast-lamp photometric factor to unity. Consequently, the ballast-lamp photometric factor was designated as being for future use and the value set to unity to be compatible with previous releases of LM-63.
+All candela values in the photometric data file (identifier lines 14 through 17) must be multiplied by the ballast-lamp photometric factor before the candela values are used in an application program.
+
+Input Watts (Identifier Line 11)
+This floating point value indicates the total power (measured in watts) consumed by the luminaire, as measured during the photometric test.
+(The input watts value is *not* adjusted by the ballast factor or ballast-lamp photometric factor, even though the power consumption of a luminaire may change if the measured candela values are modified.)
+
+Vertical Angles (Identifier Line 12)
+This line enumerates the (floating point) vertical angles.
+For Type C photometry, the first vertical angle will be either 0 or 90 degrees, and the last vertical angle will be either 90 or 180 degrees.
+For Type A or B photometry, the first vertical angle will be either -90 or 0 degrees, and the last vertical angle will be 90 degrees.
+
+Horizontal Angles (Identifier Line 13)
+This line enumerates the (floating point) horizontal angles.
+For Type C photometry, the first value is (almost) always 0 degrees, and the last value is one of the following:
+0° There is only one horizontal angle, implying that the luminaire is laterally symmetric in all photometric planes;
+90° The luminaire is assumed to be symmetric in each quadrant;
+180° The luminaire is assumed to be bilaterally symmetric about the 0-180 degree photometric plane;
+360° The luminaire is assumed to exhibit no lateral symmetry. (NOTE: this is an error in the draft IES LM-63-1995 standard, because the 360-degree plane is coincident with the 0-degree plane. It should read "greater than 180 degrees and less than 360 degrees").
+A luminaire that is bilaterally symmetric about the 90-270 degree photometric plane will have a first value of 90 degrees and a last value of 270 degrees.
+For Type A or B photometry where the luminaire is laterally symmetric about a vertical reference plane, the first horizontal angle will be 0 degrees, and the last horizontal angle will be 90 degrees.
+For Type A or B photometry where the luminaire is not laterally symmetric about a vertical reference plane, the first horizontal angle will be -90 degrees, and the last horizontal angle will be 90 degrees.
+
+Candela Values (Identifier Lines 14 Through 17)
+These lines enumerate the (floating point) candela values. There is one line for each corresponding horizontal angle, and one candela value for each corresponding vertical angle.
+
+IES Standard File Example
+The following is an example of an IES LM-63-1995 photometric data file:
+
+IESNA:LM-63-1995
+[TEST]	ABC1234 ABC Laboratories
+[MANUFAC]	Aardvark Lighting Inc.
+[LUMCAT]	SKYVIEW 123-XYZ-abs-400
+[LUMINAIRE]	Wide beam flood to be used without tilt
+[LAMPCAT]	MH-400-CLEAR
+[LAMP]	Metal Halide 400 watt
+[BALLASTCAT]	Global 16G6031-17R
+[BALLAST]	400W 277V MH
+[MAINTCAT]	4
+[OTHER]	This luminaire is useful as an indirect flood
+[MORE]	and to reduce light pollution in down light
+[MORE]	applications.
+[SEARCH]	POLLUTION SPORTS INDIRECT
+[BLOCK]
+[LUMCAT]	TENNISVIEW 123-XYZ-abc-400
+[LUMINAIRE]	Wide beam flood for indirect applications.
+[ENDBLOCK]
+TILT=INCLUDE
+1
+13
+0	15	30	45	60	75	90	105	120	135	150	165	180
+1.0	.95	.94	.90	.88	.87	.98	.87	.88	.90	.94	.95	1.0
+1	50000	1	5	3	1	1	.5	.6	0
+1.0	1.0	495
+0	22.5	45	67.5	90
+0	45	90
+10000	50000	25000	10000	5000
+10000	35000	16000	8000	3000
+10000	20000	10000	5000	1000

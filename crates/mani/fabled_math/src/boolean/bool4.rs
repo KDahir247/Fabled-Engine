@@ -81,6 +81,21 @@ impl Bool4 {
             value: std::simd::mask32x4::from_array(array),
         }
     }
+
+    #[inline]
+    pub fn to_int(self) -> [i32; 4] {
+        self.value.to_int().to_array()
+    }
+
+    #[inline]
+    pub fn to_simd_int(self) -> std::simd::i32x4 {
+        self.value.to_int()
+    }
+
+    #[inline]
+    pub fn to_simd_mask(self) -> std::simd::mask32x4 {
+        self.value
+    }
 }
 
 impl Display for Bool4 {
@@ -1470,7 +1485,7 @@ impl Swizzles4 for Bool4 {
             value: unsafe { std::simd::mask32x4::from_int_unchecked(yxyx) },
         }
     }
-    
+
     #[inline]
     fn yxyy(self) -> Self {
         let yxyy = std::simd::simd_swizzle!(self.value.to_int(), [1, 0, 1, 1]);
