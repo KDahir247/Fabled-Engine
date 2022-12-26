@@ -1,24 +1,22 @@
 use crate::color::{hsl_to_rgb, hsv_to_rgb, srgb_to_cmyk, ColorSpace};
 use fabled_component::{Component, Modification};
-use fabled_math::Vector3;
+use fabled_math::{Vector3, Vector4};
 use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct ACESCompression {
     // Distance from achromatic which will be compressed to the gamut boundary
-    pub limit_cmy: Vector3,
+    pub limit: Vector3,
     // Percentage of the core gamut to protect
-    pub threshold_cmy: Vector3,
-    // Aggressiveness of the compression curve
-    pub power: f32,
+    // Aggressiveness of the compression curve in W
+    pub threshold_power: Vector4,
 }
 
 impl Default for ACESCompression {
     fn default() -> Self {
         Self {
-            limit_cmy: Vector3::set(1.147, 1.264, 1.312),
-            threshold_cmy: Vector3::set(0.815, 0.803, 0.88),
-            power: 1.2,
+            limit: Vector3::set(1.147, 1.264, 1.312),
+            threshold_power: Vector4::set(0.815, 0.803, 0.88, 1.2),
         }
     }
 }
@@ -40,10 +38,11 @@ impl ACESCompression {
             ColorSpace::CMY => threshold,
         };
 
+        let threshold = Vector4::set(threshold_cmy.x(), threshold_cmy.y(), threshold.z(), power);
+
         ACESCompression {
-            limit_cmy,
-            threshold_cmy,
-            power,
+            limit: limit_cmy,
+            threshold_power: threshold,
         }
     }
 }
@@ -53,7 +52,9 @@ impl Display for ACESCompression {
         write!(
             f,
             "ACESCompression(limit_cmy: {}, threshold_cmy: {}, power: {})",
-            self.limit_cmy, self.threshold_cmy, self.power
+            self.limit,
+            self.threshold_power.trunc_vec3(),
+            self.threshold_power.w()
         )
     }
 }

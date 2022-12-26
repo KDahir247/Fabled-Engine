@@ -4,7 +4,7 @@ use crate::color::{
     srgb_to_oklab,
 };
 use fabled_math::vector_math::{abs, component_max, gt, lt, min, select};
-use fabled_math::{approximate_equal, Bool3, Vector3};
+use fabled_math::{approximate_equal, Bool3, Swizzles4, Vector3};
 
 pub fn aces_gamut_compression(
     aces2025: Vector3,
@@ -15,12 +15,12 @@ pub fn aces_gamut_compression(
     let threshold_cmy = Vector3 {
         value: min(
             Vector3::broadcast(0.9999).value,
-            aces_param.threshold_cmy.value,
+            aces_param.threshold_power.xyz().value,
         ),
     };
 
     // limit is the max distance from gamut body that will be compressed.
-    let limit_cmy = aces_param.limit_cmy + 1.0;
+    let limit_cmy = aces_param.limit + 1.0;
 
     // achromatic axis
     let achromatic = Vector3::broadcast(component_max(aces2025.value));
@@ -49,19 +49,19 @@ pub fn aces_gamut_compression(
             distance.x(),
             limit_cmy.x(),
             threshold_cmy.x(),
-            aces_param.power,
+            aces_param.threshold_power.w(),
         ),
         aces_compression_internal(
             distance.y(),
             limit_cmy.y(),
             threshold_cmy.y(),
-            aces_param.power,
+            aces_param.threshold_power.w(),
         ),
         aces_compression_internal(
             distance.z(),
             limit_cmy.z(),
             threshold_cmy.z(),
-            aces_param.power,
+            aces_param.threshold_power.w(),
         ),
     );
 
@@ -71,19 +71,19 @@ pub fn aces_gamut_compression(
             distance.x(),
             limit_cmy.x(),
             threshold_cmy.x(),
-            aces_param.power,
+            aces_param.threshold_power.w(),
         ),
         aces_uncompressed_internal(
             distance.y(),
             limit_cmy.y(),
             threshold_cmy.y(),
-            aces_param.power,
+            aces_param.threshold_power.w(),
         ),
         aces_uncompressed_internal(
             distance.z(),
             limit_cmy.z(),
             threshold_cmy.z(),
-            aces_param.power,
+            aces_param.threshold_power.w(),
         ),
     );
 

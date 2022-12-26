@@ -12,19 +12,18 @@ pub fn compute_adaption_matrix(
     adaptation_param: ColorSpaceAdaption,
 ) -> Matrix3x3 {
     let src_cone_response_domain = adaptation_param.adaption_matrix * src_tri_stimulus_white_point;
+    let dst_cone_response_domain = adaptation_param.adaption_matrix * dst_tri_stimulus_white_point;
 
     let src_cone_response_domain_rcp = Vector3 {
         value: rcp(src_cone_response_domain.value),
     };
 
-    let dst_cone_response_domain = adaptation_param.adaption_matrix * dst_tri_stimulus_white_point;
-
     let dst_diff_src = dst_cone_response_domain * src_cone_response_domain_rcp;
 
     let diagonal_diff_matrix = Matrix3x3::set(
-        Vector3::set(dst_diff_src.x(), 0.0, 0.0),
-        Vector3::set(0.0, dst_diff_src.y(), 0.0),
-        Vector3::set(0.0, 0.0, dst_diff_src.z()),
+        dst_diff_src * Vector3::RIGHT,
+        dst_diff_src * Vector3::UP,
+        dst_diff_src * Vector3::FORWARD,
     );
 
     let inverse_adaption_matrix = inverse_mat3(adaptation_param.adaption_matrix);
@@ -46,6 +45,7 @@ pub fn apply_adaption_matrix_cct(
     let tri_stimulus = adaptation_param.tri_stimulus_matrix * color;
 
     let src_chromatic_coordinate = cct_to_chromatic_coord(cct_src);
+
     let src_tri_stimulus_white_point =
         chromatic_coord_to_tri_stimulus_white(src_chromatic_coordinate);
 

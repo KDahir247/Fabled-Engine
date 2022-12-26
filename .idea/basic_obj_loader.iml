@@ -183,6 +183,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_ecs/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_binding/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_component/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/mani/fabled_app/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_camera/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/wgpu_loader_core/target" />

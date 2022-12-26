@@ -1,7 +1,7 @@
 use crate::color::component::ColorSpaceAdaption;
 use crate::color::{compute_adaption_matrix, eotf_s_rgb, oetf_s_rgb};
-use fabled_math::vector_math::{component_min, component_sum, length, min, pow};
-use fabled_math::{Matrix3x3, Swizzles3, Vector3, Vector4};
+use fabled_math::vector_math::{component_min, component_sum, length, min, pow, rcp, select};
+use fabled_math::{approximate_equal, Bool3, Matrix3x3, Swizzles3, Vector3, Vector4};
 
 pub const SRGB_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(0.41238656, 0.21263682, 0.01933062),
@@ -90,84 +90,99 @@ pub const SRGB_TO_DCI_P3_MATRIX: Matrix3x3 = Matrix3x3::set(
 
 // primitive conversion
 pub fn xy_y_to_xyz(xy_y: Vector3) -> Vector3 {
-    // Y / y
-    let a = xy_y.z() / xy_y.y();
-    let b = 1.0 - xy_y.x() - xy_y.y();
+    let x = xy_y.x();
 
-    // x * (Y / y)
-    let x = xy_y.x() * a;
-    // Z = (1-x-y)Y / y
+    let a = xy_y.z() / xy_y.y();
+    let b = 1.0 - x - xy_y.y();
+
+    let x = x * a;
     let z = b * a;
-    // Y = Y
     let y = xy_y.z();
 
     Vector3::set(x, y, z)
 }
 
 pub fn xyz_to_xy_y(xyz: Vector3) -> Vector3 {
-    // 1.0 / (X + Y + Z)
     let intermediate = 1.0 / (component_sum(xyz.value));
 
-    // x = X / (X + Y + Z)
     let x = xyz.x() * intermediate;
-    // y = Y / (X + Y + Z)
     let y = xyz.y() * intermediate;
-    // Y = Y
     let _y = xyz.y();
 
     Vector3::set(x, y, _y)
 }
 
 
-pub fn srgb_to_xyz(
-    srgb_nonlinear: Vector3,
+pub fn linear_to_xyz(
+    linear: Vector3,
     src_tristimulus_white_point: Vector3,
     dst_tristmulus_white_point: Vector3,
 ) -> Vector3 {
-    let srgb_linear = eotf_s_rgb(srgb_nonlinear);
+    let src_white_point_mag = component_sum(src_tristimulus_white_point.value);
+    let dst_white_point_mag = component_sum(dst_tristmulus_white_point.value);
 
-    let mut tri_stimulus = Vector3::ZERO;
+    let white_point_equality_mask = Bool3::broadcast(approximate_equal(
+        src_white_point_mag,
+        dst_white_point_mag,
+        f32::EPSILON,
+    ));
 
-    if src_tristimulus_white_point != dst_tristmulus_white_point {
-        let adapted_matrix = compute_adaption_matrix(
-            src_tristimulus_white_point,
-            dst_tristmulus_white_point,
-            ColorSpaceAdaption {
-                tri_stimulus_matrix: SRGB_TO_XYZ_MATRIX,
-                adaption_matrix: Default::default(),
-            },
-        );
-        tri_stimulus = adapted_matrix * srgb_linear;
-    } else {
-        tri_stimulus = SRGB_TO_XYZ_MATRIX * srgb_linear;
+    let adapted_matrix = compute_adaption_matrix(
+        src_tristimulus_white_point,
+        dst_tristmulus_white_point,
+        ColorSpaceAdaption {
+            tri_stimulus_matrix: SRGB_TO_XYZ_MATRIX,
+            adaption_matrix: Default::default(),
+        },
+    );
+
+    let adapted_tri_stimulus = adapted_matrix * linear;
+
+    let default_tri_stimulus = SRGB_TO_XYZ_MATRIX * linear;
+
+    Vector3 {
+        value: select(
+            default_tri_stimulus.value,
+            adapted_tri_stimulus.value,
+            white_point_equality_mask.value,
+        ),
     }
-
-    tri_stimulus
 }
 
-pub fn xyz_to_srgb(
+pub fn xyz_to_linear(
     tri_stimulus: Vector3,
     src_tristimulus_white_point: Vector3,
     dst_tristmulus_white_point: Vector3,
 ) -> Vector3 {
-    let mut srgb_linear = Vector3::ZERO;
+    let src_white_point_mag = component_sum(src_tristimulus_white_point.value);
+    let dst_white_point_mag = component_sum(dst_tristmulus_white_point.value);
 
-    if src_tristimulus_white_point != dst_tristmulus_white_point {
-        let adapted_matrix = compute_adaption_matrix(
-            src_tristimulus_white_point,
-            dst_tristmulus_white_point,
-            ColorSpaceAdaption {
-                tri_stimulus_matrix: XYZ_TO_SRGB_MATRIX,
-                adaption_matrix: Default::default(),
-            },
-        );
+    let white_point_equality_mask = Bool3::broadcast(approximate_equal(
+        src_white_point_mag,
+        dst_white_point_mag,
+        f32::EPSILON,
+    ));
 
-        srgb_linear = adapted_matrix * tri_stimulus;
-    } else {
-        srgb_linear = XYZ_TO_SRGB_MATRIX * tri_stimulus;
+    let adapted_matrix = compute_adaption_matrix(
+        src_tristimulus_white_point,
+        dst_tristmulus_white_point,
+        ColorSpaceAdaption {
+            tri_stimulus_matrix: XYZ_TO_SRGB_MATRIX,
+            adaption_matrix: Default::default(),
+        },
+    );
+
+    let adapted_linear = adapted_matrix * tri_stimulus;
+
+    let default_linear = XYZ_TO_SRGB_MATRIX * tri_stimulus;
+
+    Vector3 {
+        value: select(
+            default_linear.value,
+            adapted_linear.value,
+            white_point_equality_mask.value,
+        ),
     }
-
-    oetf_s_rgb(srgb_linear)
 }
 
 
@@ -175,63 +190,51 @@ pub fn xyz_to_srgb(
 pub fn oklab_to_xyz(oklab: Vector3) -> Vector3 {
     let lms_oklab = OKLAB_TO_OKLAB_LMS_MATRIX * oklab;
 
-    let pow_3_lms_oklab = pow(lms_oklab.value, Vector3::broadcast(3.0).value);
+    let pow_3_lms_oklab = lms_oklab * lms_oklab * lms_oklab;
 
-    OKLAB_LMS_TO_XYZ_MATRIX
-        * Vector3 {
-            value: pow_3_lms_oklab,
-        }
+    OKLAB_LMS_TO_XYZ_MATRIX * pow_3_lms_oklab
 }
 
 pub fn xyz_to_oklab(tri_stimulus: Vector3) -> Vector3 {
     let lms_oklab = XYZ_TO_OKLAB_LMS_MATRIX * tri_stimulus;
 
-    let cbrt_lms_oklab = pow(
-        lms_oklab.value,
-        Vector3::broadcast(0.33333333333333333333333333333333).value,
-    );
+    let rcp_lms_oklab = Vector3 {
+        value: rcp(lms_oklab.value),
+    };
 
-    OKLAB_LMS_TO_OKLAB
-        * Vector3 {
-            value: cbrt_lms_oklab,
-        }
+    let cbrt_lms_oklab = lms_oklab * rcp_lms_oklab * rcp_lms_oklab;
+
+    OKLAB_LMS_TO_OKLAB * cbrt_lms_oklab
 }
 
 pub fn oklab_to_srgb(oklab: Vector3) -> Vector3 {
     let lms_oklab = OKLAB_TO_OKLAB_LMS_MATRIX * oklab;
 
-    let pow_3_lms_oklab = pow(lms_oklab.value, Vector3::broadcast(3.0).value);
+    let pow_3_lms_oklab = lms_oklab * lms_oklab * lms_oklab;
 
-    OKLAB_LMS_TO_SRGB_MATRIX
-        * Vector3 {
-            value: pow_3_lms_oklab,
-        }
+    OKLAB_LMS_TO_SRGB_MATRIX * pow_3_lms_oklab
 }
 
 pub fn srgb_to_oklab(srgb: Vector3) -> Vector3 {
     let lms_oklab = SRGB_TO_OKLAB_LMS_MATRIX * srgb;
 
-    let cbrt_lms_oklab = pow(
-        lms_oklab.value,
-        Vector3::broadcast(0.33333333333333333333333333333333).value,
-    );
+    let rcp_lms_oklab = Vector3 {
+        value: rcp(lms_oklab.value),
+    };
 
-    OKLAB_LMS_TO_OKLAB
-        * Vector3 {
-            value: cbrt_lms_oklab,
-        }
+    let cbrt_lms_oklab = lms_oklab * rcp_lms_oklab * rcp_lms_oklab;
+
+    OKLAB_LMS_TO_OKLAB * cbrt_lms_oklab
 }
 
 pub fn oklab_to_lch(oklab: Vector3) -> Vector3 {
     let lightness = oklab.x();
 
-    let ab_vector = Vector3 {
-        value: oklab.yzx().trunc_vec2().to_simd(),
-    };
+    let ab_vector = oklab.yzx().trunc_vec2();
 
-    let chroma = length(ab_vector.value);
+    let chroma = (ab_vector.x() * ab_vector.x()) + (ab_vector.y() * ab_vector.y());
+
     let hue = ab_vector.y().atan2(ab_vector.x());
-
 
     Vector3::set(lightness, chroma, hue)
 }
@@ -240,19 +243,19 @@ pub fn ok_lab_from_lch(lch: Vector3) -> Vector3 {
     let (hue_sin, hue_cos) = lch.z().sin_cos();
     let chroma = lch.y();
     let l = lch.x();
+
     let a = chroma * hue_cos;
     let b = chroma * hue_sin;
 
     Vector3::set(l, a, b)
 }
 
-
 pub fn srgb_to_cmyk(srgb: Vector3) -> Vector4 {
-    let rcp_255 = 1.0 / 255.0;
+    const RCP_255: f32 = 1.0 / 255.0;
 
-    let black = component_min((Vector3::ONE - srgb * rcp_255).value);
+    let black = component_min((Vector3::ONE - srgb).value);
 
-    let cmy = (Vector3::ONE - (srgb * rcp_255) - black) / (1.0 - black);
+    let cmy = (Vector3::ONE - srgb - black) / (1.0 - black);
 
     Vector4::set(cmy.x(), cmy.y(), cmy.z(), black)
 }
@@ -261,11 +264,10 @@ pub fn srgb_to_cmyk(srgb: Vector3) -> Vector4 {
 pub fn cmyk_to_srgb(cmyk: Vector4) -> Vector3 {
     let cmy = cmyk.trunc_vec3();
 
+    let black_diff = Vector3::ONE - cmyk.w();
+
     Vector3::ONE
         - Vector3 {
-            value: min(
-                (cmy * (Vector3::ONE * cmyk.w()) * 255.0).value,
-                Vector3::ONE.value,
-            ),
+            value: min((cmy * black_diff + cmyk.w()).value, Vector3::ONE.value),
         }
 }

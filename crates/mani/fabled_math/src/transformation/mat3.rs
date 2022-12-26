@@ -463,8 +463,8 @@ pub mod matrix3x3_math {
         let inverse_determinant: f32 = determinant_mat3(matrix).recip();
 
         let cofactor_matrix: Matrix3x3 = Matrix3x3::set(x, y, z);
-        let adjugate_matrix: Matrix3x3 = transpose_mat3(cofactor_matrix);
+        let adjudicate_matrix: Matrix3x3 = transpose_mat3(cofactor_matrix);
 
-        adjugate_matrix * inverse_determinant
+        adjudicate_matrix * inverse_determinant
     }
 }

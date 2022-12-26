@@ -1,5 +1,5 @@
-use fabled_math::vector_math::{component_max, sqrt};
-use fabled_math::{Matrix3x3, Vector3, Vector4};
+use fabled_math::vector_math::{component_max, exp2, ge, gt, le, log2, lt, select, sqrt};
+use fabled_math::{Bool3, Matrix3x3, Vector3, Vector4};
 
 pub const DCI_P3_TO_XYZ_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(4.451_698e-1, 2.094_916_9e-1, -3.634_101_2e-17),
@@ -97,79 +97,108 @@ pub const XYZ_TO_AP1_MATRIX: Matrix3x3 = Matrix3x3::set(
     Vector3::set(-0.2364246952, 0.0167563477, 0.9883948585),
 );
 
-// ACEScc and ACEScct are primarily used for color grading
-fn acescct_from_linear_single(lin: f32) -> f32 {
-    if lin <= 0.0078125 {
-        10.5402377416545 * lin + 0.0729055341958355
-    } else {
-        (lin.log2() + 9.72) / 17.5
-    }
-}
 
 // convert aces2025 to acescct
 pub fn acescct_from_linear(lin: Vector3) -> Vector3 {
-    Vector3::set(
-        acescct_from_linear_single(lin.x()),
-        acescct_from_linear_single(lin.y()),
-        acescct_from_linear_single(lin.z()),
-    )
-}
+    const RCP_17_52: f32 = 1.0 / 17.52;
 
-fn linear_from_acescct_single(cct: f32) -> f32 {
-    if cct > 0.155251141552511 {
-        2.0f32.powf(cct * 17.52 - 9.72)
-    } else {
-        (cct - 0.0729055341958355) / 10.5402377416545
+    let lin_log2 = Vector3 {
+        value: log2(lin.value),
+    };
+
+    let a = lin_log2 + 9.72;
+
+    let min = lin * 10.5402377416545;
+
+    let max = a * RCP_17_52;
+
+    let mask = le(lin.value, Vector3::broadcast(0.0078125).value);
+
+    Vector3 {
+        value: select((min + 0.0729055341958355).value, max.value, mask),
     }
 }
 
 pub fn linear_from_acescct(cct: Vector3) -> Vector3 {
-    Vector3::set(
-        linear_from_acescct_single(cct.x()),
-        linear_from_acescct_single(cct.y()),
-        linear_from_acescct_single(cct.z()),
-    )
+    // not exactly 10.5 but this specific value is need for acescct conversion.
+    const RCP_10_5: f32 = 1.0 / 10.5402377416545;
+
+    let max = Vector3 {
+        value: exp2((cct * 17.52 - 9.72).value),
+    };
+
+    let min = (cct - 0.0729055341958355) * RCP_10_5;
+
+    Vector3 {
+        value: select(
+            max.value,
+            min.value,
+            gt(cct.value, Vector3::broadcast(0.155251141552511).value),
+        ),
+    }
 }
 
 // When ACES values are matrixed into the smaller AP1 space, colors outside
 // the AP1 gamut can generate negative values even before the log encoding.
 // store negative value to have a lossless conversion if needed.
-fn acescc_from_linear_single(lin: f32) -> f32 {
-    if lin <= 0.0 {
-        -0.3584474886
-    } else if lin < 2.0f32.powf(-15.0) {
-        ((2.0f32.powf(-16.0) + lin * 0.5).log2() + 9.72) / 17.52
-    } else {
-        (lin.log2() + 9.72) / 17.52
-    }
-}
-
 pub fn acescc_from_linear(lin: Vector3) -> Vector3 {
-    Vector3::set(
-        acescc_from_linear_single(lin.x()),
-        acescc_from_linear_single(lin.y()),
-        acescc_from_linear_single(lin.z()),
-    )
-}
+    // we will completely disregard if lin is zero and we are getting the log2 from
+    // it. This would not cause and error, but will give back inf we handle the
+    // case below.
+    const RCP_17_52: f32 = 1.0 / 17.52;
 
-fn linear_from_acescc_single(cc: f32) -> f32 {
-    const HALF_MAX: f32 = 65504.0;
 
-    if cc < -0.3013698630 {
-        (2.0f32.powf(cc * 17.52 - 9.72) - 2.0f32.powf(-16.0)) * 2.0
-    } else if cc < (HALF_MAX.log2() + 9.72) / 17.52 {
-        2.0f32.powf(cc * 17.52 - 9.72)
-    } else {
-        HALF_MAX
+    let min = (Vector3 {
+        value: log2((lin * 0.5 + 0.0000152587890625).value),
+    } + 9.72)
+        * RCP_17_52;
+
+    let max = (Vector3 {
+        value: log2(lin.value),
+    } + 9.72)
+        * RCP_17_52;
+
+
+    let aces_cc_unhandled = select(
+        min.value,
+        max.value,
+        lt(lin.value, Vector3::broadcast(0.000030517578125).value),
+    );
+
+    Vector3 {
+        value: select(
+            Vector3::broadcast(-0.3584474886).value,
+            aces_cc_unhandled,
+            le(lin.value, Vector3::ZERO.value),
+        ),
     }
 }
 
 pub fn linear_from_acescc(cc: Vector3) -> Vector3 {
-    Vector3::set(
-        linear_from_acescc_single(cc.x()),
-        linear_from_acescc_single(cc.y()),
-        linear_from_acescc_single(cc.z()),
-    )
+    let max = Vector3 {
+        value: exp2((cc * 17.52 - 9.72).value),
+    };
+
+    let min = (max - 0.0000152587890625) + (max - 0.0000152587890625);
+
+    let max = max;
+
+    let linear_unhandled = select(
+        min.value,
+        max.value,
+        lt(cc.value, Vector3::broadcast(-0.3013698630).value),
+    );
+
+    Vector3 {
+        value: select(
+            Vector3::broadcast(65504.0).value,
+            linear_unhandled,
+            ge(
+                cc.value,
+                Vector3::broadcast(1.4679962899543378995433789954338).value,
+            ),
+        ),
+    }
 }
 
 pub fn linear_to_acescg(lin: Vector3) -> Vector3 {
@@ -192,52 +221,70 @@ pub fn aces_to_standard(acescg: Vector3) -> Vector3 {
 pub fn screen_referred_to_rgbe(screen_referred_color: Vector3) -> Vector4 {
     let maximum_luminance = component_max(screen_referred_color.value);
 
-    let scalar: f32 = f32::from(u8::from(maximum_luminance > 10.0f32.powf(-38.0)));
+    let log2_max_luminance = maximum_luminance.log2();
 
-    let exponent = maximum_luminance.log2() + 128.0;
+    let luminance_mask = Bool3::broadcast(maximum_luminance > 1.0e-38);
 
-    let rgb_intermediate = 2.0f32.powf(exponent - 128.0).recip();
+    let exponent = log2_max_luminance + 128.0;
 
-    let rgb = (screen_referred_color * 256.0) * (rgb_intermediate * scalar);
-    let exp = exponent * scalar;
+    let rgb_intermediate = log2_max_luminance.exp2().recip();
 
-    Vector4::set(rgb.x(), rgb.y(), rgb.z(), exp)
+    let rgb = screen_referred_color * 256.0 * rgb_intermediate;
+
+    Vector4 {
+        value: select(
+            Vector4::set(rgb.x(), rgb.y(), rgb.z(), exponent).value,
+            Vector4::ZERO.value,
+            luminance_mask.value,
+        ),
+    }
 }
 
 
 pub fn rgbe_to_screen_referred(rgbe: Vector4) -> Vector3 {
     let maximum_luminance = component_max(rgbe.value);
 
-    let scalar = f32::from(u8::from(maximum_luminance > 10.0f32.powf(-38.0)));
+    let luminance_mask = Bool3::broadcast(maximum_luminance > 1.0e-38);
 
-    let screen_referred_intermediate = 256.0 * 2.0f32.powf(rgbe.w() - 128.0);
+    let modified_rgbe = rgbe + 0.5;
 
-    ((rgbe + 0.5) * (screen_referred_intermediate * scalar)).trunc_vec3()
+    let half_exposure = rgbe.w() - 128.0;
+
+    let screen_referred_intermediate = 256.0 * half_exposure.exp2();
+    let rgb_representation = (modified_rgbe * screen_referred_intermediate).trunc_vec3();
+
+    Vector3 {
+        value: select(
+            rgb_representation.value,
+            Vector3::ZERO.value,
+            luminance_mask.value,
+        ),
+    }
 }
 
-
 pub fn linear_to_rgb_m(linear: Vector3) -> Vector4 {
-    const ONE_6_RCP: f32 = 1.0 / 6.0;
-    const ONE_255_RCP: f32 = 1.0 / 255.0;
+    const RCP_6: f32 = 1.0 / 6.0;
 
     let rgb = Vector3 {
         value: sqrt(linear.value),
-    } * ONE_6_RCP;
+    } * RCP_6;
 
-    let maximum_luminance = component_max(rgb.value);
+    let maximum_luminance = component_max(rgb.value).ceil();
 
-    let multiply = (maximum_luminance * 255.0).ceil() * ONE_255_RCP;
-    let rcp_multiply = multiply.recip();
+    let rcp_maximum_luminance = maximum_luminance.recip();
 
-    let rgb_m = rgb * rcp_multiply;
+    let rgb_m = rgb * rcp_maximum_luminance;
 
-    Vector4::set(rgb_m.x(), rgb_m.y(), rgb_m.z(), multiply)
+    Vector4::set(rgb_m.x(), rgb_m.y(), rgb_m.z(), maximum_luminance)
 }
 
 pub fn rgb_m_to_linear(rgbm: Vector4) -> Vector3 {
-    let intermediate_step = (rgbm.w() + rgbm.w()) + (rgbm.w() + rgbm.w()) + (rgbm.w() + rgbm.w());
+    let rgb = rgbm.trunc_vec3();
 
-    let rgb_linear = rgbm.trunc_vec3() * intermediate_step;
+    let multiplier_mul_2 = rgbm.w() + rgbm.w();
+    let multiplier_step = multiplier_mul_2 + multiplier_mul_2 + multiplier_mul_2;
+
+    let rgb_linear = rgb * multiplier_step;
 
     rgb_linear * rgb_linear
 }

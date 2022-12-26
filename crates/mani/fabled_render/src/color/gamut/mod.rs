@@ -103,6 +103,9 @@ pub(crate) fn find_gamut_intersection(a: f32, b: f32, l1: f32, c1: f32, l0: f32)
     let rhs = cusp.x() - l0;
     let intermediate = l0 - l1;
 
+    // We will keep the conditional branch here since we don't want to calculate
+    // everything in the else block and select the correct result. Conditional
+    // will be faster.
     if ((dl * cusp.y()) - (rhs * c1)) <= 0.0 {
         t = (cusp.y() * l0) / ((c1 * cusp.x()) + (cusp.y() * intermediate));
     } else {
