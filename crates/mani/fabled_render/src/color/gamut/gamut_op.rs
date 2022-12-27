@@ -3,19 +3,20 @@ use crate::color::{
     aces_compression_internal, aces_uncompressed_internal, find_gamut_intersection, oklab_to_srgb,
     srgb_to_oklab,
 };
-use fabled_math::vector_math::{abs, component_max, gt, lt, min, select};
-use fabled_math::{approximate_equal, Bool3, Swizzles4, Vector3};
+use fabled_math::vector_math::{abs, component_max, gt, length, lt, min, select};
+use fabled_math::{approximate_equal, Bool3, Vector3, Vector4};
 
 pub fn aces_gamut_compression(
     aces2025: Vector3,
     aces_param: ACESCompression,
     invert: bool,
 ) -> Vector3 {
-    // threshold is the percentage of the core gamut to protect
-    let threshold_cmy = Vector3 {
+    // threshold is the percentage of the core gamut to protect we want to clamp
+    // cmy, but don't really care about the power.
+    let threshold_cmy = Vector4 {
         value: min(
-            Vector3::broadcast(0.9999).value,
-            aces_param.threshold_power.xyz().value,
+            Vector4::set(0.9999, 0.9999, 0.9999, aces_param.threshold_power.w()).value,
+            aces_param.threshold_power.value,
         ),
     };
 
@@ -44,48 +45,12 @@ pub fn aces_gamut_compression(
     let mask = Bool3::broadcast(!invert);
 
     // compress distance with user controlled parameterized shaper function
-    let compressed_distance = Vector3::set(
-        aces_compression_internal(
-            distance.x(),
-            limit_cmy.x(),
-            threshold_cmy.x(),
-            aces_param.threshold_power.w(),
-        ),
-        aces_compression_internal(
-            distance.y(),
-            limit_cmy.y(),
-            threshold_cmy.y(),
-            aces_param.threshold_power.w(),
-        ),
-        aces_compression_internal(
-            distance.z(),
-            limit_cmy.z(),
-            threshold_cmy.z(),
-            aces_param.threshold_power.w(),
-        ),
-    );
+    let compressed_distance = aces_compression_internal(distance, limit_cmy, threshold_cmy);
+
 
     // uncompress distance with user controlled parameterized shaper function
-    let uncompressed_distance = Vector3::set(
-        aces_uncompressed_internal(
-            distance.x(),
-            limit_cmy.x(),
-            threshold_cmy.x(),
-            aces_param.threshold_power.w(),
-        ),
-        aces_uncompressed_internal(
-            distance.y(),
-            limit_cmy.y(),
-            threshold_cmy.y(),
-            aces_param.threshold_power.w(),
-        ),
-        aces_uncompressed_internal(
-            distance.z(),
-            limit_cmy.z(),
-            threshold_cmy.z(),
-            aces_param.threshold_power.w(),
-        ),
-    );
+    let uncompressed_distance =
+        aces_uncompressed_internal(compressed_distance, limit_cmy, threshold_cmy);
 
     let desired_distance = Vector3 {
         value: select(
@@ -105,9 +70,8 @@ pub fn aces_gamut_compression(
     compressed_rgb
 }
 
-pub fn gamut_clip_adaptive_l0_0_5(rgb: Vector3, alpha: Option<f32>) -> Vector3 {
-    let alpha = alpha.unwrap_or(0.05);
-
+// alpha is defaulted to 0.05.
+pub fn gamut_clip_adaptive_l0_0_5(rgb: Vector3, alpha: f32) -> Vector3 {
     let normalized_min = Bool3 {
         value: lt(rgb.value, Vector3::broadcast(1.0).value),
     };
@@ -120,33 +84,28 @@ pub fn gamut_clip_adaptive_l0_0_5(rgb: Vector3, alpha: Option<f32>) -> Vector3 {
     }
 
     let lab = srgb_to_oklab(rgb);
-
-    let l = lab.x();
-
-    let length = ((lab.y() * lab.y()) + (lab.z() * lab.z()))
-        .sqrt()
-        .max(f32::EPSILON);
-
+    let ab = lab * Vector3::set(0.0, 1.0, 1.0);
+    
+    let length = length(ab.value).max(f32::EPSILON);
     let rcp_length = length.recip();
 
-    let a_ = lab.y() * rcp_length;
-    let b_ = lab.z() * rcp_length;
+    let lab_ = lab * Vector3::set(1.0, rcp_length, rcp_length);
 
-    let ld = l - 0.5;
+    let ld = lab_.x() - 0.5;
     let ld_abs = ld.abs();
     let e1 = (0.5 + ld_abs) + (alpha * length);
 
     let c = ((e1 * e1) - (ld_abs + ld_abs)).sqrt();
     let l0 = 0.5 * (1.0 + ld.signum() * (e1 - c));
 
-    let t = find_gamut_intersection(a_, b_, l, length, l0);
+    let t = find_gamut_intersection(lab_, length, l0);
 
     let d = 1.0 - t;
-    let l_clipped = (l0 * d) + (t * l);
+    let l_clipped = (l0 * d) + (t * lab_.x());
     let c_clipped = t * length;
 
-    let a = c_clipped * a_;
-    let b = c_clipped * b_;
+    let a = c_clipped * lab_.y();
+    let b = c_clipped * lab_.z();
 
     oklab_to_srgb(Vector3::set(l_clipped, a, b))
 }

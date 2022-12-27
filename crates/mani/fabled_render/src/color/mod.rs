@@ -22,9 +22,10 @@ pub use util::*;
 use fabled_math::vector_math::{cast, reduce_or, reduce_sum};
 use fabled_math::{Vector3, Vector4};
 
+// todo don't like the simd cast happening here. Got to create some container
+//  for integer type.
+
 pub fn rgb_to_hex(rgb: Vector3) -> usize {
-    // todo don't like the simd cast happening here. Got to create some container
-    //  for integer type.
     let shift_mask = cast::<f32, usize>(Vector3::set(16.0, 8.0, 0.0).value);
     let mul_mask = cast::<f32, usize>(Vector3::broadcast(255.0).value);
     let scaled_rgb = cast::<f32, usize>(rgb.value) * mul_mask;

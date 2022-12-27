@@ -1,4 +1,4 @@
-use crate::color::srgb_compute_luminance;
+use crate::color::compute_luminance;
 use fabled_math::vector_math::{
     abs, clamp, dot, exp2, le, lerp, log2, max, pow, rcp, select, step,
 };
@@ -72,7 +72,7 @@ pub fn apply_asc_cdl(a: Vector3, slope: Vector3, offset: Vector3, power: Vector3
 }
 
 pub fn desaturate(a: Vector3, luminance: Vector3, factor: f32) -> Vector3 {
-    let max_luminance = srgb_compute_luminance(a, luminance);
+    let max_luminance = compute_luminance(a, luminance);
 
     let luminance = Vector3::broadcast(max_luminance);
 
@@ -80,7 +80,7 @@ pub fn desaturate(a: Vector3, luminance: Vector3, factor: f32) -> Vector3 {
 }
 
 pub fn saturation(a: Vector3, luminance: Vector3, factor: f32) -> Vector3 {
-    let max_luminance = srgb_compute_luminance(a, luminance);
+    let max_luminance = compute_luminance(a, luminance);
 
     let luminance = Vector3::broadcast(max_luminance);
 

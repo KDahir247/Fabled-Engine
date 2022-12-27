@@ -3,13 +3,11 @@ mod gamut_op;
 pub use gamut_op::*;
 
 use crate::color::oklab_to_srgb;
-use fabled_math::vector_math::{component_max, component_min, ge, gt, lt, select};
-use fabled_math::{Vector2, Vector3};
+use fabled_math::vector_math::{component_max, component_min, dot, ge, pow, rcp, select};
+use fabled_math::{Bool3, Swizzles4, Vector2, Vector3, Vector4};
 
 pub(crate) fn compute_max_saturation(a: f32, b: f32) -> f32 {
-    let mut wl = 0.0;
-    let mut wm = 0.0;
-    let mut ws = 0.0;
+    let mut w_lms = Vector3::ZERO;
 
     let s = {
         let mut k0 = 0.0;
@@ -24,60 +22,53 @@ pub(crate) fn compute_max_saturation(a: f32, b: f32) -> f32 {
             k2 = 0.59662641;
             k3 = 0.75515197;
             k4 = 0.56771245;
-            wl = 4.0767416621;
-            wm = -3.3077115913;
-            ws = 0.2309699292;
+
+            w_lms = Vector3::set(4.0767416621, -3.3077115913, 0.2309699292);
         } else if ((1.81444104 * a) - (1.19445276 * b)) > 1.0 {
             k0 = 0.73956515;
             k1 = -0.45954404;
             k2 = 0.08285427;
             k3 = 0.12541070;
             k4 = 0.14503204;
-            wl = 1.2684380046;
-            wm = 2.6097574011;
-            ws = -0.3413193965;
+
+            w_lms = Vector3::set(1.2684380046, 2.6097574011, -0.3413193965);
         } else {
             k0 = 1.35733652;
             k1 = -0.00915799;
             k2 = -1.15130210;
             k3 = -0.50559606;
             k4 = 0.00692167;
-            wl = -0.0041960863;
-            wm = -0.7034186147;
-            ws = 1.7076147010;
+
+            w_lms = Vector3::set(-0.0041960863, -0.7034186147, 1.7076147010);
         }
 
         k0 + (k1 * a) + (k2 * b) + (k3 * a) * a + (k4 * a) * b
     };
 
-    let k_l = (0.3963377774 * a) + (0.2158037573 * b);
-    let k_m = -(0.1055613458 * a) - (0.0638541728 * b);
-    let k_s = -(0.0894841775 * a) - (1.2914855480 * b);
+
+    let k_lms = Vector3::set(
+        (0.3963377774 * a) + (0.2158037573 * b),
+        -(0.1055613458 * a) - (0.0638541728 * b),
+        -(0.0894841775 * a) - (1.2914855480 * b),
+    );
 
     let res = {
-        let l_ = 1.0 + s * k_l;
-        let m_ = 1.0 + s * k_m;
-        let s_ = 1.0 + s * k_s;
+        let lms_ = k_lms * s + Vector3::ONE;
 
-        let l = l_ * l_ * l_;
-        let m = m_ * m_ * m_;
-        let s = s_ * s_ * s_;
+        let lms = lms_ * lms_ * lms_;
 
-        let l_ds = (3.0 * k_l) * (l_ * l_);
-        let m_ds = (3.0 * k_m) * (m_ * m_);
-        let s_ds = (3.0 * k_s) * (s_ * s_);
+        let lms_ds = (k_lms * 3.0) * (lms_ * lms_);
 
-        let l_ds2 = (6.0 * k_l) * (k_l * l_);
-        let m_ds2 = (6.0 * k_m) * (k_m * m_);
-        let s_ds2 = (6.0 * k_s) * (k_s * s_);
+        let lms_ds2 = (k_lms * 6.0) * (k_lms * lms_);
 
-        let f = (wl * l) + (wm * m) + (ws * s);
-        let f1 = (wl * l_ds) + (wm * m_ds) + (ws * s_ds);
-        let f2 = (wl * l_ds2) + (wm * m_ds2) + (ws * s_ds2);
+        let f = dot(w_lms.value, lms.value);
+        let f1 = dot(w_lms.value, lms_ds.value);
+        let f2 = dot(w_lms.value, lms_ds2.value);
 
         let neg_half_f = -0.5 * f;
         let denominator = (f1 * f1) + (neg_half_f * f2);
-        s - f * f1 / denominator
+
+        lms.z() - f * f1 / denominator
     };
 
     res
@@ -86,94 +77,100 @@ pub(crate) fn compute_max_saturation(a: f32, b: f32) -> f32 {
 pub(crate) fn find_cusp(a: f32, b: f32) -> Vector2 {
     let s_cusp = compute_max_saturation(a, b);
 
-    let rgb_at_max = oklab_to_srgb(Vector3::set(1.0, s_cusp * a, s_cusp * b));
+    let rgb_at_max_lightness = oklab_to_srgb(Vector3::set(1.0, s_cusp * a, s_cusp * b));
 
-    let l_cusp = (1.0 / component_max(rgb_at_max.value)).cbrt();
+    let rcp_max_channel = component_max(rgb_at_max_lightness.value).recip();
+
+    let l_cusp = rcp_max_channel.cbrt();
     let c_cusp = l_cusp * s_cusp;
 
     Vector2::set(l_cusp, c_cusp)
 }
 
-pub(crate) fn find_gamut_intersection(a: f32, b: f32, l1: f32, c1: f32, l0: f32) -> f32 {
-    let cusp = find_cusp(a, b);
+pub(crate) fn find_gamut_intersection(lab: Vector3, c1: f32, l0: f32) -> f32 {
+    let cusp = find_cusp(lab.y(), lab.z());
+
+    let l = cusp.x();
+    let c = cusp.y();
 
     let mut t = 0.0;
 
-    let dl = l1 - l0;
-    let rhs = cusp.x() - l0;
-    let intermediate = l0 - l1;
+    let dl = lab.x() - l0;
+    let rhs = l - l0;
+    let intermediate = l0 - lab.x();
 
     // We will keep the conditional branch here since we don't want to calculate
     // everything in the else block and select the correct result. Conditional
     // will be faster.
-    if ((dl * cusp.y()) - (rhs * c1)) <= 0.0 {
-        t = (cusp.y() * l0) / ((c1 * cusp.x()) + (cusp.y() * intermediate));
+    if ((dl * c) - (rhs * c1)) <= 0.0 {
+        let denometer = (c1 * l) + (c * intermediate);
+        t = (c * l0) / denometer;
     } else {
         let a = l0 - 1.0;
-        let b = cusp.x() - 1.0;
+        let b = l - 1.0;
 
-        t = (cusp.y() * a) / ((c1 * b) + (cusp.y() * intermediate));
+        let denometer = (c1 * b) + (c * intermediate);
+        t = (c * a) / denometer;
 
         {
-            let k_l = (0.3963377774 * a) + (0.2158037573 * b);
-            let k_m = -(0.1055613458 * a) - (0.0638541728 * b);
-            let k_s = -(0.0894841775 * a) - (1.2914855480 * b);
+            let k_lms = Vector3::set(
+                (0.3963377774 * a) + (0.2158037573 * b),
+                -(0.1055613458 * a) - (0.0638541728 * b),
+                -(0.0894841775 * a) - (1.2914855480 * b),
+            );
 
-            let l_dt = dl + c1 * k_l;
-            let m_dt = dl + c1 * k_m;
-            let s_dt = dl + c1 * k_s;
+            let lms_dt = k_lms * c1 + dl;
 
             {
                 let d = 1.0 - t;
-                let l = (l0 * d) + (t * l1);
+                let l = (l0 * d) + (t * lab.x());
                 let c = t * c1;
 
-                let l_ = l + c * k_l;
-                let m_ = l + c * k_m;
-                let s_ = l + c * k_s;
+                let lms_ = k_lms * c + l;
 
-                let l = l_ * l_ * l_;
-                let m = m_ * m_ * m_;
-                let s = s_ * s_ * s_;
+                let lms = lms_ * lms_ * lms_;
 
-                let ldt = (3.0 * l_dt) * (l_ * l_);
-                let mdt = (3.0 * m_dt) * (m_ * m_);
-                let sdt = (3.0 * s_dt) * (s_ * s_);
+                let lmsdt = (lms_dt * 3.0) * (lms_ * lms_);
 
-                let ldt2 = (6.0 * l_dt) * (l_dt * l_);
-                let mdt2 = (6.0 * m_dt) * (m_dt * m_);
-                let sdt2 = (6.0 * s_dt) * (s_dt * s_);
+                let lmsdt2 = (lms_dt * 6.0) * (lms_dt * lms_);
 
-                let r = (4.0767416621 * l) - (3.3077115913 * m) + (0.2309699292 * s) - 1.0;
-                let r1 = (4.0767416621 * ldt) - (3.3077115913 * mdt) + (0.2309699292 * sdt);
-                let r2 = (4.0767416621 * ldt2) - (3.3077115913 * mdt2) + (0.2309699292 * sdt2);
+                const RED_VECTOR: Vector3 = Vector3::set(4.0767416621, -3.3077115913, 0.2309699292);
 
+                const GREEN_VECTOR: Vector3 =
+                    Vector3::set(-1.2684380046, 2.6097574011, -0.3413193965);
 
-                let g = -(1.2684380046 * l) + (2.6097574011 * m) - (0.3413193965 * s) - 1.0;
-                let g1 = -(1.2684380046 * ldt) + (2.6097574011 * mdt) - (0.3413193965 * sdt);
-                let g2 = -(1.2684380046 * ldt2) + (2.6097574011 * mdt2) - (0.3413193965 * sdt2);
+                const BLUE_VECTOR: Vector3 =
+                    Vector3::set(-0.0041960863, -0.7034186147, 1.7076147010);
 
-
-                let b = -(0.0041960863 * l) - (0.7034186147 * m) + (1.7076147010 * s) - 1.0;
-                let b1 = -(0.0041960863 * ldt) - (0.7034186147 * mdt) + (1.7076147010 * sdt);
-                let b2 = -(0.0041960863 * ldt2) - (0.7034186147 * mdt2) + (1.7076147010 * sdt2);
-
-                let rgb1_half = Vector3::set(0.5 * r, 0.5 * g, 0.5 * b);
-
-                let u_rgb = Vector3::set(
-                    r1 / ((r1 * r1) - (rgb1_half.x() * r2)),
-                    g1 / ((g1 * g1) - (rgb1_half.y() * g2)),
-                    b1 / ((b1 * b1) - (rgb1_half.z() * b2)),
+                let rgb = Vector3::set(
+                    dot(RED_VECTOR.value, lms.value) - 1.0,
+                    dot(GREEN_VECTOR.value, lms.value) - 1.0,
+                    dot(BLUE_VECTOR.value, lms.value) - 1.0,
                 );
 
-                let t_rgb = Vector3::set(-r * u_rgb.x(), -g * u_rgb.y(), -b * u_rgb.z());
+                let rgb_1 = Vector3::set(
+                    dot(RED_VECTOR.value, lmsdt.value),
+                    dot(GREEN_VECTOR.value, lmsdt.value),
+                    dot(BLUE_VECTOR.value, lmsdt.value),
+                );
 
-                let max_vector3 = Vector3::broadcast(f32::MAX);
+                let rgb_2 = Vector3::set(
+                    dot(RED_VECTOR.value, lmsdt2.value),
+                    dot(GREEN_VECTOR.value, lmsdt2.value),
+                    dot(BLUE_VECTOR.value, lmsdt2.value),
+                );
 
+                let rgb_1_half = rgb * 0.5;
+                let u_rgb_denominator = (rgb_1 * rgb_1) - (rgb_1_half * rgb_2);
 
-                let mask = ge(u_rgb.value, Vector3::broadcast(0.0).value);
+                let u_rgb = rgb_1 / u_rgb_denominator;
+                let t_rgb = -rgb * u_rgb;
 
-                let t_rgb = select(t_rgb.value, max_vector3.value, mask);
+                let t_rgb = select(
+                    t_rgb.value,
+                    Vector3::broadcast(f32::MAX).value,
+                    ge(u_rgb.value, Vector3::broadcast(0.0).value),
+                );
 
                 t += component_min(t_rgb)
             }
@@ -184,45 +181,101 @@ pub(crate) fn find_gamut_intersection(a: f32, b: f32, l1: f32, c1: f32, l0: f32)
 
 
 pub(crate) fn aces_compression_internal(
-    distance: f32,
-    limit: f32,
-    threshold: f32,
-    power: f32,
-) -> f32 {
-    let s = (limit - threshold)
-        / (((1.0 - threshold) / (limit - threshold)).powf(-power) - 1.0).powf(1.0 / power);
+    distance: Vector3,
+    limit: Vector3,
+    threshold: Vector4,
+) -> Vector3 {
+    let power = Vector3::broadcast(threshold.w());
+    let rcp_power = rcp(power.value);
 
-    let c_distance = threshold
-        + s * ((distance - threshold) / s)
-            / ((1.0 + ((distance - threshold) / s).powf(power)).powf(1.0 / power));
+    let threshold = threshold.xyz();
 
-    let compression_result = [distance, c_distance];
+    let limit_min_thresh = limit - threshold;
+    let dist_min_thresh = distance - threshold;
 
-    let solution_mask = usize::from((distance < threshold) || (limit < 1.0001));
+    let s_intermediate = Vector3 {
+        value: pow(
+            ((Vector3::ONE - threshold) / limit_min_thresh).value,
+            -power.value,
+        ),
+    };
 
-    unsafe { *compression_result.get_unchecked(solution_mask) }
+    let s_denominator = Vector3 {
+        value: pow((s_intermediate - 1.0).value, rcp_power),
+    };
+
+    let s = limit_min_thresh / s_denominator;
+
+    let s_rcp = Vector3 {
+        value: rcp(s.value),
+    };
+
+    let c_intermediate = Vector3 {
+        value: pow((dist_min_thresh * s_rcp).value, power.value),
+    };
+
+    let c_denominator = Vector3 {
+        value: pow((Vector3::ONE + c_intermediate).value, rcp_power),
+    };
+
+    let c_distance = threshold + s * (dist_min_thresh * s_rcp) / c_denominator;
+
+    let compression_mask =
+        Bool3::broadcast((distance < threshold) || (limit < Vector3::broadcast(1.0001)));
+
+    Vector3 {
+        value: select(distance.value, c_distance.value, compression_mask.value),
+    }
 }
 
-
 pub(crate) fn aces_uncompressed_internal(
-    distance: f32,
-    limit: f32,
-    threshold: f32,
-    power: f32,
-) -> f32 {
-    let s = (limit - threshold)
-        / (((1.0 - threshold) / (limit - threshold)).powf(-power) - 1.0).powf(1.0 / power);
+    distance: Vector3,
+    limit: Vector3,
+    threshold: Vector4,
+) -> Vector3 {
+    let power = Vector3::broadcast(threshold.w());
+    let rcp_power = rcp(power.value);
 
-    let c_distance = threshold
-        + s * (-(((distance - threshold) / s).powf(power)
-            / (((distance - threshold) / s).powf(power) - 1.0)))
-            .powf(1.0 / power);
+    let threshold = threshold.xyz();
 
-    let decompression_result = [distance, c_distance];
+    let limit_min_thresh = limit - threshold;
+    let dist_min_thresh = distance - threshold;
 
-    let solution_mask =
-        usize::from((distance < threshold) || (limit < 1.0001) || distance > (threshold + s));
+    let s_intermediate = Vector3 {
+        value: pow(
+            ((Vector3::ONE - threshold) / limit_min_thresh).value,
+            -power.value,
+        ),
+    };
+
+    let s_denominator = Vector3 {
+        value: pow((s_intermediate - 1.0).value, rcp_power),
+    };
+
+    let s = limit_min_thresh / s_denominator;
+
+    let s_rcp = Vector3 {
+        value: rcp(s.value),
+    };
 
 
-    unsafe { *decompression_result.get_unchecked(solution_mask) }
+    let c_intermediate = Vector3 {
+        value: pow((dist_min_thresh * s_rcp).value, power.value),
+    };
+
+    let c = Vector3 {
+        value: pow(-(c_intermediate / c_intermediate - 1.0).value, rcp_power),
+    };
+
+    let c_distance = threshold + s * c;
+
+    let uncompressed_mask = Bool3::broadcast(
+        (distance < threshold)
+            || (limit < Vector3::broadcast(1.0001))
+            || distance > (threshold + s),
+    );
+
+    Vector3 {
+        value: select(distance.value, c_distance.value, uncompressed_mask.value),
+    }
 }

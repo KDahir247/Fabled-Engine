@@ -24,10 +24,9 @@ pub fn tri_stimulus_white_to_chromatic_coord(chromatic_coord: Vector3) -> Vector
 // to https://docs.acescentral.com/specifications/acescct/#appendix-a-application-of-asc-cdl-parameters-to-acescct-image-data
 // https://docs.acescentral.com/specifications/acescc/#appendix-b-application-of-asc-cdl-parameters-to-acescc-image-data
 // Use util\mod.rs pre-determined color luminance value (DCI-P3, SRGB, AP1,)
-pub fn srgb_compute_luminance(linear: Vector3, luminance: Vector3) -> f32 {
+pub fn compute_luminance(linear: Vector3, luminance: Vector3) -> f32 {
     dot(linear.value, luminance.value)
 }
-
 
 pub fn compute_perceived_lightness(luminance: f32) -> f32 {
     let luminance = luminance.clamp(0.0, 1.0);
@@ -45,17 +44,17 @@ pub fn compute_perceived_lightness(luminance: f32) -> f32 {
 pub fn cct_to_chromatic_coord(cct: f32) -> Vector2 {
     let cct = cct.clamp(1667.0, 25000.0);
 
-    let cct_3 = cct.powf(3.0f32);
-    let cct_2 = cct.powf(2.0f32);
+    let cct_3 = cct * cct * cct;
+    let cct_2 = cct * cct;
 
     let x = if cct <= 4000.0 {
-        -0.2661239 * 10.0f32.powf(9.0) / cct_3 - 0.2343589 * 10.0f32.powf(6.0) / cct_2
-            + 0.8776956 * 10.0f32.powf(3.0) / cct
+        -0.2661239 * 1_000_000_000.0 / cct_3 - 0.2343589 * 1_000_000.0 / cct_2
+            + 0.8776956 * 1000.0 / cct
             + 0.179910
     } else {
-        -3.0258469 * 10.0f32.powf(9.0) / cct_3
-            + 2.1070379 * 10.0f32.powf(6.0) / cct_2
-            + 0.2226347 * 10.0f32.powf(3.0) / cct
+        -3.0258469 * 1_000_000_000.0 / cct_3
+            + 2.1070379 * 1_000_000.0 / cct_2
+            + 0.2226347 * 1000.0 / cct
             + 0.24039
     };
 

@@ -121,7 +121,7 @@ pub fn exclusion_blend(a: Vector3, b: Vector3, opacity: f32) -> Vector3 {
 
 pub fn reflect_blend(a: Vector3, b: Vector3, opacity: f32) -> Vector3 {
     let reflect_intermediate = Vector3 {
-        value: min((a * b / (Vector3::ONE - b)).value, Vector3::ONE.value),
+        value: min(((a * b) / (Vector3::ONE - b)).value, Vector3::ONE.value),
     };
 
     let reflect = Vector3 {

@@ -8,7 +8,7 @@ use std::ops::{
 
 use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct Vector2 {
     pub value: [f32; 2],
 }

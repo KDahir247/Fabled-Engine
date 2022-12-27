@@ -279,9 +279,11 @@ pub fn linear_to_rgb_m(linear: Vector3) -> Vector4 {
 }
 
 pub fn rgb_m_to_linear(rgbm: Vector4) -> Vector3 {
+    let multiplier = rgbm.w();
+
     let rgb = rgbm.trunc_vec3();
 
-    let multiplier_mul_2 = rgbm.w() + rgbm.w();
+    let multiplier_mul_2 = multiplier + multiplier;
     let multiplier_step = multiplier_mul_2 + multiplier_mul_2 + multiplier_mul_2;
 
     let rgb_linear = rgb * multiplier_step;

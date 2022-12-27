@@ -25,9 +25,9 @@ pub fn oetf_s_rgb(linear: Vector3) -> Vector3 {
     };
 
     let b = a * 1.055;
-    let c = b - 0.055;
-
     let d = linear * 12.92;
+
+    let c = b - 0.055;
 
 
     let mask = ge(linear.value, Vector3::broadcast(0.0031308).value);
@@ -56,12 +56,12 @@ pub fn eotf_s_rgb(s_rgb: Vector3) -> Vector3 {
 
 // linear to rec709
 pub fn oetf_rec709(linear: Vector3) -> Vector3 {
-    let a = linear * 4.5;
-
-    let b = Vector3 {
+    let b_ = Vector3 {
         value: pow(linear.value, Vector3::broadcast(0.45).value),
-    } * 1.0993
-        - 0.0993;
+    };
+
+    let a = linear * 4.5;
+    let b = (b_ * 1.0993) - 0.0993;
 
     let mask = lt(linear.value, Vector3::broadcast(0.0181).value);
 
@@ -71,12 +71,16 @@ pub fn oetf_rec709(linear: Vector3) -> Vector3 {
 }
 
 pub fn eotf_rec709(rec709: Vector3) -> Vector3 {
-    let a = rec709 / 4.5;
+    const RCP_4_5: f32 = 1.0 / 4.5;
+    const RCP_1: f32 = 1.0 / 1.0993;
+    const RCP_4_5_TH: f32 = 1.0 / 0.45;
 
-    let b = (rec709 + 0.0993) / 1.0993;
+    let a = rec709 * RCP_4_5;
+
+    let b = (rec709 + 0.0993) * RCP_1;
 
     let c = Vector3 {
-        value: pow(b.value, Vector3::broadcast(1.0 / 0.45).value),
+        value: pow(b.value, Vector3::broadcast(RCP_4_5_TH).value),
     };
 
     let mask = lt(rec709.value, Vector3::broadcast(0.018).value);
@@ -107,20 +111,19 @@ pub fn oetf_pq(linear_val: Vector3) -> Vector3 {
 pub fn eotf_pq(pq_val: Vector3) -> Vector3 {
     let a = Vector3::broadcast(1.0 / PQ_M2);
 
-    let m = Vector3 {
+    let e = Vector3 {
         value: pow(pq_val.value, a.value),
-    } * PQ_C3;
-    let t = -(m - PQ_C2);
+    };
 
-    let n = Vector3 {
-        value: pow(pq_val.value, a.value),
-    } - PQ_C1;
+    let m = e * PQ_C3;
 
-    const ZERO_VEC3: Vector3 = Vector3::broadcast(0.0);
-    let mask = ge(n.value, Vector3::broadcast(0.0).value);
+    let t = Vector3::broadcast(PQ_C2) - m;
+    let n = e - PQ_C1;
+
+    let mask = ge(n.value, Vector3::ZERO.value);
 
     let clamped_n = Vector3 {
-        value: select(n.value, ZERO_VEC3.value, mask),
+        value: select(n.value, Vector3::ZERO.value, mask),
     };
 
     let l = Vector3 {
@@ -149,6 +152,7 @@ pub fn log_c_to_linear(log: Vector3) -> Vector3 {
     const B: f32 = 0.047996;
     const C: f32 = 4.095658;
     const D: f32 = 0.386036;
+
 
     Vector3 {
         value: pow(Vector3::broadcast(10.0).value, ((log - D) * C).value),
