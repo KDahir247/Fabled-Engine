@@ -103,7 +103,6 @@ pub fn lux_to_ev(lux: f32, distance: f32, iso: ISOSpeed, calibration_constant: O
     candela_to_ev(candela, iso, calibration_constant)
 }
 
-
 pub fn ev_to_lux(ev: f32, distance: f32, iso: ISOSpeed, calibration_constant: Option<f32>) -> f32 {
     let candela = ev_to_candela(ev, iso, calibration_constant);
     candela_to_lux(candela, distance)
@@ -123,11 +122,31 @@ pub fn point_light_candela_to_lumen(candela: f32) -> f32 {
 // Opposite operation of point light luminance power (luminance flux) to
 // luminance. Calculate point light's luminance intensity from luminance power
 // (luminance flux)
-// 	I = 4π / φ
+// 	I = φ / 4π
 // which is equivalent to I = φ / 2τ
 // where τ = tau == 2π
 pub fn point_light_lumen_to_candela(lumen: f32) -> f32 {
     lumen / (2.0 * std::f32::consts::TAU)
+}
+
+
+// Calculate point light's illuminance (lux) from luminance power (luminance
+// flux)
+// ev = φ / 4πr^2
+// which is equivalent to ev = φ / 2τrr
+// where τ = tau == 2π
+pub fn point_light_lumen_to_lux(lumen: f32, radius: f32) -> f32 {
+    lumen / (2.0 * std::f32::consts::TAU * radius * radius)
+}
+
+// Opposite operation of point light illuminance (lux) from luminance power
+// (luminance flux). Calculate point light's luminance power (luminance flux)
+// from illuminance (lux)
+// φ = ev 4πR^2
+// which is equivalent to φ = ev 2τRR
+// where τ = tau == 2π
+pub fn point_light_lux_to_lumen(lux: f32, radius: f32) -> f32 {
+    lux * 2.0 * std::f32::consts::TAU * radius * radius
 }
 
 
