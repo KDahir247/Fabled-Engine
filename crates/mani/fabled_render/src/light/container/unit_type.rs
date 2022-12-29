@@ -4,7 +4,9 @@ use crate::camera::ISOSpeed;
 pub enum IntensityUnit {
     Lumen,
     Candela,
-    Lux,
+    Lux {
+        distance: f32,
+    },
     EV100 {
         iso: ISOSpeed,
         calibration_constant: Option<f32>,

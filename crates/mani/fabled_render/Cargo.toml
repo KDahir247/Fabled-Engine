@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 
+
 image = { version = "0.23.12", features = ["default", "hdr", "jpeg_rayon", "dds"]}
 libktx-rs = {version = "0.2.4", features = ["default"]}
 
@@ -20,6 +21,8 @@ thiserror = "1.0.30"
 # Features
 [features]
 "ktx_low" = ["libktx-rs-sys"]
+
+
 
 [dependencies.libktx-rs-sys]
 version = "0.2.44"

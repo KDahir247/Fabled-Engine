@@ -1,11 +1,15 @@
+// Baked Lighting can only cast shadow on static object.
+// Dynamic Lighting
+
+
+pub use constant::*;
+pub use container::*;
 pub use container::*;
 pub use ext::*;
-pub use source::*;
 pub use util::*;
-pub use constant::*;
 
+mod component;
+mod constant;
 mod container;
 mod ext;
-mod source;
 mod util;
-mod constant;

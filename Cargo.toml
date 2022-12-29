@@ -19,9 +19,11 @@ debug = true
 
 [workspace]
 members = [
+    "crates/mani/fabled_asset",
     "crates/mani/fabled_math",
     "crates/mani/fabled_transform",
     "crates/mani/fabled_component",
     "crates/mani/fabled_render",
     "crates/mani/fabled_audio",
+    "crates/mani/fabled_system"
 ]

@@ -1,5 +1,5 @@
 use crate::color::component::ColorSpaceAdaption;
-use crate::color::{compute_adaption_matrix, eotf_s_rgb, oetf_s_rgb};
+use crate::color::compute_adaption_matrix;
 use fabled_math::vector_math::{component_min, component_sum, length, min, pow, rcp, select};
 use fabled_math::{approximate_equal, Bool3, Matrix3x3, Swizzles3, Vector3, Vector4};
 
@@ -89,30 +89,6 @@ pub const SRGB_TO_DCI_P3_MATRIX: Matrix3x3 = Matrix3x3::set(
 );
 
 // primitive conversion
-pub fn xy_y_to_xyz(xy_y: Vector3) -> Vector3 {
-    let x = xy_y.x();
-
-    let a = xy_y.z() / xy_y.y();
-    let b = 1.0 - x - xy_y.y();
-
-    let x = x * a;
-    let z = b * a;
-    let y = xy_y.z();
-
-    Vector3::set(x, y, z)
-}
-
-pub fn xyz_to_xy_y(xyz: Vector3) -> Vector3 {
-    let intermediate = 1.0 / (component_sum(xyz.value));
-
-    let x = xyz.x() * intermediate;
-    let y = xyz.y() * intermediate;
-    let _y = xyz.y();
-
-    Vector3::set(x, y, _y)
-}
-
-
 pub fn linear_to_xyz(
     linear: Vector3,
     src_tristimulus_white_point: Vector3,

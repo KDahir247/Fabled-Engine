@@ -1,6 +1,5 @@
-use crate::light::{
-    DirectionalLight, IntensityUnit, LightType, PointLight, SpotLight,
-};
+use crate::light::{DirectionalLight, IntensityUnit, LightType, PointLight, SpotLight};
+
 use gltf::khr_lights_punctual::{Kind, Light};
 
 // todo this will return and entity identifier that contains both LightType and
@@ -11,7 +10,6 @@ impl From<Light<'_>> for LightType {
 
         let range = light.range().unwrap_or_default();
 
-        
 
         match light.kind() {
             Kind::Directional => {
