@@ -30,4 +30,3 @@ impl Efficacy {
         low_lumen_per_watt: 45.0,
     };
 }
-

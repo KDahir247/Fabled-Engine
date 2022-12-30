@@ -1,6 +1,7 @@
-use fabled_math::Vector3;
-
-use crate::{camera::{ISOSpeed, CALIBRATION_CONSTANT_PRIMARY}, light::{Efficacy, Efficiency}};
+use crate::{
+    camera::{ISOSpeed, CALIBRATION_CONSTANT_PRIMARY},
+    light::{Efficacy, Efficiency},
+};
 
 // Candela to lux where the distance is in meters
 // Luminous intensity in candela (cd) to illuminance in lux (lx)
@@ -66,6 +67,7 @@ pub fn lumen_to_candela(lumen: f32, apex_angle: f32) -> f32 {
 //   ---------------------
 
 // Convert EV (exposure value) to luminance (nit)
+// 1 candela per square meter is equivalent to 1 nit
 // where NIT is equivalent to Candela (cd/m^22), thus 1 Nit  = 1 cd/m^2
 // NIT is a metric for measuring luminance, which is how much light an object
 // emits
@@ -122,8 +124,8 @@ pub fn point_light_candela_to_lumen(candela: f32) -> f32 {
 }
 
 // Opposite operation of point light luminance power (luminance flux) to
-// luminance intensity. Calculate point light's luminance intensity from luminance power
-// (luminance flux)
+// luminance intensity. Calculate point light's luminance intensity from
+// luminance power (luminance flux)
 // 	I = φ / 4π
 // which is equivalent to I = φ / 2τ
 // where τ = tau == 2π
@@ -151,7 +153,7 @@ pub fn point_light_lux_to_lumen(lux: f32, radius: f32) -> f32 {
     lux * 2.0 * std::f32::consts::TAU * radius * radius
 }
 
-
+// Coupling with outer angle and illumination
 // Calculate spot light's luminance power (luminance flux) from the luminance
 // intensity
 // φ = 2π(1.0 - cos(θ outer / 2.0)) I
@@ -161,6 +163,7 @@ pub fn spot_light_candela_to_lumen(candela: f32, outer_angle_rad: f32) -> f32 {
     std::f32::consts::TAU * (1.0 - f32::cos(outer_angle_rad * 0.5)) * candela
 }
 
+// Coupling with outer angle and illumination
 // Opposite operation of spot light luminance power (luminance flux) to
 // luminance. Calculate spot light's luminance intensity from luminance power
 // (luminance flux)
@@ -171,6 +174,7 @@ pub fn spot_light_lumen_to_candela(lumen: f32, outer_angle_rad: f32) -> f32 {
     lumen / (std::f32::consts::TAU * (1.0 - f32::cos(outer_angle_rad * 0.5)))
 }
 
+// No coupling with outer angle and illumination
 // Calculate approximate spot light's luminance power (luminance flux) from the
 // luminance intensity (disregard outer_angle),
 // φ = πI
@@ -178,7 +182,7 @@ pub fn spot_light_approx_candela_to_lumen(candela: f32) -> f32 {
     std::f32::consts::PI * candela
 }
 
-
+// No coupling with outer angle and illumination
 // Opposite operation of spot light luminance power (luminance flux) to
 // luminance. Calculate approximate spot light's luminance intensity from
 // luminance power (luminance flux) (disregarding outer_angle)
@@ -280,46 +284,54 @@ pub fn rectangle_area_light_luminance_to_lumen(luminance: f32, width: f32, heigh
     luminance * (width * height * std::f32::consts::PI)
 }
 
-// Calculate the Luminance Power (Luminance flux) in lumen from the Efficacy (Lumen Per Watt) and Radiant Power (Watt)
-// φ = Φeη
+// Calculate the Luminance Power (Luminance flux) in lumen from the Efficacy
+// (Lumen Per Watt) and Radiant Power (Watt) φ = Φeη
 // We will a formula to get the lumen at a given point within the Efficacy range
 // φ = Φe ((ηhigh - ηlow) * x + ηlow)
 // where η == Efficacy, ηlow == low range Efficacy, ηhigh == high range Efficacy
 // where x == range (1 == high, 0 == low, 0.5 == average)
-pub fn watt_to_lumen(watts: f32, luminous_efficacy: Efficacy, range : f32) -> f32 {
-    let target_efficacy = (luminous_efficacy.high_lumen_per_watt - luminous_efficacy.low_lumen_per_watt)
-                  * range
-                  + luminous_efficacy.low_lumen_per_watt;
+pub fn watt_to_lumen(watts: f32, luminous_efficacy: Efficacy, range: f32) -> f32 {
+    let target_efficacy =
+        (luminous_efficacy.high_lumen_per_watt - luminous_efficacy.low_lumen_per_watt) * range
+            + luminous_efficacy.low_lumen_per_watt;
 
     watts * target_efficacy
 }
 
-// Opposite of  Luminance Power (Luminance flux) in lumen from the Efficacy (Lumen Per Watt) and Radiant Power (Watt)
-// Calculate the Efficacy (Lumen Per Watt) from the Luminance Power (Luminance flux)
-pub fn lumen_to_watt(lumen: f32, luminous_efficacy: Efficacy, range : f32) -> f32 {
-    let target_efficacy = (luminous_efficacy.high_lumen_per_watt - luminous_efficacy.low_lumen_per_watt)
-                  * range
-                  + luminous_efficacy.low_lumen_per_watt;
+// Opposite of  Luminance Power (Luminance flux) in lumen from the Efficacy
+// (Lumen Per Watt) and Radiant Power (Watt) Calculate the Efficacy (Lumen Per
+// Watt) from the Luminance Power (Luminance flux)
+pub fn lumen_to_watt(lumen: f32, luminous_efficacy: Efficacy, range: f32) -> f32 {
+    let target_efficacy =
+        (luminous_efficacy.high_lumen_per_watt - luminous_efficacy.low_lumen_per_watt) * range
+            + luminous_efficacy.low_lumen_per_watt;
 
     lumen * target_efficacy
 }
 
 
-// Calculate the Luminance Power (Luminance flux) from the Luminance Efficiency (%)
-// Know that the maximum possible Luminance Efficacy is 683.0 we can multiply it by the Efficiency to the the target
-// Efficacy
+// Calculate the Luminance Power (Luminance flux) from the Luminance Efficiency
+// (%) Know that the maximum possible Luminance Efficacy is 683.0 we can
+// multiply it by the Efficiency to the the target Efficacy
 // φ = Φe683×V
-// We will a formula to get the lumen at a given point within the Efficency range
-// φ = Φe 683 ((Vhigh - Vlow) * x + Vlow)
-// where V == Efficiency, ηVow == low range Efficiency, Vhigh == high range Efficiency
-// where x == range (1 == high, 0 == low, 0.5 == average)
-pub fn efficiency_percentage_to_lumen(watts : f32, luminance_efficiency : Efficiency, range : f32) -> f32{
-    let target_efficiency = (luminance_efficiency.high_percentage - luminance_efficiency.low_percentage) *  range * luminance_efficiency.low_percentage;
+// We will a formula to get the lumen at a given point within the Efficency
+// range φ = Φe 683 ((Vhigh - Vlow) * x + Vlow)
+// where V == Efficiency, ηVow == low range Efficiency, Vhigh == high range
+// Efficiency where x == range (1 == high, 0 == low, 0.5 == average)
+pub fn efficiency_percentage_to_lumen(
+    watts: f32,
+    luminance_efficiency: Efficiency,
+    range: f32,
+) -> f32 {
+    let target_efficiency = (luminance_efficiency.high_percentage
+        - luminance_efficiency.low_percentage)
+        * range
+        * luminance_efficiency.low_percentage;
 
     watts * 683.0 * target_efficiency
 }
 
-pub fn lumen_to_efficiency_percentage(){
+pub fn lumen_to_efficiency_percentage() {
     todo!()
 }
 
@@ -534,7 +546,7 @@ mod unit_conversion_tests {
     }
 
 
-use crate::light::{lumen_to_watt, watt_to_lumen, Efficacy};
+    use crate::light::{lumen_to_watt, watt_to_lumen, Efficacy};
 
     #[test]
     fn watt_lumen_test() {
@@ -545,10 +557,10 @@ use crate::light::{lumen_to_watt, watt_to_lumen, Efficacy};
 
 
         let incandescent_efficacy = Efficacy::INCANDESCENT;
-        let  lumen_high = watt_to_lumen(40.0, incandescent_efficacy, 1.0);
+        let lumen_high = watt_to_lumen(40.0, incandescent_efficacy, 1.0);
 
-        //assert_eq!((lumen_low - INCANDESCENT_RESULT[0]), 0.0); // range = 0
-        //assert_eq!((lumen_average - INCANDESCENT_RESULT[1]), 0.0); // range = 0.5
+        // assert_eq!((lumen_low - INCANDESCENT_RESULT[0]), 0.0); // range = 0
+        // assert_eq!((lumen_average - INCANDESCENT_RESULT[1]), 0.0); // range = 0.5
         assert_eq!((lumen_high - INCANDESCENT_RESULT[2]), 0.0);
 
 
@@ -556,10 +568,10 @@ use crate::light::{lumen_to_watt, watt_to_lumen, Efficacy};
 
         let cfl_efficacy = Efficacy::CFL;
 
-        let  lumen_high = watt_to_lumen(124.0, cfl_efficacy, 1.0);
+        let lumen_high = watt_to_lumen(124.0, cfl_efficacy, 1.0);
 
-        //assert_eq!((lumen_low - CFL_RESULT[0]), 0.0); // range = 0
-        //assert_eq!((lumen_average - CFL_RESULT[1]), 0.0); // range = 0.5
+        // assert_eq!((lumen_low - CFL_RESULT[0]), 0.0); // range = 0
+        // assert_eq!((lumen_average - CFL_RESULT[1]), 0.0); // range = 0.5
         assert_eq!((lumen_high - CFL_RESULT[2]), 0.0);
     }
 
@@ -573,18 +585,18 @@ use crate::light::{lumen_to_watt, watt_to_lumen, Efficacy};
         let incandescent_efficacy = Efficacy::INCANDESCENT;
         let high_watt = lumen_to_watt(500.0, incandescent_efficacy, 1.0);
 
-        //assert_eq!((watt_low.round() - INCANDESCENT_RESULT[0]), 0.0); //range = 0.0
-        //assert_eq!((watt_avg.round() - INCANDESCENT_RESULT[1]), 0.0); //range = 0.5
+        // assert_eq!((watt_low.round() - INCANDESCENT_RESULT[0]), 0.0); //range = 0.0
+        // assert_eq!((watt_avg.round() - INCANDESCENT_RESULT[1]), 0.0); //range = 0.5
         assert_eq!((high_watt.round() - INCANDESCENT_RESULT[2]), 0.0);
 
         const CFL_RESULT: [f32; 3] = [16.0, 13.0, 10.0];
 
         let cfl_efficacy = Efficacy::CFL;
-        let high_watt = lumen_to_watt(627.0, cfl_efficacy,1.0);
+        let high_watt = lumen_to_watt(627.0, cfl_efficacy, 1.0);
 
 
-        //assert_eq!((watt_low.round() - CFL_RESULT[0]), 0.0); // range = 0
-        //assert_eq!((watt_avg.round() - CFL_RESULT[1]), 0.0); // range = 0.5
+        // assert_eq!((watt_low.round() - CFL_RESULT[0]), 0.0); // range = 0
+        // assert_eq!((watt_avg.round() - CFL_RESULT[1]), 0.0); // range = 0.5
         assert_eq!((high_watt.round() - CFL_RESULT[2]), 0.0);
     }
 }

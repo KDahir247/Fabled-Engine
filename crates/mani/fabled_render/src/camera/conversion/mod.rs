@@ -1,3 +1,4 @@
+pub mod fov_conversion;
 mod space_conversion;
 mod speed_conversion;
 mod unit_conversion;

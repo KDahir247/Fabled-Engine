@@ -1,6 +1,5 @@
-use crate::camera::{
-    focal_length_to_directional_fov, AnamorphicDescriptor, AspectRatio, FovScalingAlgorithm,
-};
+use crate::camera::fov_conversion::focal_length_to_directional_fov;
+use crate::camera::{AnamorphicDescriptor, AspectRatio, FovScalingAlgorithm};
 use fabled_component::{Component, Modification};
 use std::fmt::{Display, Formatter};
 
