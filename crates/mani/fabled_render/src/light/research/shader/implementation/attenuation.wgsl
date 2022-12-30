@@ -22,14 +22,14 @@ fn distance_attenuation(light_id : u32, world_position : vec3<f32>, light_radius
 
 
     #if Bakery
-    return saturate(pow((1.0 - pow(light_distance/light_radius, 4.0)),2.0)) / bakery;
+    return saturate(pow((1.0 - pow(light_distance/light_radius, 4.0) / bakery),2.0));
 
     #else UnFiltered
-    return saturate(pow((1.0 - pow(light_distance/light_radius, 4.0)),2.0)) / unfiltered;
+    return saturate(pow((1.0 - pow(light_distance/light_radius, 4.0) / unfiltered),2.0));
 
 
     #else
-    return saturate(pow((1.0 - pow(light_distance/light_radius, 4.0)),2.0)) / custom;
+    return saturate(pow((1.0 - pow(light_distance/light_radius, 4.0) /  custom),2.0));
 
 
     #endif

@@ -21,7 +21,7 @@ use crate::light::{
 // Shadow Parameters.
 
 // Intensity is Luminance Power (Luminance flux) in lumen
-
+// We will need to pass it as Luminance Intensity to the shader to calculate the target illuminance.
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct PointLight {
     pub intensity: f32,

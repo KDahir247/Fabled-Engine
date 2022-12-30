@@ -17,7 +17,7 @@ pub struct DirectionalLight {
 impl Default for DirectionalLight {
     fn default() -> Self {
         Self {
-            illuminance: 130000.0,
+            illuminance: 20000.0,
         }
     }
 }
