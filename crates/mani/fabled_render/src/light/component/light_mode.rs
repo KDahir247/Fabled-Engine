@@ -8,11 +8,10 @@ use std::fmt::{Display, Formatter};
 // Dynamic Lighting will cast on both static object and dynamic object and will
 // calculate attenuation dynamically in the shader.
 
-
 #[derive(Copy, Clone)]
 enum Mode {
     Baked,
-    Stationary, // future implementation
+    Stationary,
     Dynamic,
 }
 

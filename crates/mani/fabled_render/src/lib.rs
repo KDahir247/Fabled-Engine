@@ -1,5 +1,7 @@
 #![feature(split_array)]
 #![feature(array_zip)]
+// Lighting
+#![feature(generic_const_exprs)]
 
 pub mod camera;
 pub mod color;

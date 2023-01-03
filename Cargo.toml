@@ -25,5 +25,6 @@ members = [
     "crates/mani/fabled_component",
     "crates/mani/fabled_render",
     "crates/mani/fabled_audio",
-    "crates/mani/fabled_system"
+    "crates/mani/fabled_system",
+    "crates/mani/fabled_wgpu",
 ]

@@ -1,41 +1,45 @@
+use crate::light::Source;
 use fabled_component::{All, Component};
-use std::fmt::{Display, Formatter};
+use std::fmt::{write, Display, Formatter};
 
 // For direction light we will set the illuminance directly
 // since calculating the illuminance (Luminance flux / spherical radius *
 // spherical radius) and the radius extent closely to infinite
 
+// Orthographic projection
 // Directional light must have a illuminance, rotation.
 // Optional Parameters: Color (treated as tint), Temperature, Shadow Parameters.
 
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
-pub struct DirectionalLight {
+pub struct SunLight {
     pub illuminance: f32,
+    pub angle_rad: f32,
 }
 
 
-impl Default for DirectionalLight {
+impl Default for SunLight {
     fn default() -> Self {
         Self {
             illuminance: 20000.0,
+            angle_rad: 0.00951,
         }
     }
 }
 
+impl SunLight {}
 
-impl Display for DirectionalLight {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "DirectionLight(illuminance(lux) : {})", self.illuminance)
-    }
-}
+impl Source for SunLight {}
 
-impl DirectionalLight {
-    pub fn new(lux: f32) -> Self {
-        Self { illuminance: lux }
-    }
-}
-
-// we need to track all (modification, deletion and creation)
-impl Component for DirectionalLight {
+impl Component for SunLight {
     type Tracking = All;
+}
+
+impl Display for SunLight {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "SunLight(\n\tIlluminance : {}\n\tangle : {}\n)",
+            self.illuminance, self.angle_rad,
+        )
+    }
 }

@@ -1,7 +1,8 @@
 use fabled_component::{All, Component};
+use std::fmt::{Display, Formatter};
 
 use crate::light::{
-    ev_to_candela, point_light_candela_to_lumen, point_light_lux_to_lumen, IntensityUnit,
+    ev_to_candela, point_light_candela_to_lumen, point_light_lux_to_lumen, IntensityUnit, Source,
 };
 // Approximation of illuminance to pass to shader.
 // luminance flux / (4 * pi * radius * radius)
@@ -20,8 +21,10 @@ use crate::light::{
 // translation. Optional Parameters: Color (treated as tint), Temperature,
 // Shadow Parameters.
 
+// Perspective projection
 // Intensity is Luminance Power (Luminance flux) in lumen
-// We will need to pass it as Luminance Intensity to the shader to calculate the target illuminance.
+// We will need to pass it as Luminance Intensity to the shader to calculate the
+// target illuminance.
 #[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct PointLight {
     pub intensity: f32,
@@ -60,6 +63,19 @@ impl PointLight {
     }
 }
 
+impl Source for PointLight {}
+
 impl Component for PointLight {
     type Tracking = All;
+}
+
+
+impl Display for PointLight {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "PointLight(\n\tLuminance flux : {}\n\tRadius : {}\n)",
+            self.intensity, self.radius
+        )
+    }
 }

@@ -1,6 +1,7 @@
 use fabled_component::{Component, Modification};
+use std::fmt::{Display, Formatter};
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone)]
 pub enum FallOffAlgorithm {
     // Similar to unreal engine 4 falloff function
     // 1.0 / (x * x + 1.0)
@@ -16,6 +17,12 @@ pub enum FallOffAlgorithm {
     CustomBakeryFallOff { light_size: f32 },
 }
 
+impl Display for FallOffAlgorithm {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct AttenuationFallOff {
     pub algorithm: FallOffAlgorithm,
@@ -24,4 +31,11 @@ pub struct AttenuationFallOff {
 
 impl Component for FallOffAlgorithm {
     type Tracking = Modification;
+}
+
+
+impl Display for AttenuationFallOff {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Attenuation({})", self.algorithm)
+    }
 }

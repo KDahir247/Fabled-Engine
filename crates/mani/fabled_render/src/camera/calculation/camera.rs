@@ -1,7 +1,7 @@
 use fabled_math::{Matrix4x4, Quaternion, Vector3, Vector4};
 
-use fabled_math::matrix4x4_math::{inverse_mat4};
-use fabled_math::quaternion_math::{forward_vec3};
+use fabled_math::matrix4x4_math::inverse_mat4;
+use fabled_math::quaternion_math::forward_vec3;
 use fabled_math::vector_math::{cross, dot, normalize};
 
 use crate::camera::{AspectRatio, ClippingPlane, Fov, FovAxis, Oblique, ViewPort};
@@ -9,7 +9,7 @@ use crate::camera::{AspectRatio, ClippingPlane, Fov, FovAxis, Oblique, ViewPort}
 pub fn project(
     target: Vector3,
     viewport: ViewPort,
-    clipping_plane : ClippingPlane,
+    clipping_plane: ClippingPlane,
     model_view_projection: Matrix4x4,
 ) -> Vector3 {
     let t_mvp_target_vector =
@@ -39,10 +39,10 @@ pub fn project(
 pub fn un_project(
     target: Vector3,
     viewport: ViewPort,
-    clipping_plane : ClippingPlane,
+    clipping_plane: ClippingPlane,
     model_view_projection: Matrix4x4,
 ) -> Vector3 {
-    let inverse_mvp = inverse_mat4(model_view_projection, );
+    let inverse_mvp = inverse_mat4(model_view_projection);
 
     let x = target.x() - viewport.rect.x();
     let x_mul_two = x + x;
@@ -59,13 +59,7 @@ pub fn un_project(
     let vector_x = x_two_half_width - 1.0;
     let vector_y = -(y_two_half_height - 1.0);
 
-    let vector = inverse_mvp
-        * Vector4::set(
-            vector_x,
-            vector_y,
-            z_mul_depth_diff,
-            1.0,
-        );
+    let vector = inverse_mvp * Vector4::set(vector_x, vector_y, z_mul_depth_diff, 1.0);
 
     vector.trunc_vec3()
 }
@@ -103,20 +97,23 @@ pub fn compute_look_at_matrix(translation: Vector3, rotation: Quaternion) -> Mat
     )
 }
 
-#[rustfmt::skip]
-pub fn compute_perspective_matrix(aspect_ratio : AspectRatio, fov : Fov, clipping_plane : ClippingPlane) -> Matrix4x4{
+pub fn compute_perspective_matrix(
+    aspect_ratio: AspectRatio,
+    fov: Fov,
+    clipping_plane: ClippingPlane,
+) -> Matrix4x4 {
     let mut h = 0.0;
     let mut w = 0.0;
-    
+
     let inv_near_min_far = (clipping_plane.near - clipping_plane.far).recip();
 
     let hal_fov = fov.radian * 0.5;
     let r = clipping_plane.far * inv_near_min_far;
     let d = r * clipping_plane.near;
-    let s =hal_fov.tan() * clipping_plane.near;
+    let s = hal_fov.tan() * clipping_plane.near;
 
     let aspect_ratio = aspect_ratio.get_aspect();
-    
+
     match fov.axis {
         FovAxis::Horizontal => {
             w = s;
@@ -132,11 +129,15 @@ pub fn compute_perspective_matrix(aspect_ratio : AspectRatio, fov : Fov, clippin
         Vector4::set(w, 0.0, 0.0, 0.0),
         Vector4::set(0.0, h, 0.0, 0.0),
         Vector4::set(0.0, 0.0, r, -1.0),
-        Vector4::set(0.0, 0.0, d, 0.0)
+        Vector4::set(0.0, 0.0, d, 0.0),
     )
 }
 
-pub fn compute_infinite_perspective_matrix(aspect_ratio : AspectRatio, fov : Fov, clipping_plane : ClippingPlane) -> Matrix4x4 {
+pub fn compute_infinite_perspective_matrix(
+    aspect_ratio: AspectRatio,
+    fov: Fov,
+    clipping_plane: ClippingPlane,
+) -> Matrix4x4 {
     let mut w = 0.0;
     let mut h = 0.0;
 
@@ -162,7 +163,11 @@ pub fn compute_infinite_perspective_matrix(aspect_ratio : AspectRatio, fov : Fov
     )
 }
 
-pub fn perspective_infinite_reverse_projection(aspect_ratio : AspectRatio, fov : Fov, clipping_plane : ClippingPlane) -> Matrix4x4{
+pub fn perspective_infinite_reverse_projection(
+    aspect_ratio: AspectRatio,
+    fov: Fov,
+    clipping_plane: ClippingPlane,
+) -> Matrix4x4 {
     let mut w = 0.0;
     let mut h = 0.0;
 
@@ -184,11 +189,14 @@ pub fn perspective_infinite_reverse_projection(aspect_ratio : AspectRatio, fov :
         Vector4::set(w, 0.0, 0.0, 0.0),
         Vector4::set(0.0, h, 0.0, 0.0),
         Vector4::set(0.0, 0.0, 0.0, -1.0),
-        Vector4::set(0.0, 0.0, clipping_plane.near, 0.0)
+        Vector4::set(0.0, 0.0, clipping_plane.near, 0.0),
     )
 }
 
-pub fn compute_orthographic_matrix(orientation : Vector4, clipping_plane : ClippingPlane) -> Matrix4x4 {
+pub fn compute_orthographic_matrix(
+    orientation: Vector4,
+    clipping_plane: ClippingPlane,
+) -> Matrix4x4 {
     let neg_near_plane_min_far_plane_rcp = -(clipping_plane.near - clipping_plane.far).recip();
 
     let right_min_left = orientation.x() - orientation.y();

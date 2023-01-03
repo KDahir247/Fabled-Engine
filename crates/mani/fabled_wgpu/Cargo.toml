@@ -1,8 +1,26 @@
 [package]
 name = "fabled_wgpu"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
+resolver = "2"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+fabled_math = {path ="../fabled_math", version = "*"}
+
+[target.'cfg(any(windows, linux))'.dependencies.wgpu-hal]
+version = "0.14.1"
+features = ["vulkan", "dx12", "dx11", "renderdoc"]
+# Do i need all vulkan, dx12, dx11 bloat.
+# Move renderdoc to a conditional feature for development
+
+[target.'cfg(macos)'.dependencies.wgpu-hal]
+version = "0.14.1"
+features = ["metal", "renderdoc"]
+# Move renderdoc to a conditional feature for development
+
+
+
+

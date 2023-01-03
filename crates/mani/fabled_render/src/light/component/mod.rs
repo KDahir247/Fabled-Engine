@@ -1,23 +1,26 @@
+mod appearance;
 mod attenuation;
-mod directional_light;
 mod ies_profile;
+mod light_caster;
+mod light_channel;
 mod light_mode;
 mod point_light;
+mod shadow_aliasing;
 mod shadow_mapper;
 mod spot_light;
+mod sun_light;
 
-
+pub use appearance::*;
 pub use attenuation::*;
-pub use directional_light::*;
 pub use ies_profile::*;
+pub use light_caster::*;
+pub use light_channel::*;
 pub use light_mode::*;
 pub use light_mode::*;
 pub use point_light::*;
+pub use shadow_aliasing::*;
 pub use shadow_mapper::*;
 pub use spot_light::*;
-
-
-// Luminous power (lm), Luminance (cd.m−2
-// ), or EV
+pub use sun_light::*;
 
 // Sky and IBL

@@ -11,7 +11,7 @@ pub fn calculate_color_adaption(
         .with_id()
         .filter(|(entity_id,_)| chromaticity_target.is_modified(*entity_id))
         .for_each(|(_, (mut light_appearance,  chromaticity_dest))| {
-            let [src_tristimulus_x, src_tristimulus_y, src_tristimulus_z] = light_appearance.chromaticity_coord;
+            let [src_tristimulus_x, src_tristimulus_y, src_tristimulus_z] = light_appearance.temperature;
 
             let [dst_tristimulus_x, dst_tristimulus_y, dst_tristimulus_z] = chromaticity_dest.0;
 
@@ -97,7 +97,7 @@ pub fn calculate_color_adaption(
                 chromatic_adaptation_matrix[6] * src_tristimulus_x + chromatic_adaptation_matrix[7] * src_tristimulus_y + chromatic_adaptation_matrix[8] * src_tristimulus_z
             ];
 
-            light_appearance.chromaticity_coord = adapted_tristimulus;
+            light_appearance.temperature = adapted_tristimulus;
 
         });
 
