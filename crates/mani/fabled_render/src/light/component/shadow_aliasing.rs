@@ -1,3 +1,4 @@
+
 #[derive(Copy, Clone)]
 pub struct ParallelSplitVarianceFilter {}
 
@@ -6,11 +7,10 @@ pub trait SupportedKernel {}
 pub struct Kernel<const Size: usize>();
 
 // example
-// impl SupportedKernel for Kernel<4> {}
-// impl SupportedKernel for Kernel<6> {}
-// impl SupportedKernel for Kernel<10> {}
-// impl SupportedKernel for Kernel<14> {}
-// impl SupportedKernel for Kernel<18> {}
+impl SupportedKernel for Kernel<4> {}
+impl SupportedKernel for Kernel<6> {}
+impl SupportedKernel for Kernel<10> {}
+impl SupportedKernel for Kernel<14> {}
 
 #[derive(Copy, Clone)]
 pub struct PercentageCloserShadow<const FilterSize: usize>

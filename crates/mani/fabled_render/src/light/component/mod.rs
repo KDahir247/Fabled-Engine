@@ -16,11 +16,11 @@ pub use ies_profile::*;
 pub use light_caster::*;
 pub use light_channel::*;
 pub use light_mode::*;
-pub use light_mode::*;
 pub use point_light::*;
 pub use shadow_aliasing::*;
 pub use shadow_mapper::*;
 pub use spot_light::*;
 pub use sun_light::*;
 
-// Sky and IBL
+// Sky and IBL,
+// Area light, Area light penumbra, umbra

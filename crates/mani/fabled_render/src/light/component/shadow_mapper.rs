@@ -46,6 +46,10 @@ impl CubeMapFace {
 
 #[derive(Copy, Clone)]
 pub struct ShadowMapper<T: Source> {
+    // All light source can use cascade (Direction required cascade)
+    // to reduce or eliminate under sampling shadow map. You may also change the shadow map
+    // resolution. Might add sampling algorithm in future to reduce or eliminate under sampling
+    // error such as projective aliasing.
     pub cascade: Option<NonZeroU32>,
     pub depth_bias: f32,
     pub normal_bias: f32,
