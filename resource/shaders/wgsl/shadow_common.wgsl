@@ -71,7 +71,6 @@ fn interleaved_gradient_noise(uv : vec2<f32>) -> f32{
     return fract(52.9829189 * fract(dot(uv, vec2(0.06711056,0.00583715))));
 }
 
-// Multiply poisson disk with the rotation matrix
 fn rotate_poisson_disk(uv : vec2<f32>) -> mat2x2<f32>{
     let gradient = interleaved_gradient_noise(uv);
 

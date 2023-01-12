@@ -4,6 +4,7 @@
 #define DEFAULT_SHADOW_MAP_SIZE = 1024
 #define RCP_DEFAULT_SHADOW_MAP_SIZE = 0.0009765625; // 1.0 / 1024.0
 
+//todo: khal why don't you use textureGatherCompare wgsl function where available?
 
 // where index can be either the cascade shadow map index or the light array index
 fn sample_shadow_map(base_uv : vec2<f32>, delta_uv : vec2<f32>,index : i32, depth : f32, receiver_depth_plane_bias : vec3<f32>) -> f32{
@@ -143,11 +144,13 @@ fn sample_pcf_poisson_4_tap(light_index: i32, shadow_coord: vec3<f32>, shadow_dd
     let rotation_matrix = rotate_poisson_disk(shadow_coord.xy);
 
     var visibility = 0.0;
+
+    //todo: khal unroll
     for (var i = 0u; i < 4u; i += 1u){
         //todo: khal 700.0 magic number should be customizable this represent how much the samples are spread out
         let offset = (poissonDisk[i] * rotation_matrix) / 700.0;
 
-        let sample_depth = shadow_depth + dot(offset, reciever_plane);
+        let sample_depth = shadow_depth + dot(offset, reciever_plane.xy);
 
         visibility +=  textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + offset, light_index, sample_depth);
     }
@@ -155,10 +158,90 @@ fn sample_pcf_poisson_4_tap(light_index: i32, shadow_coord: vec3<f32>, shadow_dd
     return visibility / 4.0;
 }
 
-fn sample_pcf_poisson_9_tap() -> f32{
-    //todo: implement this khal
+fn sample_pcf_poisson_9_tap(light_index: i32, shadow_coord: vec3<f32>, shadow_ddx : vec3<f32>, shadow_ddy : vec3<f32>) -> f32{
+    let texel_size = RCP_DEFAULT_SHADOW_MAP_SIZE;
+
+    let reciever_plane = retriever_depth_plane_bias(shadow_ddx, shadow_ddy, texel_size);
+
+    let shadow_depth = shadow_coord.z + reciever_plane.z;
+
+    let rotation_matrix = rotate_poisson_disk(shadow_coord.xy);
+
+    var visibility = 0.0;
+
+    for (var i = 0u; i < 9u; i += 1u){
+        let offset = (poissonDisk[i] * rotation_matrix) / 700.0;
+
+        let sample_depth = shadow_depth + dot(offset, reciever_plane.xy);
+
+        visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + offset, light_index, sample_depth);
+    }
+
+    return visibility / 9.0;
 }
 
-fn sample_pcf_poisson_16_tap() -> f32{
-    //todo: implement this khal
+fn sample_pcf_poisson_16_tap(light_index: i32, shadow_coord: vec3<f32>, shadow_ddx : vec3<f32>, shadow_ddy : vec3<f32>) -> f32{
+    let texel_size = RCP_DEFAULT_SHADOW_MAP_SIZE;
+
+    let reciever_plane = retriever_depth_plane_bias(shadow_ddx, shadow_ddy, texel_size);
+
+    let shadow_depth = shadow_coord.z + reciever_plane.z;
+
+    let rotation_matrix = rotate_poisson_disk(shadow_coord.xy);
+
+    var visibility = 0.0;
+
+    for (var i = 0u; i < 16u; i += 1u){
+        let offset = (poisson_Disk[i] * rotation_matrix) / 700.0;
+
+        let sample_depth = shadow_depth + dot(offset, reciever_plane.xy);
+
+        visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + offset, light_index,sample_depth);
+    }
+
+    return visibility / 16.0;
 }
+
+fn standard_pcf_4_tap(light_index: i32, shadow_coord: vec3<f32>, shadow_ddx : vec3<f32>, shadow_ddy : vec3<f32>){
+     let texel_size = RCP_DEFAULT_SHADOW_MAP_SIZE;
+
+        let reciever_plane = retriever_depth_plane_bias(shadow_ddx, shadow_ddy, texel_size);
+
+        let shadow_depth = shadow_coord.z + reciever_plane.z;
+
+        var visibility = 0.0;
+
+        visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(-texel_size,-texel_size), light_index, sample_depth);
+        visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(-texel_size, texel_size), light_index, sample_depth);
+        visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(texel_size, texel_size), light_index, sample_depth);
+        visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(texel_size,-texel_size), light_index, sample_depth);
+
+        return visibility / 4.0;
+}
+
+
+fn standard_pcf_9_tap(light_index: i32, shadow_coord: vec3<f32>, shadow_ddx : vec3<f32>, shadow_ddy : vec3<f32>){
+    let texel_size = RCP_DEFAULT_SHADOW_MAP_SIZE;
+
+    let reciever_plane = retriever_depth_plane_bias(shadow_ddx, shadow_ddy, texel_size);
+
+    let shadow_depth = shadow_coord.z + reciever_plane.z;
+
+    var visibility = 0.0;
+
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(-texel_size,-texel_size), light_index, sample_depth);
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(0.0, -texel_size), light_index, sample_depth);
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(texel_size, -texel_size), light_index, sample_depth);
+
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(-texel_size, 0.0), light_index, sample_depth);
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(0.0, 0.0), light_index, sample_depth);
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(texel_size, 0.0), light_index, sample_depth);
+
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(-texel_size, texel_size), light_index, sample_depth);
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(0.0, texel_size), light_index, sample_depth);
+    visibility += textureSampleCompareLevel(t_shadow, sampler_shadow, shadow_coord.xy + vec2(texel_size, texel_size), light_index, sample_depth);
+
+
+    return visibility / 9.0;
+}
+
