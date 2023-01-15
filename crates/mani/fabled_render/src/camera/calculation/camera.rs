@@ -65,9 +65,11 @@ pub fn un_project(
 }
 
 // todo this is +X=RIGHT, +Y=UP, +Z=BACK we want +Z=FORWARD.
-pub fn compute_look_at_matrix(translation: Vector3, rotation: Quaternion) -> Matrix4x4 {
-    const Y_VEC3: Vector3 = Vector3::UP;
-
+pub fn compute_look_at_matrix(
+    translation: Vector3,
+    up_vector: Vector3,
+    rotation: Quaternion,
+) -> Matrix4x4 {
     let forward = forward_vec3(rotation);
 
     let neg_translation = -translation;
@@ -76,7 +78,7 @@ pub fn compute_look_at_matrix(translation: Vector3, rotation: Quaternion) -> Mat
         value: normalize(-forward.value),
     };
     let x_axis = Vector3 {
-        value: normalize(cross(Y_VEC3.value, z_axis.value)),
+        value: normalize(cross(up_vector.value, z_axis.value)),
     };
     let y_axis = Vector3 {
         value: cross(z_axis.value, x_axis.value),

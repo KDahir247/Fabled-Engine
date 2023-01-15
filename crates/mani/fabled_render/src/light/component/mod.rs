@@ -1,5 +1,6 @@
 mod appearance;
 mod attenuation;
+mod csm;
 mod ies_profile;
 mod light_caster;
 mod light_channel;
@@ -12,6 +13,7 @@ mod sun_light;
 
 pub use appearance::*;
 pub use attenuation::*;
+pub use csm::*;
 pub use ies_profile::*;
 pub use light_caster::*;
 pub use light_channel::*;
